@@ -1,26 +1,496 @@
 @import "tailwindcss";
 
+/* ============================================================
+   ORBIT STATION — GALAXY DESIGN SYSTEM
+   Dark-first, minimalist aesthetic with nebula color palette
+   ============================================================ */
+
+/* Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap");
+
+/* ============================================================
+   CSS CUSTOM PROPERTIES — DESIGN TOKENS
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* --- Base Colors --- */
+  --color-void: #030712;         /* deepest space — main bg */
+  --color-cosmos: #0a0f1e;       /* slightly lighter — card bg */
+  --color-nebula: #111827;       /* panel/surface bg */
+  --color-aurora: #1c2a4a;       /* subtle hover / border */
+
+  /* --- Text Colors --- */
+  --color-starlight: #f0f4ff;    /* primary text */
+  --color-comet: #9aa5c4;        /* secondary/muted text */
+  --color-dust: #4b5675;         /* disabled / placeholder */
+
+  /* --- Accent — Nebula Violet (primary brand) --- */
+  --color-violet-dim: #2d1b69;
+  --color-violet-mid: #5b3fde;
+  --color-violet-glow: #7c5cfc;
+  --color-violet-light: #a78bfa;
+  --color-violet-soft: #ede9fe;
+
+  /* --- Accent — Stellar Cyan (secondary / info) --- */
+  --color-cyan-dim: #0c2a3a;
+  --color-cyan-mid: #0891b2;
+  --color-cyan-glow: #22d3ee;
+  --color-cyan-light: #67e8f9;
+
+  /* --- Accent — Nova Pink (danger / warning) --- */
+  --color-pink-dim: #3b0a2a;
+  --color-pink-mid: #db2777;
+  --color-pink-glow: #f472b6;
+
+  /* --- Accent — Pulsar Amber (gold / achievement) --- */
+  --color-amber-glow: #fbbf24;
+  --color-amber-light: #fde68a;
+
+  /* --- Borders & Dividers --- */
+  --color-border: rgba(92, 107, 192, 0.15);
+  --color-border-hover: rgba(124, 92, 252, 0.35);
+  --color-border-active: rgba(124, 92, 252, 0.7);
+
+  /* --- Glassmorphism --- */
+  --glass-bg: rgba(17, 24, 39, 0.6);
+  --glass-bg-hover: rgba(28, 42, 74, 0.7);
+  --glass-border: rgba(124, 92, 252, 0.15);
+  --glass-blur: blur(16px);
+  --glass-blur-sm: blur(8px);
+
+  /* --- Shadows & Glows --- */
+  --glow-violet: 0 0 20px rgba(124, 92, 252, 0.35), 0 0 60px rgba(124, 92, 252, 0.1);
+  --glow-cyan: 0 0 20px rgba(34, 211, 238, 0.35), 0 0 60px rgba(34, 211, 238, 0.1);
+  --glow-pink: 0 0 20px rgba(244, 114, 182, 0.35);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--glass-border);
+
+  /* --- Spacing & Radius --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* --- Typography --- */
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "Space Mono", "Courier New", monospace;
+
+  /* --- Transitions --- */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* ============================================================
+   TAILWIND v4 THEME EXTENSION
+   ============================================================ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--color-void);
+  --color-foreground: var(--color-starlight);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Expose design tokens as Tailwind utilities */
+  --color-void: var(--color-void);
+  --color-cosmos: var(--color-cosmos);
+  --color-nebula: var(--color-nebula);
+  --color-aurora: var(--color-aurora);
+  --color-starlight: var(--color-starlight);
+  --color-comet: var(--color-comet);
+  --color-dust: var(--color-dust);
+  --color-violet-glow: var(--color-violet-glow);
+  --color-violet-light: var(--color-violet-light);
+  --color-violet-mid: var(--color-violet-mid);
+  --color-cyan-glow: var(--color-cyan-glow);
+  --color-cyan-light: var(--color-cyan-light);
+  --color-pink-glow: var(--color-pink-glow);
+  --color-amber-glow: var(--color-amber-glow);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   GLOBAL BASE STYLES
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-void);
+  color: var(--color-starlight);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100dvh;
+
+  /* Subtle star field background */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(91, 63, 222, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 90%, rgba(34, 211, 238, 0.04), transparent);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cosmos);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-aurora);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-violet-mid);
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-starlight);
+  line-height: 1.2;
+}
+
+h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); }
+h3 { font-size: clamp(1.1rem, 2.5vw, 1.4rem); }
+
+p { color: var(--color-comet); }
+
+a {
+  color: var(--color-violet-light);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-violet-glow);
+}
+
+code, kbd, pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* ============================================================
+   REUSABLE COMPONENT CLASSES
+   ============================================================ */
+
+/* --- Glass Panel --- */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.glass-sm {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+}
+
+.glass:hover,
+.glass-sm:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--color-border-hover);
+  transition: all var(--transition-base);
+}
+
+/* --- Glow Effects --- */
+.glow-violet { box-shadow: var(--glow-violet); }
+.glow-cyan { box-shadow: var(--glow-cyan); }
+.glow-pink { box-shadow: var(--glow-pink); }
+
+/* --- Gradient Text --- */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-violet-light), var(--color-cyan-glow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--color-amber-glow), var(--color-amber-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all var(--transition-base);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.5);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-violet-mid), var(--color-violet-glow));
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(91, 63, 222, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--color-violet-glow), #9d7aff);
+  box-shadow: var(--glow-violet);
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--glass-bg);
+  color: var(--color-starlight);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur-sm);
+}
+
+.btn-secondary:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--color-border-hover);
+  color: var(--color-starlight);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-comet);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+  background: rgba(124, 92, 252, 0.08);
+  color: var(--color-violet-light);
+  border-color: var(--glass-border);
+}
+
+.btn-danger {
+  background: rgba(244, 114, 182, 0.1);
+  color: var(--color-pink-glow);
+  border: 1px solid rgba(244, 114, 182, 0.2);
+}
+
+.btn-danger:hover {
+  background: rgba(244, 114, 182, 0.2);
+  border-color: var(--color-pink-glow);
+  box-shadow: var(--glow-pink);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+.btn-lg {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border-radius: var(--radius-lg);
+}
+
+/* --- Input Fields --- */
+.input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-starlight);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-dust);
+}
+
+.input:focus {
+  border-color: var(--color-violet-glow);
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.15);
+  background: rgba(17, 24, 39, 1);
+}
+
+/* --- Cards --- */
+.card {
+  background: var(--color-cosmos);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-base);
+}
+
+.card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-card), var(--glow-violet);
+  transform: translateY(-2px);
+}
+
+/* --- Badge / Chip --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-violet {
+  background: rgba(124, 92, 252, 0.15);
+  color: var(--color-violet-light);
+  border: 1px solid rgba(124, 92, 252, 0.25);
+}
+
+.badge-cyan {
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--color-cyan-light);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+}
+
+.badge-amber {
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--color-amber-glow);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+/* --- Divider --- */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  border: none;
+}
+
+/* --- Loading Skeleton --- */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-nebula) 25%,
+    var(--color-aurora) 50%,
+    var(--color-nebula) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* --- Modal Overlay --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-panel {
+  background: var(--color-cosmos);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: 640px;
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+/* ============================================================
+   ANIMATIONS / KEYFRAMES
+   ============================================================ */
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-scale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.animate-fade-in { animation: fade-in 0.3s var(--transition-base) both; }
+.animate-fade-in-scale { animation: fade-in-scale 0.2s ease both; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* Staggered children animation */
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(n+7) { animation-delay: 360ms; }
+
+/* ============================================================
+   SELECTION
+   ============================================================ */
+::selection {
+  background: rgba(124, 92, 252, 0.35);
+  color: var(--color-starlight);
 }
