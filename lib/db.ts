@@ -1,4 +1,4 @@
-import { PrismaClient } from "@/app/generated/prisma";
+import { PrismaClient } from "@/lib/generated/prisma";
 import { withAccelerate } from "@prisma/extension-accelerate";
 
 // Singleton pattern — prevents multiple Prisma instances in dev (HMR)

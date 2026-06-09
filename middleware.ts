@@ -13,11 +13,13 @@ export const config = {
   matcher: [
     /*
      * Match semua request path KECUALI yang dimulai dengan:
-     * - api/auth (NextAuth route)
+     * - api/ (semua API routes — auth dilakukan di dalam route itu sendiri)
      * - _next/static (static files)
      * - _next/image (image optimization)
      * - favicon.ico, sitemap.xml, robots.txt
+     * - halaman publik (/, /login, /register, /[username])
      */
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/station/:path*",
+    "/settings/:path*",
   ],
 };
