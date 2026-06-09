@@ -1,30 +1,30 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
-import GitHub from "next-auth/providers/github";
-import Google from "next-auth/providers/google";
+import { authConfig } from "@/auth.config";
 
+/**
+ * Full auth config dengan Prisma adapter.
+ * Digunakan di Server Components, API Routes, dan Server Actions.
+ * JANGAN import ini di middleware (tidak kompatibel dengan Edge Runtime).
+ */
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(db as any),
-  providers: [
-    GitHub({
-      clientId: process.env.AUTH_GITHUB_ID,
-      clientSecret: process.env.AUTH_GITHUB_SECRET,
-    }),
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
-  ],
+  session: { strategy: "jwt" },
   callbacks: {
-    session({ session, user }) {
-      // Tambahkan userId ke session agar mudah diakses di client
-      session.user.id = user.id;
+    ...authConfig.callbacks,
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token?.id) {
+        session.user.id = token.id as string;
+      }
       return session;
     },
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
   },
 });
