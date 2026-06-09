@@ -1,21 +1,29 @@
-import { PrismaClient } from "@/lib/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { withAccelerate } from "@prisma/extension-accelerate";
 
-// Singleton pattern — prevents multiple Prisma instances in dev (HMR)
-// Menggunakan Prisma Accelerate untuk koneksi ke Prisma Postgres (console.prisma.io)
+// ============================================================
+// RAW CLIENT — untuk @auth/prisma-adapter (tidak support extended client)
+// ============================================================
 const globalForPrisma = globalThis as unknown as {
-  prisma: ReturnType<typeof createPrismaClient> | undefined;
+  prismaRaw: PrismaClient | undefined;
+  prisma: ReturnType<typeof createExtendedClient> | undefined;
 };
 
-function createPrismaClient() {
+function createExtendedClient() {
   return new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["error", "warn"]
-        : ["error"],
+    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   }).$extends(withAccelerate());
 }
 
-export const db = globalForPrisma.prisma ?? createPrismaClient();
+// Raw client (tanpa extension) — dipakai oleh PrismaAdapter
+export const prismaRaw =
+  globalForPrisma.prismaRaw ?? new PrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+// Extended client — dipakai untuk semua query di app
+export const db =
+  globalForPrisma.prisma ?? createExtendedClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prismaRaw = prismaRaw;
+  globalForPrisma.prisma = db;
+}

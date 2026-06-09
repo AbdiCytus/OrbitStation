@@ -8,7 +8,7 @@ import type {
   Station,
   Sector,
   Beacon,
-} from "@/lib/generated/prisma";
+} from "@prisma/client";
 
 // ============================================================
 // RE-EXPORT PRISMA TYPES

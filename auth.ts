@@ -1,7 +1,8 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { db } from "@/lib/db";
+import { prismaRaw } from "@/lib/db";
 import { authConfig } from "@/auth.config";
+
 
 /**
  * Full auth config dengan Prisma adapter.
@@ -10,7 +11,7 @@ import { authConfig } from "@/auth.config";
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(db as any),
+  adapter: PrismaAdapter(prismaRaw),
   session: { strategy: "jwt" },
   callbacks: {
     ...authConfig.callbacks,
