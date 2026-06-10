@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
+import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 type Props = {
-  user: { id: string; name: string | null; image: string | null };
-  searchQuery: string;
-  onSearchChange: (q: string) => void;
+  user: { id: string; name: string | null; image: string | null; callsign?: string | null };
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
+  displayName?: string;
+  hideSearch?: boolean;
 };
 
-export default function StationNavbar({ user, searchQuery, onSearchChange }: Props) {
+export default function StationNavbar({ user, searchQuery, onSearchChange, displayName, hideSearch }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -22,27 +25,29 @@ export default function StationNavbar({ user, searchQuery, onSearchChange }: Pro
       </Link>
 
       {/* Search */}
-      <div className="navbar-search">
-        <span className="navbar-search-icon" aria-hidden="true">🔭</span>
-        <input
-          id="station-search"
-          className="navbar-search-input"
-          type="search"
-          placeholder="Search beacons…"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          aria-label="Search beacons"
-        />
-        {searchQuery && (
-          <button
-            className="navbar-search-clear"
-            onClick={() => onSearchChange("")}
-            aria-label="Clear search"
-          >
-            ✕
-          </button>
-        )}
-      </div>
+      {!hideSearch && (
+        <div className="navbar-search">
+          <span className="navbar-search-icon" aria-hidden="true">
+            <MagnifyingGlassIcon width={16} height={16} />
+          </span>
+          <input
+            type="text"
+            className="navbar-search-input"
+            placeholder="Search beacons..."
+            value={searchQuery ?? ""}
+            onChange={(e) => onSearchChange?.(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              className="navbar-search-clear"
+              onClick={() => onSearchChange?.("")}
+              aria-label="Clear search"
+            >
+              <XMarkIcon width={14} height={14} />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* User Menu */}
       <div className="navbar-user">
@@ -71,9 +76,9 @@ export default function StationNavbar({ user, searchQuery, onSearchChange }: Pro
         {menuOpen && (
           <>
             <div className="navbar-menu-backdrop" onClick={() => setMenuOpen(false)} />
-            <div className="navbar-menu glass">
+            <div className="navbar-menu">
               <div className="navbar-menu-user">
-                <span className="navbar-menu-name">{user.name ?? "Pilot"}</span>
+                <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
               </div>
               <hr className="divider" />
               <Link
@@ -81,14 +86,14 @@ export default function StationNavbar({ user, searchQuery, onSearchChange }: Pro
                 className="navbar-menu-item"
                 onClick={() => setMenuOpen(false)}
               >
-                ⚙️ Settings
+                <Cog8ToothIcon width={18} height={18} /> Settings
               </Link>
               <button
                 id="btn-sign-out"
                 className="navbar-menu-item navbar-menu-item-danger"
                 onClick={() => signOut({ callbackUrl: "/login" })}
               >
-                🚀 Sign out
+                <ArrowRightOnRectangleIcon width={18} height={18} /> Sign out
               </button>
             </div>
           </>

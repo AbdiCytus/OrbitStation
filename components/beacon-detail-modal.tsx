@@ -3,25 +3,42 @@
 import { useState, useTransition, useRef, useEffect, useCallback } from "react";
 import type { Beacon, SectorWithBeacons } from "@/types";
 import { deleteBeacon, toggleBeaconPin, updateBeacon, incrementBeaconVisit } from "@/lib/actions";
+import { DynamicIcon } from "./dynamic-icon";
+import {
+  EyeIcon,
+  CalendarIcon,
+  MapPinIcon,
+  LinkIcon,
+  TrashIcon,
+  DocumentTextIcon,
+  InformationCircleIcon,
+  XMarkIcon,
+  ArrowRightIcon
+} from "@heroicons/react/24/outline";
+import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
 type Props = {
   beacon: Beacon;
   sector: SectorWithBeacons | null;
   onClose: () => void;
   onDeleted: (id: string) => void;
+  onUpdated: (beacon: Beacon) => void;
 };
 
-export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }: Props) {
+export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, onUpdated }: Props) {
   const [isPinned, setIsPinned] = useState(beacon.isPinned);
   const [notes, setNotes] = useState(beacon.notes ?? "");
   const [editingNotes, setEditingNotes] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   const [, startTransition] = useTransition();
   const cardRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
 
   // Close on Escape + lock body scroll
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
     document.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
     return () => {
@@ -62,17 +79,25 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }
     window.open(beacon.url, "_blank", "noopener,noreferrer");
   }
   function handleTogglePin() {
-    setIsPinned((p) => !p);
-    startTransition(() => toggleBeaconPin(beacon.id));
+    const newVal = !isPinned;
+    setIsPinned(newVal);
+    onUpdated({ ...beacon, isPinned: newVal });
+    startTransition(async () => { await toggleBeaconPin(beacon.id); });
   }
   function handleDelete() {
+    setConfirmDelete(true);
+  }
+  function confirmDeleteAction() {
     startTransition(async () => {
       const result = await deleteBeacon(beacon.id);
-      if (!result.error) onDeleted(beacon.id);
+      if (!result.error) {
+        onDeleted(beacon.id);
+        handleClose();
+      }
     });
   }
   function handleSaveNotes() {
-    startTransition(() => updateBeacon(beacon.id, { notes }));
+    startTransition(async () => { await updateBeacon(beacon.id, { notes }); });
     setEditingNotes(false);
   }
 
@@ -89,8 +114,8 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }
   const starCount = Math.min(5, Math.max(1, Math.ceil(beacon.visitCount / 5) || 1));
 
   return (
-    <div className="hsr-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={beacon.title}>
-      <div className="hsr-panel" onClick={(e) => e.stopPropagation()}>
+    <div className={"hsr-overlay" + (isClosing ? " closing" : "")} onClick={handleClose} role="dialog" aria-modal="true" aria-label={beacon.title}>
+      <div className={"hsr-panel" + (isClosing ? " closing" : "")} onClick={(e) => e.stopPropagation()}>
 
         {/* ── STARFIELD BG ────────────────────────────────── */}
         <div className="hsr-bg" aria-hidden="true">
@@ -115,29 +140,45 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }
         {/* ── TOP ACTION BAR ──────────────────────────────── */}
         <div className="hsr-topbar">
           <div className="hsr-topbar-left">
-            <span className="hsr-topbar-icon">⊕</span>
+            <span className="hsr-topbar-icon"><InformationCircleIcon width={18} height={18} /></span>
             <span className="hsr-topbar-label">Beacon Details</span>
           </div>
           <div className="hsr-topbar-actions">
-            <button
-              className={`hsr-action-btn ${isPinned ? "hsr-action-btn--active" : ""}`}
-              onClick={handleTogglePin}
-              title={isPinned ? "Unpin" : "Pin beacon"}
-              id={`btn-pin-${beacon.id}`}
-            >
-              <span>📍</span>
-              <span className="hsr-action-label">{isPinned ? "Pinned" : "Pin"}</span>
+            {confirmDelete ? (
+              <>
+                <span className="hsr-action-label" style={{ color: "#ef4444", fontWeight: 600 }}>Sure?</span>
+                <button className="hsr-action-btn" onClick={() => setConfirmDelete(false)}>
+                  <span className="hsr-action-label">Cancel</span>
+                </button>
+                <button className="hsr-action-btn hsr-action-btn--danger" onClick={confirmDeleteAction}>
+                  <span className="hsr-action-label">Delete!</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className={`hsr-action-btn ${isPinned ? "hsr-action-btn--active" : ""}`}
+                  onClick={handleTogglePin}
+                  title={isPinned ? "Unpin" : "Pin beacon"}
+                  id={`btn-pin-${beacon.id}`}
+                >
+                  <span>{isPinned ? <MapPinSolid width={16} height={16} /> : <MapPinIcon width={16} height={16} />}</span>
+                  <span className="hsr-action-label">{isPinned ? "Pinned" : "Pin"}</span>
+                </button>
+                <button
+                  className="hsr-action-btn hsr-action-btn--danger"
+                  onClick={handleDelete}
+                  title="Delete beacon"
+                  id={`btn-delete-${beacon.id}`}
+                >
+                  <span><TrashIcon width={16} height={16} /></span>
+                  <span className="hsr-action-label">Delete</span>
+                </button>
+              </>
+            )}
+            <button className="hsr-close-btn" onClick={handleClose} aria-label="Close">
+              <XMarkIcon width={20} height={20} />
             </button>
-            <button
-              className="hsr-action-btn hsr-action-btn--danger"
-              onClick={handleDelete}
-              title="Delete beacon"
-              id={`btn-delete-${beacon.id}`}
-            >
-              <span>🗑</span>
-              <span className="hsr-action-label">Delete</span>
-            </button>
-            <button className="hsr-close-btn" onClick={onClose} aria-label="Close">✕</button>
           </div>
         </div>
 
@@ -153,15 +194,21 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }
               onMouseLeave={handleMouseLeave}
               style={{ transition: "transform 0.08s linear" }}
             >
+              {/* Back glass plate */}
+              {beacon.imageUrl && <div className="hsr-card-back-glass" />}
+
               {/* Card image */}
               <div className="hsr-card-art">
                 {beacon.imageUrl ? (
-                  <img
-                    src={beacon.imageUrl}
-                    alt={beacon.title}
-                    className="hsr-card-img"
-                    draggable={false}
-                  />
+                  <>
+                    <img
+                      src={beacon.imageUrl}
+                      alt={beacon.title}
+                      className="hsr-card-img"
+                      draggable={false}
+                    />
+                    <div className="hsr-prism" />
+                  </>
                 ) : (
                   <div className="hsr-card-placeholder">
                     {beacon.faviconUrl ? (
@@ -177,8 +224,12 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }
                 <div className="hsr-card-bottom-gradient" />
               </div>
 
-              {/* Card frame border */}
-              <div className="hsr-card-frame" style={{ borderColor: sector?.color ?? "rgba(124,92,252,0.6)" }} />
+              {/* Front glass frame or standard frame */}
+              {beacon.imageUrl ? (
+                <div className="hsr-card-front-glass" style={{ borderColor: sector?.color ?? "rgba(124,92,252,0.6)" }} />
+              ) : (
+                <div className="hsr-card-frame" style={{ borderColor: sector?.color ?? "rgba(124,92,252,0.6)" }} />
+              )}
 
               {/* Stars row at bottom of card */}
               <div className="hsr-card-stars">
@@ -204,25 +255,15 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }
               {sector && (
                 <span
                   className="hsr-sector-tag"
-                  style={{ borderColor: sector.color ?? undefined, color: sector.color ?? undefined }}
+                  style={{ borderColor: sector.color ?? undefined, color: sector.color ?? undefined, display: "inline-flex", alignItems: "center", gap: "0.375rem" }}
                 >
-                  {sector.icon ?? "📁"} {sector.name}
+                  <DynamicIcon name={sector.icon} width={14} height={14} /> {sector.name}
                 </span>
               )}
             </div>
 
             {/* Title */}
             <h2 className="hsr-title">{beacon.title}</h2>
-
-            {/* Stars line */}
-            <div className="hsr-stars-line">
-              {Array.from({ length: starCount }).map((_, i) => (
-                <span key={i} className="hsr-star-lg">★</span>
-              ))}
-              <span className="hsr-stars-hint">
-                {beacon.visitCount === 0 ? "Never visited" : `${beacon.visitCount} visit${beacon.visitCount > 1 ? "s" : ""}`}
-              </span>
-            </div>
 
             {/* Description */}
             {beacon.description && (
@@ -234,24 +275,14 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }
             {/* Stats — ala Light Cone stat rows */}
             <div className="hsr-stats">
               <div className="hsr-stat-row">
-                <span className="hsr-stat-icon">🔭</span>
+                <span className="hsr-stat-icon"><EyeIcon width={16} height={16} /></span>
                 <span className="hsr-stat-key">Total Visits</span>
                 <span className="hsr-stat-val">{beacon.visitCount}</span>
               </div>
               <div className="hsr-stat-row">
-                <span className="hsr-stat-icon">📅</span>
+                <span className="hsr-stat-icon"><CalendarIcon width={16} height={16} /></span>
                 <span className="hsr-stat-key">Logged</span>
                 <span className="hsr-stat-val">{addedDate}</span>
-              </div>
-              <div className="hsr-stat-row">
-                <span className="hsr-stat-icon">📍</span>
-                <span className="hsr-stat-key">Pinned</span>
-                <span className="hsr-stat-val">{isPinned ? "Yes" : "No"}</span>
-              </div>
-              <div className="hsr-stat-row">
-                <span className="hsr-stat-icon">🔗</span>
-                <span className="hsr-stat-key">URL</span>
-                <span className="hsr-stat-val hsr-stat-url" title={beacon.url}>{domain}</span>
               </div>
             </div>
 
@@ -259,36 +290,13 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }
 
             {/* Notes section — ala "Light Cone Ability" */}
             <div className="hsr-ability">
-              <div className="hsr-ability-header">
-                <span className="hsr-ability-icon">✦</span>
+              <div className="hsr-ability-header" style={{ marginBottom: "0.25rem" }}>
+                <span className="hsr-ability-icon"><DocumentTextIcon width={16} height={16} /></span>
                 <span className="hsr-ability-title">Pilot Notes</span>
-                {!editingNotes && (
-                  <button className="hsr-edit-btn" onClick={() => setEditingNotes(true)}>
-                    {notes ? "Edit" : "Add"}
-                  </button>
-                )}
               </div>
-              {editingNotes ? (
-                <div className="hsr-notes-edit">
-                  <textarea
-                    className="hsr-notes-input"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Why did you save this? Any observations…"
-                    rows={3}
-                    autoFocus
-                    maxLength={500}
-                  />
-                  <div className="hsr-notes-actions">
-                    <button className="btn btn-secondary btn-sm" onClick={() => setEditingNotes(false)}>Cancel</button>
-                    <button className="btn btn-primary btn-sm" onClick={handleSaveNotes}>Save</button>
-                  </div>
-                </div>
-              ) : (
-                <p className="hsr-ability-text">
-                  {notes || <span className="hsr-ability-empty">No notes yet. Click Add to write your observations.</span>}
-                </p>
-              )}
+              <div className="hsr-notes-display">
+                {notes ? notes : <span className="hsr-notes-empty">No notes recorded...</span>}
+              </div>
             </div>
 
             {/* CTA */}
@@ -298,7 +306,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted }
               onClick={handleVisit}
             >
               <span>Launch Beacon</span>
-              <span className="hsr-visit-arrow">→</span>
+              <span className="hsr-visit-arrow"><ArrowRightIcon width={16} height={16} /></span>
             </button>
           </div>
         </div>

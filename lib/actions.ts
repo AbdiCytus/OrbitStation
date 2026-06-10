@@ -33,6 +33,7 @@ export type SectorFormData = {
   name: string;
   icon?: string;
   color?: string;
+  isPublic?: boolean;
 };
 
 /** Buat Sektor baru di Station pengguna */
@@ -86,6 +87,7 @@ export async function updateSector(
       ...(data.name !== undefined && { name: data.name.trim() }),
       ...(data.icon !== undefined && { icon: data.icon.trim() || null }),
       ...(data.color !== undefined && { color: data.color.trim() || null }),
+      ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
     },
   });
 
@@ -149,6 +151,7 @@ export type BeaconFormData = {
   faviconUrl?: string;
   notes?: string;
   isPinned?: boolean;
+  sectorId?: string;
 };
 
 /** Tambah Suar (Beacon) baru ke dalam sebuah Sektor */
@@ -227,6 +230,7 @@ export async function updateBeacon(
       }),
       ...(data.notes !== undefined && { notes: data.notes.trim() || null }),
       ...(data.isPinned !== undefined && { isPinned: data.isPinned }),
+      ...(data.sectorId !== undefined && { sectorId: data.sectorId }),
     },
   });
 

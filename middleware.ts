@@ -7,7 +7,7 @@ import { authConfig } from "@/auth.config";
  *
  * Logic proteksi route ada di authConfig.callbacks.authorized
  */
-export const { auth: middleware } = NextAuth(authConfig);
+export default NextAuth(authConfig).auth;
 
 export const config = {
   matcher: [

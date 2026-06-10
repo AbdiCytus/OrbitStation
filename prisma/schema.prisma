@@ -66,6 +66,13 @@ model User {
   bio           String?
   bannerUrl     String?
   titleBadge    String?   // e.g. "Pioneer Pilot", "Star Navigator"
+  callsign      String?   // Nama panggilan pengguna (ganti "Pilot")
+
+  // Preferensi
+  animationEnabled Boolean @default(false)
+
+  // Email/password login (opsional, untuk akun Orbit Station)
+  password      String?   // hashed, null = OAuth-only user
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,6 +106,7 @@ model Sector {
   icon      String? // Emoji atau nama ikon
   color     String? // Accent color untuk sektor ini (hex)
   order     Int     @default(0)
+  isPublic  Boolean @default(true) // false = sektor privat, tidak ditampilkan di profil publik
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

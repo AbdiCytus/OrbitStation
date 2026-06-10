@@ -127,6 +127,8 @@ export async function getMyProfile() {
       bio: true,
       bannerUrl: true,
       titleBadge: true,
+      callsign: true,
+      animationEnabled: true,
       createdAt: true,
     },
   });

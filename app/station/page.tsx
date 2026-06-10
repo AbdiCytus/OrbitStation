@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { getMyStation } from "@/lib/queries";
+import { getMyStation, getMyProfile } from "@/lib/queries";
 import StationClient from "./station-client";
 
 export const metadata = {
@@ -12,7 +12,10 @@ export default async function StationPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const station = await getMyStation();
+  const [station, profile] = await Promise.all([
+    getMyStation(),
+    getMyProfile(),
+  ]);
 
   return (
     <StationClient
@@ -21,6 +24,8 @@ export default async function StationPage() {
         id: session.user.id ?? "",
         name: session.user.name ?? null,
         image: session.user.image ?? null,
+        callsign: profile?.callsign ?? null,
+        animationEnabled: profile?.animationEnabled ?? true,
       }}
     />
   );
