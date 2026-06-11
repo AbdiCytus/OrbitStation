@@ -78,9 +78,13 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  accounts Account[]
-  sessions Session[]
-  station  Station?
+  accounts         Account[]
+  sessions         Session[]
+  station          Station?
+  sentRequests     Friendship[]  @relation("SentRequests")
+  receivedRequests Friendship[]  @relation("ReceivedRequests")
+  sentMessages     ChatMessage[] @relation("SentMessages")
+  receivedMessages ChatMessage[] @relation("ReceivedMessages")
 }
 
 /// Dasbor utama milik Pilot, disebut "Station"
@@ -118,21 +122,53 @@ model Sector {
 
 /// Shortcut web, disebut "Suar" (Beacon)
 model Beacon {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   sectorId    String
   url         String
   title       String
   description String?
-  imageUrl    String? // OG Image yang di-scrape otomatis
+  imageUrl    String?
   faviconUrl  String?
-  notes       String? // Catatan pribadi pengguna
-  isPinned    Boolean @default(false) // Ditampilkan di profil publik
-  order       Int     @default(0)
-  visitCount  Int     @default(0)
+  notes       String?
+  isPinned    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  sector      Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ============================================================
+// SOCIAL MODELS
+// ============================================================
 
-  // Relations
-  sector Sector @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  receiverId  String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  requester User @relation("SentRequests", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver  User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, receiverId])
+}
+
+model ChatMessage {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  content    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 }

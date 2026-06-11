@@ -330,30 +330,236 @@ export async function reorderBeacons(
 }
 
 // ============================================================
-// PILOT SEARCH ACTION
+// SOCIAL ACTIONS
 // ============================================================
 
 export async function searchPilots(query: string) {
+  const session = await auth();
+  const currentUserId = session?.user?.id;
+
   if (!query || query.trim().length < 2) return [];
-  
   const searchStr = query.trim();
 
-  return db.user.findMany({
+  // Find users
+  const users = await db.user.findMany({
     where: {
       OR: [
-        { username: { contains: searchStr } }, // Prisma implicitly insensitive on supported DBs if configured, or use case-insensitive methods if available
-        { name: { contains: searchStr } },
+        { username: { contains: searchStr, mode: "insensitive" } },
+        { name: { contains: searchStr, mode: "insensitive" } },
+        { callsign: { contains: searchStr, mode: "insensitive" } },
       ],
-      station: {
-        isPublic: true,
-      },
+      ...(currentUserId ? { id: { not: currentUserId } } : {}),
     },
     select: {
       id: true,
       username: true,
       name: true,
+      callsign: true,
       image: true,
+      titleBadge: true,
+      station: {
+        select: { isPublic: true },
+      },
     },
-    take: 5,
+    take: 10,
   });
+
+  if (!currentUserId) {
+    return users.map(u => ({ ...u, friendshipStatus: null }));
+  }
+
+  // Get friendship status for these users
+  const friendships = await db.friendship.findMany({
+    where: {
+      OR: [
+        { requesterId: currentUserId, receiverId: { in: users.map(u => u.id) } },
+        { receiverId: currentUserId, requesterId: { in: users.map(u => u.id) } },
+      ]
+    }
+  });
+
+  return users.map(u => {
+    const fs = friendships.find(f => (f.requesterId === u.id || f.receiverId === u.id));
+    return { ...u, friendshipStatus: fs ? fs.status : null };
+  });
+}
+
+export async function getFriends() {
+  const user = await requireAuth();
+  
+  const friendships = await db.friendship.findMany({
+    where: {
+      OR: [
+        { requesterId: user.id },
+        { receiverId: user.id },
+      ],
+      status: "ACCEPTED",
+    },
+    include: {
+      requester: { select: { id: true, username: true, name: true, callsign: true, image: true, titleBadge: true, station: { select: { isPublic: true } } } },
+      receiver: { select: { id: true, username: true, name: true, callsign: true, image: true, titleBadge: true, station: { select: { isPublic: true } } } },
+    }
+  });
+
+  return friendships.map(f => {
+    const isRequester = f.requesterId === user.id;
+    const friend = isRequester ? f.receiver : f.requester;
+    return {
+      friendshipId: f.id,
+      ...friend,
+    };
+  });
+}
+
+export async function getFriendRequests() {
+  const user = await requireAuth();
+  
+  const requests = await db.friendship.findMany({
+    where: {
+      receiverId: user.id,
+      status: "PENDING",
+    },
+    include: {
+      requester: { select: { id: true, username: true, name: true, callsign: true, image: true, titleBadge: true } },
+    }
+  });
+
+  return requests.map(r => ({
+    friendshipId: r.id,
+    ...r.requester,
+  }));
+}
+
+export async function sendFriendRequest(receiverId: string) {
+  const user = await requireAuth();
+  if (user.id === receiverId) return { error: "Cannot send request to yourself" };
+
+  const existing = await db.friendship.findFirst({
+    where: {
+      OR: [
+        { requesterId: user.id, receiverId },
+        { requesterId: receiverId, receiverId: user.id },
+      ]
+    }
+  });
+
+  if (existing) {
+    if (existing.status === "PENDING") return { error: "Request already pending" };
+    if (existing.status === "ACCEPTED") return { error: "Already friends" };
+    
+    // If REJECTED, we could update it back to PENDING. Let's do that.
+    const updated = await db.friendship.update({
+      where: { id: existing.id },
+      data: { status: "PENDING", requesterId: user.id, receiverId }
+    });
+    return { data: updated };
+  }
+
+  const friendship = await db.friendship.create({
+    data: { requesterId: user.id, receiverId, status: "PENDING" }
+  });
+  return { data: friendship };
+}
+
+export async function acceptFriendRequest(friendshipId: string) {
+  const user = await requireAuth();
+  
+  const friendship = await db.friendship.findUnique({ where: { id: friendshipId } });
+  if (!friendship || friendship.receiverId !== user.id) return { error: "Request not found" };
+
+  const updated = await db.friendship.update({
+    where: { id: friendshipId },
+    data: { status: "ACCEPTED" }
+  });
+  return { data: updated };
+}
+
+export async function rejectFriendRequest(friendshipId: string) {
+  const user = await requireAuth();
+  
+  const friendship = await db.friendship.findUnique({ where: { id: friendshipId } });
+  if (!friendship || friendship.receiverId !== user.id) return { error: "Request not found" };
+
+  await db.friendship.delete({ where: { id: friendshipId } });
+  return { success: true };
+}
+
+export async function getChatMessages(friendId: string) {
+  const user = await requireAuth();
+  
+  const messages = await db.chatMessage.findMany({
+    where: {
+      OR: [
+        { senderId: user.id, receiverId: friendId },
+        { senderId: friendId, receiverId: user.id },
+      ]
+    },
+    orderBy: { createdAt: "asc" }
+  });
+  
+  return messages;
+}
+
+export async function sendChatMessage(receiverId: string, content: string) {
+  const user = await requireAuth();
+  if (!content.trim()) return { error: "Message is empty" };
+
+  // Check friendship
+  const friendship = await db.friendship.findFirst({
+    where: {
+      OR: [
+        { requesterId: user.id, receiverId },
+        { requesterId: receiverId, receiverId: user.id },
+      ],
+      status: "ACCEPTED"
+    }
+  });
+
+  if (!friendship) return { error: "Not friends" };
+
+  const message = await db.chatMessage.create({
+    data: {
+      senderId: user.id,
+      receiverId,
+      content: content.trim()
+    }
+  });
+  
+  return { data: message };
+}
+
+export async function removeFriend(friendId: string) {
+  const user = await requireAuth();
+
+  const friendship = await db.friendship.findFirst({
+    where: {
+      OR: [
+        { requesterId: user.id, receiverId: friendId },
+        { requesterId: friendId, receiverId: user.id },
+      ]
+    }
+  });
+
+  if (!friendship) return { error: "Friendship not found" };
+
+  await db.friendship.delete({ where: { id: friendship.id } });
+  return { success: true };
+}
+
+// ============================================================
+// ACCOUNT ACTIONS
+// ============================================================
+
+export async function deleteAccount() {
+  const user = await requireAuth();
+
+  try {
+    await db.user.delete({
+      where: { id: user.id },
+    });
+    return { success: true };
+  } catch (err) {
+    console.error('Failed to delete account:', err);
+    return { error: 'Failed to delete account' };
+  }
 }

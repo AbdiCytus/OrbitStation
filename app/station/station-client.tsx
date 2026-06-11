@@ -8,6 +8,7 @@ import AddSectorModal from "@/components/add-sector-modal";
 import EditSectorModal from "@/components/edit-sector-modal";
 import EditBeaconModal from "@/components/edit-beacon-modal";
 import BeaconDetailModal from "@/components/beacon-detail-modal";
+import FriendsModal from "@/components/friends-modal";
 import StationNavbar from "@/components/station-navbar";
 import SpaceBackground from "@/components/space-background";
 import StaticStarfield from "@/components/static-starfield";
@@ -77,6 +78,7 @@ export default function StationClient({ initialStation, user }: Props) {
   const [editingBeacon, setEditingBeacon] = useState<Beacon | null>(null);
   const [showAddBeacon, setShowAddBeacon] = useState(false);
   const [showAddSector, setShowAddSector] = useState(false);
+  const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [editingSector, setEditingSector] = useState<SectorWithBeacons | null>(null);
   const [, startTransition] = useTransition();
 
@@ -318,6 +320,7 @@ export default function StationClient({ initialStation, user }: Props) {
         user={{ ...user, callsign: user.callsign }}
         hideSearch={true}
         displayName={displayName}
+        onOpenFriends={() => setShowFriendsModal(true)}
       />
 
       <div className="station-layout">
@@ -615,6 +618,12 @@ export default function StationClient({ initialStation, user }: Props) {
           )}
         </main>
       </div>
+
+      <FriendsModal 
+        isOpen={showFriendsModal} 
+        onClose={() => setShowFriendsModal(false)} 
+        user={user} 
+      />
 
       {/* Modals */}
       {showAddSector && (

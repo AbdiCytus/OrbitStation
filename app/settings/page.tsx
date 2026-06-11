@@ -20,8 +20,8 @@ export default async function SettingsPage() {
 
   const user = {
     id: session.user.id ?? "",
-    name: session.user.name ?? null,
-    image: session.user.image ?? null,
+    name: profile.name ?? session.user.name ?? null,
+    image: profile.image ?? session.user.image ?? null,
     callsign: profile.callsign ?? null,
   };
 

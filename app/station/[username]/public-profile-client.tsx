@@ -72,6 +72,7 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
         user={sessionUser} 
         displayName={sessionUser?.name || "Pilot"} 
         hideSearch={true} 
+        hideProfile={true}
       />
 
       {/* Background Canvas: Kosmik, Aurora, Komet, Blackhole */}
@@ -188,8 +189,8 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
                 {visibleBeacons.map((beacon, idx) => (
                   <div 
                     key={beacon.id} 
-                    className={`zzz-beacon-card ${user.animationEnabled ? "floating" : ""}`}
-                    style={{ "--enter-delay": `${idx * 0.1}s`, animationDelay: `${(idx * 0.1)}s, ${(idx * 0.2)}s` } as any}
+                    className={`zzz-beacon-card ${isAnimationEnabled ? "floating" : ""}`}
+                    style={{ "--enter-delay": `${idx * 0.1}s`, animationDelay: isAnimationEnabled ? `${(idx * 0.1)}s, ${(idx * 0.2)}s` : "0s" } as any}
                     onClick={() => handleBeaconClick(beacon)}
                   >
                     {beacon.imageUrl ? (

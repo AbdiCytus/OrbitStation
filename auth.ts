@@ -39,12 +39,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user }) {
-      if (user) token.id = user.id;
+    async jwt({ token, user, trigger, session }) {
+      if (user) {
+        token.id = user.id;
+        // Don't store massive base64 images in JWT cookies
+        delete token.picture;
+        delete token.image;
+      }
       return token;
     },
     async session({ session, token }) {
       if (token?.id) session.user.id = token.id as string;
+      // Ensure session doesn't try to send a giant default image
+      session.user.image = null;
       return session;
     },
   },

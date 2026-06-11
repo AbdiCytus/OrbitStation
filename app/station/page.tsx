@@ -22,8 +22,8 @@ export default async function StationPage() {
       initialStation={station}
       user={{
         id: session.user.id ?? "",
-        name: session.user.name ?? null,
-        image: session.user.image ?? null,
+        name: profile?.name ?? session.user.name ?? null,
+        image: profile?.image ?? session.user.image ?? null,
         callsign: profile?.callsign ?? null,
         animationEnabled: profile?.animationEnabled ?? true,
       }}
