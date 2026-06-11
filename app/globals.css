@@ -3146,3 +3146,4 @@ code, kbd, pre {
 @media (max-width: 1024px) { .beacon-masonry { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 768px) { .beacon-masonry { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .beacon-masonry { grid-template-columns: 1fr; } }
+

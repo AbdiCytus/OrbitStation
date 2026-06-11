@@ -21,11 +21,12 @@ type Props = {
   beacon: Beacon;
   sector: SectorWithBeacons | null;
   onClose: () => void;
-  onDeleted: (id: string) => void;
-  onUpdated: (beacon: Beacon) => void;
+  onDeleted?: (id: string) => void;
+  onUpdated?: (beacon: Beacon) => void;
+  readOnly?: boolean;
 };
 
-export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, onUpdated }: Props) {
+export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, onUpdated, readOnly = false }: Props) {
   const [isPinned, setIsPinned] = useState(beacon.isPinned);
   const [notes, setNotes] = useState(beacon.notes ?? "");
   const [editingNotes, setEditingNotes] = useState(false);
@@ -106,6 +107,13 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     catch { return beacon.url; }
   })();
 
+  const subroute = (() => {
+    try { 
+      const url = new URL(beacon.url);
+      return url.pathname && url.pathname !== "/" ? url.pathname : null;
+    } catch { return null; }
+  })();
+
   const addedDate = new Date(beacon.createdAt).toLocaleDateString("en", {
     month: "short", day: "numeric", year: "numeric",
   });
@@ -144,37 +152,53 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             <span className="hsr-topbar-label">Beacon Details</span>
           </div>
           <div className="hsr-topbar-actions">
-            {confirmDelete ? (
-              <>
-                <span className="hsr-action-label" style={{ color: "#ef4444", fontWeight: 600 }}>Sure?</span>
-                <button className="hsr-action-btn" onClick={() => setConfirmDelete(false)}>
-                  <span className="hsr-action-label">Cancel</span>
-                </button>
-                <button className="hsr-action-btn hsr-action-btn--danger" onClick={confirmDeleteAction}>
-                  <span className="hsr-action-label">Delete!</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className={`hsr-action-btn ${isPinned ? "hsr-action-btn--active" : ""}`}
-                  onClick={handleTogglePin}
-                  title={isPinned ? "Unpin" : "Pin beacon"}
-                  id={`btn-pin-${beacon.id}`}
-                >
-                  <span>{isPinned ? <MapPinSolid width={16} height={16} /> : <MapPinIcon width={16} height={16} />}</span>
-                  <span className="hsr-action-label">{isPinned ? "Pinned" : "Pin"}</span>
-                </button>
-                <button
-                  className="hsr-action-btn hsr-action-btn--danger"
-                  onClick={handleDelete}
-                  title="Delete beacon"
-                  id={`btn-delete-${beacon.id}`}
-                >
-                  <span><TrashIcon width={16} height={16} /></span>
-                  <span className="hsr-action-label">Delete</span>
-                </button>
-              </>
+            {!readOnly && (
+              confirmDelete ? (
+                <>
+                  <span className="hsr-action-label" style={{ color: "#ef4444", fontWeight: 600 }}>Sure?</span>
+                  <button className="hsr-action-btn" onClick={() => setConfirmDelete(false)}>
+                    <span className="hsr-action-label">Cancel</span>
+                  </button>
+                  <button className="hsr-action-btn hsr-action-btn--danger" onClick={handleDelete} disabled={isPending}>
+                    <span className="hsr-action-label">Delete!</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  {subroute && (
+                    <div style={{ 
+                      background: "rgba(255, 255, 255, 0.1)", 
+                      padding: "0.2rem 0.5rem", 
+                      borderRadius: "6px", 
+                      fontSize: "0.75rem", 
+                      color: "#c4b5fd",
+                      marginRight: "0.5rem",
+                      display: "flex",
+                      alignItems: "center"
+                    }}>
+                      {subroute}
+                    </div>
+                  )}
+                  <button
+                    className={`hsr-action-btn ${isPinned ? "hsr-action-btn--active" : ""}`}
+                    onClick={handleTogglePin}
+                    title={isPinned ? "Unpin" : "Pin beacon"}
+                    id={`btn-pin-${beacon.id}`}
+                  >
+                    <span>{isPinned ? <MapPinSolid width={16} height={16} /> : <MapPinIcon width={16} height={16} />}</span>
+                    <span className="hsr-action-label">{isPinned ? "Pinned" : "Pin"}</span>
+                  </button>
+                  <button
+                    className="hsr-action-btn hsr-action-btn--danger"
+                    onClick={() => setConfirmDelete(true)}
+                    title="Delete beacon"
+                    id={`btn-delete-${beacon.id}`}
+                  >
+                    <span><TrashIcon width={16} height={16} /></span>
+                    <span className="hsr-action-label">Delete</span>
+                  </button>
+                </>
+              )
             )}
             <button className="hsr-close-btn" onClick={handleClose} aria-label="Close">
               <XMarkIcon width={20} height={20} />
@@ -240,7 +264,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             </div>
 
             {/* Domain pill below card */}
-            <div className="hsr-domain-pill">
+            <div className="hsr-domain-pill" style={{ marginTop: "1.5rem" }}>
               {beacon.faviconUrl && (
                 <img src={beacon.faviconUrl} alt="" width={14} height={14} className="hsr-domain-favicon" />
               )}
@@ -273,7 +297,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             <div className="hsr-divider" />
 
             {/* Stats — ala Light Cone stat rows */}
-            <div className="hsr-stats">
+            <div className="hsr-stats" style={{ gap: "0.25rem" }}>
               <div className="hsr-stat-row">
                 <span className="hsr-stat-icon"><EyeIcon width={16} height={16} /></span>
                 <span className="hsr-stat-key">Total Visits</span>
@@ -304,6 +328,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               id={`btn-visit-hsr-${beacon.id}`}
               className="hsr-visit-btn"
               onClick={handleVisit}
+              style={{ padding: "0.6rem 1rem", fontSize: "0.9rem" }}
             >
               <span>Launch Beacon</span>
               <span className="hsr-visit-arrow"><ArrowRightIcon width={16} height={16} /></span>

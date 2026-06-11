@@ -15,6 +15,7 @@ type Profile = {
   titleBadge: string | null;
   callsign: string | null;
   animationEnabled: boolean;
+  station: { isPublic: boolean } | null;
 };
 
 type Props = { profile: Profile };
@@ -27,6 +28,7 @@ export default function SettingsClient({ profile }: Props) {
   const [bannerUrl, setBannerUrl] = useState(profile.bannerUrl ?? "");
   const [titleBadge, setTitleBadge] = useState(profile.titleBadge ?? "");
   const [animationEnabled, setAnimationEnabled] = useState(profile.animationEnabled);
+  const [isPublic, setIsPublic] = useState(profile.station?.isPublic ?? false);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [, startTransition] = useTransition();
@@ -41,7 +43,7 @@ export default function SettingsClient({ profile }: Props) {
       const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled }),
+        body: JSON.stringify({ name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, isPublic }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -134,6 +136,25 @@ export default function SettingsClient({ profile }: Props) {
                   type="checkbox"
                   checked={animationEnabled}
                   onChange={(e) => setAnimationEnabled(e.target.checked)}
+                />
+                <span className="toggle-thumb" />
+              </label>
+            </div>
+
+            {/* Public Profile toggle */}
+            <div className="settings-toggle-row" style={{ marginTop: "1rem" }}>
+              <div className="settings-toggle-info">
+                <span className="settings-toggle-label">Public Station</span>
+                <span className="settings-toggle-desc">
+                  Allow anyone to visit your Orbit Station via your public URL.
+                </span>
+              </div>
+              <label className="toggle-switch" htmlFor="toggle-public">
+                <input
+                  id="toggle-public"
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(e) => setIsPublic(e.target.checked)}
                 />
                 <span className="toggle-thumb" />
               </label>

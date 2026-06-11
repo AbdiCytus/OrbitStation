@@ -9,7 +9,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
-  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled } = body;
+  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, isPublic } = body;
 
   // Validate username uniqueness if changed
   if (username) {
@@ -34,6 +34,16 @@ export async function PATCH(req: Request) {
         ...(animationEnabled !== undefined && { animationEnabled: Boolean(animationEnabled) }),
       },
     });
+
+
+
+    if (isPublic !== undefined) {
+      await db.station.upsert({
+        where: { userId: session.user.id },
+        update: { isPublic: Boolean(isPublic) },
+        create: { userId: session.user.id, isPublic: Boolean(isPublic) },
+      });
+    }
 
     return NextResponse.json({ data: updated });
   } catch (err) {

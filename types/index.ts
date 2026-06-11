@@ -43,6 +43,8 @@ export type PublicUserProfile = {
   bio: string | null;
   bannerUrl: string | null;
   titleBadge: string | null;
+  callsign?: string | null;
+  animationEnabled?: boolean;
 };
 
 /** Data halaman profil publik (untuk /[username] route) */

@@ -96,14 +96,27 @@ export async function updateSector(
 }
 
 /** Hapus Sektor beserta semua Beacon di dalamnya */
-export async function deleteSector(sectorId: string) {
+export async function deleteSector(sectorId: string, moveToSectorId?: string) {
   const user = await requireAuth();
 
   const sector = await db.sector.findFirst({
     where: { id: sectorId, station: { userId: user.id } },
+    include: { _count: { select: { beacons: true } } }
   });
   if (!sector) {
     return { error: "Sector not found or access denied" };
+  }
+
+  if (moveToSectorId && sector._count.beacons > 0) {
+    const targetSector = await db.sector.findFirst({
+      where: { id: moveToSectorId, station: { userId: user.id } }
+    });
+    if (!targetSector) return { error: "Target sector not found" };
+
+    await db.beacon.updateMany({
+      where: { sectorId },
+      data: { sectorId: moveToSectorId }
+    });
   }
 
   await db.sector.delete({ where: { id: sectorId } });
@@ -314,4 +327,33 @@ export async function reorderBeacons(
 
   revalidatePath("/station");
   return { success: true };
+}
+
+// ============================================================
+// PILOT SEARCH ACTION
+// ============================================================
+
+export async function searchPilots(query: string) {
+  if (!query || query.trim().length < 2) return [];
+  
+  const searchStr = query.trim();
+
+  return db.user.findMany({
+    where: {
+      OR: [
+        { username: { contains: searchStr } }, // Prisma implicitly insensitive on supported DBs if configured, or use case-insensitive methods if available
+        { name: { contains: searchStr } },
+      ],
+      station: {
+        isPublic: true,
+      },
+    },
+    select: {
+      id: true,
+      username: true,
+      name: true,
+      image: true,
+    },
+    take: 5,
+  });
 }

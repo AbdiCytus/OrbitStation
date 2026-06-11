@@ -50,6 +50,7 @@ export default async function SettingsPage() {
         titleBadge: profile.titleBadge,
         callsign: profile.callsign,
         animationEnabled: profile.animationEnabled,
+        station: profile.station,
       }} />
     </div>
   );

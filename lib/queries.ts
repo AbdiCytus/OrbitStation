@@ -42,9 +42,11 @@ export async function getPublicStation(username: string) {
         where: { isPublic: true },
         include: {
           sectors: {
+            where: { isPublic: true },
             orderBy: { order: "asc" },
             include: {
               beacons: {
+                where: { isPinned: true },
                 orderBy: { order: "asc" },
               },
             },
@@ -65,6 +67,8 @@ export async function getPublicStation(username: string) {
       bio: user.bio,
       bannerUrl: user.bannerUrl,
       titleBadge: user.titleBadge,
+      callsign: user.callsign,
+      animationEnabled: user.animationEnabled,
     },
     station: user.station,
   };
@@ -130,6 +134,11 @@ export async function getMyProfile() {
       callsign: true,
       animationEnabled: true,
       createdAt: true,
+      station: {
+        select: {
+          isPublic: true,
+        },
+      },
     },
   });
 }
