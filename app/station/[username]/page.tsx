@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPublicStation } from "@/lib/queries";
 import { auth } from "@/auth";
+import { db } from "@/lib/db";
 import PublicProfileClient from "./public-profile-client";
 
 // Memoize so generateMetadata and Page share the same fetch
@@ -59,7 +60,15 @@ export default async function PublicProfilePage({
   const data = await getStation(username);
   const session = await auth();
 
+  let sessionUser = session?.user || null;
+  if (sessionUser?.id) {
+    const dbUser = await db.user.findUnique({ where: { id: sessionUser.id }, select: { animationEnabled: true } });
+    if (dbUser) {
+      sessionUser = { ...sessionUser, animationEnabled: dbUser.animationEnabled } as any;
+    }
+  }
+
   if (!data) notFound();
 
-  return <PublicProfileClient data={data} sessionUser={session?.user || null} />;
+  return <PublicProfileClient data={data} sessionUser={sessionUser} />;
 }

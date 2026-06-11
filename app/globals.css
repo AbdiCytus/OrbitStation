@@ -2302,8 +2302,8 @@ code, kbd, pre {
    MASONRY BEACON GRID  (Poin 12)
    ============================================================ */
 .beacon-masonry {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  align-items: flex-start;
   gap: 0.875rem;
   width: 100%;
   padding-bottom: 2rem;
@@ -3142,8 +3142,5 @@ code, kbd, pre {
 .hsr-prism { position: absolute; inset: 0; background: linear-gradient(105deg, transparent 20%, rgba(255, 120, 150, 0.25) 25%, rgba(120, 255, 150, 0.25) 45%, rgba(120, 150, 255, 0.25) 65%, transparent 80%); mix-blend-mode: color-dodge; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 5; }
 .hsr-card:hover .hsr-prism { opacity: 1; }
 
-@media (max-width: 1400px) { .beacon-masonry { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 1024px) { .beacon-masonry { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 768px) { .beacon-masonry { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .beacon-masonry { grid-template-columns: 1fr; } }
+
 

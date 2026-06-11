@@ -14,6 +14,7 @@ import StaticStarfield from "@/components/static-starfield";
 import { deleteSector } from "@/lib/actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   initialStation: StationWithSectors | null;
@@ -70,7 +71,7 @@ export default function StationClient({ initialStation, user }: Props) {
   }, [displaySectorId, isExiting, user.animationEnabled]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterVisibility, setFilterVisibility] = useState<"all" | "public" | "private">("all");
-  const [sortBy, setSortBy] = useState<"date" | "name" | "sector">("date");
+  const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "name_asc" | "name_desc" | "sector">("date_desc");
   const [openMenu, setOpenMenu] = useState<"filter" | "sort" | null>(null);
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
   const [editingBeacon, setEditingBeacon] = useState<Beacon | null>(null);
@@ -107,20 +108,46 @@ export default function StationClient({ initialStation, user }: Props) {
       );
     }
 
-    if (sortBy === "name") {
+    if (sortBy === "name_asc") {
       beacons.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "name_desc") {
+      beacons.sort((a, b) => b.title.localeCompare(a.title));
     } else if (sortBy === "sector") {
       beacons.sort((a, b) => {
         const orderDiff = (a._sectorOrder ?? 0) - (b._sectorOrder ?? 0);
         if (orderDiff !== 0) return orderDiff;
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-    } else {
+    } else if (sortBy === "date_asc") {
+      beacons.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    } else { // date_desc
       beacons.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
     return beacons;
   }, [sectors, displaySectorId, searchQuery, filterVisibility, sortBy]);
+
+  const [cols, setCols] = useState(6);
+  useEffect(() => {
+    const updateCols = () => {
+      if (window.innerWidth <= 480) setCols(1);
+      else if (window.innerWidth <= 768) setCols(2);
+      else if (window.innerWidth <= 1024) setCols(3);
+      else if (window.innerWidth <= 1400) setCols(4);
+      else setCols(6);
+    };
+    updateCols();
+    window.addEventListener("resize", updateCols);
+    return () => window.removeEventListener("resize", updateCols);
+  }, []);
+
+  const columnWrapper = useMemo(() => {
+    const wrapper = Array.from({ length: cols }, () => [] as { beacon: Beacon, globalIndex: number }[]);
+    visibleBeacons.forEach((beacon, index) => {
+      wrapper[index % cols].push({ beacon, globalIndex: index });
+    });
+    return wrapper;
+  }, [visibleBeacons, cols]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -394,6 +421,7 @@ export default function StationClient({ initialStation, user }: Props) {
                   border-color: #a78bfa !important;
                   color: #fff !important;
                 }
+                .dropdown-option-btn:hover { background: rgba(139, 92, 246, 0.4) !important; }
                 .staggered-item { }
                 .entering .staggered-item {
                   animation-name: zoomInControl;
@@ -441,12 +469,13 @@ export default function StationClient({ initialStation, user }: Props) {
                       <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: 0, background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", padding: "0.5rem", zIndex: 50, minWidth: "150px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
                         {[
                           { id: "all", label: "All Visibility" },
-                          { id: "public", label: "Public Only" },
-                          { id: "private", label: "Private Only" }
+                          { id: "public", label: "Public" },
+                          { id: "private", label: "Private" }
                         ].map(opt => (
                           <button
                             key={opt.id}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", background: filterVisibility === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", textAlign: "left", fontSize: "0.85rem" }}
+                            className="dropdown-option-btn"
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", background: filterVisibility === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", textAlign: "left", fontSize: "0.85rem", transition: "all 0.2s" }}
                             onClick={() => { setFilterVisibility(opt.id as any); setOpenMenu(null); }}
                           >
                             {opt.label}
@@ -463,22 +492,25 @@ export default function StationClient({ initialStation, user }: Props) {
                 <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
                   <button
                     className="custom-dropdown-btn"
-                    style={{ background: sortBy !== "date" ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)", border: `1px solid ${sortBy !== "date" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`, color: sortBy !== "date" ? "#fff" : "#a1a1aa" }}
+                    style={{ background: sortBy !== "date_desc" ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)", border: `1px solid ${sortBy !== "date_desc" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`, color: sortBy !== "date_desc" ? "#fff" : "#a1a1aa" }}
                     onClick={() => setOpenMenu(openMenu === "sort" ? null : "sort")}
                     title="Sort Beacons"
                   >
                     <ArrowsUpDownIcon width={18} height={18} />
                   </button>
                   {openMenu === "sort" && (
-                    <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: 0, background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", padding: "0.5rem", zIndex: 50, minWidth: "160px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: 0, background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", padding: "0.5rem", zIndex: 50, minWidth: "180px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
                       {[
-                        { id: "date", label: "Date Added" },
-                        { id: "name", label: "Name (A-Z)" },
+                        { id: "date_desc", label: "Date Added (Newest)" },
+                        { id: "date_asc", label: "Date Added (Oldest)" },
+                        { id: "name_asc", label: "Name (A-Z)" },
+                        { id: "name_desc", label: "Name (Z-A)" },
                         { id: "sector", label: "Sector Order" }
-                      ].map(opt => (
+                      ].filter(opt => opt.id !== "sector" || displaySectorId === "all").map(opt => (
                         <button
                           key={opt.id}
-                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", background: sortBy === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", textAlign: "left", fontSize: "0.85rem" }}
+                          className="dropdown-option-btn"
+                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", background: sortBy === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", textAlign: "left", fontSize: "0.85rem", transition: "all 0.2s" }}
                           onClick={() => { setSortBy(opt.id as any); setOpenMenu(null); }}
                         >
                           {opt.label}
@@ -490,31 +522,33 @@ export default function StationClient({ initialStation, user }: Props) {
                 </div>
               </div>
 
-              <div className="staggered-item" style={{ flex: 1, minWidth: "200px", maxWidth: "250px" }}>
-                <div className={`${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative", width: "100%", animationDelay: "0.4s" }}>
-                  <MagnifyingGlassIcon style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", width: "16px", color: "#a1a1aa" }} />
-                  <input
-                    id="beacon-search-input"
-                    type="text"
-                    placeholder="Search beacons... (Ctrl+K)"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{
-                      width: "100%",
-                      height: "38px",
-                      background: "rgba(15, 15, 25, 0.6)",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      borderRadius: "8px",
-                      padding: "0 1rem 0 36px",
-                      color: "#fff",
-                      outline: "none",
-                      transition: "all 0.2s"
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = "#a78bfa"}
-                    onBlur={(e) => e.target.style.borderColor = "rgba(255, 255, 255, 0.1)"}
-                  />
+              {displaySectorId === "all" && (
+                <div className="staggered-item" style={{ flex: 1, minWidth: "200px", maxWidth: "250px" }}>
+                  <div className={`${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative", width: "100%", animationDelay: "0.4s" }}>
+                    <MagnifyingGlassIcon style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", width: "16px", color: "#a1a1aa" }} />
+                    <input
+                      id="beacon-search-input"
+                      type="text"
+                      placeholder="Search beacons... (Ctrl+K)"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      style={{
+                        width: "100%",
+                        height: "38px",
+                        background: "rgba(15, 15, 25, 0.6)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        borderRadius: "8px",
+                        padding: "0 1rem 0 36px",
+                        color: "#fff",
+                        outline: "none",
+                        transition: "all 0.2s"
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = "#a78bfa"}
+                      onBlur={(e) => e.target.style.borderColor = "rgba(255, 255, 255, 0.1)"}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -553,14 +587,29 @@ export default function StationClient({ initialStation, user }: Props) {
             </div>
           ) : (
             <div className={`beacon-masonry ${isExiting ? "exiting" : isEntering ? "entering" : ""}`} key={displaySectorId}>
-              {visibleBeacons.map((beacon, index) => (
-                <BeaconCard
-                  key={beacon.id}
-                  beacon={beacon}
-                  index={index}
-                  onClick={() => setSelectedBeacon(beacon)}
-                  onEdit={() => setEditingBeacon(beacon)}
-                />
+              {columnWrapper.map((colItems, colIndex) => (
+                <div className="beacon-masonry-col" key={`col-${colIndex}`}>
+                  <AnimatePresence>
+                    {colItems.map(({ beacon, globalIndex }) => (
+                      <motion.div
+                        layout={user.animationEnabled}
+                        layoutId={user.animationEnabled ? `${displaySectorId}-${beacon.id}` : undefined}
+                        initial={user.animationEnabled ? { opacity: 0, scale: 0.8 } : false}
+                        animate={user.animationEnabled ? { opacity: 1, scale: 1 } : false}
+                        exit={user.animationEnabled ? { opacity: 0, scale: 0.8 } : false}
+                        transition={{ duration: 0.3, type: "spring", bounce: 0.2 }}
+                        key={beacon.id}
+                      >
+                        <BeaconCard
+                          beacon={beacon}
+                          index={globalIndex}
+                          onClick={() => setSelectedBeacon(beacon)}
+                          onEdit={() => setEditingBeacon(beacon)}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
               ))}
             </div>
           )}

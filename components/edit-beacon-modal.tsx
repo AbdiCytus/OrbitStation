@@ -78,10 +78,10 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
       sectorId,
       url: finalUrl,
       title,
-      description: description || undefined,
-      imageUrl: imageUrl || undefined,
-      faviconUrl: faviconUrl || undefined,
-      notes: notes || undefined,
+      description,
+      imageUrl,
+      faviconUrl,
+      notes,
     });
     setLoading(false);
     if (result.error) {

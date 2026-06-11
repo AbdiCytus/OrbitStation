@@ -1,20 +1,33 @@
 import Link from "next/link";
 import "./public-profile.css";
+import { auth } from "@/auth";
+import { db } from "@/lib/db";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const session = await auth();
+  let animationEnabled = true;
+  if (session?.user?.id) {
+    const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { animationEnabled: true } });
+    if (dbUser) animationEnabled = dbUser.animationEnabled;
+  }
+
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
       {/* Cosmic Background (Animation Enabled State) */}
       <div className="cosmic-bg">
         <div className="cosmic-stars"></div>
         <div className="cosmic-aurora"></div>
-        <div className="cosmic-blackhole">
-          <div className="accretion-disk"></div>
-        </div>
-        <div className="cosmic-asteroids"></div>
-        <div className="cosmic-comet"></div>
-        <div className="cosmic-comet comet-2"></div>
-        <div className="cosmic-dust"></div>
+        {animationEnabled && (
+          <>
+            <div className="cosmic-blackhole">
+              <div className="accretion-disk"></div>
+            </div>
+            <div className="cosmic-asteroids"></div>
+            <div className="cosmic-comet"></div>
+            <div className="cosmic-comet comet-2"></div>
+            <div className="cosmic-dust"></div>
+          </>
+        )}
       </div>
 
       <div style={{ zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem" }}>

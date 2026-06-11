@@ -61,6 +61,10 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
   const isOwnProfile = sessionUser?.id === user.id;
   const profileTitle = isOwnProfile ? user.name : `${user.name}'s Station`;
 
+  const isAnimationEnabled = sessionUser && 'animationEnabled' in sessionUser 
+    ? sessionUser.animationEnabled 
+    : user.animationEnabled;
+
   return (
     <>
       {/* Station Navbar */}
@@ -71,38 +75,40 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
       />
 
       {/* Background Canvas: Kosmik, Aurora, Komet, Blackhole */}
-      <CosmicBackground enabled={user.animationEnabled} />
+      <CosmicBackground enabled={isAnimationEnabled} />
 
       <div className="zzz-wrapper" style={{ top: "60px" }}>
         {/* Modal Container */}
-        <div className={`zzz-modal ${user.animationEnabled ? "floating" : ""}`}>
+        <div className={`zzz-modal ${isAnimationEnabled ? "floating" : ""}`}>
           
           {/* Modal Background Sparkles */}
-          <div className="zzz-modal-bg" aria-hidden="true">
-            {Array.from({ length: 30 }).map((_, i) => {
-              // Deterministic pseudo-random values to prevent hydration errors
-              const r1 = (i * 13) % 100;
-              const r2 = (i * 29) % 100;
-              const r3 = (i * 7) % 3;
-              const r4 = (i * 17) % 4;
-              const r5 = (i * 11) % 2;
+          {isAnimationEnabled && (
+            <div className="zzz-modal-bg" aria-hidden="true">
+              {Array.from({ length: 30 }).map((_, i) => {
+                // Deterministic pseudo-random values to prevent hydration errors
+                const r1 = (i * 13) % 100;
+                const r2 = (i * 29) % 100;
+                const r3 = (i * 7) % 3;
+                const r4 = (i * 17) % 4;
+                const r5 = (i * 11) % 2;
 
-              return (
-                <span
-                  key={i}
-                  className="zzz-star-particle"
-                  style={{
-                    left: `${r1}%`,
-                    top: `${r2}%`,
-                    width: `${r3 + 1}px`,
-                    height: `${r3 + 1}px`,
-                    animationDelay: `${r4}s`,
-                    animationDuration: `${r5 + 2}s`,
-                  }}
-                />
-              );
-            })}
-          </div>
+                return (
+                  <span
+                    key={i}
+                    className="zzz-star-particle"
+                    style={{
+                      left: `${r1}%`,
+                      top: `${r2}%`,
+                      width: `${r3 + 1}px`,
+                      height: `${r3 + 1}px`,
+                      animationDelay: `${r4}s`,
+                      animationDuration: `${r5 + 2}s`,
+                    }}
+                  />
+                );
+              })}
+            </div>
+          )}
 
           <div className="zzz-content">
             {/* Banner Section */}
