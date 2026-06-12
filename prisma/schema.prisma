@@ -85,6 +85,8 @@ model User {
   receivedRequests Friendship[]  @relation("ReceivedRequests")
   sentMessages     ChatMessage[] @relation("SentMessages")
   receivedMessages ChatMessage[] @relation("ReceivedMessages")
+  collabSectors    SectorCollaborator[] @relation("CollabSectors")
+  createdBeacons   Beacon[]
 }
 
 /// Dasbor utama milik Pilot, disebut "Station"
@@ -118,6 +120,7 @@ model Sector {
   // Relations
   station Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
   beacons Beacon[]
+  collaborators SectorCollaborator[]
 }
 
 /// Shortcut web, disebut "Suar" (Beacon)
@@ -135,6 +138,9 @@ model Beacon {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   sector      Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  creatorId   String?
+  creator     User?    @relation(fields: [creatorId], references: [id])
+  visits      Int      @default(0)
 }
 
 // ============================================================
@@ -167,8 +173,22 @@ model ChatMessage {
   receiverId String
   content    String
   isRead     Boolean  @default(false)
+  type       String   @default("TEXT") // TEXT, COLLAB_INVITE, COLLAB_ACCEPTED, COLLAB_REJECTED
+  metadata   String?  // JSON string
   createdAt  DateTime @default(now())
   
   sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
   receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+model SectorCollaborator {
+  id        String   @id @default(cuid())
+  sectorId  String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  sector    Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  user      User     @relation("CollabSectors", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sectorId, userId])
 }

@@ -24,13 +24,47 @@ export async function getMyStation() {
         include: {
           beacons: {
             orderBy: { order: "asc" },
+            include: { creator: { select: { name: true, image: true } } }
           },
+          collaborators: {
+            include: {
+              user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } }
+            }
+          }
         },
       },
     },
   });
 
   return station;
+}
+
+/** Ambil sektor-sektor di mana user menjadi kolaborator */
+export async function getCollabSectors() {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  return db.sector.findMany({
+    where: {
+      collaborators: {
+        some: { userId: session.user.id }
+      }
+    },
+    include: {
+      beacons: {
+        orderBy: { order: "asc" },
+        include: { creator: { select: { name: true, image: true } } }
+      },
+      collaborators: {
+        include: {
+          user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } }
+        }
+      },
+      station: {
+        select: { user: { select: { id: true, name: true } } }
+      }
+    }
+  });
 }
 
 /** Ambil Station publik milik user lain berdasarkan username */

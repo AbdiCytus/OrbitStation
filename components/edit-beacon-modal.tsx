@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { updateBeacon, deleteBeacon } from "@/lib/actions";
 import type { Beacon, SectorWithBeacons } from "@/types";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 type Props = {
   beacon: Beacon;
@@ -18,8 +19,9 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
   const [title, setTitle] = useState(beacon.title);
   const [description, setDescription] = useState(beacon.description ?? "");
   const [imageUrl, setImageUrl] = useState(beacon.imageUrl ?? "");
-  const [faviconUrl, setFaviconUrl] = useState(beacon.faviconUrl ?? "");
-  const [notes, setNotes] = useState(beacon.notes ?? "");
+  const [faviconUrl, setFaviconUrl] = useState(beacon.faviconUrl || "");
+  const [notes, setNotes] = useState(beacon.notes || "");
+  const [isSectorDropdownOpen, setIsSectorDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
@@ -114,26 +116,41 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
             {/* Sector selector */}
             <div className="form-group">
               <label className="form-label" htmlFor="edit-beacon-sector">Sector</label>
-            <select
-              id="edit-beacon-sector"
-              className="input"
-              value={sectorId}
-              onChange={(e) => setSectorId(e.target.value)}
-              required
-            >
-              {sectors.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  id="edit-beacon-sector"
+                  className="input"
+                  style={{ textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  onClick={() => setIsSectorDropdownOpen(!isSectorDropdownOpen)}
+                >
+                  {sectors.find(s => s.id === sectorId)?.name || "Select a sector"}
+                  <ChevronDownIcon width={16} height={16} style={{ color: "var(--color-comet)", transition: "transform 0.2s", transform: isSectorDropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }} />
+                </button>
+                {isSectorDropdownOpen && (
+                  <>
+                    <div style={{ position: "fixed", inset: 0, zIndex: 90 }} onClick={() => setIsSectorDropdownOpen(false)} />
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", zIndex: 100, overflow: "hidden", overflowY: "auto", maxHeight: "200px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+                      {sectors.map((s) => (
+                        <div
+                          key={s.id}
+                          className="dropdown-option-btn hover:bg-white/5"
+                          style={{ padding: "0.6rem 1rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
+                          onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
+                        >
+                          {s.name}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
 
-          {/* URL */}
           <div className="form-group">
             <label className="form-label" htmlFor="edit-beacon-url">URL</label>
-            <div className="input-with-prefix">
-              <span className="input-prefix">https://</span>
+            <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
+              <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>
               <input
                 id="edit-beacon-url"
                 className="input input-url"
@@ -142,6 +159,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="example.com"
                 required
+                style={{ border: "none", background: "transparent", paddingLeft: "0", flex: 1 }}
               />
             </div>
           </div>

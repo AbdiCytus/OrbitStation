@@ -6,7 +6,7 @@ import { PencilSquareIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/20
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
 type Props = {
-  beacon: Beacon;
+  beacon: Beacon & { _creator?: { name: string | null; image: string | null } | null };
   onClick: () => void;
   onEdit?: () => void;
   index?: number; // For stagger animation
@@ -85,6 +85,18 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0 }: Props
         <h3 className="beacon-card-title">{beacon.title}</h3>
         {beacon.description && (
           <p className="beacon-card-desc">{beacon.description}</p>
+        )}
+        {beacon._creator && (
+          <div style={{ marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            {beacon._creator.image ? (
+              <img src={beacon._creator.image} alt={beacon._creator.name || "?"} style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ fontSize: "0.65rem", background: "rgba(255,255,255,0.1)", width: 16, height: 16, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+                {(beacon._creator.name || "?")[0].toUpperCase()}
+              </span>
+            )}
+            <span style={{ fontSize: "0.7rem", color: "var(--color-starlight)" }} title={`Added by ${beacon._creator.name}`}>Added by <span style={{ color: "#fff" }}>{beacon._creator.name?.split(" ")[0]}</span></span>
+          </div>
         )}
       </div>
 

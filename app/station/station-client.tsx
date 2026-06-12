@@ -8,22 +8,27 @@ import AddSectorModal from "@/components/add-sector-modal";
 import EditSectorModal from "@/components/edit-sector-modal";
 import EditBeaconModal from "@/components/edit-beacon-modal";
 import BeaconDetailModal from "@/components/beacon-detail-modal";
+import SectorMembersModal from "@/components/sector-members-modal";
 import FriendsModal from "@/components/friends-modal";
 import StationNavbar from "@/components/station-navbar";
 import SpaceBackground from "@/components/space-background";
 import StaticStarfield from "@/components/static-starfield";
 import { deleteSector } from "@/lib/actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
-import { PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { 
+  PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon 
+} from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   initialStation: StationWithSectors | null;
+  initialCollabSectors?: (SectorWithBeacons & { collaborators?: any[] })[];
   user: { id: string; name: string | null; image: string | null; callsign: string | null; animationEnabled: boolean };
 };
 
-export default function StationClient({ initialStation, user }: Props) {
+export default function StationClient({ initialStation, initialCollabSectors = [], user }: Props) {
   const [station, setStation] = useState(initialStation);
+  const [collabSectors, setCollabSectors] = useState(initialCollabSectors);
   const [activeSectorId, setActiveSectorId] = useState<string | "all">("all");
   const [displaySectorId, setDisplaySectorId] = useState<string | "all">("all");
   const [isExiting, setIsExiting] = useState(false);
@@ -72,7 +77,8 @@ export default function StationClient({ initialStation, user }: Props) {
   }, [displaySectorId, isExiting, user.animationEnabled]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterVisibility, setFilterVisibility] = useState<"all" | "public" | "private">("all");
-  const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "name_asc" | "name_desc" | "sector">("date_desc");
+  const [sortBy, setSortBy] = useState<"date" | "name" | "sector" | "creator" | "visits">("date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [openMenu, setOpenMenu] = useState<"filter" | "sort" | null>(null);
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
   const [editingBeacon, setEditingBeacon] = useState<Beacon | null>(null);
@@ -80,19 +86,26 @@ export default function StationClient({ initialStation, user }: Props) {
   const [showAddSector, setShowAddSector] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [editingSector, setEditingSector] = useState<SectorWithBeacons | null>(null);
+  const [viewingMembersSector, setViewingMembersSector] = useState<SectorWithBeacons | null>(null);
   const [, startTransition] = useTransition();
 
-  const sectors = station?.sectors ?? [];
+  const allOwnedSectors = station?.sectors ?? [];
+  const personalSectors = allOwnedSectors.filter(s => !s.collaborators || s.collaborators.length === 0);
+  const myCollabSectors = allOwnedSectors.filter(s => s.collaborators && s.collaborators.length > 0);
+  const allCollabSectors = [...myCollabSectors, ...collabSectors];
+  const allSectors = [...allOwnedSectors, ...collabSectors];
+
+  const baseBeacons = useMemo(() => {
+    if (displaySectorId === "all") {
+      return personalSectors.flatMap((s) => s.beacons.map((b: any) => ({ ...b, _isPublic: s.isPublic, _sectorOrder: s.order, _sectorName: s.name, _creator: b.creator })));
+    } else {
+      const s = allSectors.find((s) => s.id === displaySectorId);
+      return s?.beacons.map((b: any) => ({ ...b, _isPublic: s.isPublic, _sectorOrder: s.order, _sectorName: s.name, _creator: b.creator })) ?? [];
+    }
+  }, [allSectors, displaySectorId, personalSectors]);
 
   const visibleBeacons = useMemo(() => {
-    let beacons: (Beacon & { _isPublic?: boolean; _sectorOrder?: number; _sectorName?: string })[] = [];
-    
-    if (displaySectorId === "all") {
-      beacons = sectors.flatMap((s) => s.beacons.map(b => ({ ...b, _isPublic: s.isPublic, _sectorOrder: s.order, _sectorName: s.name })));
-    } else {
-      const s = sectors.find((s) => s.id === displaySectorId);
-      beacons = s?.beacons.map(b => ({ ...b, _isPublic: s.isPublic, _sectorOrder: s.order, _sectorName: s.name })) ?? [];
-    }
+    let beacons = [...baseBeacons];
 
     if (filterVisibility === "public") {
       beacons = beacons.filter(b => b._isPublic);
@@ -110,24 +123,24 @@ export default function StationClient({ initialStation, user }: Props) {
       );
     }
 
-    if (sortBy === "name_asc") {
-      beacons.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === "name_desc") {
-      beacons.sort((a, b) => b.title.localeCompare(a.title));
+    if (sortBy === "name") {
+      beacons.sort((a, b) => sortDir === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title));
     } else if (sortBy === "sector") {
       beacons.sort((a, b) => {
         const orderDiff = (a._sectorOrder ?? 0) - (b._sectorOrder ?? 0);
-        if (orderDiff !== 0) return orderDiff;
+        if (orderDiff !== 0) return sortDir === "asc" ? orderDiff : -orderDiff;
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-    } else if (sortBy === "date_asc") {
-      beacons.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    } else { // date_desc
-      beacons.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sortBy === "creator") {
+      beacons.sort((a, b) => sortDir === "asc" ? (a._creator?.name || "").localeCompare(b._creator?.name || "") : (b._creator?.name || "").localeCompare(a._creator?.name || ""));
+    } else if (sortBy === "visits") {
+      beacons.sort((a, b) => sortDir === "asc" ? (a.visits || 0) - (b.visits || 0) : (b.visits || 0) - (a.visits || 0));
+    } else { // date
+      beacons.sort((a, b) => sortDir === "asc" ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
     return beacons;
-  }, [sectors, displaySectorId, searchQuery, filterVisibility, sortBy]);
+  }, [baseBeacons, searchQuery, filterVisibility, sortBy, sortDir]);
 
   const [cols, setCols] = useState(6);
   useEffect(() => {
@@ -171,7 +184,7 @@ export default function StationClient({ initialStation, user }: Props) {
     };
   }, []);
 
-  const activeSector = sectors.find((s) => s.id === displaySectorId) ?? null;
+  const activeSector = allSectors.find((s) => s.id === displaySectorId) ?? null;
 
   // ── Handlers ────────────────────────────────────────────────
   const handleSectorCreated = useCallback((newSector: SectorWithBeacons) => {
@@ -207,6 +220,9 @@ export default function StationClient({ initialStation, user }: Props) {
         ),
       };
     });
+    setCollabSectors((prev) => 
+      prev.map(s => s.id === newBeacon.sectorId ? { ...s, beacons: [...s.beacons, newBeacon] } : s)
+    );
     setShowAddBeacon(false);
   }, []);
 
@@ -221,6 +237,9 @@ export default function StationClient({ initialStation, user }: Props) {
         })),
       };
     });
+    setCollabSectors((prev) => 
+      prev.map(s => ({ ...s, beacons: s.beacons.map(b => b.id === updated.id ? updated : b) }))
+    );
     setEditingBeacon(null);
     setSelectedBeacon(null);
   }, []);
@@ -236,6 +255,9 @@ export default function StationClient({ initialStation, user }: Props) {
         })),
       };
     });
+    setCollabSectors((prev) => 
+      prev.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== beaconId) }))
+    );
     setSelectedBeacon(null);
     setEditingBeacon(null);
   }, []);
@@ -347,11 +369,11 @@ export default function StationClient({ initialStation, user }: Props) {
               <span className="sector-tab-icon"><DynamicIcon name="GlobeAltIcon" /></span>
               <span className="sector-tab-name">All Beacons</span>
               <span className="sector-tab-count">
-                {sectors.reduce((a, s) => a + s.beacons.length, 0)}
+                {allSectors.reduce((a, s) => a + s.beacons.length, 0)}
               </span>
             </button>
 
-            {sectors.map((sector) => (
+            {personalSectors.map((sector) => (
               <div key={sector.id} className="sector-tab-wrapper">
                 <button
                   id={`tab-sector-${sector.id}`}
@@ -376,6 +398,65 @@ export default function StationClient({ initialStation, user }: Props) {
                 </button>
               </div>
             ))}
+
+            {allCollabSectors.length > 0 && (
+              <div style={{ marginTop: "1.5rem" }}>
+                <span className="sidebar-label" style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--color-starlight)" }}>
+                  <DynamicIcon name="UsersIcon" width={14} height={14} /> Collab Sectors
+                </span>
+                {allCollabSectors.map((sector) => {
+                  const isOwner = sector.stationId === station?.id;
+                  return (
+                    <div key={sector.id} className="sector-tab-wrapper" style={{ marginTop: "0.5rem" }}>
+                      <button
+                        id={`tab-sector-${sector.id}`}
+                        className={`sector-tab group ${activeSectorId === sector.id ? "active" : ""}`}
+                        onClick={() => handleTabClick(sector.id)}
+                        style={activeSectorId === sector.id && sector.color
+                          ? { borderLeftColor: sector.color, color: sector.color }
+                          : undefined}
+                      >
+                        <span className="sector-tab-icon"><DynamicIcon name={sector.icon} /></span>
+                        <span className="sector-tab-name">
+                          {sector.name}
+                        </span>
+                        {isOwner && (
+                          <div className="relative w-6 h-6 flex items-center justify-center shrink-0 ml-1">
+                            {/* Crown Icon (visible when NOT hovered) */}
+                            <div className="absolute inset-0 flex items-center justify-center text-yellow-500 opacity-100 group-hover:opacity-0 transition-opacity pointer-events-none" title="Sector Owner">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5ZM19 19C19 19.5523 18.5523 20 18 20H6C5.44772 20 5 19.5523 5 19V18H19V19Z" />
+                              </svg>
+                            </div>
+                            {/* Edit Button (visible when hovered) */}
+                            <div
+                              className="absolute inset-0 flex items-center justify-center text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-white/10 rounded-md"
+                              onClick={(e) => { e.stopPropagation(); setEditingSector(sector); }}
+                              title="Edit sector"
+                              aria-label={`Edit ${sector.name}`}
+                            >
+                              <PencilSquareIcon width={14} height={14} />
+                            </div>
+                          </div>
+                        )}
+                        {!isOwner && (
+                          <div className="relative w-6 h-6 flex items-center justify-center shrink-0 ml-1">
+                            <div
+                              className="absolute inset-0 flex items-center justify-center text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-white/10 rounded-md"
+                              onClick={(e) => { e.stopPropagation(); setViewingMembersSector(sector); }}
+                              title="View Members"
+                              aria-label={`View Members of ${sector.name}`}
+                            >
+                              <DynamicIcon name="UsersIcon" width={14} height={14} />
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </nav>
         </aside>
 
@@ -393,10 +474,18 @@ export default function StationClient({ initialStation, user }: Props) {
                 {searchQuery && ` matching "${searchQuery}"`}
               </p>
             </div>
-            {sectors.length > 0 && (
+            {allSectors.length > 0 && (
               <button
                 id="btn-add-beacon"
                 className="btn btn-primary"
+                style={{
+                  background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                  boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)",
+                  border: "1px solid rgba(139, 92, 246, 0.5)",
+                  color: "#fff",
+                  fontWeight: "600",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.3)"
+                }}
                 onClick={() => setShowAddBeacon(true)}
                 title="Add new beacon"
               >
@@ -457,7 +546,9 @@ export default function StationClient({ initialStation, user }: Props) {
                 .floating-controls { animation: floatControls 5s ease-in-out infinite; }
               `}} />
               
-              {displaySectorId === "all" && (
+              {baseBeacons.length > 0 && (
+                <>
+                  {displaySectorId === "all" && (
                 <div className="staggered-item">
                   <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
                     <button
@@ -495,7 +586,7 @@ export default function StationClient({ initialStation, user }: Props) {
                 <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
                   <button
                     className="custom-dropdown-btn"
-                    style={{ background: sortBy !== "date_desc" ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)", border: `1px solid ${sortBy !== "date_desc" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`, color: sortBy !== "date_desc" ? "#fff" : "#a1a1aa" }}
+                    style={{ background: sortBy !== "date" ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)", border: `1px solid ${sortBy !== "date" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`, color: sortBy !== "date" ? "#fff" : "#a1a1aa" }}
                     onClick={() => setOpenMenu(openMenu === "sort" ? null : "sort")}
                     title="Sort Beacons"
                   >
@@ -504,28 +595,39 @@ export default function StationClient({ initialStation, user }: Props) {
                   {openMenu === "sort" && (
                     <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: 0, background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", padding: "0.5rem", zIndex: 50, minWidth: "180px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
                       {[
-                        { id: "date_desc", label: "Date Added (Newest)" },
-                        { id: "date_asc", label: "Date Added (Oldest)" },
-                        { id: "name_asc", label: "Name (A-Z)" },
-                        { id: "name_desc", label: "Name (Z-A)" },
-                        { id: "sector", label: "Sector Order" }
-                      ].filter(opt => opt.id !== "sector" || displaySectorId === "all").map(opt => (
-                        <button
-                          key={opt.id}
-                          className="dropdown-option-btn"
-                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", background: sortBy === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", textAlign: "left", fontSize: "0.85rem", transition: "all 0.2s" }}
-                          onClick={() => { setSortBy(opt.id as any); setOpenMenu(null); }}
-                        >
-                          {opt.label}
-                          {sortBy === opt.id && <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />}
-                        </button>
+                        { id: "date", label: "Date Added" },
+                        { id: "name", label: "Name" },
+                        { id: "visits", label: "Total Visits" },
+                        { id: "sector", label: "Sector Order", hide: displaySectorId !== "all" },
+                        { id: "creator", label: "Added By", hide: !(displaySectorId !== "all" && allCollabSectors.some(s => s.id === displaySectorId)) }
+                      ].filter(opt => !opt.hide).map(opt => (
+                        <div key={opt.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: sortBy === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", borderRadius: "6px", overflow: "hidden", transition: "all 0.2s" }}>
+                          <button
+                            className="dropdown-option-btn hover:bg-white/5"
+                            style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", border: "none", background: "transparent", color: "inherit", cursor: "pointer", textAlign: "left", fontSize: "0.85rem" }}
+                            onClick={() => setSortBy(opt.id as any)}
+                          >
+                            {opt.label}
+                            {sortBy === opt.id && <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />}
+                          </button>
+                          {sortBy === opt.id && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setSortDir(d => d === "asc" ? "desc" : "asc"); }}
+                              style={{ padding: "0.5rem", background: "rgba(255,255,255,0.05)", border: "none", borderLeft: "1px solid rgba(255,255,255,0.1)", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                              className="hover:bg-white/10"
+                              title={`Sort ${sortDir === "asc" ? "Descending" : "Ascending"}`}
+                            >
+                              {sortDir === "asc" ? <BarsArrowUpIcon width={16} height={16} /> : <BarsArrowDownIcon width={16} height={16} />}
+                            </button>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
 
-              {displaySectorId === "all" && (
+              {(displaySectorId === "all" || (displaySectorId !== "all" && allCollabSectors.some(s => s.id === displaySectorId))) && (
                 <div className="staggered-item" style={{ flex: 1, minWidth: "200px", maxWidth: "250px" }}>
                   <div className={`${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative", width: "100%", animationDelay: "0.4s" }}>
                     <MagnifyingGlassIcon style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", width: "16px", color: "#a1a1aa" }} />
@@ -552,13 +654,15 @@ export default function StationClient({ initialStation, user }: Props) {
                   </div>
                 </div>
               )}
-            </div>
+              </>
+            )}
           </div>
+        </div>
 
           {/* Beacon masonry grid */}
           {visibleBeacons.length === 0 ? (
             <div className={`station-empty ${isExiting ? "exiting" : isEntering ? "entering" : ""}`} key={`empty-${displaySectorId}-${filterVisibility}-${searchQuery}`}>
-              {sectors.length === 0 ? (
+              {allSectors.length === 0 ? (
                 <>
                   <div className="station-empty-icon"><RocketLaunchIcon width={48} height={48} /></div>
                   <p className="station-empty-title">Your Station is empty</p>
@@ -597,9 +701,9 @@ export default function StationClient({ initialStation, user }: Props) {
                       <motion.div
                         layout={user.animationEnabled}
                         layoutId={user.animationEnabled ? `${displaySectorId}-${beacon.id}` : undefined}
-                        initial={user.animationEnabled ? { opacity: 0, scale: 0.8 } : false}
-                        animate={user.animationEnabled ? { opacity: 1, scale: 1 } : false}
-                        exit={user.animationEnabled ? { opacity: 0, scale: 0.8 } : false}
+                        initial={user.animationEnabled ? { opacity: 0, scale: 0.8 } : undefined}
+                        animate={user.animationEnabled ? { opacity: 1, scale: 1 } : undefined}
+                        exit={user.animationEnabled ? { opacity: 0, scale: 0.8 } : undefined}
                         transition={{ duration: 0.3, type: "spring", bounce: 0.2 }}
                         key={beacon.id}
                       >
@@ -635,8 +739,8 @@ export default function StationClient({ initialStation, user }: Props) {
 
       {showAddBeacon && (
         <AddBeaconModal
-          sectors={sectors}
-          defaultSectorId={activeSectorId !== "all" ? activeSectorId : undefined}
+          sectors={allSectors}
+          initialSectorId={displaySectorId !== "all" ? displaySectorId : undefined}
           onClose={() => setShowAddBeacon(false)}
           onCreated={handleBeaconCreated}
         />
@@ -645,17 +749,26 @@ export default function StationClient({ initialStation, user }: Props) {
       {editingSector && (
         <EditSectorModal
           sector={editingSector}
-          sectors={sectors}
+          sectors={allOwnedSectors}
+          currentUserId={user.id}
           onClose={() => setEditingSector(null)}
           onUpdated={handleSectorUpdated}
           onDeleted={handleSectorDelete}
         />
       )}
 
+      {viewingMembersSector && (
+        <SectorMembersModal
+          sector={viewingMembersSector}
+          currentUserId={user.id}
+          onClose={() => setViewingMembersSector(null)}
+        />
+      )}
+
       {editingBeacon && (
         <EditBeaconModal
           beacon={editingBeacon}
-          sectors={sectors}
+          sectors={allSectors}
           onClose={() => setEditingBeacon(null)}
           onUpdated={handleBeaconUpdated}
           onDeleted={handleBeaconDeleted}
@@ -665,7 +778,7 @@ export default function StationClient({ initialStation, user }: Props) {
       {selectedBeacon && !editingBeacon && (
         <BeaconDetailModal
           beacon={selectedBeacon}
-          sector={sectors.find((s) => s.id === selectedBeacon.sectorId) ?? null}
+          sector={allSectors.find(s => s.id === selectedBeacon.sectorId) ?? null}
           onClose={() => setSelectedBeacon(null)}
           onUpdated={handleBeaconUpdated}
           onDeleted={handleBeaconDeleted}

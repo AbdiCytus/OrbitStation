@@ -4,14 +4,14 @@ import { useState, useEffect, useTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   XMarkIcon, UserPlusIcon, UsersIcon, EnvelopeIcon, 
-  MagnifyingGlassIcon, ChatBubbleOvalLeftEllipsisIcon, GlobeAltIcon, CheckIcon, UserMinusIcon
+  MagnifyingGlassIcon, ChatBubbleOvalLeftEllipsisIcon, GlobeAltIcon, CheckIcon, UserMinusIcon, ArrowsRightLeftIcon, TrashIcon
 } from "@heroicons/react/24/outline";
 import SpaceBackground from "./space-background";
 import StaticStarfield from "./static-starfield";
-import { 
-  searchPilots, getFriends, getFriendRequests, 
-  sendFriendRequest, acceptFriendRequest, rejectFriendRequest,
-  getChatMessages, sendChatMessage, removeFriend
+import {
+  searchUsers, sendFriendRequest, acceptFriendRequest, rejectFriendRequest,
+  getChatMessages, sendChatMessage, removeFriend, clearChat,
+  acceptCollab, rejectCollab, getFriends, getFriendRequests, acceptTransferOwnership, rejectTransferOwnership
 } from "@/lib/actions";
 
 type Tab = "add" | "list" | "requests";
@@ -25,6 +25,7 @@ interface Props {
 export default function FriendsModal({ isOpen, onClose, user }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("list");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeChatName, setActiveChatName] = useState<string>("");
 
@@ -135,10 +136,29 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
     // optionally refetch messages
   };
 
+  const handleClearChat = async () => {
+    if (!activeChatId) return;
+    setShowClearConfirm(true);
+  };
+
+  const confirmClearChat = async () => {
+    if (!activeChatId) return;
+    setMessages([]);
+    setShowClearConfirm(false);
+    await clearChat(activeChatId);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="modal-overlay" style={{ zIndex: 100 }}>
+        <motion.div 
+          className="modal-overlay" 
+          style={{ zIndex: 100, animation: "none" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <motion.div
             className="flex flex-col shadow-2xl"
             style={{ 
@@ -265,7 +285,7 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-2 transition-opacity">
                           {p.station?.isPublic && (
                             <a href={`/station/${p.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
                               <GlobeAltIcon width={22} height={22} />
@@ -342,7 +362,7 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                           </AnimatePresence>
                         </div>
 
-                        <div className={`flex items-center gap-2 transition-opacity ${activeChatId ? "opacity-100 flex-wrap justify-center" : "opacity-0 group-hover:opacity-100"}`}>
+                        <div className={`flex items-center gap-2 transition-opacity ${activeChatId ? "flex-wrap justify-center" : ""}`}>
                           {f.station?.isPublic && (
                             <a href={`/station/${f.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
                               <GlobeAltIcon width={22} height={22} />
@@ -407,19 +427,19 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
 
                         <div className="flex items-center gap-2">
                           <button 
-                            onClick={() => handleAcceptRequest(r.id, r.friendshipId)}
-                            className="rounded-full bg-violet-500 hover:bg-violet-400 text-white font-medium text-sm transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.4)]"
-                            style={{ height: "44px", padding: "0 20px" }}
-                          >
-                            <CheckIcon width={20} height={20} /> Accept
-                          </button>
-                          <button 
                             onClick={() => handleRejectRequest(r.id, r.friendshipId)}
                             className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all flex items-center justify-center"
                             title="Refuse"
-                            style={{ width: "44px", height: "44px" }}
+                            style={{ width: "48px", height: "48px" }}
                           >
-                            <XMarkIcon width={22} height={22} />
+                            <XMarkIcon width={24} height={24} />
+                          </button>
+                          <button 
+                            onClick={() => handleAcceptRequest(r.id, r.friendshipId)}
+                            className="rounded-full bg-violet-500 hover:bg-violet-400 text-white font-medium text-sm transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+                            style={{ height: "48px", padding: "0 24px" }}
+                          >
+                            <CheckIcon width={20} height={20} /> Accept
                           </button>
                         </div>
                       </motion.div>
@@ -500,11 +520,48 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                            })()}
                          </div>
                        </div>
-                       <button onClick={() => setActiveChatId(null)} className="text-gray-400 hover:text-white" style={{ padding: "8px" }}>
-                         <XMarkIcon width={24} height={24} />
-                       </button>
-                    </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={handleClearChat} className="text-gray-400 hover:text-red-400 transition-colors" style={{ padding: "8px" }} title="Clear Chat">
+                            <TrashIcon width={20} height={20} />
+                          </button>
+                          <button onClick={() => setActiveChatId(null)} className="text-gray-400 hover:text-white transition-colors" style={{ padding: "8px" }}>
+                            <XMarkIcon width={24} height={24} />
+                          </button>
+                        </div>
+                     </div>
                     
+                    {showClearConfirm && (
+                      <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ borderRadius: "16px" }}>
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          style={{
+                            backgroundColor: "#141423",
+                            border: "1px solid rgba(139, 92, 246, 0.3)",
+                            padding: "32px",
+                            borderRadius: "20px",
+                            boxShadow: "0 10px 40px rgba(0,0,0,0.8)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: "20px",
+                            textAlign: "center",
+                            maxWidth: "340px",
+                            width: "90%"
+                          }}
+                        >
+                          <TrashIcon width={48} height={48} style={{ color: "#f87171", opacity: 0.8 }} />
+                          <h3 style={{ color: "white", fontWeight: "bold", fontSize: "1.125rem", margin: 0 }}>Clear Chat?</h3>
+                          <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0, lineHeight: 1.5 }}>This will permanently delete all messages in this conversation. This cannot be undone.</p>
+                          <div style={{ display: "flex", width: "100%", gap: "12px", marginTop: "8px" }}>
+                            <button style={{ flex: 1, padding: "10px 16px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", color: "white", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"} onClick={() => setShowClearConfirm(false)}>Cancel</button>
+                            <button style={{ flex: 1, padding: "10px 16px", background: "rgba(239, 68, 68, 0.2)", color: "#f87171", borderRadius: "8px", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.3)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"} onClick={confirmClearChat}>Clear</button>
+                          </div>
+                        </motion.div>
+                      </div>
+                    )}
+
                     <div className="flex-1 overflow-y-auto flex flex-col" style={{ gap: "16px", padding: "8px" }}>
                       {messages.map((msg) => {
                         const isMine = msg.senderId === user.id;
@@ -523,7 +580,91 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                             fontSize: "14px",
                             boxShadow: "0 2px 10px rgba(0,0,0,0.2)"
                           }}>
-                            {msg.content}
+                            {msg.type === "TEXT" && msg.content}
+                            
+                            {(msg.type === "COLLAB_INVITE" || msg.type === "OWNERSHIP_TRANSFER_INVITE") && (
+                              <div className="flex flex-col gap-3">
+                                <div className="text-sm text-white/90 leading-relaxed">
+                                  <span className="font-semibold text-violet-300">{isMine ? "You" : activeChatName}</span> 
+                                  {msg.type === "OWNERSHIP_TRANSFER_INVITE" ? (
+                                    <>
+                                      {isMine ? " want to transfer ownership of sector " : " wants to transfer ownership of sector "}
+                                      <span className="font-bold text-white">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch(e){ return "Unknown Sector"; } })()}"</span>
+                                      {" to "}
+                                      <span className="font-semibold text-violet-300">{isMine ? "them" : "you"}</span>.
+                                    </>
+                                  ) : (
+                                    <>
+                                      {" invited "}
+                                      <span className="font-semibold text-violet-300">{isMine ? "them" : "you"}</span>
+                                      {" to collaborate on sector "}
+                                      <span className="font-bold text-white">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch(e){ return "Unknown Sector"; } })()}"</span>.
+                                    </>
+                                  )}
+                                </div>
+                                {!isMine && (
+                                  <div className="flex gap-2 mt-1">
+                                    <button 
+                                      onClick={async () => {
+                                        if (msg.type === "COLLAB_INVITE") {
+                                          await rejectCollab(msg.id);
+                                          setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_REJECTED", content: "rejected the sector collaboration" } : m));
+                                        } else {
+                                          await rejectTransferOwnership(msg.id);
+                                          setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_REJECTED", content: "rejected the ownership transfer" } : m));
+                                        }
+                                      }}
+                                      className="flex-1 bg-white/10 hover:bg-pink-500/80 text-white rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
+                                      style={{ padding: "0.75rem 0" }}
+                                    >
+                                      <XMarkIcon width={18} height={18} /> Reject
+                                    </button>
+                                    <button 
+                                      onClick={async () => {
+                                        try {
+                                          if (msg.type === "COLLAB_INVITE") {
+                                            const meta = JSON.parse(msg.metadata);
+                                            await acceptCollab(msg.id, meta.sectorId);
+                                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_ACCEPTED", content: "accepted the sector collaboration" } : m));
+                                          } else {
+                                            await acceptTransferOwnership(msg.id);
+                                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_ACCEPTED", content: "accepted the ownership transfer" } : m));
+                                          }
+                                        } catch (e) {}
+                                      }}
+                                      className="flex-1 bg-violet-600 hover:bg-violet-500 text-white rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
+                                      style={{ padding: "0.75rem 0" }}
+                                    >
+                                      <CheckIcon width={18} height={18} /> Accept
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {msg.type === "COLLAB_ACCEPTED" && (
+                              <div className="text-green-300 italic">
+                                {isMine ? activeChatName : "You"} accepted the sector collaboration
+                              </div>
+                            )}
+
+                            {msg.type === "COLLAB_REJECTED" && (
+                              <div className="text-pink-300 italic">
+                                {isMine ? activeChatName : "You"} rejected the sector collaboration
+                              </div>
+                            )}
+                            
+                            {msg.type === "OWNERSHIP_TRANSFER_ACCEPTED" && (
+                              <div className="text-green-300 italic">
+                                {isMine ? activeChatName : "You"} accepted the ownership transfer
+                              </div>
+                            )}
+
+                            {msg.type === "OWNERSHIP_TRANSFER_REJECTED" && (
+                              <div className="text-pink-300 italic">
+                                {isMine ? activeChatName : "You"} rejected the ownership transfer
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -558,7 +699,7 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
               </div>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );

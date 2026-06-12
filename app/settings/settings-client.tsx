@@ -256,6 +256,11 @@ export default function SettingsClient({ profile }: Props) {
                   <span className="settings-toggle-desc">
                     Allow anyone to visit your Orbit Station via your public URL.
                   </span>
+                  {isPublic && (
+                    <a href={`/station/${username}`} target="_blank" rel="noreferrer" style={{ marginTop: "0.5rem", display: "inline-block", fontSize: "0.8rem", color: "#a78bfa", textDecoration: "underline" }}>
+                      View your public station
+                    </a>
+                  )}
                 </div>
                 <label className="toggle-switch" htmlFor="toggle-public">
                   <input

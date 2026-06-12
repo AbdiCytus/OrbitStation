@@ -34,6 +34,7 @@ export type SectorFormData = {
   icon?: string;
   color?: string;
   isPublic?: boolean;
+  invitedFriendIds?: string[];
 };
 
 /** Buat Sektor baru di Station pengguna */
@@ -58,9 +59,21 @@ export async function createSector(data: SectorFormData) {
       name: data.name.trim(),
       icon: data.icon?.trim() || null,
       color: data.color?.trim() || null,
+      isPublic: data.isPublic ?? true,
       order: newOrder,
     },
   });
+
+  if (!data.isPublic && data.invitedFriendIds && data.invitedFriendIds.length > 0) {
+    const messages = data.invitedFriendIds.map(id => ({
+      senderId: user.id!,
+      receiverId: id,
+      content: `invited you to sector collaboration`,
+      type: "COLLAB_INVITE",
+      metadata: JSON.stringify({ sectorId: sector.id, sectorName: sector.name })
+    }));
+    await db.chatMessage.createMany({ data: messages });
+  }
 
   revalidatePath("/station");
   return { data: sector };
@@ -91,8 +104,197 @@ export async function updateSector(
     },
   });
 
+  if (!updated.isPublic && data.invitedFriendIds && data.invitedFriendIds.length > 0) {
+    const messages = data.invitedFriendIds.map(id => ({
+      senderId: user.id!,
+      receiverId: id,
+      content: `invited you to sector collaboration`,
+      type: "COLLAB_INVITE",
+      metadata: JSON.stringify({ sectorId: updated.id, sectorName: updated.name })
+    }));
+    await db.chatMessage.createMany({ data: messages });
+  }
+
   revalidatePath("/station");
   return { data: updated };
+}
+
+export async function acceptCollab(messageId: string, sectorId: string) {
+  const user = await requireAuth();
+  
+  try {
+    await db.sectorCollaborator.create({
+      data: {
+        userId: user.id!,
+        sectorId: sectorId
+      }
+    });
+
+    await db.chatMessage.update({
+      where: { id: messageId },
+      data: { type: "COLLAB_ACCEPTED", content: "accepted the sector collaboration" }
+    });
+  } catch (e) {
+    // If they already joined, just update the message
+    await db.chatMessage.update({
+      where: { id: messageId },
+      data: { type: "COLLAB_ACCEPTED", content: "accepted the sector collaboration" }
+    });
+  }
+
+  revalidatePath("/station");
+  return { success: true };
+}
+
+export async function rejectCollab(messageId: string) {
+  await requireAuth();
+  
+  await db.chatMessage.update({
+    where: { id: messageId },
+    data: { type: "COLLAB_REJECTED", content: "rejected the sector collaboration" }
+  });
+
+  revalidatePath("/station");
+  return { success: true };
+}
+
+export async function removeCollaborator(sectorId: string, userIdToRemove: string) {
+  const user = await requireAuth();
+  const sector = await db.sector.findFirst({
+    where: { id: sectorId, station: { userId: user.id } }
+  });
+  if (!sector) return { error: "Access denied" };
+
+  await db.sectorCollaborator.deleteMany({
+    where: { sectorId, userId: userIdToRemove }
+  });
+  revalidatePath("/station");
+  return { success: true };
+}
+
+export async function sendTransferOwnershipInvite(sectorId: string, newOwnerId: string) {
+  const user = await requireAuth();
+  const sector = await db.sector.findFirst({
+    where: { id: sectorId, station: { userId: user.id } }
+  });
+  if (!sector) return { error: "Access denied" };
+
+  await db.chatMessage.create({
+    data: {
+      senderId: user.id,
+      receiverId: newOwnerId,
+      content: `wants to transfer ownership of sector`,
+      type: "OWNERSHIP_TRANSFER_INVITE",
+      metadata: JSON.stringify({ sectorId, sectorName: sector.name })
+    }
+  });
+
+  revalidatePath("/station");
+  return { success: true };
+}
+
+export async function acceptTransferOwnership(messageId: string) {
+  const user = await requireAuth();
+  const message = await db.chatMessage.findUnique({ where: { id: messageId } });
+  if (!message || message.receiverId !== user.id) return { error: "Message not found" };
+
+  const meta = JSON.parse(message.metadata || "{}");
+  const sectorId = meta.sectorId;
+  if (!sectorId) return { error: "Invalid metadata" };
+
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true }
+  });
+  if (!sector) return { error: "Sector not found" };
+
+  const previousOwnerId = sector.station.userId;
+
+  // Get the new owner's station
+  const targetStation = await db.station.findUnique({
+    where: { userId: user.id }
+  });
+  if (!targetStation) return { error: "Your station not found" };
+
+  // Make the previous owner a collaborator
+  await db.sectorCollaborator.create({
+    data: { sectorId, userId: previousOwnerId }
+  });
+
+  // Remove the new owner from collaborators
+  await db.sectorCollaborator.deleteMany({
+    where: { sectorId, userId: user.id }
+  });
+
+  // Transfer the sector to the new owner's station
+  await db.sector.update({
+    where: { id: sectorId },
+    data: { stationId: targetStation.id }
+  });
+
+  await db.chatMessage.update({
+    where: { id: messageId },
+    data: { type: "OWNERSHIP_TRANSFER_ACCEPTED", content: "accepted the ownership transfer" }
+  });
+
+  revalidatePath("/station");
+  return { success: true };
+}
+
+export async function rejectTransferOwnership(messageId: string) {
+  const user = await requireAuth();
+  const message = await db.chatMessage.findUnique({ where: { id: messageId } });
+  if (!message || message.receiverId !== user.id) return { error: "Message not found" };
+
+  await db.chatMessage.update({
+    where: { id: messageId },
+    data: { type: "OWNERSHIP_TRANSFER_REJECTED", content: "rejected the ownership transfer" }
+  });
+
+  revalidatePath("/station");
+  return { success: true };
+}
+
+export async function hasCollabInvites(sectorId: string) {
+  const user = await requireAuth();
+  // Check if there are any pending COLLAB_INVITE messages for this sector
+  const count = await db.chatMessage.count({
+    where: {
+      type: "COLLAB_INVITE",
+      metadata: {
+        contains: `"sectorId":"${sectorId}"`
+      }
+    }
+  });
+  return count > 0;
+}
+
+export async function getPendingCollabInvites(sectorId: string) {
+  const user = await requireAuth();
+  const messages = await db.chatMessage.findMany({
+    where: {
+      type: "COLLAB_INVITE",
+      metadata: {
+        contains: `"sectorId":"${sectorId}"`
+      }
+    },
+    include: { receiver: true }
+  });
+  // deduplicate by receiverId
+  const uniqueUsers = Array.from(new Map(messages.map(m => [m.receiverId, m.receiver])).values());
+  return uniqueUsers;
+}
+
+export async function getSectorOwner(sectorId: string) {
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: { include: { user: true } } }
+  });
+  if (!sector?.station?.user) return null;
+  return {
+    ...sector.station.user,
+    isPublic: sector.station.isPublic
+  };
 }
 
 /** Hapus Sektor beserta semua Beacon di dalamnya */
@@ -173,7 +375,13 @@ export async function createBeacon(sectorId: string, data: BeaconFormData) {
 
   // Validasi sektor milik user
   const sector = await db.sector.findFirst({
-    where: { id: sectorId, station: { userId: user.id } },
+    where: { 
+      id: sectorId, 
+      OR: [
+        { station: { userId: user.id } },
+        { collaborators: { some: { userId: user.id } } }
+      ]
+    },
   });
   if (!sector) {
     return { error: "Sector not found or access denied" };
@@ -206,7 +414,9 @@ export async function createBeacon(sectorId: string, data: BeaconFormData) {
       notes: data.notes?.trim() || null,
       isPinned: data.isPinned ?? false,
       order: newOrder,
+      creatorId: user.id
     },
+    include: { creator: { select: { name: true, image: true } } }
   });
 
   revalidatePath("/station");
@@ -221,7 +431,15 @@ export async function updateBeacon(
   const user = await requireAuth();
 
   const beacon = await db.beacon.findFirst({
-    where: { id: beaconId, sector: { station: { userId: user.id } } },
+    where: { 
+      id: beaconId, 
+      sector: { 
+        OR: [
+          { station: { userId: user.id } },
+          { collaborators: { some: { userId: user.id } } }
+        ]
+      } 
+    },
   });
   if (!beacon) {
     return { error: "Beacon not found or access denied" };
@@ -245,6 +463,7 @@ export async function updateBeacon(
       ...(data.isPinned !== undefined && { isPinned: data.isPinned }),
       ...(data.sectorId !== undefined && { sectorId: data.sectorId }),
     },
+    include: { creator: { select: { name: true, image: true } } }
   });
 
   revalidatePath("/station");
@@ -256,7 +475,15 @@ export async function deleteBeacon(beaconId: string) {
   const user = await requireAuth();
 
   const beacon = await db.beacon.findFirst({
-    where: { id: beaconId, sector: { station: { userId: user.id } } },
+    where: { 
+      id: beaconId, 
+      sector: { 
+        OR: [
+          { station: { userId: user.id } },
+          { collaborators: { some: { userId: user.id } } }
+        ]
+      } 
+    },
   });
   if (!beacon) {
     return { error: "Beacon not found or access denied" };
@@ -273,7 +500,7 @@ export async function incrementBeaconVisit(beaconId: string) {
   // Tidak perlu auth check — ini "public" action untuk track kunjungan
   await db.beacon.update({
     where: { id: beaconId },
-    data: { visitCount: { increment: 1 } },
+    data: { visits: { increment: 1 } },
   });
   return { success: true };
 }
@@ -283,7 +510,15 @@ export async function toggleBeaconPin(beaconId: string) {
   const user = await requireAuth();
 
   const beacon = await db.beacon.findFirst({
-    where: { id: beaconId, sector: { station: { userId: user.id } } },
+    where: { 
+      id: beaconId, 
+      sector: { 
+        OR: [
+          { station: { userId: user.id } },
+          { collaborators: { some: { userId: user.id } } }
+        ]
+      } 
+    },
   });
   if (!beacon) {
     return { error: "Beacon not found or access denied" };
@@ -292,12 +527,12 @@ export async function toggleBeaconPin(beaconId: string) {
   const updated = await db.beacon.update({
     where: { id: beaconId },
     data: { isPinned: !beacon.isPinned },
+    include: { creator: { select: { name: true, image: true } } }
   });
 
   revalidatePath("/station");
   return { data: updated };
 }
-
 /** Update urutan Beacon dalam satu Sektor */
 export async function reorderBeacons(
   sectorId: string,
@@ -305,9 +540,15 @@ export async function reorderBeacons(
 ) {
   const user = await requireAuth();
 
-  // Validasi sektor milik user
+  // Validasi sektor milik user atau kolaborator
   const sector = await db.sector.findFirst({
-    where: { id: sectorId, station: { userId: user.id } },
+    where: { 
+      id: sectorId, 
+      OR: [
+        { station: { userId: user.id } },
+        { collaborators: { some: { userId: user.id } } }
+      ]
+    },
     include: { beacons: { select: { id: true } } },
   });
   if (!sector) {
@@ -526,6 +767,19 @@ export async function sendChatMessage(receiverId: string, content: string) {
   });
   
   return { data: message };
+}
+
+export async function clearChat(friendId: string) {
+  const user = await requireAuth();
+  await db.chatMessage.deleteMany({
+    where: {
+      OR: [
+        { senderId: user.id, receiverId: friendId },
+        { senderId: friendId, receiverId: user.id },
+      ]
+    }
+  });
+  return { success: true };
 }
 
 export async function removeFriend(friendId: string) {

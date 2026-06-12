@@ -19,6 +19,21 @@ type Props = {
 
 export default function StationNavbar({ user, searchQuery, onSearchChange, displayName, hideSearch, hideProfile, onOpenFriends }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
 
 
   return (
@@ -58,7 +73,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, displ
 
       </div>
 
-      <div className="navbar-user" style={{ display: "flex", alignItems: "center" }}>
+              <div className="navbar-user" style={{ display: "flex", alignItems: "center" }} ref={menuRef}>
         {!hideProfile ? (
           user ? (
             <>
@@ -88,9 +103,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, displ
                 )}
               </button>
 
-              {menuOpen && (
-                <>
-                  <div className="navbar-menu-backdrop" onClick={() => setMenuOpen(false)} />
+                {menuOpen && (
                   <div className="navbar-menu">
                     <div className="navbar-menu-user">
                       <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
@@ -120,8 +133,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, displ
                       <ArrowRightOnRectangleIcon width={18} height={18} /> Sign out
                     </button>
                   </div>
-                </>
-              )}
+                )}
             </>
           ) : (
             <Link href="/login" style={{

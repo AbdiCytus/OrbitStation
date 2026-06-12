@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { getMyStation, getMyProfile } from "@/lib/queries";
+import { getMyStation, getMyProfile, getCollabSectors } from "@/lib/queries";
 import StationClient from "./station-client";
 
 export const metadata = {
@@ -12,14 +12,16 @@ export default async function StationPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const [station, profile] = await Promise.all([
+  const [station, profile, collabSectors] = await Promise.all([
     getMyStation(),
     getMyProfile(),
+    getCollabSectors(),
   ]);
 
   return (
     <StationClient
       initialStation={station}
+      initialCollabSectors={collabSectors}
       user={{
         id: session.user.id ?? "",
         name: profile?.name ?? session.user.name ?? null,

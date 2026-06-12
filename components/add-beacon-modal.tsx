@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect, FormEvent } from "react";
 import { createBeacon } from "@/lib/actions";
 import { useMetaFetcher } from "@/hooks/use-meta-fetcher";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import type { Beacon, SectorWithBeacons } from "@/types";
 
 type Props = {
   sectors: SectorWithBeacons[];
-  defaultSectorId?: string;
+  initialSectorId?: string;
   onClose: () => void;
   onCreated: (beacon: Beacon) => void;
 };
@@ -22,13 +23,15 @@ function normalizeUrl(raw: string): string {
   return `https://${trimmed}`;
 }
 
-export default function AddBeaconModal({ sectors, defaultSectorId, onClose, onCreated }: Props) {
-  const [sectorId, setSectorId] = useState(defaultSectorId ?? sectors[0]?.id ?? "");
+export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCreated }: Props) {
+  const [sectorId, setSectorId] = useState(initialSectorId ?? sectors[0]?.id ?? "");
   const [urlRaw, setUrlRaw] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [customImageUrl, setCustomImageUrl] = useState("");
   const [customFaviconUrl, setCustomFaviconUrl] = useState("");
+  
+  const [isSectorDropdownOpen, setIsSectorDropdownOpen] = useState(false);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -147,22 +150,37 @@ export default function AddBeaconModal({ sectors, defaultSectorId, onClose, onCr
 
         <form onSubmit={handleSubmit} className="modal-form-grid">
           <div className="modal-col">
-            {/* Sector selector */}
             <div className="form-group">
               <label className="form-label" htmlFor="beacon-sector">Sector</label>
-              <select
-                id="beacon-sector"
-                className="input"
-                value={sectorId}
-                onChange={(e) => setSectorId(e.target.value)}
-                required
-              >
-                {sectors.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+              <div style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  id="beacon-sector"
+                  className="input"
+                  style={{ textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", ...(initialSectorId ? { backgroundColor: "rgba(15, 15, 25, 0.4)", color: "#a1a1aa", cursor: "not-allowed", opacity: 0.8 } : {}) }}
+                  onClick={() => !initialSectorId && setIsSectorDropdownOpen(!isSectorDropdownOpen)}
+                >
+                  {sectors.find(s => s.id === sectorId)?.name || "Select a sector"}
+                  <ChevronDownIcon width={16} height={16} style={{ color: "var(--color-comet)", transition: "transform 0.2s", transform: isSectorDropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }} />
+                </button>
+                {isSectorDropdownOpen && (
+                  <>
+                    <div style={{ position: "fixed", inset: 0, zIndex: 90 }} onClick={() => setIsSectorDropdownOpen(false)} />
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", zIndex: 100, overflow: "hidden", overflowY: "auto", maxHeight: "200px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+                      {sectors.map((s) => (
+                        <div
+                          key={s.id}
+                          className="dropdown-option-btn hover:bg-white/5"
+                          style={{ padding: "0.6rem 1rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
+                          onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
+                        >
+                          {s.name}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* URL with auto-prefix */}

@@ -23,6 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
+import MouseTrail from "@/components/mouse-trail";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,7 +40,10 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <MouseTrail />
+        {children}
+      </body>
     </html>
   );
 }

@@ -350,6 +350,13 @@ code, kbd, pre {
   background: rgba(17, 24, 39, 1);
 }
 
+.input option {
+  background: #111827; /* Fallback */
+  background: var(--color-nebula);
+  color: var(--color-starlight);
+  padding: 8px;
+}
+
 /* --- Cards --- */
 .card {
   background: var(--color-cosmos);
@@ -357,12 +364,15 @@ code, kbd, pre {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   transition: all var(--transition-base);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 .card:hover {
   border-color: var(--color-border-hover);
   box-shadow: var(--shadow-card), var(--glow-violet);
-  transform: translateY(-2px);
+  transform: translate3d(0, -2px, 0);
 }
 
 /* --- Badge / Chip --- */

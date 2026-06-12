@@ -27,6 +27,7 @@ export type BeaconWithSector = Beacon & {
 /** Sektor dengan semua Beacon di dalamnya */
 export type SectorWithBeacons = Sector & {
   beacons: Beacon[];
+  collaborators?: { user: { id: string; name: string | null; image: string | null; username?: string | null } }[];
 };
 
 /** Station lengkap dengan semua Sektor dan Beacon (untuk dasbor) */

@@ -18,7 +18,7 @@ import {
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
 type Props = {
-  beacon: Beacon;
+  beacon: Beacon & { _creator?: { name: string | null; image: string | null } | null };
   sector: SectorWithBeacons | null;
   onClose: () => void;
   onDeleted?: (id: string) => void;
@@ -179,15 +179,17 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                       {subroute}
                     </div>
                   )}
-                  <button
-                    className={`hsr-action-btn ${isPinned ? "hsr-action-btn--active" : ""}`}
-                    onClick={handleTogglePin}
-                    title={isPinned ? "Unpin" : "Pin beacon"}
-                    id={`btn-pin-${beacon.id}`}
-                  >
-                    <span>{isPinned ? <MapPinSolid width={16} height={16} /> : <MapPinIcon width={16} height={16} />}</span>
-                    <span className="hsr-action-label">{isPinned ? "Pinned" : "Pin"}</span>
-                  </button>
+                  {(!sector || sector.isPublic) && (
+                    <button
+                      className={`hsr-action-btn ${isPinned ? "hsr-action-btn--active" : ""}`}
+                      onClick={handleTogglePin}
+                      title={isPinned ? "Unpin" : "Pin beacon"}
+                      id={`btn-pin-${beacon.id}`}
+                    >
+                      <span>{isPinned ? <MapPinSolid width={16} height={16} /> : <MapPinIcon width={16} height={16} />}</span>
+                      <span className="hsr-action-label">{isPinned ? "Pinned" : "Pin"}</span>
+                    </button>
+                  )}
                   <button
                     className="hsr-action-btn hsr-action-btn--danger"
                     onClick={() => setConfirmDelete(true)}
@@ -301,13 +303,22 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               <div className="hsr-stat-row">
                 <span className="hsr-stat-icon"><EyeIcon width={16} height={16} /></span>
                 <span className="hsr-stat-key">Total Visits</span>
-                <span className="hsr-stat-val">{beacon.visitCount}</span>
+                <span className="hsr-stat-val">{beacon.visits ?? 0}</span>
               </div>
               <div className="hsr-stat-row">
                 <span className="hsr-stat-icon"><CalendarIcon width={16} height={16} /></span>
                 <span className="hsr-stat-key">Logged</span>
                 <span className="hsr-stat-val">{addedDate}</span>
               </div>
+              {beacon._creator && (
+                <div className="hsr-stat-row">
+                  <span className="hsr-stat-icon" style={{ borderRadius: "50%", overflow: "hidden", width: 16, height: 16, background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyItems: "center" }}>
+                    {beacon._creator.image ? <img src={beacon._creator.image} alt="" style={{ width: 16, height: 16, objectFit: "cover" }} /> : <span style={{ fontSize: "10px", width: "100%", textAlign: "center" }}>{(beacon._creator.name || "?")[0].toUpperCase()}</span>}
+                  </span>
+                  <span className="hsr-stat-key">Added by</span>
+                  <span className="hsr-stat-val">{beacon._creator.name}</span>
+                </div>
+              )}
             </div>
 
             <div className="hsr-divider" />
