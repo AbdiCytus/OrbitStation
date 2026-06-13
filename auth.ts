@@ -39,7 +39,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   events: {
     async createUser({ user }) {
-      if (!user.username) {
+      if (!(user as any).username) {
         let isUnique = false;
         let generatedUsername = "";
         while (!isUnique) {

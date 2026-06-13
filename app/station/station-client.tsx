@@ -16,7 +16,7 @@ import StaticStarfield from "@/components/static-starfield";
 import { deleteSector } from "@/lib/actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { 
-  PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon 
+  PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -56,11 +56,21 @@ export default function StationClient({ initialStation, initialCollabSectors = [
     }
   }, [isEntering, displaySectorId]);
 
-  const handleTabClick = useCallback((newId: string | "all") => {
-    if (newId === displaySectorId || isExiting) return;
-    setActiveSectorId(newId);
+  const handleTabClick = (sectorId: string | "all") => {
+    setActiveSectorId(sectorId);
+    if (sectorId !== "all") {
+      setFilterVisibility("all");
+      setSearchQuery("");
+      setLocalSearchQuery("");
+    }
+    // Auto-close sidebar on mobile after navigating
+    if (window.innerWidth <= 768) {
+      setIsSidebarOpen(false);
+    }
+    
+    if (sectorId === displaySectorId || isExiting) return;
     if (!user.animationEnabled) {
-      setDisplaySectorId(newId);
+      setDisplaySectorId(sectorId);
       return;
     }
     setIsExiting(true);
@@ -74,11 +84,12 @@ export default function StationClient({ initialStation, initialCollabSectors = [
     }
 
     setTimeout(() => {
-      setDisplaySectorId(newId);
+      setDisplaySectorId(sectorId);
       setIsExiting(false);
       setIsEntering(true);
     }, delay);
-  }, [displaySectorId, isExiting, user.animationEnabled]);
+  };
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -116,6 +127,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const [showAddBeacon, setShowAddBeacon] = useState(false);
   const [showAddSector, setShowAddSector] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingSector, setEditingSector] = useState<SectorWithBeacons | null>(null);
   const [viewingMembersSector, setViewingMembersSector] = useState<SectorWithBeacons | null>(null);
   const [, startTransition] = useTransition();
@@ -176,10 +188,10 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const [cols, setCols] = useState(6);
   useEffect(() => {
     const updateCols = () => {
-      if (window.innerWidth <= 480) setCols(1);
-      else if (window.innerWidth <= 768) setCols(2);
+      if (window.innerWidth <= 640) setCols(1);
+      else if (window.innerWidth <= 840) setCols(2);
       else if (window.innerWidth <= 1024) setCols(3);
-      else if (window.innerWidth <= 1400) setCols(4);
+      else if (window.innerWidth <= 1200) setCols(4);
       else setCols(6);
     };
     updateCols();
@@ -380,9 +392,43 @@ export default function StationClient({ initialStation, initialCollabSectors = [
         stats={stats}
       />
 
+      {/* Mobile Sidebar Toggle Button */}
+      {!(showAddSector || showAddBeacon || !!editingSector || !!editingBeacon || !!selectedBeacon || showFriendsModal || !!viewingMembersSector) && (
+        <div 
+          className="mobile-only"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        style={{
+           position: 'fixed',
+           left: isSidebarOpen ? '260px' : '0',
+           top: '50%',
+           transform: 'translateY(-50%)',
+           zIndex: 101, // Above backdrop
+           background: 'rgba(20, 20, 30, 0.95)',
+           border: '1px solid var(--border-subtle)',
+           borderLeft: 'none',
+           borderRadius: '0 8px 8px 0',
+           padding: '0.75rem 0.5rem',
+           display: 'flex',
+           flexDirection: 'row',
+           alignItems: 'center',
+           gap: '0.25rem',
+           transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+           cursor: 'pointer',
+           boxShadow: '4px 0 12px rgba(0,0,0,0.5)'
+        }}
+      >
+        {isSidebarOpen ? <ChevronLeftIcon width={16} height={16} /> : <ChevronRightIcon width={16} height={16} />}
+      </div>
+      )}
+
       <div className="station-layout">
+        <div 
+          className={`sidebar-backdrop mobile-only ${isSidebarOpen ? "open" : ""}`} 
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        />
         {/* Sidebar */}
-        <aside className="station-sidebar glass">
+        <aside className={`station-sidebar glass ${isSidebarOpen ? "open" : ""}`}>
           <div className="sidebar-header">
             <span className="sidebar-label">Sectors</span>
             <button
@@ -423,7 +469,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                     {sector.name}
                   </span>
                   <div
-                    className="sector-tab-edit-btn"
+                    className="sector-tab-edit-btn hidden md:flex"
                     onClick={(e) => { e.stopPropagation(); setEditingSector(sector); }}
                     title="Edit sector"
                     aria-label={`Edit ${sector.name}`}
@@ -435,14 +481,14 @@ export default function StationClient({ initialStation, initialCollabSectors = [
             ))}
 
             {allCollabSectors.length > 0 && (
-              <div style={{ marginTop: "1.5rem" }}>
-                <span className="sidebar-label" style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--color-starlight)" }}>
+              <>
+                <div className="sidebar-label" style={{ marginTop: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--color-starlight)" }}>
                   <DynamicIcon name="UsersIcon" width={14} height={14} /> Collab Sectors
-                </span>
+                </div>
                 {allCollabSectors.map((sector) => {
                   const isOwner = sector.stationId === station?.id;
                   return (
-                    <div key={sector.id} className="sector-tab-wrapper" style={{ marginTop: "0.5rem" }}>
+                    <div key={sector.id} className="sector-tab-wrapper collab-sector-tab">
                       <button
                         id={`tab-sector-${sector.id}`}
                         className={`sector-tab group ${activeSectorId === sector.id ? "active" : ""}`}
@@ -463,9 +509,9 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                                 <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5ZM19 19C19 19.5523 18.5523 20 18 20H6C5.44772 20 5 19.5523 5 19V18H19V19Z" />
                               </svg>
                             </div>
-                            {/* Edit Button (visible when hovered) */}
+                            {/* Edit Button (visible when hovered on desktop, hidden on mobile) */}
                             <div
-                              className="absolute inset-0 flex items-center justify-center text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-white/10 rounded-md"
+                              className="absolute inset-0 items-center justify-center text-gray-400 hover:text-white opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-white/10 rounded-md hidden md:flex"
                               onClick={(e) => { e.stopPropagation(); setEditingSector(sector); }}
                               title="Edit sector"
                               aria-label={`Edit ${sector.name}`}
@@ -477,7 +523,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                         {!isOwner && (
                           <div className="relative w-6 h-6 flex items-center justify-center shrink-0 ml-1">
                             <div
-                              className="absolute inset-0 flex items-center justify-center text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-white/10 rounded-md"
+                              className="absolute inset-0 flex items-center justify-center text-gray-400 hover:text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-white/10 rounded-md"
                               onClick={(e) => { e.stopPropagation(); setViewingMembersSector(sector); }}
                               title="View Members"
                               aria-label={`View Members of ${sector.name}`}
@@ -490,19 +536,28 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                     </div>
                   );
                 })}
-              </div>
+              </>
             )}
           </nav>
         </aside>
 
-        {/* Main */}
         <main className="station-main">
           <div className="station-section-header">
             <div>
-              <h2 className="station-section-title">
+              <h2 className="station-section-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 {displaySectorId === "all"
                   ? "All Beacons"
-                  : <><DynamicIcon name={activeSector?.icon} style={{ display: "inline-block", verticalAlign: "middle", marginRight: "0.25rem", width: "24px", height: "24px" }} /> {activeSector?.name ?? ""} {activeSector && !activeSector.isPublic && <LockClosedIcon width={20} height={20} style={{ display: "inline-block", verticalAlign: "middle", marginLeft: "0.5rem", opacity: 0.5 }} title="Private Sector" />}</>}
+                  : <><DynamicIcon name={activeSector?.icon} style={{ display: "inline-block", verticalAlign: "middle", width: "24px", height: "24px" }} /> {activeSector?.name ?? ""} {activeSector && !activeSector.isPublic && <LockClosedIcon width={20} height={20} style={{ display: "inline-block", verticalAlign: "middle", opacity: 0.5 }} title="Private Sector" />}</>}
+                {displaySectorId !== "all" && activeSector && activeSector.stationId === station?.id && (
+                  <button
+                    onClick={() => setEditingSector(activeSector)}
+                    className="btn-icon mobile-only"
+                    style={{ opacity: 0.7, padding: 0, width: "32px", height: "32px" }}
+                    title="Edit Sector"
+                  >
+                    <PencilSquareIcon width={20} height={20} />
+                  </button>
+                )}
               </h2>
               <p className="station-section-sub">
                 {visibleBeacons.length} beacon{visibleBeacons.length !== 1 ? "s" : ""}

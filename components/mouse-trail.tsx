@@ -14,7 +14,10 @@ export default function MouseTrail() {
   const smoothY = useSpring(mouseY, springConfig);
 
   useEffect(() => {
-    setIsClient(true);
+    // Only enable on devices with a fine pointer (like a mouse)
+    if (window.matchMedia("(pointer: fine)").matches) {
+      setIsClient(true);
+    }
     const updateMousePosition = (e: MouseEvent) => {
       mouseX.set(e.clientX - 150);
       mouseY.set(e.clientY - 150);

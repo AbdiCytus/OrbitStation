@@ -5,6 +5,7 @@ import { createSector, getFriends } from "@/lib/actions";
 import type { SectorWithBeacons, Beacon } from "@/types";
 import { toast } from "sonner";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 
 type Props = {
   onClose: () => void;
@@ -31,9 +32,18 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   const [error, setError] = useState<string | null>(null);
+  const [mobilePage, setMobilePage] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     getFriends().then(setFriends);
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -70,10 +80,18 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form" style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", gap: "2rem", flexDirection: "row" }}>
+        <form onSubmit={handleSubmit} className="modal-form" style={{ display: "flex", flexDirection: "column", overflowX: isMobile ? "hidden" : "visible", padding: isMobile ? "1.25rem 0 1.5rem" : undefined }}>
+          <div style={{ 
+            display: "flex", 
+            gap: isMobile ? "0" : "2rem", 
+            flexDirection: "row",
+            transform: isMobile ? `translateX(-${mobilePage * 100}%)` : "none",
+            transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            width: isMobile ? "100%" : "auto",
+            paddingBottom: isMobile ? "0" : "60px"
+          }}>
           {/* Left Section */}
-          <div style={{ flex: 1, minWidth: "250px", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ flex: isMobile ? "0 0 100%" : 1, width: isMobile ? "100%" : "auto", padding: isMobile ? "0 1.5rem" : 0, minWidth: isMobile ? "100%" : "250px", display: "flex", flexDirection: "column", gap: "1rem" }}>
           {/* Name */}
           <div className="form-group">
             <label className="form-label" htmlFor="sector-name">Sector Name</label>
@@ -129,7 +147,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
           </div>
 
           {/* Right Section */}
-          <div style={{ flex: 1, minWidth: "250px", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ flex: isMobile ? "0 0 100%" : 1, width: isMobile ? "100%" : "auto", padding: isMobile ? "0 1.5rem" : 0, minWidth: isMobile ? "100%" : "250px", display: "flex", flexDirection: "column", gap: "1rem" }}>
             {/* Visibility toggle */}
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Visibility</label>
@@ -162,7 +180,10 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                     type="button" 
                     className="btn btn-secondary" 
                     style={{ width: "100%", justifyContent: "center", borderStyle: "dashed" }}
-                    onClick={() => setShowInvite(!showInvite)}
+                    onClick={() => {
+                      setShowInvite(!showInvite);
+                      if (!showInvite && isMobile) setMobilePage(2);
+                    }}
                   >
                     <DynamicIcon name="UserPlusIcon" width={18} height={18} /> {showInvite ? "Hide Invite Friends" : "Invite Friends to Collaborate"}
                   </button>
@@ -183,29 +204,93 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                 )}
               </div>
             </div>
-            </div>
           </div>
 
-          {error && <p className="form-error">{error}</p>}
+          {/* Mobile Expanded Invite Panel (Rendered inline on mobile) */}
+          {isMobile && showInvite && !isPublic && (
+            <div style={{ flex: "0 0 100%", width: "100%", padding: "0 1.5rem", minWidth: "100%" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem", height: "100%" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ fontSize: "1rem", fontWeight: 600, color: "var(--color-starlight)" }}>Invite Friends</h3>
+                </div>
+                <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>
+                  <label className="form-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span>Select Friends</span>
+                    <span style={{ fontSize: "0.8rem", color: "var(--color-violet-glow)" }}>{invitedFriends.length} selected</span>
+                  </label>
+                  <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "40vh" }}>
+                  {friends.length === 0 ? (
+                    <p className="text-gray-400 text-sm m-auto text-center" style={{ padding: "2rem 0" }}>You have no friends to invite yet.</p>
+                  ) : (
+                    friends.map(f => (
+                      <label 
+                        key={f.id} 
+                        className="flex items-center rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group" 
+                        style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                      >
+                        <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                          {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-300 truncate">{f.name || f.username}</p>
+                        </div>
+                        <div className="flex items-center justify-center rounded-full border transition-colors" style={{ width: "20px", height: "20px", borderColor: invitedFriends.includes(f.id) ? "#a78bfa" : "rgba(255,255,255,0.1)", background: invitedFriends.includes(f.id) ? "#a78bfa" : "transparent" }}>
+                          {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "white" }} />}
+                        </div>
+                        <input
+                          type="checkbox"
+                          className="hidden"
+                          checked={invitedFriends.includes(f.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setInvitedFriends(p => [...p, f.id]);
+                            else setInvitedFriends(p => p.filter(id => id !== f.id));
+                          }}
+                        />
+                      </label>
+                    ))
+                  )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-          <div className="modal-actions" style={{ flexWrap: "wrap", marginTop: "1.5rem", display: "flex", alignItems: "center" }}>
-            <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
-            <div style={{ flex: 1 }} />
-            <button
-              id="btn-create-sector"
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? <span className="spinner" /> : "Create Sector"}
-            </button>
+          </div>
+
+          {error && <p className="form-error" style={{ margin: "1rem 1.5rem 0" }}>{error}</p>}
+          <div className="modal-actions" style={{ 
+            padding: isMobile ? "1.5rem" : "0", 
+            position: isMobile ? "relative" : "absolute",
+            bottom: isMobile ? "auto" : "1.5rem",
+            left: isMobile ? "auto" : "1.5rem",
+            right: isMobile ? "auto" : "1.5rem",
+            display: "flex", 
+            flexDirection: "column", 
+            gap: "1rem" 
+          }}>
+            {isMobile && (
+              <div style={{ display: "flex", justifyContent: "space-between", width: "100%", padding: "0 0.5rem" }}>
+                <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.max(0, p - 1))} disabled={mobilePage === 0} style={{ width: "44px", height: "44px", background: "var(--color-violet-glow)", opacity: mobilePage === 0 ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
+                  <span style={{ marginTop: "1px", marginLeft: "-2px" }}>{"◀"}</span>
+                </button>
+                <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.min((showInvite && !isPublic) ? 2 : 1, p + 1))} disabled={mobilePage === ((showInvite && !isPublic) ? 2 : 1)} style={{ width: "44px", height: "44px", background: "var(--color-violet-glow)", opacity: mobilePage === ((showInvite && !isPublic) ? 2 : 1) ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
+                  <span style={{ marginTop: "1px", marginLeft: "2px" }}>{"▶"}</span>
+                </button>
+              </div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+              <button type="button" className="btn btn-secondary" onClick={handleClose} style={{ minWidth: "100px" }}>Cancel</button>
+              <button id="btn-create-sector" type="submit" className="btn btn-primary" disabled={loading} style={{ minWidth: "120px" }}>
+                {loading ? <span className="spinner" /> : "Create Sector"}
+              </button>
+            </div>
           </div>
         </form>
       </motion.div>
 
       {/* SECOND PANEL */}
       <AnimatePresence>
-        {showInvite && !isPublic && (
+        {!isMobile && showInvite && !isPublic && (
           <motion.div 
             className={`modal-panel ${isClosing ? "closing" : ""} glass`} 
             style={{ maxWidth: "400px", margin: 0, display: "flex", flexDirection: "column", animation: isClosing ? undefined : "none", overflow: "hidden" }}

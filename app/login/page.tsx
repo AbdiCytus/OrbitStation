@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LinkIcon, KeyIcon, RocketLaunchIcon } from "@heroicons/react/20/solid";
 
@@ -16,6 +16,18 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [stars, setStars] = useState<{ id: number; left: number; top: number; delay: number; size: number }[]>([]);
+
+  useEffect(() => {
+    const generatedStars = Array.from({ length: 60 }).map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      delay: Math.random() * 4,
+      size: Math.random() * 2 + 1,
+    }));
+    setStars(generatedStars);
+  }, []);
 
   async function handleOAuth(provider: "github" | "google") {
     setLoadingProvider(provider);
@@ -74,13 +86,13 @@ export default function LoginPage() {
     <main className="login-page">
       {/* Starfield background */}
       <div className="starfield" aria-hidden="true">
-        {Array.from({ length: 60 }).map((_, i) => (
-          <div key={i} className="star" style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 4}s`,
-            width: `${Math.random() * 2 + 1}px`,
-            height: `${Math.random() * 2 + 1}px`,
+        {stars.map((star) => (
+          <div key={star.id} className="star" style={{
+            left: `${star.left}%`,
+            top: `${star.top}%`,
+            animationDelay: `${star.delay}s`,
+            width: `${star.size}px`,
+            height: `${star.size}px`,
           }} />
         ))}
       </div>

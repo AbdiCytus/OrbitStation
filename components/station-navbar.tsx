@@ -4,7 +4,7 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
@@ -39,11 +39,13 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, displ
 
   return (
     <header className="station-navbar glass-nav">
-      {/* Logo */}
-      <Link href="/station" className="navbar-logo">
-        <span className="navbar-logo-icon">⊕</span>
-        <span className="navbar-logo-text text-gradient">Orbit Station</span>
-      </Link>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        {/* Logo */}
+        <Link href="/station" className="navbar-logo">
+          <span className="navbar-logo-icon">⊕</span>
+          <span className="navbar-logo-text text-gradient">Orbit Station</span>
+        </Link>
+      </div>
 
       <div style={{ display: "flex", flex: 1, justifyContent: "center", gap: "1rem", margin: "0 1rem" }}>
         {/* Search */}

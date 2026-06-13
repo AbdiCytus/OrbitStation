@@ -67,7 +67,7 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0 }: Props
 
       {/* Content */}
       <div className="beacon-card-body">
-        <div className="beacon-card-meta" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+        <div className="beacon-card-meta">
           <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
             {beacon.faviconUrl && (
               <img
@@ -101,7 +101,7 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0 }: Props
       </div>
 
       {/* Footer */}
-      <div className="beacon-card-footer" style={{ display: "flex", gap: "0.5rem", padding: "0.625rem" }}>
+      <div className="beacon-card-footer">
         {onEdit && (
           <button
             className="btn-icon beacon-card-edit-btn"

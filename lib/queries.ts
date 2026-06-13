@@ -137,7 +137,7 @@ export async function getPinnedBeacons(userId: string) {
       isPinned: true,
       sector: { station: { userId } },
     },
-    orderBy: { visitCount: "desc" },
+    orderBy: { visits: "desc" },
     take: 6, // Maksimal 6 beacon yang ditampilkan di profil
     include: {
       sector: { select: { name: true, color: true } },

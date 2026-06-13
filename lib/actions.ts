@@ -181,7 +181,7 @@ export async function sendTransferOwnershipInvite(sectorId: string, newOwnerId: 
 
   await db.chatMessage.create({
     data: {
-      senderId: user.id,
+      senderId: user.id!,
       receiverId: newOwnerId,
       content: `wants to transfer ownership of sector`,
       type: "OWNERSHIP_TRANSFER_INVITE",
@@ -691,13 +691,13 @@ export async function sendFriendRequest(receiverId: string) {
     // If REJECTED, we could update it back to PENDING. Let's do that.
     const updated = await db.friendship.update({
       where: { id: existing.id },
-      data: { status: "PENDING", requesterId: user.id, receiverId }
+      data: { status: "PENDING", requesterId: user.id!, receiverId }
     });
     return { data: updated };
   }
 
   const friendship = await db.friendship.create({
-    data: { requesterId: user.id, receiverId, status: "PENDING" }
+    data: { requesterId: user.id!, receiverId, status: "PENDING" }
   });
   return { data: friendship };
 }
@@ -760,7 +760,7 @@ export async function sendChatMessage(receiverId: string, content: string) {
 
   const message = await db.chatMessage.create({
     data: {
-      senderId: user.id,
+      senderId: user.id!,
       receiverId,
       content: content.trim()
     }

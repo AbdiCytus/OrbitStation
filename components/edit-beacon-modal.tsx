@@ -6,6 +6,7 @@ import { useMetaFetcher } from "@/hooks/use-meta-fetcher";
 import type { Beacon, SectorWithBeacons } from "@/types";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { toast } from "sonner";
+import { DynamicIcon } from "@/components/dynamic-icon";
 
 type Props = {
   beacon: Beacon;
@@ -27,7 +28,6 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{url?: string, title?: string}>({});
 
@@ -320,32 +320,20 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
 
       <div className="modal-actions" style={{ padding: "0 1.5rem 1.5rem" }}>
         {error && <p className="form-error" style={{ marginRight: "auto" }}>{error}</p>}
-        {confirmDelete ? (
-          <>
-            <span className="form-error" style={{ flex: 1, textAlign: "right" }}>Delete this beacon permanently?</span>
-            <button type="button" className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>Cancel</button>
-            <button type="button" className="btn btn-danger" onClick={handleDelete}>Delete</button>
-          </>
-        ) : (
-          <>
-            <button type="button" className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
-              Delete Beacon
-            </button>
-            <div style={{ flex: 1 }} />
-            <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
-            <button
-              id="btn-save-beacon"
-              type="button"
-              onClick={handleSave}
-              className="btn btn-primary"
-              disabled={loading}
-            >
+        <div style={{ display: "flex", gap: "0.75rem", marginLeft: "auto" }}>
+          <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
+          <button
+            id="btn-save-beacon"
+            type="button"
+            onClick={handleSave}
+            className="btn btn-primary"
+            disabled={loading}
+          >
               {loading ? <span className="spinner" /> : "Save Changes"}
             </button>
-          </>
-        )}
+        </div>
       </div>
-    </div>
+      </div>
     </div>
   );
 }

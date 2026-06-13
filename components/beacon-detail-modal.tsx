@@ -33,7 +33,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
   const cardRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
 
@@ -82,7 +82,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   function handleTogglePin() {
     const newVal = !isPinned;
     setIsPinned(newVal);
-    onUpdated({ ...beacon, isPinned: newVal });
+    if (onUpdated) onUpdated({ ...beacon, isPinned: newVal });
     startTransition(async () => { await toggleBeaconPin(beacon.id); });
   }
   function handleDelete() {
@@ -92,7 +92,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     startTransition(async () => {
       const result = await deleteBeacon(beacon.id);
       if (!result.error) {
-        onDeleted(beacon.id);
+        if (onDeleted) onDeleted(beacon.id);
         handleClose();
       }
     });
@@ -119,7 +119,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   });
 
   // "rarity" stars based on visit count (cosmetic)
-  const starCount = Math.min(5, Math.max(1, Math.ceil(beacon.visitCount / 5) || 1));
+  const starCount = Math.min(5, Math.max(1, Math.ceil(beacon.visits / 5) || 1));
 
   return (
     <div className={"hsr-overlay" + (isClosing ? " closing" : "")} onClick={handleClose} role="dialog" aria-modal="true" aria-label={beacon.title}>

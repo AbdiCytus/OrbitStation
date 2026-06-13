@@ -170,10 +170,10 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
     setMessages([]);
     setShowClearConfirm(false);
     const res = await clearChat(activeChatId);
-    if (!res.error) {
-      toast.success("Chat cleared");
-    } else {
+    if ((res as any).error) {
       toast.error("Failed to clear chat");
+    } else {
+      toast.success("Chat cleared");
     }
   };
 
@@ -658,16 +658,16 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                                       onClick={async () => {
                                         if (msg.type === "COLLAB_INVITE") {
                                           const res = await rejectCollab(msg.id);
-                                          if (!res?.error) {
+                                          if (!(res as any)?.error) {
                                             toast.success("Collab invite rejected");
                                             setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_REJECTED", content: "rejected the sector collaboration" } : m));
-                                          } else toast.error(res.error);
+                                          } else toast.error((res as any).error);
                                         } else {
                                           const res = await rejectTransferOwnership(msg.id);
-                                          if (!res?.error) {
+                                          if (!(res as any)?.error) {
                                             toast.success("Ownership transfer rejected");
                                             setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_REJECTED", content: "rejected the ownership transfer" } : m));
-                                          } else toast.error(res.error);
+                                          } else toast.error((res as any).error);
                                         }
                                       }}
                                       className="flex-1 bg-white/10 hover:bg-pink-500/80 text-white rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
@@ -681,16 +681,16 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                                           if (msg.type === "COLLAB_INVITE") {
                                             const meta = JSON.parse(msg.metadata);
                                             const res = await acceptCollab(msg.id, meta.sectorId);
-                                            if (!res?.error) {
+                                            if (!(res as any)?.error) {
                                               toast.success("Collab invite accepted");
                                               setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_ACCEPTED", content: "accepted the sector collaboration" } : m));
-                                            } else toast.error(res.error);
+                                            } else toast.error((res as any).error);
                                           } else {
                                             const res = await acceptTransferOwnership(msg.id);
-                                            if (!res?.error) {
+                                            if (!(res as any)?.error) {
                                               toast.success("Ownership transfer accepted");
                                               setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_ACCEPTED", content: "accepted the ownership transfer" } : m));
-                                            } else toast.error(res.error);
+                                            } else toast.error((res as any).error);
                                           }
                                         } catch (e) {}
                                       }}
