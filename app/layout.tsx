@@ -2,24 +2,38 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
     default: "Orbit Station",
     template: "%s — Orbit Station",
   },
   description:
     "Your personal web portal in the stars. Organize, navigate, and share your favorite web destinations from one command center.",
-  keywords: ["web portal", "bookmark manager", "link shortcut", "orbit station"],
+  keywords: ["web portal", "bookmark manager", "link shortcut", "orbit station", "productivity"],
   authors: [{ name: "Orbit Station" }],
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
     title: "Orbit Station",
     description: "Your personal web portal in the stars.",
     type: "website",
     siteName: "Orbit Station",
+    images: [
+      {
+        url: "/api/og?name=Orbit+Station",
+        width: 1200,
+        height: 630,
+        alt: "Orbit Station - Your Personal Web Portal",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Orbit Station",
     description: "Your personal web portal in the stars.",
+    images: ["/api/og?name=Orbit+Station"],
   },
 };
 

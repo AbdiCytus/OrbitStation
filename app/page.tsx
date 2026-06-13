@@ -9,6 +9,15 @@ export const metadata: Metadata = {
   title: "Orbit Station — Your Personal Web Portal in the Stars",
   description:
     "Organize your favorite web shortcuts into Sectors. Access them anytime from your personal Station.",
+  openGraph: {
+    title: "Orbit Station — Your Personal Web Portal",
+    description: "Organize your favorite web shortcuts into Sectors. Access them anytime from your personal Station.",
+    url: "/",
+  },
+  twitter: {
+    title: "Orbit Station — Your Personal Web Portal",
+    description: "Organize your favorite web shortcuts into Sectors. Access them anytime from your personal Station.",
+  },
 };
 
 export default async function HomePage() {

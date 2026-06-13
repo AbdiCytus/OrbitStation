@@ -26,12 +26,14 @@ export async function generateMetadata({
   const allBeaconsCount = data.station.sectors.reduce((acc, s) => acc + s.beacons.length, 0);
   const statsStr = `${data.station.sectors.length} Sectors · ${allBeaconsCount} Beacons`;
   
-  const ogUrl = new URL(`https://orbit-station.vercel.app/api/og`); // Replace with your actual domain later
-  ogUrl.searchParams.set("name", data.user.name ?? username);
-  ogUrl.searchParams.set("username", username);
-  if (data.user.bio) ogUrl.searchParams.set("bio", data.user.bio);
-  ogUrl.searchParams.set("stats", statsStr);
-  if (data.user.image) ogUrl.searchParams.set("avatar", data.user.image);
+  const searchParams = new URLSearchParams();
+  searchParams.set("name", data.user.name ?? username);
+  searchParams.set("username", username);
+  if (data.user.bio) searchParams.set("bio", data.user.bio);
+  searchParams.set("stats", statsStr);
+  if (data.user.image) searchParams.set("avatar", data.user.image);
+  
+  const ogImageRoute = `/api/og?${searchParams.toString()}`;
 
   return {
     title: `${data.user.name ?? username}'s Station — Orbit Station`,
@@ -39,14 +41,15 @@ export async function generateMetadata({
     openGraph: {
       title: `${data.user.name ?? username}'s Orbit Station`,
       description: data.user.bio ?? undefined,
-      images: [ogUrl.toString()],
+      images: [ogImageRoute],
       type: "profile",
+      url: `/station/${username}`,
     },
     twitter: {
       card: "summary_large_image",
       title: `${data.user.name ?? username}'s Orbit Station`,
       description: data.user.bio ?? undefined,
-      images: [ogUrl.toString()],
+      images: [ogImageRoute],
     },
   };
 }
