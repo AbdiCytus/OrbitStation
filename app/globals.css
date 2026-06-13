@@ -1589,13 +1589,13 @@ code, kbd, pre {
 .hsr-stat-icon { font-size: 0.875rem; width: 20px; text-align: center; flex-shrink: 0; }
 .hsr-stat-key {
   flex: 1;
-  font-size: 0.8125rem;
-  color: rgba(154,165,196,0.75);
+  font-size: 0.75rem;
+  color: rgba(154, 165, 196, 0.6);
 }
 .hsr-stat-val {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #f0f4ff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(240, 244, 255, 0.7);
   text-align: right;
 }
 .hsr-stat-url {
@@ -1615,6 +1615,14 @@ code, kbd, pre {
   align-items: center;
   gap: 0.375rem;
 }
+.hsr-notes-display {
+  font-size: 0.75rem;
+  color: rgba(229, 231, 235, 0.6);
+  font-style: italic;
+  line-height: 1.5;
+}
+.hsr-notes-display::before { content: '"'; }
+.hsr-notes-display::after { content: '"'; }
 .hsr-ability-icon {
   color: var(--color-violet-glow, #7c5cfc);
   font-size: 0.75rem;
@@ -1697,21 +1705,72 @@ code, kbd, pre {
     max-height: 95dvh;
   }
   .hsr-content {
-    flex-direction: column;
-    padding: 1.25rem;
-    gap: 1.5rem;
-    overflow-y: auto;
+    display: grid !important;
+    grid-template-columns: 120px 1fr !important;
+    grid-auto-rows: min-content !important;
+    padding: 1.25rem !important;
+    gap: 0.5rem 1.75rem !important;
+    overflow-y: auto !important;
   }
-  .hsr-left {
-    width: 100%;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 1.25rem;
+  .hsr-left, .hsr-right {
+    display: contents !important;
   }
-  .hsr-card { width: 120px; height: 168px; }
+  .hsr-card { 
+    grid-column: 1 !important;
+    grid-row: 1 / span 3 !important;
+    width: 120px !important; 
+    height: 168px !important; 
+  }
+  .hsr-domain-pill {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    margin-top: -6px !important;
+    align-self: start !important;
+  }
+  .hsr-ability {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    margin: 0 !important;
+    height: 100% !important;
+    max-height: 130px !important; /* Limit height so it doesn't push down past the card */
+    overflow: hidden !important;
+  }
+  .hsr-ability-header {
+    display: none !important; /* Hide 'Pilot Notes' title so the quote looks natural */
+  }
+  .hsr-notes-display {
+    font-size: 0.75rem !important;
+    color: rgba(229, 231, 235, 0.6) !important;
+    font-style: italic !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 6 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  .hsr-notes-display::before { content: '"'; }
+  .hsr-notes-display::after { content: '"'; }
+  
+  .hsr-breadcrumb { grid-column: 1 / -1 !important; grid-row: 4 !important; margin-top: 1rem !important; }
+  .hsr-title      { grid-column: 1 / -1 !important; grid-row: 5 !important; font-size: 1.25rem !important; }
+  .hsr-desc       { grid-column: 1 / -1 !important; grid-row: 6 !important; }
+  .hsr-divider    { grid-column: 1 / -1 !important; }
+  .hsr-stats      { grid-column: 1 / -1 !important; }
+  .hsr-visit-btn  { grid-column: 1 / -1 !important; margin-top: 1rem !important; }
+  
+  .hsr-stat-val { font-size: 0.8125rem !important; color: rgba(240, 244, 255, 0.7) !important; font-weight: 500 !important; }
+  .hsr-stat-key { font-size: 0.75rem !important; color: rgba(154, 165, 196, 0.6) !important; }
+  
   .hsr-card-initial { font-size: 2.5rem; }
-  .hsr-title { font-size: 1.25rem; }
   .hsr-action-label { display: none; }
+  
+  /* Fix inline confirmation visibility on mobile */
+  .hsr-topbar-actions > span.hsr-action-label { display: inline-block !important; }
+  .hsr-action-btn:not([id]) .hsr-action-label { display: inline-block !important; }
 }
 
 /* ============================================================
@@ -2936,7 +2995,10 @@ code, kbd, pre {
 }
 @media (max-width: 768px) {
   .settings-grid-layout {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 2rem;
+    align-items: stretch;
   }
 }
 .settings-content > * { animation: fade-in-up 0.6s ease backwards; }
@@ -3404,5 +3466,183 @@ code, kbd, pre {
 .hsr-prism { position: absolute; inset: 0; background: linear-gradient(105deg, transparent 20%, rgba(255, 120, 150, 0.25) 25%, rgba(120, 255, 150, 0.25) 45%, rgba(120, 150, 255, 0.25) 65%, transparent 80%); mix-blend-mode: color-dodge; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 5; }
 .hsr-card:hover .hsr-prism { opacity: 1; }
 
+/* --- Friends Modal Desktop/Global Overrides --- */
+.fm-mobile-options-btn { display: none; }
 
-
+/* --- Friends Modal Mobile Layout --- */
+@media (max-width: 768px) {
+  .fm-modal-container {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    margin: 0 !important;
+  }
+  .fm-modal-header {
+    padding: 16px 20px !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 16px !important;
+    align-items: center !important;
+  }
+  .fm-header-left {
+    display: contents !important;
+  }
+  .fm-header-title {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: auto !important;
+    margin: 0 !important;
+  }
+  .fm-close-btn {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+  }
+  .fm-header-search {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .fm-header-search input {
+    padding-left: 60px !important; /* Increase space between icon and placeholder */
+  }
+  
+  .fm-modal-body {
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+  .fm-sidebar {
+    width: 100% !important;
+    flex-direction: row !important;
+    padding: 12px !important;
+    justify-content: space-around !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    order: 3 !important; /* Move tabs to bottom */
+    background: rgba(20, 15, 35, 0.95) !important;
+    border-top: 1px solid rgba(255,255,255,0.1) !important;
+  }
+  .fm-sidebar button {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  .fm-sidebar button svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  .fm-content-wrapper {
+    flex-direction: column !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+  
+  .fm-list-section {
+    width: 100% !important;
+    padding: 16px !important;
+    border-right: none !important;
+    gap: 16px !important; /* Nice spacing between users */
+  }
+  .fm-list-hidden-on-mobile {
+    display: none !important; /* Hide list when chat is active */
+  }
+  
+  /* Shrink elements inside list rows */
+  .fm-list-row {
+    position: relative !important;
+    padding: 12px !important;
+  }
+  .fm-list-row .w-12 {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .fm-list-row .font-semibold {
+    font-size: 0.9rem !important;
+  }
+  .fm-list-row .text-sm {
+    font-size: 0.75rem !important;
+  }
+  
+  /* 3-dots Menu Logic & Animations */
+  .fm-user-text {
+    transition: opacity 0.3s ease, transform 0.3s ease !important;
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+  }
+  .fm-mobile-options-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 20 !important;
+  }
+  .fm-action-buttons {
+    display: flex !important;
+    position: absolute !important;
+    right: 48px !important; /* Right before the 3-dots button */
+    top: 50% !important;
+    transform: translateY(-50%) translateX(15px) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    z-index: 10 !important;
+    gap: 12px !important;
+    transition: opacity 0.3s ease, transform 0.3s ease !important;
+  }
+  
+  .fm-show-options .fm-user-text {
+    opacity: 0 !important;
+    transform: translateX(-15px) !important; /* Slide out to left */
+    pointer-events: none !important;
+  }
+  .fm-show-options .fm-action-buttons {
+    opacity: 1 !important;
+    transform: translateY(-50%) translateX(0) !important; /* Slide in */
+    pointer-events: auto !important;
+  }
+  
+  .fm-action-buttons button,
+  .fm-action-buttons a {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .fm-action-buttons button.fm-text-btn,
+  .fm-action-buttons a.fm-text-btn {
+    width: auto !important;
+    padding: 0 16px !important;
+  }
+  .fm-action-buttons button svg,
+  .fm-action-buttons a svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
+  /* Chat Section */
+  .fm-chat-section {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 16px 12px 24px 12px !important; /* extra bottom padding */
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 50 !important;
+    background: rgba(20, 15, 35, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: 0 !important;
+  }
+}

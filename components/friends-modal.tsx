@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   XMarkIcon, UserPlusIcon, UsersIcon, EnvelopeIcon, 
-  MagnifyingGlassIcon, ChatBubbleOvalLeftEllipsisIcon, GlobeAltIcon, CheckIcon, UserMinusIcon, ArrowsRightLeftIcon, TrashIcon
+  MagnifyingGlassIcon, ChatBubbleOvalLeftEllipsisIcon, GlobeAltIcon, CheckIcon, UserMinusIcon, ArrowsRightLeftIcon, TrashIcon, EllipsisVerticalIcon
 } from "@heroicons/react/24/outline";
 import SpaceBackground from "./space-background";
 import StaticStarfield from "./static-starfield";
@@ -32,6 +32,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeChatName, setActiveChatName] = useState<string>("");
   const [friendToRemove, setFriendToRemove] = useState<{id: string, name: string} | null>(null);
+  const [mobileOptionsId, setMobileOptionsId] = useState<string | null>(null);
 
   const [pilots, setPilots] = useState<any[]>([]);
   const [friends, setFriends] = useState<any[]>([]);
@@ -90,6 +91,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
         setSearchQuery("");
         setActiveChatId(null);
         setActiveTab("list");
+        setMobileOptionsId(null);
       }, 300);
     }
   }, [isOpen]);
@@ -189,7 +191,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
           transition={{ duration: 0.3 }}
         >
           <motion.div
-            className="flex flex-col shadow-2xl"
+            className="flex flex-col shadow-2xl fm-modal-container"
             style={{ 
               width: "90vw", 
               height: "85vh", 
@@ -220,15 +222,15 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
             </div>
 
             {/* Modal Header */}
-            <div className="flex items-center justify-between relative z-10 bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-[rgba(255,255,255,0.1)]" style={{ padding: "16px 24px", borderRadius: "16px" }}>
-              <div className="flex items-center w-full">
-                <div className="font-bold text-white tracking-wide shrink-0 mr-4 flex items-center gap-3" style={{ fontSize: "20px", width: "180px" }}>
+            <div className="flex items-center justify-between relative z-10 bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] fm-modal-header" style={{ padding: "16px 24px", borderRadius: "16px" }}>
+              <div className="flex items-center w-full fm-header-left">
+                <div className="font-bold text-white tracking-wide shrink-0 mr-4 flex items-center gap-3 fm-header-title" style={{ fontSize: "20px", width: "180px" }}>
                   {activeTab === "add" ? "Find Pilots" : activeTab === "list" ? (
                     <>Friend List <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{friends.length}</span></>
                   ) : "Friend Requests"}
                 </div>
                 
-                <div className="relative flex-1 max-w-lg ml-6">
+                <div className="relative flex-1 max-w-lg ml-6 fm-header-search">
                   <MagnifyingGlassIcon className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" width={20} height={20} />
                     <input
                       type="text"
@@ -241,24 +243,24 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                 </div>
               </div>
 
-              <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white ml-6 shrink-0">
+              <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white ml-6 shrink-0 fm-close-btn">
                 <XMarkIcon width={24} height={24} />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="flex flex-1 overflow-hidden relative z-10" style={{ gap: "24px" }}>
+            <div className="flex flex-1 overflow-hidden relative z-10 fm-modal-body" style={{ gap: "24px" }}>
               {/* Sidebar Tabs */}
-              <div className="w-24 flex flex-col items-center border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] glass-sm" style={{ padding: "24px 0", gap: "24px", borderRadius: "16px" }}>
+              <div className="w-24 flex flex-col items-center border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] glass-sm fm-sidebar" style={{ padding: "24px 0", gap: "24px", borderRadius: "16px" }}>
                 <button 
-                  onClick={() => { setActiveTab("add"); setActiveChatId(null); setSearchQuery(""); }}
+                  onClick={() => { setActiveTab("add"); setActiveChatId(null); setSearchQuery(""); setMobileOptionsId(null); }}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${activeTab === "add" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
                   title="Find Pilots"
                 >
                   <UserPlusIcon width={28} height={28} />
                 </button>
                 <button 
-                  onClick={() => { setActiveTab("list"); setSearchQuery(""); }}
+                  onClick={() => { setActiveTab("list"); setSearchQuery(""); setMobileOptionsId(null); }}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "list" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
                   title="Friend List"
                 >
@@ -268,7 +270,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                   )}
                 </button>
                 <button 
-                  onClick={() => { setActiveTab("requests"); setActiveChatId(null); setSearchQuery(""); }}
+                  onClick={() => { setActiveTab("requests"); setActiveChatId(null); setSearchQuery(""); setMobileOptionsId(null); }}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "requests" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
                   title="Friend Requests"
                 >
@@ -280,10 +282,10 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
               </div>
 
               {/* Main Content Area */}
-              <div className="flex-1 flex overflow-hidden border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)]" style={{ borderRadius: "16px" }}>
+              <div className="flex-1 flex overflow-hidden border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] fm-content-wrapper" style={{ borderRadius: "16px" }}>
                 {/* Left Section (List) */}
                 <motion.div 
-                  className="flex flex-col h-full overflow-y-auto bg-[rgba(0,0,0,0.2)] backdrop-blur-sm"
+                  className={`flex flex-col h-full overflow-y-auto bg-[rgba(0,0,0,0.2)] backdrop-blur-sm fm-list-section ${activeTab === 'list' && activeChatId ? 'fm-list-hidden-on-mobile' : ''}`}
                   initial={false}
                   animate={{
                     width: (activeTab === "list" && activeChatId) ? 140 : "100%",
@@ -297,7 +299,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                     {activeTab === "add" && pilots.map((p, i) => (
                       <motion.div
                         key={`add-${p.id}`}
-                        className="glass flex items-center justify-between transition-colors group"
+                        className={`glass flex items-center justify-between transition-colors group fm-list-row ${mobileOptionsId === p.id ? "fm-show-options" : ""}`}
                         style={{ padding: "16px", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px" }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -306,23 +308,22 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         whileHover={user.animationEnabled ? { scale: 1.02, boxShadow: "0 0 15px rgba(139,92,246,0.3)" } : {}}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-white/10 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-white/10 flex items-center justify-center shrink-0">
                             {p.image ? (
                               <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                             ) : (
                               <span className="text-gray-400 font-bold">{(p.name || p.username || "?")[0].toUpperCase()}</span>
                             )}
                           </div>
-                          <div>
+                          <div className="fm-user-text">
                             <div className="font-semibold text-white flex items-center gap-2">
                               {p.name || "Pilot"}
-                              {p.titleBadge && <span className="badge badge-violet text-[0.65rem]">{p.titleBadge}</span>}
                             </div>
                             <div className="text-sm text-gray-400">@{p.username} {p.callsign && `• ${p.callsign}`}</div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 transition-opacity">
+                        <div className="flex items-center gap-2 transition-opacity fm-action-buttons">
                           {p.station?.isPublic && (
                             <a href={`/station/${p.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
                               <GlobeAltIcon width={22} height={22} />
@@ -333,7 +334,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                               <ChatBubbleOvalLeftEllipsisIcon width={22} height={22} />
                             </button>
                           ) : p.friendshipStatus === "PENDING" ? (
-                            <button disabled className="rounded-full bg-white/5 text-gray-500 text-sm font-medium border border-white/5 cursor-not-allowed flex items-center justify-center transition-all" style={{ padding: "0 20px", height: "44px" }}>
+                            <button disabled className="rounded-full bg-white/5 text-gray-500 text-sm font-medium border border-white/5 cursor-not-allowed flex items-center justify-center transition-all fm-text-btn" style={{ padding: "0 20px", height: "44px" }}>
                               Pending
                             </button>
                           ) : (
@@ -342,13 +343,16 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                             </button>
                           )}
                         </div>
+                        <button className="fm-mobile-options-btn text-gray-400 hover:text-white p-2" onClick={() => setMobileOptionsId(prev => prev === p.id ? null : p.id)}>
+                          <EllipsisVerticalIcon width={24} height={24} />
+                        </button>
                       </motion.div>
                     ))}
 
                     {activeTab === "list" && friends.filter(f => !searchQuery || (f.name||"").toLowerCase().includes(searchQuery.toLowerCase()) || (f.username||"").toLowerCase().includes(searchQuery.toLowerCase())).map((f, i) => (
                       <motion.div
                         key={`list-${f.id}`}
-                        className={`glass flex transition-colors group ${activeChatId === f.id ? "bg-[rgba(139,92,246,0.2)]" : ""}`}
+                        className={`glass flex transition-colors group fm-list-row ${activeChatId === f.id ? "bg-[rgba(139,92,246,0.2)]" : ""} ${mobileOptionsId === f.id ? "fm-show-options" : ""}`}
                         style={{ 
                           padding: "16px", border: activeChatId === f.id ? "1px solid rgba(139,92,246,0.5)" : "1px solid rgba(255,255,255,0.05)", borderRadius: "16px",
                           flexDirection: activeChatId ? "column" : "row",
@@ -393,10 +397,10 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                                 exit={{ opacity: 0, width: 0 }}
                                 style={{ overflow: "hidden", whiteSpace: "nowrap" }}
                                 transition={{ duration: 0.2 }}
+                                className="fm-user-text"
                               >
                                 <div className="font-semibold text-white flex items-center gap-2">
                                   {f.name || "Pilot"}
-                                  {f.titleBadge && <span className="badge badge-violet text-[0.65rem]">{f.titleBadge}</span>}
                                 </div>
                                 <div className="text-sm text-gray-400">@{f.username} {f.callsign && `• ${f.callsign}`}</div>
                               </motion.div>
@@ -404,7 +408,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           </AnimatePresence>
                         </div>
 
-                        <div className={`flex items-center gap-2 transition-opacity ${activeChatId ? "flex-wrap justify-center" : ""}`}>
+                        <div className={`flex items-center gap-2 transition-opacity fm-action-buttons ${activeChatId ? "flex-wrap justify-center" : ""}`}>
                           {f.station?.isPublic && (
                             <a href={`/station/${f.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
                               <GlobeAltIcon width={22} height={22} />
@@ -436,13 +440,18 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                             </button>
                           )}
                         </div>
+                        {!activeChatId && (
+                          <button className="fm-mobile-options-btn text-gray-400 hover:text-white p-2" onClick={() => setMobileOptionsId(prev => prev === f.id ? null : f.id)}>
+                            <EllipsisVerticalIcon width={24} height={24} />
+                          </button>
+                        )}
                       </motion.div>
                     ))}
 
                     {activeTab === "requests" && requests.map((r, i) => (
                       <motion.div
                         key={`req-${r.id}`}
-                        className="glass flex items-center justify-between transition-colors group"
+                        className={`glass flex items-center justify-between transition-colors group fm-list-row ${mobileOptionsId === r.id ? "fm-show-options" : ""}`}
                         style={{ padding: "16px", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px" }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -451,23 +460,22 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         whileHover={user.animationEnabled ? { scale: 1.02, boxShadow: "0 0 15px rgba(139,92,246,0.3)" } : {}}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-white/10 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-white/10 flex items-center justify-center shrink-0">
                             {r.image ? (
                               <img src={r.image} alt={r.name} className="w-full h-full object-cover" />
                             ) : (
                               <span className="text-gray-400 font-bold">{(r.name || r.username || "?")[0].toUpperCase()}</span>
                             )}
                           </div>
-                          <div>
+                          <div className="fm-user-text">
                             <div className="font-semibold text-white flex items-center gap-2">
                               {r.name || "Pilot"}
-                              {r.titleBadge && <span className="badge badge-violet text-[0.65rem]">{r.titleBadge}</span>}
                             </div>
                             <div className="text-sm text-gray-400">@{r.username} wants to be friends</div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 transition-opacity fm-action-buttons">
                           <button 
                             onClick={() => handleRejectRequest(r.id, r.friendshipId)}
                             className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all flex items-center justify-center"
@@ -478,12 +486,15 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           </button>
                           <button 
                             onClick={() => handleAcceptRequest(r.id, r.friendshipId)}
-                            className="rounded-full bg-violet-500 hover:bg-violet-400 text-white font-medium text-sm transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+                            className="rounded-full bg-violet-500 hover:bg-violet-400 text-white font-medium text-sm transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.4)] fm-text-btn"
                             style={{ height: "48px", padding: "0 24px" }}
                           >
                             <CheckIcon width={20} height={20} /> Accept
                           </button>
                         </div>
+                        <button className="fm-mobile-options-btn text-gray-400 hover:text-white p-2" onClick={() => setMobileOptionsId(prev => prev === r.id ? null : r.id)}>
+                          <EllipsisVerticalIcon width={24} height={24} />
+                        </button>
                       </motion.div>
                     ))}
 
@@ -542,7 +553,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                       animate={{ opacity: 1, x: 0, width: "auto" }}
                       exit={{ opacity: 0, x: 30, width: 0 }}
                       transition={user.animationEnabled ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
-                      className="flex-1 flex flex-col h-full relative backdrop-blur-sm overflow-hidden" 
+                      className="flex-1 flex flex-col h-full relative backdrop-blur-sm overflow-hidden fm-chat-section" 
                       style={{ backgroundColor: "rgba(20, 15, 35, 0.5)", padding: "24px", gap: "16px" }}
                     >
                       <div className="flex items-center justify-between backdrop-blur-md z-10" style={{ backgroundColor: "rgba(139, 92, 246, 0.05)", padding: "16px 24px", borderRadius: "16px", border: "1px solid rgba(139, 92, 246, 0.2)" }}>
@@ -787,7 +798,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                     <div className="w-16 h-16 rounded-full bg-pink-500/10 border border-pink-500/30 flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(236,72,153,0.3)]">
                       <UserMinusIcon width={32} height={32} style={{ color: "#ec4899" }} />
                     </div>
-                    <h3 style={{ color: "white", fontWeight: "bold", fontSize: "1.125rem", margin: 0 }}>Remove Member?</h3>
+                    <h3 style={{ color: "white", fontWeight: "bold", fontSize: "1.125rem", margin: 0 }}>Remove Friend?</h3>
                     <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0, lineHeight: 1.5 }}>
                       Are you sure you want to remove <span className="text-white font-semibold">{friendToRemove.name}</span> from your friends list?
                     </p>

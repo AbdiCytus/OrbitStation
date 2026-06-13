@@ -13,7 +13,7 @@ import {
   DocumentTextIcon,
   InformationCircleIcon,
   XMarkIcon,
-  ArrowRightIcon
+  RocketLaunchIcon
 } from "@heroicons/react/24/outline";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
@@ -155,11 +155,11 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             {!readOnly && (
               confirmDelete ? (
                 <>
-                  <span className="hsr-action-label" style={{ color: "#ef4444", fontWeight: 600 }}>Sure?</span>
+                  {/* <span className="hsr-action-label" style={{ color: "#ef4444", fontWeight: 600 }}>Sure?</span> */}
                   <button className="hsr-action-btn" onClick={() => setConfirmDelete(false)}>
                     <span className="hsr-action-label">Cancel</span>
                   </button>
-                  <button className="hsr-action-btn hsr-action-btn--danger" onClick={handleDelete} disabled={isPending}>
+                  <button className="hsr-action-btn hsr-action-btn--danger" onClick={confirmDeleteAction} disabled={isPending}>
                     <span className="hsr-action-label">Delete!</span>
                   </button>
                 </>
@@ -342,7 +342,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               style={{ padding: "0.6rem 1rem", fontSize: "0.9rem" }}
             >
               <span>Launch Beacon</span>
-              <span className="hsr-visit-arrow"><ArrowRightIcon width={16} height={16} /></span>
+              <span className="hsr-visit-arrow"><RocketLaunchIcon width={16} height={16} /></span>
             </button>
           </div>
         </div>

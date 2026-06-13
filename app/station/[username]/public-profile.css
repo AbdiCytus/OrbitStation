@@ -469,3 +469,181 @@
   20% { transform: translateX(110vw) translateY(110vh) rotate(30deg); opacity: 0; }
   100% { opacity: 0; }
 }
+
+/* --- Mobile Linktree Layout --- */
+@media (max-width: 768px) {
+  .zzz-wrapper {
+    padding: 0;
+    align-items: stretch;
+  }
+  .zzz-modal {
+    max-width: 100%;
+    max-height: calc(100vh - 60px); /* Leave space for navbar */
+    margin-top: 60px;
+    border-radius: 24px 24px 0 0;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    background: rgba(15, 15, 25, 0.7);
+    backdrop-filter: blur(16px);
+    height: 100%; /* Force height so inner scrolls work */
+  }
+  .zzz-content {
+    overflow: hidden; /* Stop full page scroll */
+    display: flex;
+    flex-direction: column;
+  }
+  .zzz-banner-container {
+    height: auto;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    background: transparent;
+  }
+  .zzz-banner-img {
+    display: none;
+  }
+  .zzz-banner-overlay {
+    position: static;
+    flex-direction: row; /* Keep row for 2 columns */
+    padding: 2rem 1.5rem 1rem;
+    background: transparent;
+  }
+  .zzz-banner-left {
+    flex-direction: row; /* Left avatar, right info */
+    text-align: left;
+    align-items: center;
+    gap: 1.25rem;
+    width: 100%;
+  }
+  .zzz-avatar {
+    width: 80px; /* Scaled down */
+    height: 80px;
+    margin: 0; /* Align left */
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
+    flex-shrink: 0;
+  }
+  .zzz-user-info {
+    align-items: flex-start; /* Left align */
+    flex: 1;
+    min-width: 0; /* For text truncation */
+  }
+  .zzz-user-name {
+    font-size: 1.35rem; /* Smaller */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+  .zzz-user-username {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+  .zzz-user-badge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    margin-top: 0.25rem;
+  }
+  .zzz-banner-right {
+    display: none; /* Hide stats */
+  }
+  .zzz-bio-bar {
+    padding: 0 1.5rem;
+    text-align: left;
+    display: flex;
+    justify-content: flex-start;
+  }
+  .zzz-bio-text {
+    border-left: 2px solid #8b5cf6;
+    padding-left: 0.75rem;
+    font-size: 0.9rem;
+    max-width: 100%;
+  }
+  
+  /* Linktree Style Buttons */
+  .zzz-beacon-grid {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    padding: 1rem 1.5rem 8rem; /* Extra 8rem at bottom for mobile nav bar */
+    gap: 1rem;
+    flex: 1; /* Take up rest of height */
+    overflow-y: auto; /* Scrollable list */
+    overflow-x: hidden;
+  }
+  .zzz-beacon-card {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: auto;
+    height: 64px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 32px; /* Pill shape */
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .zzz-beacon-card:hover {
+    scale: 1.02;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .zzz-beacon-img, .zzz-beacon-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50% !important; /* Force fully rounded */
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden; /* Ensure inner img respects border-radius */
+  }
+  /* If the placeholder contains an img, force it to respect the circular boundary */
+  .zzz-beacon-placeholder img {
+    border-radius: 50% !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  .zzz-beacon-placeholder {
+    font-size: 1.25rem;
+  }
+  .zzz-beacon-placeholder svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .zzz-beacon-info {
+    position: static;
+    background: transparent;
+    padding: 0 1rem;
+    opacity: 1; /* Always visible */
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: row; /* Fix from column to row */
+    align-items: center; /* Vertical center */
+    justify-content: flex-start; /* Horizontal left */
+    min-width: 0; /* allow flex child to shrink below min-content */
+  }
+  .zzz-beacon-title {
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    transform: none; 
+    line-height: 1.2;
+    margin: 0;
+  }
+  .zzz-sector-tabs {
+    padding: 0 1.5rem 1rem;
+    justify-content: flex-start;
+  }
+}
