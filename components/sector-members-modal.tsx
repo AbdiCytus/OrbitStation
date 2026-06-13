@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { getSectorOwner, getFriends, sendFriendRequest } from "@/lib/actions";
 import type { SectorWithBeacons } from "@/types";
-import { UserPlusIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { UserPlusIcon, ArrowTopRightOnSquareIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -82,8 +82,8 @@ export default function SectorMembersModal({ sector, currentUserId, onClose }: P
                 <div className="flex items-center gap-3">
                   <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest">Owner</span>
                   {sectorOwner.isPublic && sectorOwner.username && (
-                    <Link href={`/station/${sectorOwner.username}`} className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Visit Profile">
-                      <ArrowTopRightOnSquareIcon width={16} height={16} />
+                    <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Visit Profile">
+                      <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
                   {sectorOwner.id !== currentUserId && !isFriend(sectorOwner.id) && !pendingRequests.has(sectorOwner.id) && (
@@ -117,8 +117,8 @@ export default function SectorMembersModal({ sector, currentUserId, onClose }: P
                 </div>
                 <div className="flex items-center gap-3">
                   {c.user.station?.isPublic && c.user.username && (
-                    <Link href={`/station/${c.user.username}`} className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Visit Profile">
-                      <ArrowTopRightOnSquareIcon width={16} height={16} />
+                    <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Visit Profile">
+                      <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
                   {c.user.id !== currentUserId && !isFriend(c.user.id) && !pendingRequests.has(c.user.id) && (
