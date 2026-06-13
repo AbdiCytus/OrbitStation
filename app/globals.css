@@ -755,7 +755,6 @@ code, kbd, pre {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-  animation: fade-in-scale 0.15s ease both;
 }
 .navbar-menu-user {
   padding: 0.5rem 0.75rem;
@@ -1094,6 +1093,24 @@ code, kbd, pre {
   margin: 0;
 }
 .modal-close { color: var(--color-comet); }
+@keyframes beacon-shrink-out {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.5); opacity: 0; }
+}
+
+@keyframes beacon-grow-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.beacon-filter-exiting {
+  animation: beacon-shrink-out 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.beacon-filter-entering {
+  animation: beacon-grow-in 0.25s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
 .modal-form {
   padding: 1.25rem 1.5rem 1.5rem;
   display: flex;

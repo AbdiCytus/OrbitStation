@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { createSector, getFriends } from "@/lib/actions";
-import type { SectorWithBeacons } from "@/types";
+import type { SectorWithBeacons, Beacon } from "@/types";
+import { toast } from "sonner";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
 type Props = {
   onClose: () => void;
@@ -24,6 +26,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
   const [showInvite, setShowInvite] = useState(false);
   const [friends, setFriends] = useState<any[]>([]);
   const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
+  const [formErrors, setFormErrors] = useState<{name?: string}>({});
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
@@ -35,7 +38,10 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      setFormErrors({ name: "Sector Name is required." });
+      return;
+    }
     setLoading(true);
     setError(null);
     const result = await createSector({ 
@@ -45,16 +51,18 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
     setLoading(false);
     if (result.error) {
       setError(result.error);
+      toast.error(result.error || "Failed to create sector");
     } else if (result.data) {
+      toast.success(`Sector "${result.data.name}" created successfully`);
       onCreated({ ...result.data, beacons: [] });
     }
   }
 
   return (
     <div className={`modal-overlay ${isClosing ? "closing" : ""}`} onClick={handleClose} role="dialog" aria-modal="true" aria-label="Add Sector" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", overflowY: "auto" }}>
-      <div style={{ display: "flex", gap: "1rem", flexDirection: "row", alignItems: "stretch", justifyContent: "center", width: "100%", maxWidth: showInvite && !isPublic ? "1170px" : "750px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
+      <div style={{ display: "flex", rowGap: "1rem", flexDirection: "row", alignItems: "stretch", justifyContent: "center", width: "100%", maxWidth: "1170px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
       {/* MAIN PANEL */}
-      <div className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ flex: "1 1 500px", maxWidth: "750px", margin: 0, display: "flex", flexDirection: "column" }}>
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ flex: "1 1 750px", maxWidth: "750px", margin: 0, display: "flex", flexDirection: "column", animation: isClosing ? undefined : "none" }}>
         <div className="modal-header">
           <h2 className="modal-title">New Sector</h2>
           {!showInvite && (
@@ -75,11 +83,11 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
               type="text"
               placeholder="e.g. Design Tools"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => { setName(e.target.value); setFormErrors({}); }}
               autoFocus
-              required
               maxLength={40}
             />
+            {formErrors.name && <span className="text-red-500 text-xs mt-1 block">{formErrors.name}</span>}
           </div>
 
           {/* Icon picker */}
@@ -187,33 +195,51 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
               id="btn-create-sector"
               type="submit"
               className="btn btn-primary"
-              disabled={loading || !name.trim()}
+              disabled={loading}
             >
               {loading ? <span className="spinner" /> : "Create Sector"}
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
 
       {/* SECOND PANEL */}
-      {showInvite && !isPublic && (
-        <div className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ flex: "1 1 300px", maxWidth: "400px", margin: 0, display: "flex", flexDirection: "column" }}>
-          <div className="modal-header" style={{ paddingBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
-            <h3 className="modal-title" style={{ fontSize: "1.1rem" }}>Invite Friends</h3>
-            <button className="btn-icon modal-close" onClick={() => setShowInvite(false)} aria-label="Close">✕</button>
-          </div>
-          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "0 1.5rem 1.5rem 1.5rem" }}>
-            <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>
-              <label className="form-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>Select Friends</span>
-                <span style={{ fontSize: "0.8rem", color: "var(--color-violet-glow)" }}>{invitedFriends.length} selected</span>
-              </label>
-              <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+      <AnimatePresence>
+        {showInvite && !isPublic && (
+          <motion.div 
+            className={`modal-panel ${isClosing ? "closing" : ""} glass`} 
+            style={{ maxWidth: "400px", margin: 0, display: "flex", flexDirection: "column", animation: isClosing ? undefined : "none", overflow: "hidden" }}
+            initial={{ opacity: 0, scale: 0.95, flex: "0 0 0px", marginLeft: 0 }}
+            animate={{ opacity: 1, scale: 1, flex: "1 1 300px", marginLeft: "1rem" }}
+            exit={{ opacity: 0, scale: 0.95, flex: "0 0 0px", marginLeft: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            <div style={{ minWidth: "300px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+            <div className="modal-header" style={{ paddingBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
+              <h3 className="modal-title" style={{ fontSize: "1.1rem" }}>Invite Friends</h3>
+              <button className="btn-icon modal-close" onClick={() => setShowInvite(false)} aria-label="Close">✕</button>
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "0 1.5rem 1.5rem 1.5rem" }}>
+              <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>
+                <label className="form-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>Select Friends</span>
+                  <span style={{ fontSize: "0.8rem", color: "var(--color-violet-glow)" }}>{invitedFriends.length} selected</span>
+                </label>
+                <motion.div 
+                  style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}
+                  initial="hidden" animate="visible"
+                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } }}
+                >
                 {friends.length === 0 ? (
-                  <p className="text-gray-400 text-sm text-center mt-4">You have no friends to invite yet.</p>
+                  <p className="text-gray-400 text-sm m-auto text-center" style={{ padding: "2rem 0" }}>You have no friends to invite yet.</p>
                 ) : (
                   friends.map(f => (
-                    <label key={f.id} className="flex items-center rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group" style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}>
+                    <motion.label 
+                      key={f.id} 
+                      className="flex items-center rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group" 
+                      style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                      variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                    >
                       <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                         {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
                       </div>
@@ -232,14 +258,16 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                           else setInvitedFriends(prev => prev.filter(id => id !== f.id));
                         }}
                       />
-                    </label>
+                    </motion.label>
                   ))
                 )}
+                </motion.div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       </div>
     </div>
   );

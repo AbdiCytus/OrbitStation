@@ -24,6 +24,7 @@ export const metadata: Metadata = {
 };
 
 import MouseTrail from "@/components/mouse-trail";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -42,6 +43,21 @@ export default function RootLayout({
       </head>
       <body>
         <MouseTrail />
+        <Toaster 
+          theme="dark" 
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: "rgba(20, 20, 35, 0.9)",
+              border: "1px solid rgba(139, 92, 246, 0.4)",
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(139, 92, 246, 0.2)",
+              backdropFilter: "blur(12px)",
+              color: "#e2e8f0",
+              borderRadius: "12px",
+            },
+            className: "font-sans",
+          }}
+        />
         {children}
       </body>
     </html>

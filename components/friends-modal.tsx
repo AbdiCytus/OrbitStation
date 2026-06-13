@@ -9,10 +9,11 @@ import {
 import SpaceBackground from "./space-background";
 import StaticStarfield from "./static-starfield";
 import {
-  searchUsers, sendFriendRequest, acceptFriendRequest, rejectFriendRequest,
+  searchPilots, sendFriendRequest, acceptFriendRequest, rejectFriendRequest,
   getChatMessages, sendChatMessage, removeFriend, clearChat,
-  acceptCollab, rejectCollab, getFriends, getFriendRequests, acceptTransferOwnership, rejectTransferOwnership
+  acceptCollab, rejectCollab, getFriends, getFriendRequests, acceptTransferOwnership, rejectTransferOwnership, markChatAsRead
 } from "@/lib/actions";
+import { toast } from "sonner";
 
 type Tab = "add" | "list" | "requests";
 
@@ -20,14 +21,17 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   user: any; // Current user
+  stats?: any;
+  refetchStats?: () => void;
 }
 
-export default function FriendsModal({ isOpen, onClose, user }: Props) {
+export default function FriendsModal({ isOpen, onClose, user, stats, refetchStats }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeChatName, setActiveChatName] = useState<string>("");
+  const [friendToRemove, setFriendToRemove] = useState<{id: string, name: string} | null>(null);
 
   const [pilots, setPilots] = useState<any[]>([]);
   const [friends, setFriends] = useState<any[]>([]);
@@ -67,14 +71,17 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
   useEffect(() => {
     if (activeTab === "list" && activeChatId) {
       getChatMessages(activeChatId).then(setMessages);
+      markChatAsRead(activeChatId).then(() => {
+        if (refetchStats) refetchStats();
+      });
     }
-  }, [activeChatId, activeTab]);
+  }, [activeChatId, activeTab, refetchStats]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: user?.animationEnabled ? "smooth" : "auto" });
     }
-  }, [messages, user?.animationEnabled]);
+  }, [messages.length, activeChatId, user?.animationEnabled]);
 
   // Reset states when closed
   useEffect(() => {
@@ -90,28 +97,44 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
   const handleAddFriend = async (id: string) => {
     const res = await sendFriendRequest(id);
     if (!res.error) {
+      toast.success("Friend request sent");
       // update pilot list to show pending
       setPilots(prev => prev.map(p => p.id === id ? { ...p, friendshipStatus: "PENDING" } : p));
+    } else {
+      toast.error(res.error || "Failed to send request");
     }
   };
 
   const handleAcceptRequest = async (id: string, friendshipId: string) => {
-    await acceptFriendRequest(friendshipId);
-    setRequests(prev => prev.filter(r => r.id !== id));
+    const res = await acceptFriendRequest(friendshipId);
+    if (!res?.error) {
+      toast.success("Friend request accepted");
+      setRequests(prev => prev.filter(r => r.id !== id));
+    } else {
+      toast.error(res.error || "Failed to accept request");
+    }
   };
 
   const handleRejectRequest = async (id: string, friendshipId: string) => {
-    await rejectFriendRequest(friendshipId);
-    setRequests(prev => prev.filter(r => r.id !== id));
+    const res = await rejectFriendRequest(friendshipId);
+    if (!res?.error) {
+      toast.success("Friend request rejected");
+      setRequests(prev => prev.filter(r => r.id !== id));
+    } else {
+      toast.error(res.error || "Failed to reject request");
+    }
   };
 
   const handleRemoveFriend = async (id: string) => {
     const res = await removeFriend(id);
     if (!res.error) {
+      toast.success("Friend removed");
       setFriends(prev => prev.filter(f => f.id !== id));
       if (activeChatId === id) {
         setActiveChatId(null);
       }
+    } else {
+      toast.error(res.error || "Failed to remove friend");
     }
   };
 
@@ -128,6 +151,7 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
       senderId: user.id,
       receiverId: activeChatId,
       content,
+      type: "TEXT",
       createdAt: new Date().toISOString()
     };
     setMessages(prev => [...prev, tempMsg]);
@@ -145,7 +169,12 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
     if (!activeChatId) return;
     setMessages([]);
     setShowClearConfirm(false);
-    await clearChat(activeChatId);
+    const res = await clearChat(activeChatId);
+    if (!res.error) {
+      toast.success("Chat cleared");
+    } else {
+      toast.error("Failed to clear chat");
+    }
   };
 
   return (
@@ -193,8 +222,10 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
             {/* Modal Header */}
             <div className="flex items-center justify-between relative z-10 bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-[rgba(255,255,255,0.1)]" style={{ padding: "16px 24px", borderRadius: "16px" }}>
               <div className="flex items-center w-full">
-                <div className="font-bold text-white tracking-wide shrink-0 mr-4" style={{ fontSize: "20px", width: "180px" }}>
-                  {activeTab === "add" ? "Find Pilots" : activeTab === "list" ? "Friend List" : "Friend Requests"}
+                <div className="font-bold text-white tracking-wide shrink-0 mr-4 flex items-center gap-3" style={{ fontSize: "20px", width: "180px" }}>
+                  {activeTab === "add" ? "Find Pilots" : activeTab === "list" ? (
+                    <>Friend List <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{friends.length}</span></>
+                  ) : "Friend Requests"}
                 </div>
                 
                 <div className="relative flex-1 max-w-lg ml-6">
@@ -228,17 +259,23 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                 </button>
                 <button 
                   onClick={() => { setActiveTab("list"); setSearchQuery(""); }}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${activeTab === "list" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "list" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
                   title="Friend List"
                 >
                   <UsersIcon width={28} height={28} />
+                  {stats?.totalUnreadMessages > 0 && (
+                    <span style={{ position: "absolute", top: "2px", right: "2px", width: "12px", height: "12px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423" }}></span>
+                  )}
                 </button>
                 <button 
                   onClick={() => { setActiveTab("requests"); setActiveChatId(null); setSearchQuery(""); }}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${activeTab === "requests" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "requests" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
                   title="Friend Requests"
                 >
                   <EnvelopeIcon width={28} height={28} />
+                  {stats?.totalPendingRequests > 0 && (
+                    <span style={{ position: "absolute", top: "2px", right: "2px", width: "12px", height: "12px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423" }}></span>
+                  )}
                 </button>
               </div>
 
@@ -327,20 +364,25 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                       >
                         <div className="flex items-center gap-3">
                           <motion.div 
-                            className="rounded-full bg-gray-700 overflow-hidden relative border border-white/10 flex items-center justify-center shrink-0" 
+                            className="relative flex shrink-0" 
                             initial={{ width: activeChatId ? 64 : 48, height: activeChatId ? 64 : 48 }}
                             animate={{ width: activeChatId ? 64 : 48, height: activeChatId ? 64 : 48 }}
                             transition={user.animationEnabled ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
                           >
-                            {f.image ? (
-                              <img src={f.image} alt={f.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <motion.span 
-                                className="text-gray-400 font-bold" 
-                                animate={{ fontSize: activeChatId ? 24 : 16 }}
-                              >
-                                {(f.name || f.username || "?")[0].toUpperCase()}
-                              </motion.span>
+                            <div className="w-full h-full rounded-full bg-gray-700 overflow-hidden border border-white/10 flex items-center justify-center relative">
+                              {f.image ? (
+                                <img src={f.image} alt={f.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <motion.span 
+                                  className="text-gray-400 font-bold" 
+                                  animate={{ fontSize: activeChatId ? 24 : 16 }}
+                                >
+                                  {(f.name || f.username || "?")[0].toUpperCase()}
+                                </motion.span>
+                              )}
+                            </div>
+                            {stats?.unreadPerFriend?.[f.id] > 0 && (
+                              <span style={{ position: "absolute", top: "0px", right: "0px", width: "12px", height: "12px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423", zIndex: 10 }}></span>
                             )}
                           </motion.div>
                           <AnimatePresence>
@@ -385,7 +427,7 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                           </button>
                           {!activeChatId && (
                             <button 
-                              onClick={() => handleRemoveFriend(f.id)} 
+                              onClick={() => setFriendToRemove({id: f.id, name: f.name || f.username})} 
                               className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all" 
                               title="Remove Friend"
                               style={{ padding: "10px" }}
@@ -530,8 +572,15 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                         </div>
                      </div>
                     
+                    <AnimatePresence>
                     {showClearConfirm && (
-                      <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ borderRadius: "16px" }}>
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" 
+                        style={{ borderRadius: "16px" }}
+                      >
                         <motion.div 
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -559,8 +608,9 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                             <button style={{ flex: 1, padding: "10px 16px", background: "rgba(239, 68, 68, 0.2)", color: "#f87171", borderRadius: "8px", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.3)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"} onClick={confirmClearChat}>Clear</button>
                           </div>
                         </motion.div>
-                      </div>
+                      </motion.div>
                     )}
+                    </AnimatePresence>
 
                     <div className="flex-1 overflow-y-auto flex flex-col" style={{ gap: "16px", padding: "8px" }}>
                       {messages.map((msg) => {
@@ -607,11 +657,17 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                                     <button 
                                       onClick={async () => {
                                         if (msg.type === "COLLAB_INVITE") {
-                                          await rejectCollab(msg.id);
-                                          setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_REJECTED", content: "rejected the sector collaboration" } : m));
+                                          const res = await rejectCollab(msg.id);
+                                          if (!res?.error) {
+                                            toast.success("Collab invite rejected");
+                                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_REJECTED", content: "rejected the sector collaboration" } : m));
+                                          } else toast.error(res.error);
                                         } else {
-                                          await rejectTransferOwnership(msg.id);
-                                          setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_REJECTED", content: "rejected the ownership transfer" } : m));
+                                          const res = await rejectTransferOwnership(msg.id);
+                                          if (!res?.error) {
+                                            toast.success("Ownership transfer rejected");
+                                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_REJECTED", content: "rejected the ownership transfer" } : m));
+                                          } else toast.error(res.error);
                                         }
                                       }}
                                       className="flex-1 bg-white/10 hover:bg-pink-500/80 text-white rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
@@ -624,11 +680,17 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                                         try {
                                           if (msg.type === "COLLAB_INVITE") {
                                             const meta = JSON.parse(msg.metadata);
-                                            await acceptCollab(msg.id, meta.sectorId);
-                                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_ACCEPTED", content: "accepted the sector collaboration" } : m));
+                                            const res = await acceptCollab(msg.id, meta.sectorId);
+                                            if (!res?.error) {
+                                              toast.success("Collab invite accepted");
+                                              setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_ACCEPTED", content: "accepted the sector collaboration" } : m));
+                                            } else toast.error(res.error);
                                           } else {
-                                            await acceptTransferOwnership(msg.id);
-                                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_ACCEPTED", content: "accepted the ownership transfer" } : m));
+                                            const res = await acceptTransferOwnership(msg.id);
+                                            if (!res?.error) {
+                                              toast.success("Ownership transfer accepted");
+                                              setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_ACCEPTED", content: "accepted the ownership transfer" } : m));
+                                            } else toast.error(res.error);
                                           }
                                         } catch (e) {}
                                       }}
@@ -698,6 +760,45 @@ export default function FriendsModal({ isOpen, onClose, user }: Props) {
                 </AnimatePresence>
               </div>
             </div>
+
+            {/* Remove Friend Confirm Modal */}
+            <AnimatePresence>
+              {friendToRemove && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ borderRadius: "24px" }}>
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    style={{
+                      backgroundColor: "#141423",
+                      border: "1px solid rgba(236, 72, 153, 0.3)",
+                      padding: "32px",
+                      borderRadius: "20px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.8)",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "20px",
+                      textAlign: "center",
+                      maxWidth: "340px",
+                      width: "90%"
+                    }}
+                  >
+                    <div className="w-16 h-16 rounded-full bg-pink-500/10 border border-pink-500/30 flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+                      <UserMinusIcon width={32} height={32} style={{ color: "#ec4899" }} />
+                    </div>
+                    <h3 style={{ color: "white", fontWeight: "bold", fontSize: "1.125rem", margin: 0 }}>Remove Member?</h3>
+                    <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0, lineHeight: 1.5 }}>
+                      Are you sure you want to remove <span className="text-white font-semibold">{friendToRemove.name}</span> from your friends list?
+                    </p>
+                    <div style={{ display: "flex", width: "100%", gap: "12px", marginTop: "8px" }}>
+                      <button style={{ flex: 1, padding: "10px 16px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", color: "white", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"} onClick={() => setFriendToRemove(null)}>Cancel</button>
+                      <button style={{ flex: 1, padding: "10px 16px", background: "rgba(236, 72, 153, 0.2)", color: "#ec4899", borderRadius: "8px", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(236, 72, 153, 0.3)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(236, 72, 153, 0.2)"} onClick={() => { handleRemoveFriend(friendToRemove.id); setFriendToRemove(null); }}>Remove</button>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
       )}

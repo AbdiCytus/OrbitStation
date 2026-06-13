@@ -5,6 +5,7 @@ import { getSectorOwner, getFriends, sendFriendRequest } from "@/lib/actions";
 import type { SectorWithBeacons } from "@/types";
 import { UserPlusIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 type Props = {
   sector: SectorWithBeacons;
@@ -49,14 +50,26 @@ export default function SectorMembersModal({ sector, currentUserId, onClose }: P
       <div style={{ display: "flex", gap: "1rem", flexDirection: "column", width: "100%", maxWidth: "400px", minHeight: "600px", maxHeight: "85vh" }} onClick={(e) => e.stopPropagation()}>
         <div className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ margin: 0, display: "flex", flexDirection: "column", padding: 0, flex: 1 }}>
           <div className="modal-header" style={{ padding: "1.5rem 1.5rem 1rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
-            <h2 className="modal-title" style={{ fontSize: "1.1rem" }}>Members of {sector.name}</h2>
+            <h2 className="modal-title flex items-center gap-2" style={{ fontSize: "1.1rem" }}>
+              Members of {sector.name}
+              <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span>
+            </h2>
             <button className="btn-icon modal-close" onClick={handleClose} aria-label="Close" style={{ right: "1.5rem", top: "1.5rem" }}>✕</button>
           </div>
           
-          <div className="form-group" style={{ marginBottom: 0, flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", padding: "0 1.5rem 1.5rem 1.5rem" }}>
+          <motion.div 
+            className="form-group" 
+            style={{ marginBottom: 0, flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", padding: "0 1.5rem 1.5rem 1.5rem" }}
+            initial="hidden" animate="visible"
+            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } }}
+          >
             {/* Owner */}
             {sectorOwner && (
-              <div className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}>
+              <motion.div 
+                className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" 
+                style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+              >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                     {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
@@ -82,12 +95,17 @@ export default function SectorMembersModal({ sector, currentUserId, onClose }: P
                     <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Members */}
             {localCollaborators.map((c: any) => (
-              <div key={c.user.id} className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}>
+              <motion.div 
+                key={c.user.id} 
+                className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" 
+                style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+              >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                     {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
@@ -112,13 +130,13 @@ export default function SectorMembersModal({ sector, currentUserId, onClose }: P
                     <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
             
             {localCollaborators.length === 0 && !sectorOwner && (
               <p className="text-sm text-gray-400 text-center py-4">No members found.</p>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

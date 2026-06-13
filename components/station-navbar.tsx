@@ -5,19 +5,20 @@ import { signOut } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon } from "@heroicons/react/24/outline";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   user?: { id: string; name: string | null; image: string | null; callsign?: string | null } | null;
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
   displayName?: string;
-  displayName?: string;
   hideSearch?: boolean;
   hideProfile?: boolean;
   onOpenFriends?: () => void;
+  stats?: { hasNotifications: boolean };
 };
 
-export default function StationNavbar({ user, searchQuery, onSearchChange, displayName, hideSearch, hideProfile, onOpenFriends }: Props) {
+export default function StationNavbar({ user, searchQuery, onSearchChange, displayName, hideSearch, hideProfile, onOpenFriends, stats }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -87,7 +88,11 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, displ
                 onClick={() => setMenuOpen((o) => !o)}
                 aria-expanded={menuOpen}
                 aria-label="User menu"
+                style={{ position: "relative" }}
               >
+                {stats?.hasNotifications && (
+                  <span style={{ position: "absolute", top: 0, right: 0, width: "10px", height: "10px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423", zIndex: 10 }}></span>
+                )}
                 {user.image ? (
                   <img
                     src={user.image}
@@ -103,37 +108,50 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, displ
                 )}
               </button>
 
-                {menuOpen && (
-                  <div className="navbar-menu">
-                    <div className="navbar-menu-user">
-                      <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
-                    </div>
-                    <hr className="divider" />
-                    <button
-                      className="navbar-menu-item"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        onOpenFriends?.();
-                      }}
+                <AnimatePresence>
+                  {menuOpen && (
+                    <motion.div 
+                      className="navbar-menu"
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ transformOrigin: "top right" }}
                     >
-                      <UsersIcon width={18} height={18} /> Friends
-                    </button>
-                    <Link
-                      href="/settings"
-                      className="navbar-menu-item"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <Cog8ToothIcon width={18} height={18} /> Settings
-                    </Link>
-                    <button
-                      id="btn-sign-out"
-                      className="navbar-menu-item navbar-menu-item-danger"
-                      onClick={() => signOut({ callbackUrl: "/login" })}
-                    >
-                      <ArrowRightOnRectangleIcon width={18} height={18} /> Sign out
-                    </button>
-                  </div>
-                )}
+                      <div className="navbar-menu-user">
+                        <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
+                      </div>
+                      <hr className="divider" />
+                      <button
+                        className="navbar-menu-item"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          onOpenFriends?.();
+                        }}
+                      >
+                        <UsersIcon width={18} height={18} /> 
+                        <span style={{ flex: 1, textAlign: "left" }}>Friends</span>
+                        {stats?.hasNotifications && (
+                          <span style={{ width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", display: "inline-block" }}></span>
+                        )}
+                      </button>
+                      <Link
+                        href="/settings"
+                        className="navbar-menu-item"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Cog8ToothIcon width={18} height={18} /> Settings
+                      </Link>
+                      <button
+                        id="btn-sign-out"
+                        className="navbar-menu-item navbar-menu-item-danger"
+                        onClick={() => signOut({ callbackUrl: "/login" })}
+                      >
+                        <ArrowRightOnRectangleIcon width={18} height={18} /> Sign out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
             </>
           ) : (
             <Link href="/login" style={{

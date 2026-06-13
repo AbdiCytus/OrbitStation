@@ -5,6 +5,7 @@ import { createBeacon } from "@/lib/actions";
 import { useMetaFetcher } from "@/hooks/use-meta-fetcher";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import type { Beacon, SectorWithBeacons } from "@/types";
+import { toast } from "sonner";
 
 type Props = {
   sectors: SectorWithBeacons[];
@@ -37,6 +38,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{url?: string, title?: string, sector?: string}>({});
   const [showImageEdit, setShowImageEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +73,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 500 * 1024) {
-      alert("Icon size must be less than 500KB.");
+      toast.error("Icon size must be less than 500KB.");
       return;
     }
     const reader = new FileReader();
@@ -87,7 +89,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { // 2MB for banner
-      alert("Banner image size must be less than 2MB.");
+      toast.error("Banner image size must be less than 2MB.");
       return;
     }
     const reader = new FileReader();
@@ -115,7 +117,14 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const finalUrl = normalizeUrl(urlRaw);
-    if (!finalUrl || finalUrl === "https://" || !title.trim() || !sectorId) return;
+    const errors: {url?: string, title?: string, sector?: string} = {};
+    if (!finalUrl || finalUrl === "https://") errors.url = "URL is required.";
+    if (!title.trim()) errors.title = "Title is required.";
+    if (!sectorId) errors.sector = "Sector is required.";
+    
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setLoading(true);
     setError(null);
 
@@ -131,7 +140,9 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
     setLoading(false);
     if (result.error) {
       setError(result.error);
+      toast.error(result.error || "Failed to create beacon");
     } else if (result.data) {
+      toast.success("Beacon added successfully");
       onCreated(result.data);
     }
   }
@@ -181,6 +192,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   </>
                 )}
               </div>
+              {formErrors.sector && <span className="text-red-500 text-xs mt-1 block">{formErrors.sector}</span>}
             </div>
 
             {/* URL with auto-prefix */}
@@ -198,12 +210,12 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   type="text"
                   placeholder="example.com"
                   value={urlRaw}
-                  onChange={(e) => handleUrlChange(e.target.value)}
+                  onChange={(e) => { handleUrlChange(e.target.value); setFormErrors(p => ({...p, url: undefined})); }}
                   onBlur={handleUrlBlur}
-                  required
                   style={{ border: "none", borderRadius: 0, flex: 1, outline: "none", boxShadow: "none", background: "transparent", color: "var(--color-starlight)", fontFamily: "var(--font-sans)", fontSize: "0.9rem", padding: "0.625rem 1rem 0.625rem 0" }}
                 />
               </div>
+              {formErrors.url && <span className="text-red-500 text-xs mt-1 block">{formErrors.url}</span>}
             </div>
 
             {/* Title */}
@@ -215,10 +227,10 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                 type="text"
                 placeholder="Beacon title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
+                onChange={(e) => { setTitle(e.target.value); setFormErrors(p => ({...p, title: undefined})); }}
                 maxLength={100}
               />
+              {formErrors.title && <span className="text-red-500 text-xs mt-1 block">{formErrors.title}</span>}
             </div>
 
             {/* Description */}
@@ -353,7 +365,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
             type="button"
             className="btn btn-primary"
             onClick={handleSubmit}
-            disabled={loading || !title.trim() || !sectorId || !urlRaw.trim()}
+            disabled={loading}
           >
             {loading ? "Launching..." : "Launch Beacon"}
           </button>

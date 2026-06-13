@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Cropper from "react-easy-crop";
 import { deleteAccount } from "@/lib/actions";
+import { toast } from "sonner";
 
 type Profile = {
   id: string;
@@ -83,6 +84,7 @@ export default function SettingsClient({ profile }: Props) {
   
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [formErrors, setFormErrors] = useState<{name?: string, username?: string}>({});
   const [, startTransition] = useTransition();
   const router = useRouter();
 
@@ -105,7 +107,7 @@ export default function SettingsClient({ profile }: Props) {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       if (file.size > 2 * 1024 * 1024) {
-        alert("File size exceeds 2MB limit.");
+        toast.error("File size exceeds 2MB limit.");
         return;
       }
       const reader = new FileReader();
@@ -134,15 +136,22 @@ export default function SettingsClient({ profile }: Props) {
     setIsDeleting(true);
     const res = await deleteAccount();
     if (res.error) {
-      alert(res.error);
+      toast.error(res.error);
       setIsDeleting(false);
     } else {
+      toast.success("Account deleted");
       signOut({ callbackUrl: "/" });
     }
   };
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    const errors: {name?: string, username?: string} = {};
+    if (!name.trim()) errors.name = "Display name is required.";
+    if (!username.trim()) errors.username = "Username is required.";
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setStatus("saving");
     setErrorMsg("");
 
@@ -156,14 +165,17 @@ export default function SettingsClient({ profile }: Props) {
       if (!res.ok) {
         setStatus("error");
         setErrorMsg(data.error ?? "Something went wrong");
+        toast.error(data.error ?? "Failed to save settings");
       } else {
         setStatus("saved");
+        toast.success("Settings saved successfully");
         router.refresh();
         setTimeout(() => setStatus("idle"), 2500);
       }
     } catch {
       setStatus("error");
       setErrorMsg("Network error. Please try again.");
+      toast.error("Network error. Please try again.");
     }
   }
 
@@ -339,10 +351,11 @@ export default function SettingsClient({ profile }: Props) {
                   id="s-name"
                   className="input"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => { setName(e.target.value); setFormErrors(p => ({...p, name: ""})); }}
                   maxLength={60}
                   placeholder="How others see your name"
                 />
+                {formErrors.name && <span className="text-red-500 text-xs mt-1 block">{formErrors.name}</span>}
               </div>
 
               {/* Username */}
@@ -355,10 +368,12 @@ export default function SettingsClient({ profile }: Props) {
                   id="s-username"
                   className="input"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                  onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "")); setFormErrors(p => ({...p, username: ""})); }}
                   maxLength={32}
                   placeholder="yourname"
                 />
+                {formErrors.username && <span className="text-red-500 text-xs mt-1 block">{formErrors.username}</span>}
+                {errorMsg && errorMsg.toLowerCase().includes("username") && <span className="text-red-500 text-xs mt-1 block">{errorMsg}</span>}
               </div>
 
               {/* Callsign */}

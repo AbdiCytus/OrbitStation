@@ -817,3 +817,67 @@ export async function deleteAccount() {
     return { error: 'Failed to delete account' };
   }
 }
+
+// ============================================================
+// NOTIFICATION ACTIONS
+// ============================================================
+
+export async function getNotificationStats() {
+  const user = await requireAuth();
+
+  const [unreadMessages, pendingRequests] = await Promise.all([
+    db.chatMessage.count({
+      where: {
+        receiverId: user.id,
+        isRead: false
+      }
+    }),
+    db.friendship.count({
+      where: {
+        receiverId: user.id,
+        status: "PENDING"
+      }
+    })
+  ]);
+
+  // Unread per friend
+  const unreadPerFriendData = await db.chatMessage.groupBy({
+    by: ['senderId'],
+    where: {
+      receiverId: user.id,
+      isRead: false
+    },
+    _count: {
+      id: true
+    }
+  });
+
+  const unreadPerFriend = unreadPerFriendData.reduce((acc, curr) => {
+    acc[curr.senderId] = curr._count.id;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return {
+    totalUnreadMessages: unreadMessages,
+    totalPendingRequests: pendingRequests,
+    hasNotifications: unreadMessages > 0 || pendingRequests > 0,
+    unreadPerFriend
+  };
+}
+
+export async function markChatAsRead(senderId: string) {
+  const user = await requireAuth();
+  
+  await db.chatMessage.updateMany({
+    where: {
+      senderId,
+      receiverId: user.id,
+      isRead: false
+    },
+    data: {
+      isRead: true
+    }
+  });
+
+  return { success: true };
+}

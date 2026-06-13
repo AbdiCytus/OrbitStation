@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition, useCallback, useEffect } from "react";
+import { useState, useMemo, useTransition, useCallback, useEffect, useRef } from "react";
 import type { StationWithSectors, SectorWithBeacons, Beacon } from "@/types";
 import BeaconCard from "@/components/beacon-card";
 import AddBeaconModal from "@/components/add-beacon-modal";
@@ -19,6 +19,8 @@ import {
   PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon 
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNotifications } from "@/hooks/use-notifications";
+import { toast } from "sonner";
 
 type Props = {
   initialStation: StationWithSectors | null;
@@ -34,6 +36,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const [isExiting, setIsExiting] = useState(false);
   const [isEntering, setIsEntering] = useState(true);
   const [funFact, setFunFact] = useState("");
+
+  const { stats, refetch: refetchNotifications } = useNotifications();
 
   const FUN_FACTS = [
     "Did you know? A day on Venus is longer than a year on Venus.",
@@ -76,9 +80,36 @@ export default function StationClient({ initialStation, initialCollabSectors = [
     }, delay);
   }, [displaySectorId, isExiting, user.animationEnabled]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [localSearchQuery, setLocalSearchQuery] = useState("");
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [filterVisibility, setFilterVisibility] = useState<"all" | "public" | "private">("all");
   const [sortBy, setSortBy] = useState<"date" | "name" | "sector" | "creator" | "visits">("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [isFilterExiting, setIsFilterExiting] = useState(false);
+  const [isFilterEntering, setIsFilterEntering] = useState(false);
+  
+  const applyFilterSort = (updateFn: () => void) => {
+    if (!user.animationEnabled) {
+      updateFn();
+      return;
+    }
+    setIsFilterExiting(true);
+    setTimeout(() => {
+      updateFn();
+      setIsFilterExiting(false);
+      setIsFilterEntering(true);
+      setTimeout(() => setIsFilterEntering(false), 500);
+    }, 300);
+  };
+
+  const handleSearchChange = (val: string) => {
+    setLocalSearchQuery(val);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
+      applyFilterSort(() => setSearchQuery(val));
+    }, 300);
+  };
+
   const [openMenu, setOpenMenu] = useState<"filter" | "sort" | null>(null);
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
   const [editingBeacon, setEditingBeacon] = useState<Beacon | null>(null);
@@ -286,6 +317,9 @@ export default function StationClient({ initialStation, initialCollabSectors = [
         setActiveSectorId("all");
         setDisplaySectorId("all");
         setEditingSector(null);
+        toast.success("Sector deleted successfully");
+      } else {
+        toast.error(result.error || "Failed to delete sector");
       }
     });
   }, [startTransition]);
@@ -343,6 +377,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
         hideSearch={true}
         displayName={displayName}
         onOpenFriends={() => setShowFriendsModal(true)}
+        stats={stats}
       />
 
       <div className="station-layout">
@@ -369,7 +404,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
               <span className="sector-tab-icon"><DynamicIcon name="GlobeAltIcon" /></span>
               <span className="sector-tab-name">All Beacons</span>
               <span className="sector-tab-count">
-                {allSectors.reduce((a, s) => a + s.beacons.length, 0)}
+                {personalSectors.reduce((a, s) => a + s.beacons.length, 0)}
               </span>
             </button>
 
@@ -570,7 +605,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                             key={opt.id}
                             className="dropdown-option-btn"
                             style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", background: filterVisibility === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", textAlign: "left", fontSize: "0.85rem", transition: "all 0.2s" }}
-                            onClick={() => { setFilterVisibility(opt.id as any); setOpenMenu(null); }}
+                            onClick={() => { applyFilterSort(() => setFilterVisibility(opt.id as any)); setOpenMenu(null); }}
                           >
                             {opt.label}
                             {filterVisibility === opt.id && <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />}
@@ -605,14 +640,14 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                           <button
                             className="dropdown-option-btn hover:bg-white/5"
                             style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", border: "none", background: "transparent", color: "inherit", cursor: "pointer", textAlign: "left", fontSize: "0.85rem" }}
-                            onClick={() => setSortBy(opt.id as any)}
+                            onClick={() => { applyFilterSort(() => setSortBy(opt.id as any)); }}
                           >
                             {opt.label}
                             {sortBy === opt.id && <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />}
                           </button>
                           {sortBy === opt.id && (
                             <button
-                              onClick={(e) => { e.stopPropagation(); setSortDir(d => d === "asc" ? "desc" : "asc"); }}
+                              onClick={(e) => { e.stopPropagation(); applyFilterSort(() => setSortDir(d => d === "asc" ? "desc" : "asc")); }}
                               style={{ padding: "0.5rem", background: "rgba(255,255,255,0.05)", border: "none", borderLeft: "1px solid rgba(255,255,255,0.1)", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                               className="hover:bg-white/10"
                               title={`Sort ${sortDir === "asc" ? "Descending" : "Ascending"}`}
@@ -635,8 +670,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                       id="beacon-search-input"
                       type="text"
                       placeholder="Search beacons... (Ctrl+K)"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      value={localSearchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
                       style={{
                         width: "100%",
                         height: "38px",
@@ -696,26 +731,27 @@ export default function StationClient({ initialStation, initialCollabSectors = [
             <div className={`beacon-masonry ${isExiting ? "exiting" : isEntering ? "entering" : ""}`} key={displaySectorId}>
               {columnWrapper.map((colItems, colIndex) => (
                 <div className="beacon-masonry-col" key={`col-${colIndex}`}>
-                  <AnimatePresence>
-                    {colItems.map(({ beacon, globalIndex }) => (
-                      <motion.div
-                        layout={user.animationEnabled}
-                        layoutId={user.animationEnabled ? `${displaySectorId}-${beacon.id}` : undefined}
-                        initial={user.animationEnabled ? { opacity: 0, scale: 0.8 } : undefined}
-                        animate={user.animationEnabled ? { opacity: 1, scale: 1 } : undefined}
-                        exit={user.animationEnabled ? { opacity: 0, scale: 0.8 } : undefined}
-                        transition={{ duration: 0.3, type: "spring", bounce: 0.2 }}
-                        key={beacon.id}
-                      >
-                        <BeaconCard
-                          beacon={beacon}
-                          index={globalIndex}
-                          onClick={() => setSelectedBeacon(beacon)}
-                          onEdit={() => setEditingBeacon(beacon)}
-                        />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                  {colItems.map(({ beacon, globalIndex }) => (
+                    <div
+                      className={`
+                        beacon-card-wrapper
+                        ${isFilterExiting ? 'beacon-filter-exiting' : ''}
+                        ${isFilterEntering ? 'beacon-filter-entering' : ''}
+                      `}
+                      style={{ 
+                        animationDelay: user.animationEnabled ? `${globalIndex * 0.03}s` : '0s',
+                        transformOrigin: "center center"
+                      }}
+                      key={beacon.id}
+                    >
+                      <BeaconCard
+                        beacon={beacon}
+                        index={globalIndex}
+                        onClick={() => setSelectedBeacon(beacon)}
+                        onEdit={() => setEditingBeacon(beacon)}
+                      />
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
@@ -727,6 +763,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
         isOpen={showFriendsModal} 
         onClose={() => setShowFriendsModal(false)} 
         user={user} 
+        stats={stats}
+        refetchStats={refetchNotifications}
       />
 
       {/* Modals */}

@@ -19,8 +19,13 @@ export async function POST(req: Request) {
 
   const hashed = await bcrypt.hash(password, 12);
 
+  let username = `Pilot${Math.floor(1000 + Math.random() * 9000)}`;
+  while (await db.user.findUnique({ where: { username } })) {
+    username = `Pilot${Math.floor(1000 + Math.random() * 9000)}`;
+  }
+
   await db.user.create({
-    data: { email, name, password: hashed },
+    data: { email, name, password: hashed, username },
   });
 
   return NextResponse.json({ success: true });

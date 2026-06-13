@@ -37,6 +37,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  events: {
+    async createUser({ user }) {
+      if (!user.username) {
+        let isUnique = false;
+        let generatedUsername = "";
+        while (!isUnique) {
+          generatedUsername = `Pilot${Math.floor(1000 + Math.random() * 9000)}`;
+          const existingUser = await db.user.findUnique({ where: { username: generatedUsername }});
+          if (!existingUser) isUnique = true;
+        }
+        await db.user.update({
+          where: { id: user.id },
+          data: { username: generatedUsername, name: user.name || "New Pilot" }
+        });
+      }
+    }
+  },
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, trigger, session }) {

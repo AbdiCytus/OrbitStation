@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { updateSector, getFriends, removeCollaborator, sendTransferOwnershipInvite, hasCollabInvites, getPendingCollabInvites, getSectorOwner } from "@/lib/actions";
 import type { SectorWithBeacons } from "@/types";
+import { toast } from "sonner";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
 import { DynamicIcon, ICON_OPTIONS } from "@/components/dynamic-icon";
 
@@ -36,6 +38,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
   const otherSectors = sectors.filter(s => s.id !== sector.id);
   const [moveToSectorId, setMoveToSectorId] = useState<string>(otherSectors[0]?.id ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{name?: string}>({});
 
   const [friends, setFriends] = useState<any[]>([]);
   const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
@@ -68,7 +71,10 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      setFormErrors({ name: "Sector Name is required." });
+      return;
+    }
     setLoading(true);
     setError(null);
     
@@ -82,16 +88,18 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
     setLoading(false);
     if (result.error) {
       setError(result.error);
+      toast.error(result.error || "Failed to update sector");
     } else if (result.data) {
+      toast.success("Sector updated successfully");
       onUpdated({ ...sector, name, icon, color, isPublic } as SectorWithBeacons & { isPublic: boolean });
     }
   }
 
   return (
     <div className={`modal-overlay ${isClosing ? "closing" : ""}`} onClick={handleClose} role="dialog" aria-modal="true" aria-label="Edit Sector" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", overflowY: "auto" }}>
-      <div style={{ display: "flex", gap: "1rem", flexDirection: "row", alignItems: "stretch", justifyContent: "center", width: "100%", maxWidth: rightPanelMode ? "1170px" : "750px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: "flex", rowGap: "1rem", flexDirection: "row", alignItems: "stretch", justifyContent: "center", width: "100%", maxWidth: "1170px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
         {/* MAIN PANEL */}
-        <div className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ flex: "1 1 500px", maxWidth: "750px", margin: 0, display: "flex", flexDirection: "column" }}>
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ flex: "1 1 750px", maxWidth: "750px", margin: 0, display: "flex", flexDirection: "column", animation: isClosing ? undefined : "none" }}>
         <div className="modal-header">
           <h2 className="modal-title">Edit Sector</h2>
           {!rightPanelMode && (
@@ -111,11 +119,11 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                   className="input"
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => { setName(e.target.value); setFormErrors({}); }}
                   maxLength={40}
-                  required
                   autoFocus
                 />
+                {formErrors.name && <span className="text-red-500 text-xs mt-1 block">{formErrors.name}</span>}
               </div>
 
               {/* Icon picker */}
@@ -291,25 +299,38 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
           {error && <p className="form-error" style={{ marginTop: "1rem" }}>{error}</p>}
 
           <div className="modal-actions" style={{ flexWrap: "wrap", marginTop: "1.5rem", display: "flex", alignItems: "center" }}>
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
             <div style={{ flex: 1 }} />
             <button
               id="btn-save-sector"
               type="submit"
               className="btn btn-primary"
-              disabled={loading || !name.trim()}
+              disabled={loading}
             >
               {loading ? <span className="spinner" /> : "Save Changes"}
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
 
       {/* SECOND PANEL (Collab Members & Invite) */}
-      {rightPanelMode && (
-        <div className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ flex: "1 1 300px", maxWidth: "400px", margin: 0, display: "flex", flexDirection: "column" }}>
+      <AnimatePresence>
+        {rightPanelMode && (
+          <motion.div 
+            className={`modal-panel ${isClosing ? "closing" : ""} glass`} 
+            style={{ maxWidth: "400px", margin: 0, display: "flex", flexDirection: "column", animation: isClosing ? undefined : "none", overflow: "hidden" }}
+            initial={{ opacity: 0, scale: 0.95, flex: "0 0 0px", marginLeft: 0 }}
+            animate={{ opacity: 1, scale: 1, flex: "1 1 300px", marginLeft: "1rem" }}
+            exit={{ opacity: 0, scale: 0.95, flex: "0 0 0px", marginLeft: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+          <div style={{ minWidth: "300px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <div className="modal-header" style={{ paddingBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
-            <h3 className="modal-title" style={{ fontSize: "1.1rem" }}>{rightPanelMode === "members" ? "Members" : "Invite Friends"}</h3>
+            <h3 className="modal-title flex items-center gap-2" style={{ fontSize: "1.1rem" }}>
+              {rightPanelMode === "members" ? (
+                <>Members <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span></>
+              ) : "Invite Friends"}
+            </h3>
             <button className="btn-icon modal-close" onClick={() => setRightPanelMode(null)} aria-label="Close">✕</button>
           </div>
           <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "0 1.5rem 1.5rem 1.5rem" }}>
@@ -317,11 +338,19 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                 {/* Active Collaborators */}
                 {rightPanelMode === "members" && (
                   <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>
-                    <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem", paddingRight: "0.5rem" }}>
+                    <motion.div 
+                      style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem", paddingRight: "0.5rem" }}
+                      initial="hidden" animate="visible"
+                      variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } }}
+                    >
                       
                       {/* Owner */}
                       {sectorOwner && (
-                        <div className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" style={{ padding: "0.5rem 1rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}>
+                        <motion.div 
+                          className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" 
+                          style={{ padding: "0.5rem 1rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                          variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                        >
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                               {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
@@ -332,12 +361,17 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                             </p>
                           </div>
                           <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest">Owner</span>
-                        </div>
+                        </motion.div>
                       )}
 
                       {/* Active Members */}
                       {localCollaborators?.map((c: any) => (
-                        <div key={c.user.id} className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}>
+                        <motion.div 
+                          key={c.user.id} 
+                          className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" 
+                          style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                          variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                        >
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                               {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
@@ -355,7 +389,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                               <DynamicIcon name="UserMinusIcon" width={16} height={16} />
                             </button>
                           </div>
-                        </div>
+                        </motion.div>
                       ))}
 
                       {/* Pending Members */}
@@ -363,7 +397,12 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
                           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2" style={{ marginBottom: "1rem" }}>Pending Invites</div>
                           {pendingMembers.map((u: any) => (
-                            <div key={u.id} className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] transition-colors group opacity-60" style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}>
+                            <motion.div 
+                              key={u.id} 
+                              className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] transition-colors group opacity-60" 
+                              style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                              variants={{ hidden: { opacity: 0, y: -10 }, visible: { opacity: 0.6, y: 0 } }}
+                            >
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                                   {u.image ? <img src={u.image} alt={u.name ?? ""} className="w-full h-full object-cover grayscale" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(u.name || u.username || "?")[0].toUpperCase()}</span>}
@@ -371,11 +410,11 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                                 <p className="text-sm font-medium text-gray-300 truncate">{u.name || u.username}</p>
                               </div>
                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
-                            </div>
+                            </motion.div>
                           ))}
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   </div>
                 )}
 
@@ -386,12 +425,21 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                       <span>Select Friends</span>
                       <span style={{ fontSize: "0.8rem", color: "var(--color-violet-glow)" }}>{invitedFriends.length} selected</span>
                     </label>
-                    <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <motion.div 
+                      style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}
+                      initial="hidden" animate="visible"
+                      variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } }}
+                    >
                       {friends.length === 0 ? (
-                        <p className="text-gray-400 text-sm text-center mt-4">You have no friends to invite yet.</p>
+                        <p className="text-gray-400 text-sm m-auto text-center" style={{ padding: "2rem 0" }}>You have no friends to invite yet.</p>
                       ) : (
                         friends.filter(f => !localCollaborators?.find((c: any) => c.user.id === f.id) && !pendingMembers.find((p: any) => p.id === f.id)).map(f => (
-                          <label key={f.id} className="flex items-center rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group" style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}>
+                          <motion.label 
+                            key={f.id} 
+                            className="flex items-center rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group" 
+                            style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                            variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                          >
                             <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                               {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
                             </div>
@@ -410,24 +458,41 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                                 else setInvitedFriends(prev => prev.filter(id => id !== f.id));
                               }}
                             />
-                          </label>
+                          </motion.label>
                         ))
                       )}
-                    </div>
+                    </motion.div>
                   </div>
                 )}
 
-              </div>
-        </div>
-      )}
-      </div>
+                {/* Right panel save button */}
+                <div style={{ marginTop: "auto", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                  <button type="button" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => setRightPanelMode(null)}>
+                    Done
+                  </button>
+                </div>
 
+              </div>
+          </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        </div>
+
+      <AnimatePresence>
       {(removingMemberId || transferringTo) && (
-        <div 
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center backdrop-blur-sm" 
           onClick={(e) => { e.stopPropagation(); setRemovingMemberId(null); setTransferringTo(null); }}
         >
-          <div 
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="bg-[#0b0c10] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col" 
             style={{ borderRadius: "2rem", maxWidth: "24rem", width: "100%", padding: "2.5rem" }}
             onClick={(e) => e.stopPropagation()}
@@ -458,19 +523,30 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
               <button type="button" className={`flex-1 text-white rounded-2xl transition-all font-medium text-sm shadow-xl ${removingMemberId ? "bg-[#e11d48] hover:bg-[#be123c] shadow-pink-500/20" : "bg-[#8b5cf6] hover:bg-[#7c3aed] shadow-violet-500/20"}`} style={{ padding: "0.75rem 0" }} onClick={async () => {
                 if (removingMemberId) {
                   const id = removingMemberId; setRemovingMemberId(null);
-                  await removeCollaborator(sector.id, id);
-                  setLocalCollaborators(prev => prev.filter((c: any) => c.user.id !== id));
+                  const result = await removeCollaborator(sector.id, id);
+                  if (result?.error) {
+                    toast.error(result.error);
+                  } else {
+                    toast.success("Member removed from sector");
+                    setLocalCollaborators(prev => prev.filter((c: any) => c.user.id !== id));
+                  }
                 } else {
                   const id = transferringTo; setTransferringTo(null);
-                  await sendTransferOwnershipInvite(sector.id, id!);
+                  const result = await sendTransferOwnershipInvite(sector.id, id!);
+                  if (result?.error) {
+                    toast.error(result.error);
+                  } else {
+                    toast.success("Ownership transfer request sent");
+                  }
                 }
               }}>
                 {removingMemberId ? "Remove" : "Transfer"}
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 }

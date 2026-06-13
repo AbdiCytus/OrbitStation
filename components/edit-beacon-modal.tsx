@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { updateBeacon, deleteBeacon } from "@/lib/actions";
+import { useMetaFetcher } from "@/hooks/use-meta-fetcher";
 import type { Beacon, SectorWithBeacons } from "@/types";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { toast } from "sonner";
 
 type Props = {
   beacon: Beacon;
@@ -27,6 +29,36 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{url?: string, title?: string}>({});
+
+  const { data: meta, loading: metaLoading, fetchMeta } = useMetaFetcher();
+
+  useEffect(() => {
+    if (meta) {
+      setTitle(meta.title ?? title);
+      setDescription(meta.description ?? description);
+      if (meta.imageUrl) setImageUrl(meta.imageUrl);
+      if (meta.faviconUrl) setFaviconUrl(meta.faviconUrl);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meta]);
+
+  function normalizeUrl(raw: string): string {
+    const trimmed = raw.trim();
+    if (!trimmed) return trimmed;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith("//")) return `https:${trimmed}`;
+    return `https://${trimmed}`;
+  }
+
+  async function handleUrlBlur() {
+    const normalized = normalizeUrl(url);
+    const cleaned = normalized.replace(/^https?:\/\//, "");
+    if (cleaned !== url) setUrl(cleaned);
+    if (normalized.length > 8 && normalized.includes(".")) {
+      await fetchMeta(normalized);
+    }
+  }
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -42,7 +74,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 500 * 1024) {
-      alert("Icon size must be less than 500KB.");
+      toast.error("Icon size must be less than 500KB.");
       return;
     }
     const reader = new FileReader();
@@ -58,7 +90,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { // 2MB for banner
-      alert("Banner image size must be less than 2MB.");
+      toast.error("Banner image size must be less than 2MB.");
       return;
     }
     const reader = new FileReader();
@@ -72,10 +104,16 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim()) return;
+    const finalUrl = (url.trim().startsWith("http://") || url.trim().startsWith("https://")) ? url.trim() : "https://" + url.trim();
+    const errors: {url?: string, title?: string} = {};
+    if (!url.trim()) errors.url = "URL is required.";
+    if (!title.trim()) errors.title = "Title is required.";
+    
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setLoading(true);
     setError(null);
-    const finalUrl = (url.trim().startsWith("http://") || url.trim().startsWith("https://")) ? url.trim() : "https://" + url.trim();
     const result = await updateBeacon(beacon.id, {
       sectorId,
       url: finalUrl,
@@ -88,14 +126,21 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
     setLoading(false);
     if (result.error) {
       setError(result.error);
+      toast.error(result.error || "Failed to update beacon");
     } else if (result.data) {
+      toast.success("Beacon updated successfully");
       onUpdated(result.data);
     }
   }
 
   async function handleDelete() {
     const result = await deleteBeacon(beacon.id);
-    if (!result.error) onDeleted(beacon.id);
+    if (result.error) {
+      toast.error(result.error || "Failed to delete beacon");
+    } else {
+      toast.success("Beacon deleted successfully");
+      onDeleted(beacon.id);
+    }
   }
 
   const domain = (() => {
@@ -148,7 +193,11 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
             </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="edit-beacon-url">URL</label>
+            <label className="form-label" htmlFor="edit-beacon-url">
+              URL
+              {metaLoading && <span className="form-label-hint">⟳ Fetching metadata…</span>}
+              {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
+            </label>
             <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
               <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>
               <input
@@ -156,12 +205,13 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
                 className="input input-url"
                 type="text"
                 value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                onChange={(e) => { setUrl(e.target.value); setFormErrors(p => ({...p, url: undefined})); }}
+                onBlur={handleUrlBlur}
                 placeholder="example.com"
-                required
                 style={{ border: "none", background: "transparent", paddingLeft: "0", flex: 1 }}
               />
             </div>
+            {formErrors.url && <span className="text-red-500 text-xs mt-1 block">{formErrors.url}</span>}
           </div>
 
           {/* Title */}
@@ -172,11 +222,11 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
               className="input"
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => { setTitle(e.target.value); setFormErrors(p => ({...p, title: undefined})); }}
               maxLength={100}
-              required
               autoFocus
             />
+            {formErrors.title && <span className="text-red-500 text-xs mt-1 block">{formErrors.title}</span>}
           </div>
 
           {/* Description */}
@@ -288,7 +338,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
               type="button"
               onClick={handleSave}
               className="btn btn-primary"
-              disabled={loading || !title.trim() || !url.trim()}
+              disabled={loading}
             >
               {loading ? <span className="spinner" /> : "Save Changes"}
             </button>
