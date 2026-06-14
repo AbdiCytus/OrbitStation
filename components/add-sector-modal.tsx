@@ -302,7 +302,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
             <div style={{ minWidth: "300px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
             <div className="modal-header" style={{ paddingBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
               <h3 className="modal-title" style={{ fontSize: "1.1rem" }}>Invite Friends</h3>
-              <button className="btn-icon modal-close" onClick={() => setShowInvite(false)} aria-label="Close">✕</button>
+              <button className="btn-icon modal-close" style={{ display: isMobile ? "flex" : "none" }} onClick={() => setShowInvite(false)} aria-label="Close">✕</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "0 1.5rem 1.5rem 1.5rem" }}>
               <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>

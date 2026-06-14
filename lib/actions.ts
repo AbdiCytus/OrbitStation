@@ -524,6 +524,15 @@ export async function toggleBeaconPin(beaconId: string) {
     return { error: "Beacon not found or access denied" };
   }
 
+  if (!beacon.isPinned) {
+    const pinnedCount = await db.beacon.count({
+      where: { sectorId: beacon.sectorId, isPinned: true },
+    });
+    if (pinnedCount >= 10) {
+      return { error: "Maximum 10 pinned beacons per sector allowed." };
+    }
+  }
+
   const updated = await db.beacon.update({
     where: { id: beaconId },
     data: { isPinned: !beacon.isPinned },

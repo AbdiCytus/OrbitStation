@@ -29,9 +29,12 @@ export default async function StationPage() {
       user={{
         id: session.user.id ?? "",
         name: profile?.name ?? session.user.name ?? null,
+        username: profile?.username ?? null,
         image: profile?.image ?? session.user.image ?? null,
         callsign: profile?.callsign ?? null,
         animationEnabled: profile?.animationEnabled ?? true,
+        hologramEnabled: (profile as any)?.hologramEnabled ?? true,
+        station: { isPublic: profile?.station?.isPublic ?? false },
       }}
     />
   );

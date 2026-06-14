@@ -19,6 +19,7 @@ type Profile = {
   titleBadge: string | null;
   callsign: string | null;
   animationEnabled: boolean;
+  hologramEnabled: boolean;
   station: { isPublic: boolean } | null;
 };
 
@@ -79,6 +80,7 @@ export default function SettingsClient({ profile }: Props) {
   const [bannerUrl, setBannerUrl] = useState(profile.bannerUrl ?? "");
   const [titleBadge, setTitleBadge] = useState(profile.titleBadge ?? "");
   const [animationEnabled, setAnimationEnabled] = useState(profile.animationEnabled);
+  const [hologramEnabled, setHologramEnabled] = useState(profile.hologramEnabled);
   const [isPublic, setIsPublic] = useState(profile.station?.isPublic ?? false);
   const [image, setImage] = useState(profile.image ?? "");
   
@@ -159,7 +161,7 @@ export default function SettingsClient({ profile }: Props) {
       const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, isPublic, image }),
+        body: JSON.stringify({ name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, isPublic, image }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -256,6 +258,25 @@ export default function SettingsClient({ profile }: Props) {
                     type="checkbox"
                     checked={animationEnabled}
                     onChange={(e) => setAnimationEnabled(e.target.checked)}
+                  />
+                  <span className="toggle-thumb" />
+                </label>
+              </div>
+
+              {/* Hologram toggle */}
+              <div className="settings-toggle-row desktop-only" style={{ marginTop: "1rem" }}>
+                <div className="settings-toggle-info">
+                  <span className="settings-toggle-label">Hologram Effect</span>
+                  <span className="settings-toggle-desc">
+                    Show a holographic text effect when hovering over beacons.
+                  </span>
+                </div>
+                <label className="toggle-switch" htmlFor="toggle-hologram">
+                  <input
+                    id="toggle-hologram"
+                    type="checkbox"
+                    checked={hologramEnabled}
+                    onChange={(e) => setHologramEnabled(e.target.checked)}
                   />
                   <span className="toggle-thumb" />
                 </label>

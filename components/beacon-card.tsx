@@ -2,7 +2,7 @@
 
 import type { Beacon } from "@/types";
 import { incrementBeaconVisit } from "@/lib/actions";
-import { PencilSquareIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
+import { PencilSquareIcon, ArrowTopRightOnSquareIcon, InformationCircleIcon } from "@heroicons/react/20/solid";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
 type Props = {
@@ -10,13 +10,21 @@ type Props = {
   onClick: () => void;
   onEdit?: () => void;
   index?: number; // For stagger animation
+  isCollab?: boolean;
+  sectorName?: string;
+  isAllBeacons?: boolean;
 };
 
-export default function BeaconCard({ beacon, onClick, onEdit, index = 0 }: Props) {
+export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isCollab = false, sectorName, isAllBeacons }: Props) {
   function handleVisit(e: React.MouseEvent) {
     e.stopPropagation();
     incrementBeaconVisit(beacon.id);
     window.open(beacon.url, "_blank", "noopener,noreferrer");
+  }
+
+  function handleDetail(e: React.MouseEvent) {
+    e.stopPropagation();
+    onClick();
   }
 
   function handleEdit(e: React.MouseEvent) {
@@ -33,7 +41,7 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0 }: Props
     <article
       className="beacon-card glass"
       style={{ "--enter-delay": `${Math.min(index * 60, 600)}ms` } as React.CSSProperties}
-      onClick={onClick}
+      onClick={handleVisit}
       role="button"
       tabIndex={0}
       aria-label={`Beacon: ${beacon.title}`}
@@ -65,6 +73,13 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0 }: Props
         )}
       </div>
 
+      {/* Hologram Effect (Desktop Only, All Beacons Only) */}
+      {isAllBeacons && sectorName && (
+        <div className="beacon-hologram" aria-hidden="true">
+          <span className="beacon-hologram-text">{sectorName.toUpperCase()}</span>
+        </div>
+      )}
+
       {/* Content */}
       <div className="beacon-card-body">
         <div className="beacon-card-meta">
@@ -86,7 +101,7 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0 }: Props
         {beacon.description && (
           <p className="beacon-card-desc">{beacon.description}</p>
         )}
-        {beacon._creator && (
+        {beacon._creator && isCollab && (
           <div style={{ marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
             {beacon._creator.image ? (
               <img src={beacon._creator.image} alt={beacon._creator.name || "?"} style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }} />
@@ -116,12 +131,12 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0 }: Props
         )}
         <button
           className="btn btn-primary btn-sm"
-          onClick={handleVisit}
-          aria-label={`Visit ${beacon.title}`}
-          id={`btn-visit-${beacon.id}`}
-          style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.375rem" }}
+          onClick={handleDetail}
+          aria-label={`Details for ${beacon.title}`}
+          id={`btn-detail-${beacon.id}`}
+          style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "0.375rem" }}
         >
-          Visit <ArrowTopRightOnSquareIcon width={14} height={14} />
+          <InformationCircleIcon width={16} height={16} /> Details
         </button>
       </div>
     </article>

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { PublicStationPage, Beacon } from "@/types";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import BeaconDetailModal from "@/components/beacon-detail-modal";
 import StationNavbar from "@/components/station-navbar";
 import { incrementBeaconVisit } from "@/lib/actions";
+import { useRouter } from "next/navigation";
+import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import "./public-profile.css";
 
 type Props = {
@@ -13,7 +15,7 @@ type Props = {
   sessionUser?: any;
 };
 
-function CosmicBackground({ enabled }: { enabled: boolean }) {
+function CosmicBackground({ enabled, isMobile }: { enabled: boolean; isMobile: boolean }) {
   if (!enabled) {
     return (
       <div className="cosmic-bg">
@@ -29,10 +31,10 @@ function CosmicBackground({ enabled }: { enabled: boolean }) {
       <div className="cosmic-blackhole">
         <div className="accretion-disk"></div>
       </div>
-      <div className="cosmic-asteroids"></div>
+      {!isMobile && <div className="cosmic-asteroids"></div>}
       <div className="cosmic-comet"></div>
-      <div className="cosmic-comet comet-2"></div>
-      <div className="cosmic-dust"></div>
+      {!isMobile && <div className="cosmic-comet comet-2"></div>}
+      {!isMobile && <div className="cosmic-dust"></div>}
     </div>
   );
 }
@@ -48,8 +50,18 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
   );
   
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
+  const [stationSearch, setStationSearch] = useState("");
+  const router = useRouter();
 
-  const visibleBeacons = (sectors.find((s) => s.id === activeSectorId)?.beacons ?? []).slice(0, 6);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const visibleBeacons = (sectors.find((s) => s.id === activeSectorId)?.beacons ?? []).slice(0, 10);
 
   function handleBeaconClick(beacon: Beacon) {
     incrementBeaconVisit(beacon.id);
@@ -63,7 +75,7 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
 
   const isAnimationEnabled = sessionUser && 'animationEnabled' in sessionUser 
     ? sessionUser.animationEnabled 
-    : user.animationEnabled;
+    : false;
 
   return (
     <>
@@ -71,12 +83,20 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
       <StationNavbar 
         user={sessionUser} 
         displayName={sessionUser?.name || "Pilot"} 
-        hideSearch={true} 
-        hideProfile={true}
+        hideSearch={false}
+        searchQuery={stationSearch}
+        onSearchChange={setStationSearch}
+        searchPlaceholder={isMobile ? "Find Pilot" : "Find another pilot station"}
+        onSearchSubmit={() => {
+          if (stationSearch.trim()) {
+            router.push(`/station/${stationSearch.trim()}`);
+          }
+        }}
+        isPublicProfile={true}
       />
 
       {/* Background Canvas: Kosmik, Aurora, Komet, Blackhole */}
-      <CosmicBackground enabled={isAnimationEnabled} />
+      <CosmicBackground enabled={isAnimationEnabled} isMobile={isMobile} />
 
       <div className="zzz-wrapper" style={{ top: "60px" }}>
         {/* Modal Container */}
@@ -85,7 +105,7 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
           {/* Modal Background Sparkles */}
           {isAnimationEnabled && (
             <div className="zzz-modal-bg" aria-hidden="true">
-              {Array.from({ length: 30 }).map((_, i) => {
+              {Array.from({ length: isMobile ? 10 : 30 }).map((_, i) => {
                 // Deterministic pseudo-random values to prevent hydration errors
                 const r1 = (i * 13) % 100;
                 const r2 = (i * 29) % 100;
@@ -168,7 +188,7 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
                     className={`zzz-sector-tab ${activeSectorId === s.id ? "active" : ""}`}
                     onClick={() => setActiveSectorId(s.id)}
                   >
-                    {s.icon ? <DynamicIcon name={s.icon} /> : "📁"} {s.name} ({s.beacons.length})
+                    {s.icon ? <DynamicIcon name={s.icon} /> : "📁"} {s.name}
                   </button>
                 ))}
               </div>

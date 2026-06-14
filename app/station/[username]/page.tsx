@@ -65,9 +65,9 @@ export default async function PublicProfilePage({
 
   let sessionUser = session?.user || null;
   if (sessionUser?.id) {
-    const dbUser = await db.user.findUnique({ where: { id: sessionUser.id }, select: { animationEnabled: true } });
+    const dbUser = await db.user.findUnique({ where: { id: sessionUser.id }, select: { animationEnabled: true, image: true, name: true, callsign: true } });
     if (dbUser) {
-      sessionUser = { ...sessionUser, animationEnabled: dbUser.animationEnabled } as any;
+      sessionUser = { ...sessionUser, animationEnabled: dbUser.animationEnabled, image: dbUser.image || sessionUser.image, name: dbUser.name || sessionUser.name, callsign: dbUser.callsign } as any;
     }
   }
 

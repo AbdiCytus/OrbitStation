@@ -503,7 +503,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                 <>Members <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span></>
               ) : "Invite Friends"}
             </h3>
-            <button className="btn-icon modal-close" onClick={() => setRightPanelMode(null)} aria-label="Close">✕</button>
+            <button className="btn-icon modal-close" style={{ display: isMobile ? "flex" : "none" }} onClick={() => setRightPanelMode(null)} aria-label="Close">✕</button>
           </div>
           <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "0 1.5rem 1.5rem 1.5rem" }}>
                 
@@ -666,7 +666,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="bg-[#0b0c10] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col" 
-            style={{ borderRadius: "2rem", maxWidth: "24rem", width: "100%", padding: "2.5rem" }}
+            style={{ borderRadius: isMobile ? "1.5rem" : "2rem", maxWidth: "24rem", width: isMobile ? "90%" : "100%", padding: isMobile ? "1.5rem" : "2.5rem" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Gradient top line */}

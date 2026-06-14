@@ -24,7 +24,7 @@ export const authConfig: NextAuthConfig = {
         nextUrl.pathname.startsWith("/_next") ||
         nextUrl.pathname.startsWith("/favicon") ||
         // Halaman profil publik Station bisa diakses tanpa login
-        nextUrl.pathname.match(/^\/[^/]+$/) !== null;
+        (nextUrl.pathname.startsWith("/station/") && nextUrl.pathname !== "/station");
 
       if (isOnLoginPage || isOnRegisterPage) {
         if (isLoggedIn) {

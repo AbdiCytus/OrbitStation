@@ -61,7 +61,7 @@ export async function getCollabSectors() {
         }
       },
       station: {
-        select: { user: { select: { id: true, name: true } } }
+        select: { user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } } }
       }
     }
   });
@@ -138,7 +138,7 @@ export async function getPinnedBeacons(userId: string) {
       sector: { station: { userId } },
     },
     orderBy: { visits: "desc" },
-    take: 6, // Maksimal 6 beacon yang ditampilkan di profil
+    take: 10, // Maksimal 10 beacon yang ditampilkan di profil
     include: {
       sector: { select: { name: true, color: true } },
     },
@@ -167,6 +167,7 @@ export async function getMyProfile() {
       titleBadge: true,
       callsign: true,
       animationEnabled: true,
+      hologramEnabled: true,
       createdAt: true,
       station: {
         select: {

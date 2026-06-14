@@ -15,7 +15,7 @@ export default function NotFound() {
       textAlign: "center",
       padding: "2rem"
     }}>
-      <div style={{
+      <div className="not-found-card" style={{
         background: "rgba(20, 20, 35, 0.65)",
         border: "1px solid rgba(139, 92, 246, 0.3)",
         borderRadius: "24px",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useTransition, useCallback, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import type { StationWithSectors, SectorWithBeacons, Beacon } from "@/types";
 import BeaconCard from "@/components/beacon-card";
 import AddBeaconModal from "@/components/add-beacon-modal";
@@ -16,7 +17,7 @@ import StaticStarfield from "@/components/static-starfield";
 import { deleteSector } from "@/lib/actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { 
-  PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon
+  PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon, ArrowPathIcon
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -25,7 +26,7 @@ import { toast } from "sonner";
 type Props = {
   initialStation: StationWithSectors | null;
   initialCollabSectors?: (SectorWithBeacons & { collaborators?: any[] })[];
-  user: { id: string; name: string | null; image: string | null; callsign: string | null; animationEnabled: boolean };
+  user: { id: string; name: string | null; username?: string | null; image: string | null; callsign: string | null; animationEnabled: boolean; hologramEnabled?: boolean; station?: { isPublic: boolean } };
 };
 
 export default function StationClient({ initialStation, initialCollabSectors = [], user }: Props) {
@@ -37,6 +38,11 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const [isEntering, setIsEntering] = useState(true);
   const [funFact, setFunFact] = useState("");
 
+  const [touchStart, setTouchStart] = useState<{ x: number, y: number } | null>(null);
+  const [isIdle, setIsIdle] = useState(false);
+  const idleTimer = useRef<NodeJS.Timeout | null>(null);
+  const [shrinkingBeacons, setShrinkingBeacons] = useState<Set<string>>(new Set());
+
   const { stats, refetch: refetchNotifications } = useNotifications();
 
   const FUN_FACTS = [
@@ -45,8 +51,30 @@ export default function StationClient({ initialStation, initialCollabSectors = [
     "There's a planet made almost entirely of diamond twice the size of Earth.",
     "The footprints on the Moon will likely be there for 100 million years.",
     "Space is completely silent. There is no atmosphere to carry sound waves.",
+    "The Apollo 11 computer had less processing power than a modern smartphone.",
+    "One million Earths could fit inside the Sun.",
+    "There are more stars in the universe than grains of sand on Earth.",
+    "Jupiter has 95 officially recognized moons.",
+    "If two pieces of the same type of metal touch in space, they will bond permanently."
   ];
 
+
+  const router = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    setStation(initialStation);
+    setCollabSectors(initialCollabSectors);
+  }, [initialStation, initialCollabSectors]);
+
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    router.refresh();
+    setTimeout(() => {
+      setIsRefreshing(false);
+      toast.success("Sector data refreshed");
+    }, 1000);
+  }, [router]);
 
   // Clear entering class after animation
   useEffect(() => {
@@ -55,6 +83,39 @@ export default function StationClient({ initialStation, initialCollabSectors = [
       return () => clearTimeout(t);
     }
   }, [isEntering, displaySectorId]);
+
+  const resetIdleTimer = useCallback(() => {
+    setIsIdle(false);
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => setIsIdle(true), 3000);
+  }, []);
+
+  useEffect(() => {
+    resetIdleTimer();
+    return () => { if (idleTimer.current) clearTimeout(idleTimer.current); };
+  }, [resetIdleTimer]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    resetIdleTimer();
+    setTouchStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchEndX - touchStart.x;
+    const diffY = touchEndY - touchStart.y;
+
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 50 && !isSidebarOpen) {
+        setIsSidebarOpen(true);
+      } else if (isSidebarOpen && diffX < -50) {
+        setIsSidebarOpen(false);
+      }
+    }
+    setTouchStart(null);
+  };
 
   const handleTabClick = (sectorId: string | "all") => {
     setActiveSectorId(sectorId);
@@ -272,20 +333,35 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const handleBeaconUpdated = useCallback((updated: Beacon) => {
     setStation((prev) => {
       if (!prev) return prev;
-      return {
-        ...prev,
-        sectors: prev.sectors.map((s) => ({
-          ...s,
-          beacons: s.beacons.map((b) => b.id === updated.id ? updated : b),
-        })),
-      };
+      const oldBeacon = prev.sectors.flatMap(s => s.beacons).find(b => b.id === updated.id);
+      const sectorChanged = oldBeacon && oldBeacon.sectorId !== updated.sectorId;
+
+      if (sectorChanged && user.animationEnabled) {
+        setShrinkingBeacons(new Set([updated.id]));
+        setTimeout(() => {
+          setShrinkingBeacons(new Set());
+          setStation(p => {
+            if (!p) return p;
+            let ns = p.sectors.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== updated.id) }));
+            ns = ns.map(s => s.id === updated.sectorId ? { ...s, beacons: [...s.beacons, updated].sort((a,b) => a.order - b.order) } : s);
+            return { ...p, sectors: ns };
+          });
+        }, 300);
+        return prev; // don't update state yet
+      }
+
+      let newSectors = prev.sectors.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== updated.id) }));
+      newSectors = newSectors.map(s => s.id === updated.sectorId ? { ...s, beacons: [...s.beacons, updated].sort((a,b) => a.order - b.order) } : s);
+      return { ...prev, sectors: newSectors };
     });
-    setCollabSectors((prev) => 
-      prev.map(s => ({ ...s, beacons: s.beacons.map(b => b.id === updated.id ? updated : b) }))
-    );
+    setCollabSectors((prev) => {
+      let ns = prev.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== updated.id) }));
+      ns = ns.map(s => s.id === updated.sectorId ? { ...s, beacons: [...s.beacons, updated].sort((a,b) => a.order - b.order) } : s);
+      return ns;
+    });
     setEditingBeacon(null);
-    setSelectedBeacon(null);
-  }, []);
+    setSelectedBeacon((prev) => prev?.id === updated.id ? updated : prev);
+  }, [user.animationEnabled]);
 
   const handleBeaconDeleted = useCallback((beaconId: string) => {
     setStation((prev) => {
@@ -340,7 +416,12 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const animEnabled = user.animationEnabled;
 
   return (
-    <div className={`station-root${animEnabled ? "" : " no-animation"}`}>
+    <div 
+      className={`station-root${animEnabled ? "" : " no-animation"}`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onMouseMove={resetIdleTimer}
+    >
       {/* Animated space canvas background or static fallback */}
       {animEnabled ? (
         <SpaceBackground 
@@ -412,7 +493,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
            flexDirection: 'row',
            alignItems: 'center',
            gap: '0.25rem',
-           transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+           transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease',
+           opacity: isIdle && !isSidebarOpen ? 0.3 : 1,
            cursor: 'pointer',
            boxShadow: '4px 0 12px rgba(0,0,0,0.5)'
         }}
@@ -565,26 +647,47 @@ export default function StationClient({ initialStation, initialCollabSectors = [
               </p>
             </div>
             {allSectors.length > 0 && (
-              <button
-                id="btn-add-beacon"
-                className="btn btn-primary"
-                style={{
-                  background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
-                  boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)",
-                  border: "1px solid rgba(139, 92, 246, 0.5)",
-                  color: "#fff",
-                  fontWeight: "600",
-                  textShadow: "0 1px 2px rgba(0,0,0,0.3)"
-                }}
-                onClick={() => setShowAddBeacon(true)}
-                title="Add new beacon"
-              >
-                + Add Beacon
-              </button>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button
+                  className="btn-icon"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "8px",
+                    width: "38px",
+                    height: "38px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0
+                  }}
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  title="Refresh Sector Data"
+                >
+                  <ArrowPathIcon width={18} height={18} className={isRefreshing ? "animate-spin" : ""} />
+                </button>
+                <button
+                  id="btn-add-beacon"
+                  className="btn btn-primary btn-add-beacon-mobile"
+                  style={{
+                    background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                    boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)",
+                    border: "1px solid rgba(139, 92, 246, 0.5)",
+                    color: "#fff",
+                    fontWeight: "600",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.3)"
+                  }}
+                  onClick={() => setShowAddBeacon(true)}
+                  title="Add new beacon"
+                >
+                  + Add Beacon
+                </button>
+              </div>
             )}
           </div>
 
-          <div key={`controls-${displaySectorId}`} className={`controls-anim-container ${isExiting ? "exiting" : isEntering ? "entering" : ""}`} style={{ marginBottom: "0.5rem", position: "relative", zIndex: 10 }}>
+          <div key={`controls-${displaySectorId}`} className={`controls-anim-container ${isExiting && user.animationEnabled ? "exiting" : isEntering && user.animationEnabled ? "entering" : ""}`} style={{ marginBottom: "0.5rem", position: "relative", zIndex: 10 }}>
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
               <style dangerouslySetInnerHTML={{__html: `
                 .custom-dropdown-btn {
@@ -751,7 +854,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
 
           {/* Beacon masonry grid */}
           {visibleBeacons.length === 0 ? (
-            <div className={`station-empty ${isExiting ? "exiting" : isEntering ? "entering" : ""}`} key={`empty-${displaySectorId}-${filterVisibility}-${searchQuery}`}>
+            <div className={`station-empty ${isExiting && user.animationEnabled ? "exiting" : isEntering && user.animationEnabled ? "entering" : ""}`} key={`empty-${displaySectorId}-${filterVisibility}-${searchQuery}`}>
               {allSectors.length === 0 ? (
                 <>
                   <div className="station-empty-icon"><RocketLaunchIcon width={48} height={48} /></div>
@@ -783,7 +886,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
               )}
             </div>
           ) : (
-            <div className={`beacon-masonry ${isExiting ? "exiting" : isEntering ? "entering" : ""}`} key={displaySectorId}>
+            <div className={`beacon-masonry ${isExiting && user.animationEnabled ? "exiting" : isEntering && user.animationEnabled ? "entering" : ""}`} key={displaySectorId}>
               {columnWrapper.map((colItems, colIndex) => (
                 <div className="beacon-masonry-col" key={`col-${colIndex}`}>
                   {colItems.map(({ beacon, globalIndex }) => (
@@ -792,6 +895,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                         beacon-card-wrapper
                         ${isFilterExiting ? 'beacon-filter-exiting' : ''}
                         ${isFilterEntering ? 'beacon-filter-entering' : ''}
+                        ${shrinkingBeacons.has(beacon.id) ? 'beacon-shrinking' : ''}
                       `}
                       style={{ 
                         animationDelay: user.animationEnabled ? `${globalIndex * 0.03}s` : '0s',
@@ -804,6 +908,9 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                         index={globalIndex}
                         onClick={() => setSelectedBeacon(beacon)}
                         onEdit={() => setEditingBeacon(beacon)}
+                        isCollab={(activeSector?.collaborators?.length ?? 0) > 0}
+                        sectorName={allSectors.find(s => s.id === beacon.sectorId)?.name}
+                        isAllBeacons={displaySectorId === "all" && (user.hologramEnabled ?? true)}
                       />
                     </div>
                   ))}
@@ -854,6 +961,11 @@ export default function StationClient({ initialStation, initialCollabSectors = [
         <SectorMembersModal
           sector={viewingMembersSector}
           currentUserId={user.id}
+          ownerData={
+            allOwnedSectors.find(s => s.id === viewingMembersSector.id) 
+              ? user 
+              : (viewingMembersSector as any).station?.user
+          }
           onClose={() => setViewingMembersSector(null)}
         />
       )}

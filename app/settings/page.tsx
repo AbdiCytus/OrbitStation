@@ -54,6 +54,7 @@ export default async function SettingsPage() {
         titleBadge: profile.titleBadge,
         callsign: profile.callsign,
         animationEnabled: profile.animationEnabled,
+        hologramEnabled: (profile as any).hologramEnabled ?? true,
         station: profile.station,
       }} />
     </div>

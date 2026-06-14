@@ -12,7 +12,7 @@
 /* Modal using Station Detail Modal Colors */
 .zzz-modal {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1344px;
   height: max-content;
   max-height: 85vh; /* Flexible height based on content */
   background: rgba(15, 15, 25, 0.45); /* More transparent */
@@ -22,7 +22,7 @@
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   animation: zzzEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -42,6 +42,7 @@
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
+  border-radius: inherit;
 }
 
 .zzz-star-particle {
@@ -232,10 +233,13 @@
 /* Beacons Grid - Smaller size, glassmorphism banner */
 .zzz-beacon-grid {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   gap: 1.25rem;
-  padding: 0 2rem 2rem 2rem;
+  padding: 2rem 2rem 3rem 2rem;
+  margin-top: -2rem;
 }
+.zzz-beacon-grid::-webkit-scrollbar { display: none; }
 .zzz-beacon-card {
   width: 110px; /* Fixed smaller width */
   flex-shrink: 0;

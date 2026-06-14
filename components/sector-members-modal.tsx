@@ -10,23 +10,27 @@ import { motion } from "framer-motion";
 type Props = {
   sector: SectorWithBeacons;
   currentUserId: string;
+  ownerData: any;
   onClose: () => void;
 };
 
-export default function SectorMembersModal({ sector, currentUserId, onClose }: Props) {
+export default function SectorMembersModal({ sector, currentUserId, ownerData, onClose }: Props) {
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   
   const [friends, setFriends] = useState<any[]>([]);
-  const [sectorOwner, setSectorOwner] = useState<any>(null);
+  const [isFriendsLoading, setIsFriendsLoading] = useState(true);
+  const sectorOwner = ownerData;
   const [pendingRequests, setPendingRequests] = useState<Set<string>>(new Set());
 
   const localCollaborators = sector.collaborators || [];
 
   useEffect(() => {
-    getFriends().then(setFriends);
-    getSectorOwner(sector.id).then(setSectorOwner);
-  }, [sector.id]);
+    getFriends().then((data) => {
+      setFriends(data);
+      setIsFriendsLoading(false);
+    });
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -79,15 +83,15 @@ export default function SectorMembersModal({ sector, currentUserId, onClose }: P
                     {sectorOwner.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest">Owner</span>
-                  {sectorOwner.isPublic && sectorOwner.username && (
-                    <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Visit Profile">
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest mr-2">Owner</span>
+                  {(sectorOwner.isPublic || sectorOwner.station?.isPublic) && sectorOwner.username && (
+                    <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
-                  {sectorOwner.id !== currentUserId && !isFriend(sectorOwner.id) && !pendingRequests.has(sectorOwner.id) && (
-                    <button type="button" onClick={() => handleAddFriend(sectorOwner.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Add Friend">
+                  {sectorOwner.id !== currentUserId && !isFriendsLoading && !isFriend(sectorOwner.id) && !pendingRequests.has(sectorOwner.id) && (
+                    <button type="button" onClick={() => handleAddFriend(sectorOwner.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Add Friend">
                       <UserPlusIcon width={16} height={16} />
                     </button>
                   )}
@@ -115,14 +119,14 @@ export default function SectorMembersModal({ sector, currentUserId, onClose }: P
                     {c.user.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  {c.user.station?.isPublic && c.user.username && (
-                    <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Visit Profile">
+                <div className="flex items-center gap-1">
+                  {(c.user as any).station?.isPublic && c.user.username && (
+                    <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
-                  {c.user.id !== currentUserId && !isFriend(c.user.id) && !pendingRequests.has(c.user.id) && (
-                    <button type="button" onClick={() => handleAddFriend(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Add Friend">
+                  {c.userId !== currentUserId && !isFriendsLoading && !isFriend(c.user.id) && !pendingRequests.has(c.user.id) && (
+                    <button type="button" onClick={() => handleAddFriend(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Add Friend">
                       <UserPlusIcon width={16} height={16} />
                     </button>
                   )}

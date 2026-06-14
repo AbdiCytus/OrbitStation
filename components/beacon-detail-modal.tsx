@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef, useEffect, useCallback } from "react";
 import type { Beacon, SectorWithBeacons } from "@/types";
 import { deleteBeacon, toggleBeaconPin, updateBeacon, incrementBeaconVisit } from "@/lib/actions";
+import { toast } from "sonner";
 import { DynamicIcon } from "./dynamic-icon";
 import {
   EyeIcon,
@@ -80,10 +81,21 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     window.open(beacon.url, "_blank", "noopener,noreferrer");
   }
   function handleTogglePin() {
+    if (!isPinned && sector) {
+      const pinnedCount = sector.beacons.filter((b: Beacon) => b.isPinned).length;
+      if (pinnedCount >= 10) {
+        toast.error("Maximum 10 pinned beacons per sector allowed.");
+        return;
+      }
+    }
+
     const newVal = !isPinned;
     setIsPinned(newVal);
     if (onUpdated) onUpdated({ ...beacon, isPinned: newVal });
-    startTransition(async () => { await toggleBeaconPin(beacon.id); });
+    startTransition(async () => { 
+      await toggleBeaconPin(beacon.id); 
+      toast.success(newVal ? "Beacon pinned" : "Beacon unpinned");
+    });
   }
   function handleDelete() {
     setConfirmDelete(true);
@@ -310,7 +322,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                 <span className="hsr-stat-key">Logged</span>
                 <span className="hsr-stat-val">{addedDate}</span>
               </div>
-              {beacon._creator && (
+              {beacon._creator && sector?.collaborators && sector.collaborators.length > 0 && (
                 <div className="hsr-stat-row">
                   <span className="hsr-stat-icon" style={{ borderRadius: "50%", overflow: "hidden", width: 16, height: 16, background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyItems: "center" }}>
                     {beacon._creator.image ? <img src={beacon._creator.image} alt="" style={{ width: 16, height: 16, objectFit: "cover" }} /> : <span style={{ fontSize: "10px", width: "100%", textAlign: "center" }}>{(beacon._creator.name || "?")[0].toUpperCase()}</span>}

@@ -70,6 +70,7 @@ model User {
 
   // Preferensi
   animationEnabled Boolean @default(false)
+  hologramEnabled  Boolean @default(true)
 
   // Email/password login (opsional, untuk akun Orbit Station)
   password      String?   // hashed, null = OAuth-only user
@@ -192,3 +193,4 @@ model SectorCollaborator {
 
   @@unique([sectorId, userId])
 }
+ 
