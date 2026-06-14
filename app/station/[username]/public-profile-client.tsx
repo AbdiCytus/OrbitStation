@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
-import { sendFriendRequest } from "@/lib/actions";
+import { sendFriendRequest, recordStationVisit } from "@/lib/actions";
 import "./public-profile.css";
 
 type Props = {
@@ -57,6 +57,16 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
   const [stationSearch, setStationSearch] = useState("");
   const [isAddingFriend, setIsAddingFriend] = useState(false);
   const router = useRouter();
+
+  const [hasVisited, setHasVisited] = useState(false);
+
+  useEffect(() => {
+    // Record visit on mount
+    if (!hasVisited && station.id) {
+      recordStationVisit(station.id, sessionUser?.id);
+      setHasVisited(true);
+    }
+  }, [hasVisited, station.id, sessionUser?.id]);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {

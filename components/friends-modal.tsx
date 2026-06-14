@@ -68,14 +68,41 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
     }
   }, [searchQuery, activeTab]);
 
-  // Fetch chat messages
+  // Fetch chat messages and poll for real-time updates
   useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
     if (activeTab === "list" && activeChatId) {
+      // Initial fetch
       getChatMessages(activeChatId).then(setMessages);
       markChatAsRead(activeChatId).then(() => {
         if (refetchStats) refetchStats();
       });
+
+      // Poll every 3 seconds for new messages
+      intervalId = setInterval(() => {
+        getChatMessages(activeChatId).then((newMessages) => {
+          setMessages(prev => {
+            // Only update state if there are actual changes (new messages, read status changes, etc)
+            // JSON stringify is a simple way to deep compare the array of plain message objects
+            if (JSON.stringify(prev) !== JSON.stringify(newMessages)) {
+              // If new messages arrived, mark them as read
+              if (newMessages.length > prev.length) {
+                markChatAsRead(activeChatId).then(() => {
+                  if (refetchStats) refetchStats();
+                });
+              }
+              return newMessages;
+            }
+            return prev;
+          });
+        });
+      }, 3000);
     }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [activeChatId, activeTab, refetchStats]);
 
   useEffect(() => {

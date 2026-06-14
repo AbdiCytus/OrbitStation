@@ -4,7 +4,7 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon, Bars3Icon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon, Bars3Icon, ChartBarIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { searchPilots } from "@/lib/actions";
 
@@ -79,7 +79,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
           <span className="navbar-logo-icon">⊕</span>
           <span className="navbar-logo-text text-gradient">Orbit Station</span>
         </Link>
-        {user && pathname !== "/station" && pathname !== "/settings" && !isPublicProfile && (
+        {user && pathname !== "/station" && pathname !== "/settings" && pathname !== "/analytics" && !isPublicProfile && (
           <Link href="/station" className="btn btn-outline btn-sm" style={{ marginLeft: "0.25rem", padding: "0.2rem 0.5rem", height: "auto", display: "flex", gap: "0.25rem", alignItems: "center", border: "1px solid rgba(139,92,246,0.3)", borderRadius: "6px" }}>
             <span className="hidden sm:inline">My Station</span>
             <span className="sm:hidden">Home</span>
@@ -180,13 +180,13 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                 id="btn-user-menu"
                 className="navbar-avatar-btn"
                 onClick={() => {
-                  if (pathname === "/station" || pathname === "/settings") {
+                  if (pathname === "/station" || pathname === "/settings" || pathname === "/analytics") {
                     setMenuOpen((o) => !o);
                   }
                 }}
                 aria-expanded={menuOpen}
                 aria-label="User menu"
-                style={{ position: "relative", cursor: (pathname === "/station" || pathname === "/settings") ? "pointer" : "default" }}
+                style={{ position: "relative", cursor: (pathname === "/station" || pathname === "/settings" || pathname === "/analytics") ? "pointer" : "default" }}
               >
                 {stats?.hasNotifications && (
                   <span style={{ position: "absolute", top: 0, right: 0, width: "10px", height: "10px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423", zIndex: 10 }}></span>
@@ -220,7 +220,16 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                         <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
                       </div>
                       <hr className="divider" />
-                      {pathname !== '/settings' && (
+                      {pathname !== "/station" && (
+                        <Link
+                          href="/station"
+                          className="navbar-menu-item"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <UserIcon width={18} height={18} /> My Station
+                        </Link>
+                      )}
+                      {pathname !== '/settings' && pathname !== '/analytics' && (
                         <button
                           className="navbar-menu-item"
                           onClick={() => {
@@ -234,6 +243,15 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                             <span style={{ width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", display: "inline-block" }}></span>
                           )}
                         </button>
+                      )}
+                      {pathname !== '/analytics' && (
+                        <Link
+                          href="/analytics"
+                          className="navbar-menu-item"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <ChartBarIcon width={18} height={18} /> Analytics
+                        </Link>
                       )}
                       <Link
                         href="/settings"

@@ -90,6 +90,7 @@ model User {
   receivedMessages ChatMessage[] @relation("ReceivedMessages")
   collabSectors    SectorCollaborator[] @relation("CollabSectors")
   createdBeacons   Beacon[]
+  visitedStations  StationVisit[] @relation("UserVisits")
 }
 
 /// Dasbor utama milik Pilot, disebut "Station"
@@ -105,6 +106,17 @@ model Station {
   // Relations
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   sectors Sector[]
+  visits  StationVisit[]
+}
+
+model StationVisit {
+  id        String   @id @default(cuid())
+  stationId String
+  visitorId String?
+  createdAt DateTime @default(now())
+
+  station   Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  visitor   User?    @relation("UserVisits", fields: [visitorId], references: [id], onDelete: SetNull)
 }
 
 /// Kelompok/kategori Beacon, disebut "Sektor"
