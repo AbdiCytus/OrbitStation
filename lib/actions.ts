@@ -805,7 +805,17 @@ export async function removeFriend(friendId: string) {
 
   if (!friendship) return { error: "Friendship not found" };
 
-  await db.friendship.delete({ where: { id: friendship.id } });
+  await db.$transaction([
+    db.friendship.delete({ where: { id: friendship.id } }),
+    db.chatMessage.deleteMany({
+      where: {
+        OR: [
+          { senderId: user.id, receiverId: friendId },
+          { senderId: friendId, receiverId: user.id },
+        ]
+      }
+    })
+  ]);
   return { success: true };
 }
 

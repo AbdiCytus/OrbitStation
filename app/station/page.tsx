@@ -33,6 +33,7 @@ export default async function StationPage() {
         image: profile?.image ?? session.user.image ?? null,
         callsign: profile?.callsign ?? null,
         animationEnabled: profile?.animationEnabled ?? true,
+        staticBackgroundEnabled: (profile as any)?.staticBackgroundEnabled ?? false,
         hologramEnabled: (profile as any)?.hologramEnabled ?? true,
         station: { isPublic: profile?.station?.isPublic ?? false },
       }}

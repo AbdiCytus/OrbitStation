@@ -8,11 +8,15 @@ import StationNavbar from "@/components/station-navbar";
 import { incrementBeaconVisit } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
+import { toast } from "sonner";
+import { sendFriendRequest } from "@/lib/actions";
 import "./public-profile.css";
 
 type Props = {
   data: PublicStationPage;
   sessionUser?: any;
+  isFriendOrPending?: boolean;
 };
 
 function CosmicBackground({ enabled, isMobile }: { enabled: boolean; isMobile: boolean }) {
@@ -39,7 +43,7 @@ function CosmicBackground({ enabled, isMobile }: { enabled: boolean; isMobile: b
   );
 }
 
-export default function PublicProfileClient({ data, sessionUser }: Props) {
+export default function PublicProfileClient({ data, sessionUser, isFriendOrPending }: Props) {
   const { user, station } = data;
   
   // Exclude "All", and filter active sectors to those that have beacons
@@ -51,6 +55,7 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
   
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
   const [stationSearch, setStationSearch] = useState("");
+  const [isAddingFriend, setIsAddingFriend] = useState(false);
   const router = useRouter();
 
   const [isMobile, setIsMobile] = useState(false);
@@ -96,7 +101,15 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
       />
 
       {/* Background Canvas: Kosmik, Aurora, Komet, Blackhole */}
-      <CosmicBackground enabled={isAnimationEnabled} isMobile={isMobile} />
+      {sessionUser && (sessionUser as any).staticBackgroundEnabled ? (
+        <div className="cosmic-bg fixed inset-0 z-[-1] pointer-events-none static-cosmic-bg" aria-hidden="true">
+          <div className="cosmic-stars"></div>
+          <div className="cosmic-aurora" style={{ opacity: 0.5, transform: "scale(1.2)" }}></div>
+          <div className="cosmic-dust"></div>
+        </div>
+      ) : (
+        <CosmicBackground enabled={isAnimationEnabled} isMobile={isMobile} />
+      )}
 
       <div className="zzz-wrapper" style={{ top: "60px" }}>
         {/* Modal Container */}
@@ -175,8 +188,50 @@ export default function PublicProfileClient({ data, sessionUser }: Props) {
             </div>
 
             {/* Bio */}
-            <div className="zzz-bio-bar">
+            <div className="zzz-bio-bar" style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: isMobile ? "1rem" : "0" }}>
+              {isMobile && sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
+                <button 
+                  className="btn btn-primary" 
+                  style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}
+                  disabled={isAddingFriend}
+                  onClick={async () => {
+                     setIsAddingFriend(true);
+                     const res = await sendFriendRequest(user.id);
+                     if (res?.error) {
+                        toast.error(res.error);
+                     } else {
+                        toast.success("Friend request sent!");
+                     }
+                     setIsAddingFriend(false);
+                  }}
+                >
+                  <UserPlusIcon width={16} height={16} />
+                  {isAddingFriend ? "Sending..." : "Add Friend"}
+                </button>
+              )}
+              
               <div className="zzz-bio-text">"{user.bio || "Exploring the internet galaxy."}"</div>
+              
+              {!isMobile && sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
+                <button 
+                  className="btn btn-primary" 
+                  style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                  disabled={isAddingFriend}
+                  onClick={async () => {
+                     setIsAddingFriend(true);
+                     const res = await sendFriendRequest(user.id);
+                     if (res?.error) {
+                        toast.error(res.error);
+                     } else {
+                        toast.success("Friend request sent!");
+                     }
+                     setIsAddingFriend(false);
+                  }}
+                >
+                  <UserPlusIcon width={16} height={16} />
+                  {isAddingFriend ? "Sending..." : "Add Friend"}
+                </button>
+              )}
             </div>
 
             {/* Sector Tabs */}

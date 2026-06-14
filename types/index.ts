@@ -46,6 +46,8 @@ export type PublicUserProfile = {
   titleBadge: string | null;
   callsign?: string | null;
   animationEnabled?: boolean;
+  allowFriendRequests?: boolean;
+  staticBackgroundEnabled?: boolean;
 };
 
 /** Data halaman profil publik (untuk /[username] route) */

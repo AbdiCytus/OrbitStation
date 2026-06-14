@@ -9,7 +9,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
-  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, isPublic, image } = body;
+  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, isPublic, image } = body;
 
   // Validate username uniqueness if changed
   if (username) {
@@ -33,6 +33,8 @@ export async function PATCH(req: Request) {
         ...(titleBadge !== undefined && { titleBadge: titleBadge.trim() || null }),
         ...(animationEnabled !== undefined && { animationEnabled: Boolean(animationEnabled) }),
         ...(hologramEnabled !== undefined && { hologramEnabled: Boolean(hologramEnabled) }),
+        ...(allowFriendRequests !== undefined && { allowFriendRequests: Boolean(allowFriendRequests) }),
+        ...(staticBackgroundEnabled !== undefined && { staticBackgroundEnabled: Boolean(staticBackgroundEnabled) }),
         ...(image !== undefined && { image: image || null }),
       },
     });

@@ -17,7 +17,7 @@ import StaticStarfield from "@/components/static-starfield";
 import { deleteSector } from "@/lib/actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { 
-  PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon, ArrowPathIcon
+  PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon, ArrowPathIcon, EllipsisVerticalIcon
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -26,7 +26,7 @@ import { toast } from "sonner";
 type Props = {
   initialStation: StationWithSectors | null;
   initialCollabSectors?: (SectorWithBeacons & { collaborators?: any[] })[];
-  user: { id: string; name: string | null; username?: string | null; image: string | null; callsign: string | null; animationEnabled: boolean; hologramEnabled?: boolean; station?: { isPublic: boolean } };
+  user: { id: string; name: string | null; username?: string | null; image: string | null; callsign: string | null; animationEnabled: boolean; hologramEnabled?: boolean; staticBackgroundEnabled?: boolean; station?: { isPublic: boolean } };
 };
 
 export default function StationClient({ initialStation, initialCollabSectors = [], user }: Props) {
@@ -42,6 +42,9 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const [isIdle, setIsIdle] = useState(false);
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
   const [shrinkingBeacons, setShrinkingBeacons] = useState<Set<string>>(new Set());
+  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuCaption, setMobileMenuCaption] = useState<"edit" | "add" | null>(null);
 
   const { stats, refetch: refetchNotifications } = useNotifications();
 
@@ -124,10 +127,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
       setSearchQuery("");
       setLocalSearchQuery("");
     }
-    // Auto-close sidebar on mobile after navigating
-    if (window.innerWidth <= 768) {
-      setIsSidebarOpen(false);
-    }
+    // Always auto-close sidebar (desktop ignores this via CSS)
+    setIsSidebarOpen(false);
     
     if (sectorId === displaySectorId || isExiting) return;
     if (!user.animationEnabled) {
@@ -417,13 +418,19 @@ export default function StationClient({ initialStation, initialCollabSectors = [
 
   return (
     <div 
-      className={`station-root${animEnabled ? "" : " no-animation"}`}
+      className={`station-root${animEnabled ? "" : " no-animation"} ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onMouseMove={resetIdleTimer}
     >
       {/* Animated space canvas background or static fallback */}
-      {animEnabled ? (
+      {(user as any).staticBackgroundEnabled ? (
+        <div className="cosmic-bg fixed inset-0 z-[-1] pointer-events-none static-cosmic-bg" aria-hidden="true">
+          <div className="cosmic-stars"></div>
+          <div className="cosmic-aurora" style={{ opacity: 0.5, transform: "scale(1.2)" }}></div>
+          <div className="cosmic-dust"></div>
+        </div>
+      ) : animEnabled ? (
         <SpaceBackground 
           key="on" 
           sector={activeSectorId} 
@@ -476,7 +483,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
       {/* Mobile Sidebar Toggle Button */}
       {!(showAddSector || showAddBeacon || !!editingSector || !!editingBeacon || !!selectedBeacon || showFriendsModal || !!viewingMembersSector) && (
         <div 
-          className="mobile-only"
+          className="mobile-only sidebar-toggle-btn"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         style={{
            position: 'fixed',
@@ -503,7 +510,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
       </div>
       )}
 
-      <div className="station-layout">
+      <div className={`station-layout ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}>
         <div 
           className={`sidebar-backdrop mobile-only ${isSidebarOpen ? "open" : ""}`} 
           onClick={() => setIsSidebarOpen(false)}
@@ -624,67 +631,143 @@ export default function StationClient({ initialStation, initialCollabSectors = [
         </aside>
 
         <main className="station-main">
-          <div className="station-section-header">
-            <div>
-              <h2 className="station-section-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                {displaySectorId === "all"
-                  ? "All Beacons"
-                  : <><DynamicIcon name={activeSector?.icon} style={{ display: "inline-block", verticalAlign: "middle", width: "24px", height: "24px" }} /> {activeSector?.name ?? ""} {activeSector && !activeSector.isPublic && <LockClosedIcon width={20} height={20} style={{ display: "inline-block", verticalAlign: "middle", opacity: 0.5 }} title="Private Sector" />}</>}
-                {displaySectorId !== "all" && activeSector && activeSector.stationId === station?.id && (
-                  <button
-                    onClick={() => setEditingSector(activeSector)}
-                    className="btn-icon mobile-only"
-                    style={{ opacity: 0.7, padding: 0, width: "32px", height: "32px" }}
-                    title="Edit Sector"
-                  >
-                    <PencilSquareIcon width={20} height={20} />
-                  </button>
-                )}
-              </h2>
-              <p className="station-section-sub">
-                {visibleBeacons.length} beacon{visibleBeacons.length !== 1 ? "s" : ""}
-                {searchQuery && ` matching "${searchQuery}"`}
-              </p>
-            </div>
-            {allSectors.length > 0 && (
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <button
-                  className="btn-icon"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: "8px",
-                    width: "38px",
-                    height: "38px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0
-                  }}
-                  onClick={handleRefresh}
-                  disabled={isRefreshing}
-                  title="Refresh Sector Data"
+          <div className="station-section-header relative" style={{ minHeight: "56px", display: "flex", alignItems: "center" }}>
+            <AnimatePresence mode="wait">
+              {!mobileMenuOpen ? (
+                <motion.div 
+                  key="title"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full flex justify-between items-center"
                 >
-                  <ArrowPathIcon width={18} height={18} className={isRefreshing ? "animate-spin" : ""} />
-                </button>
-                <button
-                  id="btn-add-beacon"
-                  className="btn btn-primary btn-add-beacon-mobile"
-                  style={{
-                    background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
-                    boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)",
-                    border: "1px solid rgba(139, 92, 246, 0.5)",
-                    color: "#fff",
-                    fontWeight: "600",
-                    textShadow: "0 1px 2px rgba(0,0,0,0.3)"
-                  }}
-                  onClick={() => setShowAddBeacon(true)}
-                  title="Add new beacon"
+                  <div className="min-w-0 pr-2" style={{ flex: 1 }}>
+                    <h2 className="station-section-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      {displaySectorId === "all"
+                        ? "All Beacons"
+                        : <><DynamicIcon name={activeSector?.icon} style={{ display: "inline-block", verticalAlign: "middle", width: "24px", height: "24px", flexShrink: 0 }} /> <span className="truncate">{activeSector?.name ?? ""}</span> {activeSector && !activeSector.isPublic && <LockClosedIcon width={20} height={20} style={{ display: "inline-block", verticalAlign: "middle", opacity: 0.5, flexShrink: 0 }} title="Private Sector" />}</>}
+                      {displaySectorId !== "all" && activeSector && activeSector.stationId === station?.id && (
+                        <button
+                          onClick={() => setEditingSector(activeSector)}
+                          className="btn-icon desktop-only"
+                          style={{ opacity: 0.7, padding: 0, width: "32px", height: "32px", flexShrink: 0 }}
+                          title="Edit Sector"
+                        >
+                          <PencilSquareIcon width={20} height={20} />
+                        </button>
+                      )}
+                    </h2>
+                    <p className="station-section-sub truncate">
+                      {visibleBeacons.length} beacon{visibleBeacons.length !== 1 ? "s" : ""}
+                      {searchQuery && ` matching "${searchQuery}"`}
+                    </p>
+                  </div>
+
+                  {/* Desktop right side buttons */}
+                  {allSectors.length > 0 && (
+                    <div className="hidden md:flex shrink-0" style={{ gap: "0.5rem" }}>
+                      <button
+                        className="btn-icon"
+                        style={{
+                          background: "rgba(255, 255, 255, 0.05)",
+                          border: "1px solid rgba(255, 255, 255, 0.1)",
+                          borderRadius: "8px",
+                          width: "38px",
+                          height: "38px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0
+                        }}
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                        title="Refresh Sector Data"
+                      >
+                        <ArrowPathIcon width={18} height={18} className={isRefreshing ? "animate-spin" : ""} />
+                      </button>
+                      <button
+                        id="btn-add-beacon"
+                        className="btn btn-primary"
+                        style={{
+                          background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                          boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)",
+                          border: "1px solid rgba(139, 92, 246, 0.5)",
+                          color: "#fff",
+                          fontWeight: "600",
+                          textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                          whiteSpace: "nowrap"
+                        }}
+                        onClick={() => setShowAddBeacon(true)}
+                        title="Add new beacon"
+                      >
+                        + Add Beacon
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Mobile 3-dot trigger */}
+                  {allSectors.length > 0 && (
+                    <div className="flex md:hidden shrink-0">
+                      <button className="btn-icon" style={{ height: "38px", width: "38px", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setMobileMenuOpen(true)}>
+                        <EllipsisVerticalIcon width={24} height={24} />
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="menu"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full flex justify-end items-center"
                 >
-                  + Add Beacon
-                </button>
-              </div>
-            )}
+                  {/* Invisible overlay to catch outside clicks */}
+                  <div className="fixed inset-0 z-40" onClick={() => { setMobileMenuOpen(false); }} />
+                  
+                  <div className="relative z-50 flex gap-2 items-center justify-end w-full">
+                    <button className="flex shrink-0 items-center justify-center" style={{ background: "rgba(255, 255, 255, 0.05)", borderRadius: "8px", height: "38px", width: "38px", color: "var(--color-comet)", transition: "background 0.15s" }} onClick={() => {
+                      handleRefresh();
+                      setMobileMenuOpen(false);
+                    }}>
+                      <ArrowPathIcon width={18} height={18} className={isRefreshing ? "animate-spin" : ""} />
+                    </button>
+
+                    {displaySectorId !== "all" && activeSector && activeSector.stationId === station?.id && (
+                      <button 
+                        className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap" 
+                        style={{ background: "rgba(255, 255, 255, 0.05)", borderRadius: "8px", height: "38px", padding: "0 0.8rem", width: "auto", color: "var(--color-comet)", transition: "background 0.15s" }} 
+                        onClick={() => {
+                          setEditingSector(activeSector); 
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <PencilSquareIcon width={18} height={18} style={{ flexShrink: 0 }} />
+                        <span style={{fontSize: "0.85rem", marginLeft:"0.4rem", display: "inline-block", color: "var(--color-comet)"}}>Edit Sector</span>
+                      </button>
+                    )}
+
+                    <button 
+                      className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap" 
+                      style={{ color: "#fff", height: "38px", padding: "0 0.8rem", width: "auto", borderRadius: "8px", background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)", border: "1px solid rgba(139, 92, 246, 0.5)", transition: "all 0.15s" }} 
+                      onClick={() => {
+                        setShowAddBeacon(true); 
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <PlusIcon width={18} height={18} style={{ flexShrink: 0 }} />
+                      <span style={{fontSize: "0.85rem", marginLeft:"0.4rem", display: "inline-block"}}>Add Beacon</span>
+                    </button>
+
+                    <button className="flex shrink-0 items-center justify-center" style={{ height: "38px", width: "38px", color: "var(--color-comet)" }} onClick={() => { setMobileMenuOpen(false); }}>
+                      <XMarkIcon width={24} height={24} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div key={`controls-${displaySectorId}`} className={`controls-anim-container ${isExiting && user.animationEnabled ? "exiting" : isEntering && user.animationEnabled ? "entering" : ""}`} style={{ marginBottom: "0.5rem", position: "relative", zIndex: 10 }}>

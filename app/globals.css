@@ -801,6 +801,60 @@ code, kbd, pre {
   height: calc(100dvh - 57px);
 }
 
+/* Animations for Sector Transitions (Point 17) */
+.station-root.exiting .station-navbar {
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+}
+.station-root.entering .station-navbar {
+  animation: slide-down-navbar 0.5s ease-out backwards;
+}
+
+.station-root.exiting .station-sidebar {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 0.4s ease-in-out, opacity 0.4s ease;
+}
+.station-root.exiting .station-main {
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 0.4s ease-in-out, opacity 0.4s ease;
+}
+
+.station-root.entering .station-sidebar {
+  animation: slide-right-sidebar 0.5s ease-out backwards;
+}
+.station-root.entering .station-main {
+  animation: scale-up-main 0.5s ease-out backwards;
+}
+
+@media (max-width: 640px) {
+  .station-root.entering .station-sidebar { animation: none; }
+  
+  .station-root.exiting .sidebar-toggle-btn { transform: translate(-100%, -50%) !important; opacity: 0; transition: transform 0.4s ease-in-out, opacity 0.4s ease; }
+  .station-root.entering .sidebar-toggle-btn { animation: slide-right-sidebar-btn 0.5s ease-out backwards; }
+}
+
+@keyframes slide-right-sidebar-btn {
+  from { transform: translate(-100%, -50%); opacity: 0; }
+  to { transform: translate(0, -50%); opacity: 1; }
+}
+
+@keyframes slide-down-navbar {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slide-right-sidebar {
+  from { transform: translateX(-50%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes scale-up-main {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
 /* SIDEBAR */
 .station-sidebar {
   width: 220px;
@@ -928,11 +982,7 @@ code, kbd, pre {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
-.beacon-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.35), 0 0 0 1px rgba(124,92,252,0.25);
-  border-color: rgba(124,92,252,0.2);
-}
+@media (hover: hover) and (pointer: fine) { .beacon-card:hover { scale: 1.02; box-shadow: 0 10px 28px rgba(0,0,0,0.35), 0 0 0 1px rgba(124,92,252,0.25) !important; border-color: rgba(124,92,252,0.2) !important; z-index: 9999; } }
 .beacon-card-image {
   position: relative;
   width: 100%;
@@ -949,7 +999,7 @@ code, kbd, pre {
   object-fit: cover;
   transition: transform 0.3s ease;
 }
-.beacon-card:hover .beacon-card-image img { transform: scale(1.05); }
+/* removed */
 .beacon-card-image-placeholder {
   width: 100%;
   height: 100%;
@@ -2310,6 +2360,7 @@ code, kbd, pre {
     aspect-ratio: auto !important;
     height: 100% !important;
     border-right: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg) !important;
   }
   .beacon-masonry .beacon-card .beacon-card-body, .beacon-card-body {
     grid-column: 2 / 3 !important;
@@ -2620,6 +2671,14 @@ code, kbd, pre {
 /* When animation is off — keep static canvas, but disable infinite floats */
 .no-animation .beacon-masonry .beacon-card:not(.entering):not(.exiting) { 
   animation: none !important; 
+}
+
+.static-cosmic-bg {
+  filter: brightness(0.35);
+}
+
+.static-cosmic-bg * {
+  animation: none !important;
 }
 
 /* ============================================================
@@ -3732,10 +3791,27 @@ code, kbd, pre {
 
 .zzz-banner-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
-.beacon-card-footer { border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); } @media (min-width: 769px) { .beacon-card:hover { transform: translateY(-3px) scale(1.02); } } .beacon-hologram-text { z-index: 9999 !important; }
+.beacon-card-footer { border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); } @media (min-width: 769px) { .beacon-card:hover { scale: 1.02; } } .beacon-hologram-text { z-index: 9999 !important; }
 
 .zzz-user-info { min-width: 0; } .zzz-user-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 @media (max-width: 768px) { .beacon-masonry .beacon-card .beacon-card-body, .beacon-card-body { background: rgba(20, 20, 30, 0.6) !important; border-top-right-radius: var(--radius-lg) !important; } .beacon-masonry .beacon-card .beacon-card-footer, .beacon-card-footer { background: rgba(20, 20, 30, 0.6) !important; border-bottom-right-radius: var(--radius-lg) !important; } }
 
 .beacon-card:hover { z-index: 9999; } .zzz-beacon-card:hover { z-index: 9999; }
+
+/* Cosmic Background Animations - More Visible! */
+.cosmic-bg { position: fixed; inset: 0; background-color: #03000a; overflow: hidden; z-index: -1; }
+.cosmic-stars { position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 20px 30px, #fff, transparent), radial-gradient(1.5px 1.5px at 40px 70px, #fff, transparent), radial-gradient(2px 2px at 50px 160px, #fff, transparent), radial-gradient(1.5px 1.5px at 90px 40px, #fff, transparent), radial-gradient(3px 3px at 130px 80px, #e0c8ff, transparent), radial-gradient(1px 1px at 160px 120px, #fff, transparent); background-repeat: repeat; background-size: 200px 200px; animation: cosmic-drift 80s linear infinite; opacity: 0.8; }
+.cosmic-aurora { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3), transparent 30%), radial-gradient(circle at 20% 80%, rgba(14, 165, 233, 0.2), transparent 30%), radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.2), transparent 30%); animation: cosmic-pulse 15s ease-in-out infinite alternate; filter: blur(60px); }
+.cosmic-blackhole { position: absolute; top: 50%; right: 10%; transform: translateY(-50%); width: 400px; height: 400px; border-radius: 50%; background: #000; box-shadow: 0 0 100px 20px rgba(139, 92, 246, 1), 0 0 150px 40px rgba(14, 165, 233, 0.8), 0 0 250px 60px rgba(236, 72, 153, 0.6), inset 0 0 80px rgba(255, 255, 255, 0.2); animation: cosmic-bh-pulse 6s ease-in-out infinite alternate; }
+.accretion-disk { position: absolute; top: 50%; left: 50%; width: 700px; height: 700px; transform: translate(-50%, -50%) rotateX(75deg); border-radius: 50%; border: 25px solid transparent; border-left-color: rgba(139, 92, 246, 1); border-right-color: rgba(14, 165, 233, 1); filter: blur(8px); animation: cosmic-spin 8s linear infinite; }
+.accretion-disk::after { content: ""; position: absolute; inset: -30px; border-radius: 50%; border: 15px solid transparent; border-top-color: rgba(236, 72, 153, 1); border-bottom-color: rgba(139, 92, 246, 1); filter: blur(12px); animation: cosmic-spin 12s linear infinite reverse; }
+.cosmic-comet { position: absolute; top: 10%; left: -10%; width: 300px; height: 4px; background: linear-gradient(90deg, transparent, #fff); border-radius: 50%; filter: drop-shadow(0 0 20px #fff) drop-shadow(0 0 10px #a78bfa); transform: rotate(30deg); animation: cosmic-shoot 8s infinite; }
+.comet-2 { top: 70%; animation-delay: 3s; animation-duration: 14s; opacity: 0.8; }
+.cosmic-asteroids { position: absolute; width: 100vw; height: 100vh; background-image: radial-gradient(3px 3px at 10% 20%, rgba(200,200,200,0.8), transparent), radial-gradient(4px 4px at 30% 60%, rgba(180,180,180,0.9), transparent), radial-gradient(3.5px 3.5px at 80% 80%, rgba(220,220,220,0.7), transparent), radial-gradient(2.5px 2.5px at 60% 10%, rgba(250,250,250,0.8), transparent); background-size: 400px 400px; animation: cosmic-drift 30s linear infinite; opacity: 0.6; }
+.cosmic-dust { position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 25% 35%, rgba(139, 92, 246, 0.6), transparent), radial-gradient(1.5px 1.5px at 75% 65%, rgba(14, 165, 233, 0.5), transparent), radial-gradient(2px 2px at 15% 85%, rgba(236, 72, 153, 0.4), transparent); background-size: 150px 150px; animation: cosmic-drift 50s linear infinite reverse; opacity: 0.5; filter: blur(1px); }
+@keyframes cosmic-drift { 0% { background-position: 0 0; } 100% { background-position: -600px 600px; } }
+@keyframes cosmic-pulse { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.1); opacity: 1; } }
+@keyframes cosmic-bh-pulse { 0% { transform: translateY(-50%) scale(1); box-shadow: 0 0 100px 20px rgba(139, 92, 246, 1), 0 0 150px 40px rgba(14, 165, 233, 0.8), 0 0 250px 60px rgba(236, 72, 153, 0.6), inset 0 0 80px rgba(255, 255, 255, 0.2); } 100% { transform: translateY(-50%) scale(1.05); box-shadow: 0 0 120px 30px rgba(139, 92, 246, 1), 0 0 180px 50px rgba(14, 165, 233, 0.9), 0 0 300px 80px rgba(236, 72, 153, 0.8), inset 0 0 100px rgba(255, 255, 255, 0.4); } }
+@keyframes cosmic-spin { 0% { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(0deg); } 100% { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(360deg); } }
+@keyframes cosmic-shoot { 0% { transform: translateX(-10vw) translateY(-10vh) rotate(30deg); opacity: 0; } 10% { opacity: 1; } 20% { transform: translateX(110vw) translateY(110vh) rotate(30deg); opacity: 0; } 100% { opacity: 0; } }

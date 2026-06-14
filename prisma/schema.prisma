@@ -71,6 +71,8 @@ model User {
   // Preferensi
   animationEnabled Boolean @default(false)
   hologramEnabled  Boolean @default(true)
+  allowFriendRequests Boolean @default(true)
+  staticBackgroundEnabled Boolean @default(false)
 
   // Email/password login (opsional, untuk akun Orbit Station)
   password      String?   // hashed, null = OAuth-only user

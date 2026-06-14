@@ -10,6 +10,7 @@ export default function NotFound() {
       alignItems: "center",
       justifyContent: "center",
       background: "#0a0a0f",
+      position: "relative",
       color: "#fff",
       fontFamily: "var(--font-inter)",
       textAlign: "center",

@@ -33,7 +33,13 @@ export default async function SettingsPage() {
 
   return (
     <div className={`settings-root${profile.animationEnabled ? "" : " no-animation"}`}>
-      {profile.animationEnabled ? (
+      {profile.staticBackgroundEnabled ? (
+        <div className="cosmic-bg fixed inset-0 z-[-1] pointer-events-none static-cosmic-bg" aria-hidden="true">
+          <div className="cosmic-stars"></div>
+          <div className="cosmic-aurora" style={{ opacity: 0.5, transform: "scale(1.2)" }}></div>
+          <div className="cosmic-dust"></div>
+        </div>
+      ) : profile.animationEnabled ? (
         <SpaceBackground key="on" variant="settings" animEnabled={true} />
       ) : (
         <StaticStarfield seed={42} />
@@ -55,6 +61,8 @@ export default async function SettingsPage() {
         callsign: profile.callsign,
         animationEnabled: profile.animationEnabled,
         hologramEnabled: (profile as any).hologramEnabled ?? true,
+        allowFriendRequests: (profile as any).allowFriendRequests ?? true,
+        staticBackgroundEnabled: (profile as any).staticBackgroundEnabled ?? false,
         station: profile.station,
       }} />
     </div>

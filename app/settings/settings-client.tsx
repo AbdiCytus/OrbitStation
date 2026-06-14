@@ -20,6 +20,8 @@ type Profile = {
   callsign: string | null;
   animationEnabled: boolean;
   hologramEnabled: boolean;
+  allowFriendRequests?: boolean;
+  staticBackgroundEnabled?: boolean;
   station: { isPublic: boolean } | null;
 };
 
@@ -81,6 +83,8 @@ export default function SettingsClient({ profile }: Props) {
   const [titleBadge, setTitleBadge] = useState(profile.titleBadge ?? "");
   const [animationEnabled, setAnimationEnabled] = useState(profile.animationEnabled);
   const [hologramEnabled, setHologramEnabled] = useState(profile.hologramEnabled);
+  const [allowFriendRequests, setAllowFriendRequests] = useState(profile.allowFriendRequests ?? true);
+  const [staticBackgroundEnabled, setStaticBackgroundEnabled] = useState(profile.staticBackgroundEnabled ?? false);
   const [isPublic, setIsPublic] = useState(profile.station?.isPublic ?? false);
   const [image, setImage] = useState(profile.image ?? "");
   
@@ -161,7 +165,7 @@ export default function SettingsClient({ profile }: Props) {
       const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, isPublic, image }),
+        body: JSON.stringify({ name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, isPublic, image }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -257,7 +261,12 @@ export default function SettingsClient({ profile }: Props) {
                     id="toggle-animation"
                     type="checkbox"
                     checked={animationEnabled}
-                    onChange={(e) => setAnimationEnabled(e.target.checked)}
+                    onChange={(e) => {
+                      setAnimationEnabled(e.target.checked);
+                      if (e.target.checked) {
+                        setStaticBackgroundEnabled(false);
+                      }
+                    }}
                   />
                   <span className="toggle-thumb" />
                 </label>
@@ -277,6 +286,46 @@ export default function SettingsClient({ profile }: Props) {
                     type="checkbox"
                     checked={hologramEnabled}
                     onChange={(e) => setHologramEnabled(e.target.checked)}
+                  />
+                  <span className="toggle-thumb" />
+                </label>
+              </div>
+
+              {/* Static Background toggle */}
+              {!animationEnabled && (
+                <div className="settings-toggle-row" style={{ marginTop: "1rem" }}>
+                  <div className="settings-toggle-info">
+                    <span className="settings-toggle-label">Static Background Mode</span>
+                    <span className="settings-toggle-desc">
+                      Use a completely static space image instead of dynamic particle background. Applies to all pages except landing & login.
+                    </span>
+                  </div>
+                  <label className="toggle-switch" htmlFor="toggle-static-bg">
+                    <input
+                      id="toggle-static-bg"
+                      type="checkbox"
+                      checked={staticBackgroundEnabled}
+                      onChange={(e) => setStaticBackgroundEnabled(e.target.checked)}
+                    />
+                    <span className="toggle-thumb" />
+                  </label>
+                </div>
+              )}
+
+              {/* Friend Requests toggle */}
+              <div className="settings-toggle-row" style={{ marginTop: "1rem" }}>
+                <div className="settings-toggle-info">
+                  <span className="settings-toggle-label">Allow Friend Requests</span>
+                  <span className="settings-toggle-desc">
+                    Show the "Add Friend" button on your Public Profile to other logged-in pilots.
+                  </span>
+                </div>
+                <label className="toggle-switch" htmlFor="toggle-friend-request">
+                  <input
+                    id="toggle-friend-request"
+                    type="checkbox"
+                    checked={allowFriendRequests}
+                    onChange={(e) => setAllowFriendRequests(e.target.checked)}
                   />
                   <span className="toggle-thumb" />
                 </label>

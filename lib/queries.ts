@@ -103,6 +103,7 @@ export async function getPublicStation(username: string) {
       titleBadge: user.titleBadge,
       callsign: user.callsign,
       animationEnabled: user.animationEnabled,
+      allowFriendRequests: user.allowFriendRequests,
     },
     station: user.station,
   };
@@ -168,6 +169,8 @@ export async function getMyProfile() {
       callsign: true,
       animationEnabled: true,
       hologramEnabled: true,
+      allowFriendRequests: true,
+      staticBackgroundEnabled: true,
       createdAt: true,
       station: {
         select: {

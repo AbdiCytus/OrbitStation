@@ -63,15 +63,27 @@ export default async function PublicProfilePage({
   const data = await getStation(username);
   const session = await auth();
 
+  let isFriendOrPending = false;
   let sessionUser = session?.user || null;
-  if (sessionUser?.id) {
-    const dbUser = await db.user.findUnique({ where: { id: sessionUser.id }, select: { animationEnabled: true, image: true, name: true, callsign: true } });
+  if (sessionUser?.id && data) {
+    const dbUser = await db.user.findUnique({ where: { id: sessionUser.id }, select: { animationEnabled: true, staticBackgroundEnabled: true, image: true, name: true, callsign: true } });
     if (dbUser) {
-      sessionUser = { ...sessionUser, animationEnabled: dbUser.animationEnabled, image: dbUser.image || sessionUser.image, name: dbUser.name || sessionUser.name, callsign: dbUser.callsign } as any;
+      sessionUser = { ...sessionUser, animationEnabled: dbUser.animationEnabled, staticBackgroundEnabled: (dbUser as any).staticBackgroundEnabled ?? false, image: dbUser.image || sessionUser.image, name: dbUser.name || sessionUser.name, callsign: dbUser.callsign } as any;
+    }
+    const friendship = await db.friendship.findFirst({
+      where: {
+        OR: [
+          { requesterId: sessionUser!.id, receiverId: data.user.id },
+          { requesterId: data.user.id, receiverId: sessionUser!.id }
+        ]
+      }
+    });
+    if (friendship) {
+      isFriendOrPending = true;
     }
   }
 
   if (!data) notFound();
 
-  return <PublicProfileClient data={data} sessionUser={sessionUser} />;
+  return <PublicProfileClient data={data} sessionUser={sessionUser} isFriendOrPending={isFriendOrPending} />;
 }
