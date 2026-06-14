@@ -37,7 +37,8 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteOption, setDeleteOption] = useState<"delete_all" | "move">("delete_all");
   const otherSectors = sectors.filter(s => s.id !== sector.id);
-  const [moveToSectorId, setMoveToSectorId] = useState<string>(otherSectors[0]?.id ?? "");
+  const availableMoveSectors = otherSectors.filter(s => !(s.collaborators && s.collaborators.length > 0));
+  const [moveToSectorId, setMoveToSectorId] = useState<string>(availableMoveSectors[0]?.id ?? "");
   const [error, setError] = useState<string | null>(null);
   const [mobilePage, setMobilePage] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -110,7 +111,12 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
         {/* MAIN PANEL */}
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ flex: "1 1 750px", maxWidth: "750px", margin: 0, display: "flex", flexDirection: "column", animation: isClosing ? undefined : "none" }}>
         <div className="modal-header">
-          <h2 className="modal-title">Edit Sector</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <h2 className="modal-title">Edit Sector</h2>
+            <span style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.3)", fontWeight: "normal", marginTop: "4px" }}>
+              Created: {new Date(sector.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}
+            </span>
+          </div>
           {!rightPanelMode && (
             <button className="btn-icon modal-close" onClick={handleClose} aria-label="Close">✕</button>
           )}
@@ -270,7 +276,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                 ) : (
                   <div style={{ width: "100%", padding: "0.75rem", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "8px" }}>
                     <p className="form-error" style={{ marginBottom: "0.75rem", fontSize: "0.85rem" }}>Are you sure you want to delete this sector?</p>
-                    {sector.beacons.length > 0 && otherSectors.length > 0 && !isCollabSector && (
+                    {sector.beacons.length > 0 && availableMoveSectors.length > 0 && !isCollabSector && (
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                         <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#fff", fontSize: "0.85rem", cursor: "pointer" }}>
                           <div style={{ width: "16px", height: "16px", borderRadius: "50%", border: `2px solid ${deleteOption === "delete_all" ? color : "#6b7280"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -293,12 +299,12 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                             value={moveToSectorId}
                             onChange={(e) => setMoveToSectorId(e.target.value)}
                           >
-                            {otherSectors.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            {availableMoveSectors.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                           </select>
                         )}
                       </div>
                     )}
-                    {sector.beacons.length > 0 && (otherSectors.length === 0 || isCollabSector) && (
+                    {sector.beacons.length > 0 && (availableMoveSectors.length === 0 || isCollabSector) && (
                       <p style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "0.5rem" }}>
                         This will also delete {sector.beacons.length} beacon(s) {isCollabSector ? "because this is a Collab Sector" : "because there is no other sector to move them to"}.
                       </p>

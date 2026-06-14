@@ -176,7 +176,13 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
                   <>
                     <div style={{ position: "fixed", inset: 0, zIndex: 90 }} onClick={() => setIsSectorDropdownOpen(false)} />
                     <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", zIndex: 100, overflow: "hidden", overflowY: "auto", maxHeight: "200px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
-                      {sectors.map((s) => (
+                      {sectors.filter((s) => {
+                        const originalSector = sectors.find(sec => sec.id === beacon.sectorId);
+                        const isOriginalCollab = originalSector && originalSector.collaborators && originalSector.collaborators.length > 0;
+                        const isTargetCollab = s.collaborators && s.collaborators.length > 0;
+                        if (isOriginalCollab) return s.id === beacon.sectorId;
+                        return !isTargetCollab;
+                      }).map((s) => (
                         <div
                           key={s.id}
                           className="dropdown-option-btn hover:bg-white/5"

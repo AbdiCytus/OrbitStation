@@ -14,7 +14,7 @@ import FriendsModal from "@/components/friends-modal";
 import StationNavbar from "@/components/station-navbar";
 import SpaceBackground from "@/components/space-background";
 import StaticStarfield from "@/components/static-starfield";
-import { deleteSector } from "@/lib/actions";
+import { deleteSector, reorderSectors } from "@/lib/actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { 
   PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon, ArrowPathIcon, EllipsisVerticalIcon
@@ -194,7 +194,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const [viewingMembersSector, setViewingMembersSector] = useState<SectorWithBeacons | null>(null);
   const [, startTransition] = useTransition();
 
-  const allOwnedSectors = station?.sectors ?? [];
+  const allOwnedSectors = [...(station?.sectors ?? [])].sort((a, b) => a.order - b.order);
   const personalSectors = allOwnedSectors.filter(s => !s.collaborators || s.collaborators.length === 0);
   const myCollabSectors = allOwnedSectors.filter(s => s.collaborators && s.collaborators.length > 0);
   const allCollabSectors = [...myCollabSectors, ...collabSectors];
@@ -416,6 +416,61 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const displayName = user.callsign ?? user.name ?? "Pilot";
   const animEnabled = user.animationEnabled;
 
+  const [draggedSectorIndex, setDraggedSectorIndex] = useState<number | null>(null);
+  const [dragOverSectorIndex, setDragOverSectorIndex] = useState<number | null>(null);
+
+  const handleSectorDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedSectorIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
+  };
+
+  const handleSectorDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedSectorIndex !== null && draggedSectorIndex !== index) {
+      setDragOverSectorIndex(index);
+    } else {
+      setDragOverSectorIndex(null);
+    }
+  };
+
+  const handleSectorDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedSectorIndex === null || draggedSectorIndex === index) {
+      setDraggedSectorIndex(null);
+      setDragOverSectorIndex(null);
+      return;
+    }
+
+    const reorderedSectors = Array.from(personalSectors);
+    const [movedSector] = reorderedSectors.splice(draggedSectorIndex, 1);
+    reorderedSectors.splice(index, 0, movedSector);
+
+    setStation((prev) => {
+      if (!prev) return prev;
+      const updatedSectors = prev.sectors.map(s => {
+        const pIndex = reorderedSectors.findIndex(rs => rs.id === s.id);
+        if (pIndex !== -1) {
+          return { ...s, order: pIndex };
+        }
+        return s;
+      });
+      return { ...prev, sectors: updatedSectors };
+    });
+
+    startTransition(async () => {
+      await reorderSectors(reorderedSectors.map(s => s.id));
+    });
+
+    setDraggedSectorIndex(null);
+    setDragOverSectorIndex(null);
+  };
+
+  const handleSectorDragEnd = () => {
+    setDraggedSectorIndex(null);
+    setDragOverSectorIndex(null);
+  };
+
   return (
     <div 
       className={`station-root${animEnabled ? "" : " no-animation"} ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}
@@ -543,8 +598,25 @@ export default function StationClient({ initialStation, initialCollabSectors = [
               </span>
             </button>
 
-            {personalSectors.map((sector) => (
-              <div key={sector.id} className="sector-tab-wrapper">
+            {personalSectors.map((sector, idx) => (
+              <div 
+                key={sector.id} 
+                className="sector-tab-wrapper"
+                draggable
+                onDragStart={(e) => handleSectorDragStart(e, idx)}
+                onDragOver={(e) => handleSectorDragOver(e, idx)}
+                onDrop={(e) => handleSectorDrop(e, idx)}
+                onDragEnd={handleSectorDragEnd}
+                style={{ 
+                   transition: user.animationEnabled ? 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease' : 'none', 
+                   opacity: draggedSectorIndex === idx ? 0.5 : 1,
+                   transform: user.animationEnabled && dragOverSectorIndex === idx 
+                     ? (draggedSectorIndex !== null && draggedSectorIndex > idx ? 'translateY(-4px)' : 'translateY(4px)') 
+                     : 'none',
+                   borderTop: dragOverSectorIndex === idx && draggedSectorIndex !== null && draggedSectorIndex > idx ? '2px solid rgba(139, 92, 246, 0.5)' : '2px solid transparent',
+                   borderBottom: dragOverSectorIndex === idx && draggedSectorIndex !== null && draggedSectorIndex < idx ? '2px solid rgba(139, 92, 246, 0.5)' : '2px solid transparent',
+                }}
+              >
                 <button
                   id={`tab-sector-${sector.id}`}
                   className={`sector-tab ${activeSectorId === sector.id ? "active" : ""}`}

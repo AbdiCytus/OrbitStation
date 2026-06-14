@@ -43,7 +43,9 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
 
   const [suggestedPilots, setSuggestedPilots] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [focusedSuggestIndex, setFocusedSuggestIndex] = useState(-1);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     function handleClickOutsideSearch(event: MouseEvent) {
@@ -67,8 +69,39 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
     } else {
       setSuggestedPilots([]);
       setShowSuggestions(false);
+      setFocusedSuggestIndex(-1);
     }
   }, [searchQuery, isPublicProfile]);
+
+  const handleSuggestKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions || suggestedPilots.length === 0) {
+      if (e.key === "Enter") {
+        setShowSuggestions(false);
+        onSearchSubmit?.();
+      }
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setFocusedSuggestIndex(prev => (prev < suggestedPilots.length - 1 ? prev + 1 : prev));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setFocusedSuggestIndex(prev => (prev > 0 ? prev - 1 : prev));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (focusedSuggestIndex >= 0 && focusedSuggestIndex < suggestedPilots.length) {
+        setShowSuggestions(false);
+        setFocusedSuggestIndex(-1);
+        router.push(`/station/${suggestedPilots[focusedSuggestIndex].username}`);
+      } else {
+        setShowSuggestions(false);
+        onSearchSubmit?.();
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setFocusedSuggestIndex(-1);
+    }
+  };
 
 
   return (
@@ -98,12 +131,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
               value={searchQuery ?? ""}
               onChange={(e) => onSearchChange?.(e.target.value)}
               onFocus={() => { if (suggestedPilots.length > 0) setShowSuggestions(true); }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setShowSuggestions(false);
-                  onSearchSubmit?.();
-                }
-              }}
+              onKeyDown={handleSuggestKeyDown}
             />
             {searchQuery && (
               <button
@@ -117,12 +145,14 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
             )}
             {showSuggestions && suggestedPilots.length > 0 && (
               <div className="pilot-suggest-dropdown">
-                {suggestedPilots.map(pilot => (
+                {suggestedPilots.map((pilot, idx) => (
                   <Link 
                     key={pilot.id} 
                     href={`/station/${pilot.username}`} 
-                    className="pilot-suggest-item"
+                    className={`pilot-suggest-item ${focusedSuggestIndex === idx ? "bg-white/10" : ""}`}
+                    style={focusedSuggestIndex === idx ? { background: "rgba(255,255,255,0.1)" } : {}}
                     onClick={() => setShowSuggestions(false)}
+                    onMouseEnter={() => setFocusedSuggestIndex(idx)}
                   >
                     <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#374151", overflow: "hidden" }}>
                       {pilot.image ? <img src={pilot.image} style={{width:"100%", height:"100%", objectFit:"cover"}}/> : <span style={{display:"flex", alignItems:"center", justifyContent:"center", fontSize:"10px", width:"100%", height:"100%"}}>{(pilot.name || pilot.username)[0].toUpperCase()}</span>}

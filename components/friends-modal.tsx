@@ -239,15 +239,9 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", bounce: 0, duration: 0.4 }}
           >
-            {/* Background Animation */}
-            <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
-              {user.animationEnabled ? (
-                <SpaceBackground animEnabled={true} transitionDuration={800} />
-              ) : (
-                <StaticStarfield seed={42} />
-              )}
+            {/* Background Layer (Removed heavy WebGL background to fix framedrop, using glassmorphism instead) */}
+            <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", background: "radial-gradient(circle at top right, rgba(139, 92, 246, 0.05), transparent 50%)" }}>
             </div>
-
             {/* Modal Header */}
             <div className="flex items-center justify-between relative z-10 bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] fm-modal-header" style={{ padding: "16px 24px", borderRadius: "16px" }}>
               <div className="flex items-center w-full fm-header-left">
@@ -330,14 +324,14 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         style={{ padding: "16px", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px" }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={user.animationEnabled ? { type: "spring", stiffness: 300, damping: 20, delay: i * 0.05 } : { duration: 0 }}
+                        transition={user.animationEnabled ? { type: "tween", ease: "easeInOut", duration: 0.3, delay: i * 0.05 } : { duration: 0 }}
                         exit={{ opacity: 0, y: 20, transition: { duration: 0.2, delay: i * 0.03 } }}
                         whileHover={user.animationEnabled ? { scale: 1.02, boxShadow: "0 0 15px rgba(139,92,246,0.3)" } : {}}
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-white/10 flex items-center justify-center shrink-0">
                             {p.image ? (
-                              <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                              <img src={p.image} alt={p.name} fetchPriority="high" className="w-full h-full object-cover" />
                             ) : (
                               <span className="text-gray-400 font-bold">{(p.name || p.username || "?")[0].toUpperCase()}</span>
                             )}
@@ -389,7 +383,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={user.animationEnabled ? { type: "spring", stiffness: 300, damping: 20, delay: i * 0.05 } : { duration: 0 }}
+                        transition={user.animationEnabled ? { type: "tween", ease: "easeInOut", duration: 0.3, delay: i * 0.05 } : { duration: 0 }}
                         exit={{ opacity: 0, y: 20, transition: { duration: 0.2, delay: i * 0.03 } }}
                         whileHover={user.animationEnabled ? { scale: 1.02, boxShadow: "0 0 15px rgba(139,92,246,0.3)" } : {}}
                       >
@@ -402,7 +396,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           >
                             <div className="w-full h-full rounded-full bg-gray-700 overflow-hidden border border-white/10 flex items-center justify-center relative">
                               {f.image ? (
-                                <img src={f.image} alt={f.name} className="w-full h-full object-cover" />
+                                <img src={f.image} alt={f.name} fetchPriority="high" className="w-full h-full object-cover" />
                               ) : (
                                 <motion.span 
                                   className="text-gray-400 font-bold" 
@@ -489,7 +483,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-white/10 flex items-center justify-center shrink-0">
                             {r.image ? (
-                              <img src={r.image} alt={r.name} className="w-full h-full object-cover" />
+                              <img src={r.image} alt={r.name} fetchPriority="high" className="w-full h-full object-cover" />
                             ) : (
                               <span className="text-gray-400 font-bold">{(r.name || r.username || "?")[0].toUpperCase()}</span>
                             )}

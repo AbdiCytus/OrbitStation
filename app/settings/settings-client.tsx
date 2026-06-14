@@ -356,8 +356,8 @@ export default function SettingsClient({ profile }: Props) {
               </div>
             </section>
             
-            {/* Danger Zone */}
-            <section className="settings-section" style={{ borderColor: "rgba(239,68,68,0.2)" }}>
+            {/* Danger Zone (Mobile) */}
+            <section className="settings-section mobile-only" style={{ borderColor: "rgba(239,68,68,0.2)" }}>
               <h2 className="settings-section-title" style={{ color: "#ef4444" }}>Danger Zone</h2>
               <p className="text-gray-400 text-sm mb-4" style={{ marginBottom: "1rem" }}>
                 Once you delete your account, there is no going back. Please be certain. All data will be permanently removed.
@@ -475,6 +475,21 @@ export default function SettingsClient({ profile }: Props) {
                   placeholder="Tell the galaxy about yourself…"
                 />
               </div>
+            </section>
+
+            {/* Danger Zone (Desktop) */}
+            <section className="settings-section desktop-only" style={{ borderColor: "rgba(239,68,68,0.2)" }}>
+              <h2 className="settings-section-title" style={{ color: "#ef4444" }}>Danger Zone</h2>
+              <p className="text-gray-400 text-sm mb-4" style={{ marginBottom: "1rem" }}>
+                Once you delete your account, there is no going back. Please be certain. All data will be permanently removed.
+              </p>
+              <button 
+                type="button" 
+                onClick={() => setShowDeleteModal(true)}
+                style={{ padding: "8px 16px", borderRadius: "8px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", fontWeight: "500", fontSize: "0.875rem" }}
+              >
+                Delete Account
+              </button>
             </section>
           </div>
         </div>
