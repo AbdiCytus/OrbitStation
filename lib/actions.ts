@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // ============================================================
 // HELPER — ambil session + pastikan Station user sudah ada
@@ -918,6 +920,15 @@ export async function markChatAsRead(senderId: string) {
 
 export async function recordStationVisit(stationId: string, visitorId?: string) {
   try {
+    const headersList = await headers();
+    const ip = headersList.get("x-forwarded-for") || "unknown-ip";
+    
+    // Batasi 1 kunjungan per IP setiap 5 menit (300000ms) untuk endpoint ini
+    // Untuk pengembangan/testing bisa diubah limitnya jika perlu
+    if (!checkRateLimit(`visit_${ip}`, 1, 300000)) {
+      return { success: false, message: "Rate limited" };
+    }
+
     const station = await db.station.findUnique({ where: { id: stationId }, select: { userId: true } });
     if (!station || station.userId === visitorId) {
       return { success: true }; // Do not record visit if it's the owner
