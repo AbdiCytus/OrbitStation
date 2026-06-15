@@ -72,17 +72,24 @@ export default function AnalyticsClient({ analytics, user }: Props) {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
       days.push({
         date: d.toLocaleDateString("en-US", { weekday: "short" }),
-        dateString: d.toISOString().split("T")[0],
+        dateString: `${yyyy}-${mm}-${dd}`,
         count: 0
       });
     }
     
     if (analytics?.recentVisits) {
       analytics.recentVisits.forEach((v: any) => {
-        const dStr = new Date(v.createdAt).toISOString().split("T")[0];
-        const day = days.find(d => d.dateString === dStr);
+        const visitDate = new Date(v.createdAt);
+        const yyyy = visitDate.getFullYear();
+        const mm = String(visitDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(visitDate.getDate()).padStart(2, '0');
+        const visitDateStr = `${yyyy}-${mm}-${dd}`;
+        const day = days.find(d => d.dateString === visitDateStr);
         if (day) day.count++;
       });
     }

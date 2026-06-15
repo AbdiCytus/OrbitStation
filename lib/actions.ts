@@ -904,6 +904,11 @@ export async function markChatAsRead(senderId: string) {
 
 export async function recordStationVisit(stationId: string, visitorId?: string) {
   try {
+    const station = await db.station.findUnique({ where: { id: stationId }, select: { userId: true } });
+    if (!station || station.userId === visitorId) {
+      return { success: true }; // Do not record visit if it's the owner
+    }
+
     await db.stationVisit.create({
       data: {
         stationId,
