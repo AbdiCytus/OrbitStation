@@ -4,12 +4,12 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon, Bars3Icon, ChartBarIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon, Bars3Icon, ChartBarIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { searchPilots } from "@/lib/actions";
 
 type Props = {
-  user?: { id: string; name: string | null; image: string | null; callsign?: string | null } | null;
+  user?: { id: string; name: string | null; image: string | null; callsign?: string | null; username?: string | null } | null;
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
   onSearchSubmit?: () => void;
@@ -257,6 +257,15 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                           onClick={() => setMenuOpen(false)}
                         >
                           <UserIcon width={18} height={18} /> My Station
+                        </Link>
+                      )}
+                      {user.username && (
+                        <Link
+                          href={`/station/${user.username}`}
+                          className="navbar-menu-item"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <GlobeAltIcon width={18} height={18} /> Public Station
                         </Link>
                       )}
                       {pathname !== '/settings' && pathname !== '/analytics' && (

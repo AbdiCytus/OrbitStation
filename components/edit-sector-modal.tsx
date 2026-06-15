@@ -10,12 +10,43 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import { DynamicIcon, ICON_OPTIONS } from "@/components/dynamic-icon";
 
 const COLORS = [
-  "#ef4444", "#f97316", "#f59e0b", "#eab308",
-  "#84cc16", "#22c55e", "#10b981", "#14b8a6",
-  "#06b6d4", "#0ea5e9", "#3b82f6", "#6366f1",
-  "#8b5cf6", "#a855f7", "#d946ef", "#ec4899",
-  "#f43f5e", "#94a3b8", "#fbbf24", "#34d399"
+  "#ef4444", "#f97316", "#eab308", "#22c55e",
+  "#06b6d4", "#7c6bff", "#a855f7", "#ec4899",
 ];
+
+function CustomColorPicker({ color, setColor, isSelected }: { color: string, setColor: (c: string) => void, isSelected: boolean }) {
+  const [localColor, setLocalColor] = useState(color && !COLORS.includes(color) ? color : "#ffffff");
+  
+  useEffect(() => {
+    if (color && !COLORS.includes(color)) setLocalColor(color);
+  }, [color]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (isSelected && localColor !== color) {
+        setColor(localColor);
+      }
+    }, 80);
+    return () => clearTimeout(t);
+  }, [localColor, setColor, isSelected, color]);
+
+  return (
+    <label className={"color-option" + (isSelected ? " selected" : "")} style={{ width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0, background: "conic-gradient(from 180deg, red, yellow, lime, aqua, blue, magenta, red)", position: "relative", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxSizing: "border-box" }}>
+      <input
+        type="color"
+        value={localColor}
+        onChange={(e) => {
+          setLocalColor(e.target.value);
+          if (!isSelected) setColor(e.target.value);
+        }}
+        style={{ position: "absolute", opacity: 0, width: "100%", height: "100%", cursor: "pointer", zIndex: 2, colorScheme: "dark" }}
+      />
+      {isSelected && (
+        <span style={{ width: "14px", height: "14px", borderRadius: "50%", background: localColor, border: "2px solid white", boxShadow: "0 0 4px rgba(0,0,0,0.5)", zIndex: 1, pointerEvents: "none" }} />
+      )}
+    </label>
+  );
+}
 
 type Props = {
   sector: SectorWithBeacons;
@@ -174,6 +205,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                       title={c}
                     />
                   ))}
+                  <CustomColorPicker color={color} setColor={setColor} isSelected={color !== "" && !COLORS.includes(color)} />
                 </div>
               </div>
             </div>

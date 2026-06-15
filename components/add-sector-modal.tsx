@@ -19,6 +19,40 @@ const COLOR_OPTIONS = [
   "#06b6d4", "#7c6bff", "#a855f7", "#ec4899",
 ];
 
+function CustomColorPicker({ color, setColor, isSelected }: { color: string, setColor: (c: string) => void, isSelected: boolean }) {
+  const [localColor, setLocalColor] = useState(color && !COLOR_OPTIONS.includes(color) ? color : "#ffffff");
+  
+  useEffect(() => {
+    if (color && !COLOR_OPTIONS.includes(color)) setLocalColor(color);
+  }, [color]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (isSelected && localColor !== color) {
+        setColor(localColor);
+      }
+    }, 80);
+    return () => clearTimeout(t);
+  }, [localColor, setColor, isSelected, color]);
+
+  return (
+    <label className={"color-option" + (isSelected ? " selected" : "")} style={{ width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0, background: "conic-gradient(from 180deg, red, yellow, lime, aqua, blue, magenta, red)", position: "relative", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxSizing: "border-box" }}>
+      <input
+        type="color"
+        value={localColor}
+        onChange={(e) => {
+          setLocalColor(e.target.value);
+          if (!isSelected) setColor(e.target.value);
+        }}
+        style={{ position: "absolute", opacity: 0, width: "100%", height: "100%", cursor: "pointer", zIndex: 2, colorScheme: "dark" }}
+      />
+      {isSelected && (
+        <span style={{ width: "14px", height: "14px", borderRadius: "50%", background: localColor, border: "2px solid white", boxShadow: "0 0 4px rgba(0,0,0,0.5)", zIndex: 1, pointerEvents: "none" }} />
+      )}
+    </label>
+  );
+}
+
 export default function AddSectorModal({ onClose, onCreated }: Props) {
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("FolderIcon");
@@ -136,11 +170,12 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                   key={c}
                   type="button"
                   className={"color-option" + (color === c ? " selected" : "")}
-                  style={{ backgroundColor: c }}
+                  style={{ backgroundColor: c, flexShrink: 0 }}
                   onClick={() => setColor(c)}
                   aria-label={c}
                 />
               ))}
+              <CustomColorPicker color={color} setColor={setColor} isSelected={color !== "" && !COLOR_OPTIONS.includes(color)} />
             </div>
           </div>
 

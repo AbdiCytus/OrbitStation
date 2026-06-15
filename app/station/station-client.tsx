@@ -528,7 +528,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
 
       {/* Navbar */}
       <StationNavbar
-        user={{ ...user, callsign: user.callsign }}
+        user={{ ...user, callsign: user.callsign, username: (user as any).username }}
         hideSearch={true}
         displayName={displayName}
         onOpenFriends={() => setShowFriendsModal(true)}
@@ -719,16 +719,6 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                       {displaySectorId === "all"
                         ? "All Beacons"
                         : <><DynamicIcon name={activeSector?.icon} style={{ display: "inline-block", verticalAlign: "middle", width: "24px", height: "24px", flexShrink: 0 }} /> <span className="truncate">{activeSector?.name ?? ""}</span> {activeSector && !activeSector.isPublic && <LockClosedIcon width={20} height={20} style={{ display: "inline-block", verticalAlign: "middle", opacity: 0.5, flexShrink: 0 }} title="Private Sector" />}</>}
-                      {displaySectorId !== "all" && activeSector && activeSector.stationId === station?.id && (
-                        <button
-                          onClick={() => setEditingSector(activeSector)}
-                          className="btn-icon desktop-only"
-                          style={{ opacity: 0.7, padding: 0, width: "32px", height: "32px", flexShrink: 0 }}
-                          title="Edit Sector"
-                        >
-                          <PencilSquareIcon width={20} height={20} />
-                        </button>
-                      )}
                     </h2>
                     <p className="station-section-sub truncate">
                       {visibleBeacons.length} beacon{visibleBeacons.length !== 1 ? "s" : ""}
