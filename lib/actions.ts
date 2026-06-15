@@ -392,7 +392,10 @@ export async function createBeacon(sectorId: string, data: BeaconFormData) {
 
   // Validasi URL
   try {
-    new URL(data.url.trim());
+    const parsedUrl = new URL(data.url.trim());
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      return { error: "URL must start with http:// or https://" };
+    }
   } catch {
     return { error: "Invalid URL format" };
   }
@@ -443,6 +446,17 @@ export async function updateBeacon(
   });
   if (!beacon) {
     return { error: "Beacon not found or access denied" };
+  }
+
+  if (data.url !== undefined) {
+    try {
+      const parsedUrl = new URL(data.url.trim());
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        return { error: "URL must start with http:// or https://" };
+      }
+    } catch {
+      return { error: "Invalid URL format" };
+    }
   }
 
   const updated = await db.beacon.update({
