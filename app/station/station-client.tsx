@@ -533,6 +533,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
         displayName={displayName}
         onOpenFriends={() => setShowFriendsModal(true)}
         stats={stats}
+        isPublicProfile={station?.isPublic}
       />
 
       {/* Mobile Sidebar Toggle Button */}

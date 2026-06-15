@@ -259,7 +259,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                           <UserIcon width={18} height={18} /> My Station
                         </Link>
                       )}
-                      {user.username && (
+                      {user.username && isPublicProfile && (
                         <Link
                           href={`/station/${user.username}`}
                           className="navbar-menu-item"

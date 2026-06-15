@@ -14,9 +14,10 @@ type Tab = "overview" | "visitors" | "beacons";
 type Props = {
   analytics: any;
   user: any;
+  isPublicProfile?: boolean;
 };
 
-export default function AnalyticsClient({ analytics, user }: Props) {
+export default function AnalyticsClient({ analytics, user, isPublicProfile }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [selectedMobileBeacon, setSelectedMobileBeacon] = useState<any>(null);
   
@@ -153,6 +154,7 @@ export default function AnalyticsClient({ analytics, user }: Props) {
         user={user} 
         hideSearch 
         displayName={user.name || user.username || "Pilot"}
+        isPublicProfile={isPublicProfile}
       />
 
       <div className="analytics-content pt-20 flex flex-col h-full overflow-hidden w-full max-w-6xl mx-auto px-4 pb-6">

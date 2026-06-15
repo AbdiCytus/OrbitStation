@@ -34,6 +34,7 @@ export default async function AnalyticsPage() {
         animationEnabled: profile?.animationEnabled ?? true,
         staticBackgroundEnabled: (profile as any)?.staticBackgroundEnabled ?? false,
       }}
+      isPublicProfile={station.isPublic}
     />
   );
 }
