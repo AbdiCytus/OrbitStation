@@ -4,17 +4,17 @@ import type { Metadata } from "next";
 import LandingClient from "./landing-client";
 
 export const metadata: Metadata = {
-  title: "Orbit Station — Your Personal Web Portal in the Stars",
+  title: "Orbit Station",
   description:
-    "Organize your favorite web shortcuts into Sectors. Access them anytime from your personal Station.",
+    "Build your station and showcase it to the universe.",
   openGraph: {
-    title: "Orbit Station — Your Personal Web Portal",
-    description: "Organize your favorite web shortcuts into Sectors. Access them anytime from your personal Station.",
+    title: "Orbit Station",
+    description: "Build your station and showcase it to the universe.",
     url: "/",
   },
   twitter: {
-    title: "Orbit Station — Your Personal Web Portal",
-    description: "Organize your favorite web shortcuts into Sectors. Access them anytime from your personal Station.",
+    title: "Orbit Station",
+    description: "Build your station and showcase it to the universe.",
   },
 };
 
