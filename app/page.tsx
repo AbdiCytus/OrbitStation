@@ -11,10 +11,13 @@ export const metadata: Metadata = {
     title: "Orbit Station",
     description: "Build your station and showcase it to the universe.",
     url: "/",
+    images: ["/banner.png"],
   },
   twitter: {
     title: "Orbit Station",
     description: "Build your station and showcase it to the universe.",
+    images: ["/banner.png"],
+    card: "summary_large_image",
   },
 };
 
