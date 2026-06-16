@@ -42,6 +42,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const [isIdle, setIsIdle] = useState(false);
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
   const [shrinkingBeacons, setShrinkingBeacons] = useState<Set<string>>(new Set());
+  const [growingBeacons, setGrowingBeacons] = useState<Set<string>>(new Set());
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileMenuCaption, setMobileMenuCaption] = useState<"edit" | "add" | null>(null);
@@ -314,6 +315,12 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   }, []);
 
   const handleBeaconCreated = useCallback((newBeacon: Beacon) => {
+    if (user.animationEnabled) {
+      setGrowingBeacons(new Set([newBeacon.id]));
+      setTimeout(() => {
+        setGrowingBeacons(new Set());
+      }, 500);
+    }
     setStation((prev) => {
       if (!prev) return prev;
       return {
@@ -329,7 +336,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
       prev.map(s => s.id === newBeacon.sectorId ? { ...s, beacons: [...s.beacons, newBeacon] } : s)
     );
     setShowAddBeacon(false);
-  }, []);
+  }, [user.animationEnabled]);
 
   const handleBeaconUpdated = useCallback((updated: Beacon) => {
     setStation((prev) => {
@@ -365,22 +372,36 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   }, [user.animationEnabled]);
 
   const handleBeaconDeleted = useCallback((beaconId: string) => {
-    setStation((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        sectors: prev.sectors.map((s) => ({
-          ...s,
-          beacons: s.beacons.filter((b) => b.id !== beaconId),
-        })),
-      };
-    });
-    setCollabSectors((prev) => 
-      prev.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== beaconId) }))
-    );
-    setSelectedBeacon(null);
-    setEditingBeacon(null);
-  }, []);
+    const doDelete = () => {
+      setStation((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          sectors: prev.sectors.map((s) => ({
+            ...s,
+            beacons: s.beacons.filter((b) => b.id !== beaconId),
+          })),
+        };
+      });
+      setCollabSectors((prev) => 
+        prev.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== beaconId) }))
+      );
+      setSelectedBeacon(null);
+      setEditingBeacon(null);
+    };
+
+    if (user.animationEnabled) {
+      setShrinkingBeacons(new Set([beaconId]));
+      setSelectedBeacon(null);
+      setEditingBeacon(null);
+      setTimeout(() => {
+        setShrinkingBeacons(new Set());
+        doDelete();
+      }, 300);
+    } else {
+      doDelete();
+    }
+  }, [user.animationEnabled]);
 
   const handleSectorDelete = useCallback((sectorId: string, moveToSectorId?: string) => {
     startTransition(async () => {
@@ -1042,6 +1063,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                         ${isFilterExiting ? 'beacon-filter-exiting' : ''}
                         ${isFilterEntering ? 'beacon-filter-entering' : ''}
                         ${shrinkingBeacons.has(beacon.id) ? 'beacon-shrinking' : ''}
+                        ${growingBeacons.has(beacon.id) ? 'beacon-growing' : ''}
                       `}
                       style={{ 
                         animationDelay: user.animationEnabled ? `${globalIndex * 0.03}s` : '0s',

@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "OrbStation Clipper",
+  "version": "1.0.0",
+  "description": "Quickly save your current tab as a Beacon to your OrbStation.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Save to OrbStation",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.orbstation.com/*",
+    "http://localhost:3000/*"
+  ]
+}

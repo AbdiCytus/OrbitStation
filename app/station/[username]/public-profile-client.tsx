@@ -8,7 +8,7 @@ import StationNavbar from "@/components/station-navbar";
 import { incrementBeaconVisit } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
-import { UserPlusIcon } from "@heroicons/react/24/outline";
+import { UserPlusIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { sendFriendRequest, recordStationVisit } from "@/lib/actions";
 import "./public-profile.css";
@@ -199,49 +199,77 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
 
             {/* Bio */}
             <div className="zzz-bio-bar" style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: isMobile ? "1rem" : "0" }}>
-              {isMobile && sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
-                <button 
-                  className="btn btn-primary" 
-                  style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}
-                  disabled={isAddingFriend}
-                  onClick={async () => {
-                     setIsAddingFriend(true);
-                     const res = await sendFriendRequest(user.id);
-                     if (res?.error) {
-                        toast.error(res.error);
-                     } else {
-                        toast.success("Friend request sent!");
-                     }
-                     setIsAddingFriend(false);
-                  }}
-                >
-                  <UserPlusIcon width={16} height={16} />
-                  {isAddingFriend ? "Sending..." : "Add Friend"}
-                </button>
-              )}
+              <div style={{ display: "flex", gap: "0.5rem", flexDirection: isMobile ? "column" : "row", width: isMobile ? "100%" : "auto" }}>
+                {isMobile && sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%" }}
+                    disabled={isAddingFriend}
+                    onClick={async () => {
+                       setIsAddingFriend(true);
+                       const res = await sendFriendRequest(user.id);
+                       if (res?.error) {
+                          toast.error(res.error);
+                       } else {
+                          toast.success("Friend request sent!");
+                       }
+                       setIsAddingFriend(false);
+                    }}
+                  >
+                    <UserPlusIcon width={16} height={16} />
+                    {isAddingFriend ? "Sending..." : "Add Friend"}
+                  </button>
+                )}
+                {isMobile && (
+                  <button 
+                    className="btn btn-secondary hover:bg-white/10" 
+                    style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", width: "100%", background: "rgba(255,255,255,0.05)" }}
+                    onClick={() => {
+                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => {});
+                      else { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
+                    }}
+                  >
+                    <ShareIcon width={16} height={16} /> Share
+                  </button>
+                )}
+              </div>
               
-              <div className="zzz-bio-text">"{user.bio || "Exploring the internet galaxy."}"</div>
+              <div className="zzz-bio-text" style={{ flex: 1, textAlign: "center", padding: "0 1rem" }}>"{user.bio || "Exploring the internet galaxy."}"</div>
               
-              {!isMobile && sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
-                <button 
-                  className="btn btn-primary" 
-                  style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem" }}
-                  disabled={isAddingFriend}
-                  onClick={async () => {
-                     setIsAddingFriend(true);
-                     const res = await sendFriendRequest(user.id);
-                     if (res?.error) {
-                        toast.error(res.error);
-                     } else {
-                        toast.success("Friend request sent!");
-                     }
-                     setIsAddingFriend(false);
-                  }}
-                >
-                  <UserPlusIcon width={16} height={16} />
-                  {isAddingFriend ? "Sending..." : "Add Friend"}
-                </button>
-              )}
+              <div style={{ display: "flex", gap: "0.5rem", flexDirection: isMobile ? "column" : "row", width: isMobile ? "100%" : "auto", justifyContent: "flex-end" }}>
+                {!isMobile && sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                    disabled={isAddingFriend}
+                    onClick={async () => {
+                       setIsAddingFriend(true);
+                       const res = await sendFriendRequest(user.id);
+                       if (res?.error) {
+                          toast.error(res.error);
+                       } else {
+                          toast.success("Friend request sent!");
+                       }
+                       setIsAddingFriend(false);
+                    }}
+                  >
+                    <UserPlusIcon width={16} height={16} />
+                    {isAddingFriend ? "Sending..." : "Add Friend"}
+                  </button>
+                )}
+                {!isMobile && (
+                  <button 
+                    className="btn btn-secondary hover:bg-white/10" 
+                    style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)" }}
+                    onClick={() => {
+                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => {});
+                      else { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
+                    }}
+                  >
+                    <ShareIcon width={16} height={16} /> Share
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Sector Tabs */}

@@ -31,8 +31,8 @@ export async function GET(req: NextRequest) {
           }}
         >
           {/* Logo */}
-          <div style={{ position: 'absolute', top: 40, left: 40, display: 'flex', fontSize: 32, fontWeight: 'bold', color: '#a78bfa', letterSpacing: '-0.02em' }}>
-            ⊕ Orbit Station
+          <div style={{ position: 'absolute', top: 40, left: 40, display: 'flex' }}>
+            <img src={`${new URL(req.url).origin}/logo.png`} height={80} style={{ objectFit: 'contain' }} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>

@@ -108,9 +108,9 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
     <header className="station-navbar glass-nav">
       <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
         {/* Logo */}
-        <Link href={user ? "/station" : "/"} className="navbar-logo">
-          <span className="navbar-logo-icon">⊕</span>
-          <span className="navbar-logo-text text-gradient">Orbit Station</span>
+        <Link href={user ? "/station" : "/"} className="navbar-logo" style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+          <img src="/logo.png" alt="Orbit Station" style={{ height: "40px", width: "auto", objectFit: "contain", filter: "drop-shadow(0 0 10px rgba(139, 92, 246, 0.6))" }} />
+          <span style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#f8fafc", letterSpacing: "0.5px", textShadow: "0 0 10px rgba(139, 92, 246, 0.6), 0 0 20px rgba(139, 92, 246, 0.4)" }} className="hidden sm:inline">Orbit Station</span>
         </Link>
         {user && pathname !== "/station" && pathname !== "/settings" && pathname !== "/analytics" && !isPublicProfile && (
           <Link href="/station" className="btn btn-outline btn-sm" style={{ marginLeft: "0.25rem", padding: "0.2rem 0.5rem", height: "auto", display: "flex", gap: "0.25rem", alignItems: "center", border: "1px solid rgba(139,92,246,0.3)", borderRadius: "6px" }}>

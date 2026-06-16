@@ -60,9 +60,8 @@ export default function LandingClient() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="landing-nav"
         >
-          <span className="navbar-logo">
-            <span className="navbar-logo-icon" style={{ textShadow: "0 0 15px #a78bfa" }}>⊕</span>
-            <span className="navbar-logo-text text-gradient">Orbit Station</span>
+          <span className="navbar-logo" style={{ display: "flex", alignItems: "center" }}>
+            <img src="/logo.png" alt="Orbit Station" style={{ height: "48px", width: "auto", objectFit: "contain", filter: "drop-shadow(0 0 10px rgba(139, 92, 246, 0.6))" }} />
           </span>
           <Link href="/login" className="btn btn-secondary btn-sm" style={{ backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)" }}>
             Sign In
@@ -100,6 +99,29 @@ export default function LandingClient() {
           </motion.div>
         </motion.section>
 
+        {/* About Section */}
+        <motion.section
+          className="landing-about"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={containerVariants}
+          style={{ padding: "4rem 2rem", maxWidth: "900px", margin: "0 auto", textAlign: "center" }}
+        >
+          <motion.div variants={itemVariants} style={{ marginBottom: "3rem" }}>
+            <img src="/banner-icon.png" alt="Orbit Station OS" style={{ width: "100%", maxWidth: "550px", height: "auto", margin: "0 auto", filter: "drop-shadow(0 0 25px rgba(139, 92, 246, 0.5))" }} />
+          </motion.div>
+          <motion.h2 variants={itemVariants} style={{ fontSize: "2rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "1rem" }}>
+            What is Orbit Station?
+          </motion.h2>
+          <motion.p variants={itemVariants} style={{ color: "#94a3b8", fontSize: "1.1rem", lineHeight: "1.8", marginBottom: "1.5rem" }}>
+            Orbit Station is built to be your ultimate command center in the vast ocean of the internet. Unlike traditional, rigid bookmark managers, Orbit Station is designed with a premium, dynamic cosmic aesthetic and powered by <span style={{ color: "#a78bfa" }}>Smart Beacons</span>.
+          </motion.p>
+          <motion.p variants={itemVariants} style={{ color: "#94a3b8", fontSize: "1.1rem", lineHeight: "1.8" }}>
+            Organize your essential web destinations into thematic <strong>Sectors</strong>, showcase your curated "Station" publicly as a futuristic digital business card, and seamlessly save tabs using our dedicated browser extension. It's not just a list of links—it's your personalized gateway to the digital universe.
+          </motion.p>
+        </motion.section>
+
         {/* Feature cards */}
         <motion.section 
           className="landing-features"
@@ -120,11 +142,17 @@ export default function LandingClient() {
         </motion.section>
 
         {/* Footer */}
-        <footer className="landing-footer" style={{ marginTop: "auto", borderTop: "1px solid rgba(255,255,255,0.05)", background: "rgba(10, 10, 15, 0.5)", backdropFilter: "blur(10px)" }}>
-          <span className="text-gradient" style={{ fontWeight: 700, letterSpacing: "1px" }}>⊕ Orbit Station</span>
-          <span style={{ color: "#64748b", fontSize: "0.85rem" }}>
-            Built for curious minds.
-          </span>
+        <footer className="landing-footer" style={{ marginTop: "auto", borderTop: "1px solid rgba(255,255,255,0.05)", background: "rgba(10, 10, 15, 0.5)", backdropFilter: "blur(10px)", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <img src="/logo.png" alt="Orbit Station" style={{ height: "36px", width: "auto", objectFit: "contain", filter: "drop-shadow(0 0 8px rgba(139, 92, 246, 0.4))" }} />
+            <span style={{ color: "#64748b", fontSize: "0.85rem" }}>
+              Built for curious minds.
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: "1rem", fontSize: "0.8rem", color: "#64748b" }}>
+            <a href="/terms" className="hover:text-purple-400 transition-colors">Terms of Service</a>
+            <a href="/privacy" className="hover:text-purple-400 transition-colors">Privacy Policy</a>
+          </div>
         </footer>
       </div>
     </main>

@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { LinkIcon, KeyIcon, RocketLaunchIcon } from "@heroicons/react/20/solid";
+import { LinkIcon, KeyIcon, RocketLaunchIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
 import { motion, AnimatePresence } from "framer-motion";
 
 type AuthMode = "oauth" | "login" | "register";
@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // ... (handle methods below) ...
 
@@ -108,14 +109,8 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <motion.div variants={itemVariants} className="login-logo text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-4" style={{ background: "rgba(139, 92, 246, 0.15)", border: "1px solid rgba(139, 92, 246, 0.3)", color: "#a78bfa", boxShadow: "0 0 20px rgba(139, 92, 246, 0.2)" }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="2" x2="12" y2="22"></line>
-              <line x1="2" y1="12" x2="22" y2="12"></line>
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gradient" style={{ background: "linear-gradient(135deg, #fff 0%, #a78bfa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Orbit Station</h1>
+          <img src="/logo.png" alt="Orbit Station" style={{ height: "84px", width: "auto", objectFit: "contain", margin: "0 auto", filter: "drop-shadow(0 0 16px rgba(139, 92, 246, 0.6))" }} />
+          <h1 style={{ fontSize: "1.75rem", fontWeight: "bold", color: "#f8fafc", marginTop: "-0.25rem", letterSpacing: "0.5px", textShadow: "0 0 12px rgba(139, 92, 246, 0.6), 0 0 24px rgba(139, 92, 246, 0.4)" }}>Orbit Station</h1>
           <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>Your personal web portal in the stars</p>
         </motion.div>
 
@@ -152,7 +147,8 @@ export default function LoginPage() {
               initial={{ opacity: 0, height: 0 }} 
               animate={{ opacity: 1, height: "auto" }} 
               exit={{ opacity: 0, height: 0 }}
-              className="text-red-400 text-sm text-center bg-red-500/10 py-2 rounded-lg border border-red-500/20"
+              className="text-sm text-center bg-red-500/10 rounded-lg border border-red-500/20"
+              style={{color: "rgba(255, 100, 100)", padding: "10px 0"}}
             >
               {error}
             </motion.p>
@@ -211,17 +207,26 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 relative">
                 <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Secure Password</label>
-                <input
-                  className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
-                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "3rem" }}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
               <button
                 type="submit"
@@ -261,18 +266,27 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 relative">
                 <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Secure Password</label>
-                <input
-                  className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
-                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                />
+                <div className="relative">
+                  <input
+                    className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "3rem" }}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
               <button
                 type="submit"
@@ -287,7 +301,7 @@ export default function LoginPage() {
         </AnimatePresence>
 
         <motion.p variants={itemVariants} className="text-xs text-center text-slate-500 mt-4">
-          By continuing, you agree to Orbit Station's Terms of Service and Privacy Policy.
+          By continuing, you agree to Orbit Station's <a href="/terms" className="text-purple-400 hover:underline">Terms of Service</a> and <a href="/privacy" className="text-purple-400 hover:underline">Privacy Policy</a>.
         </motion.p>
       </motion.div>
     </main>

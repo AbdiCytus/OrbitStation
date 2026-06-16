@@ -98,16 +98,15 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     });
   }
   function handleDelete() {
-    setConfirmDelete(true);
-  }
-  function confirmDeleteAction() {
-    startTransition(async () => {
-      const result = await deleteBeacon(beacon.id);
-      if (!result.error) {
-        if (onDeleted) onDeleted(beacon.id);
-        handleClose();
-      }
-    });
+    if (window.confirm("Are you sure you want to delete this beacon?")) {
+      startTransition(async () => {
+        const result = await deleteBeacon(beacon.id);
+        if (!result.error) {
+          if (onDeleted) onDeleted(beacon.id);
+          handleClose();
+        }
+      });
+    }
   }
   function handleSaveNotes() {
     startTransition(async () => { await updateBeacon(beacon.id, { notes }); });
@@ -165,17 +164,6 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
           </div>
           <div className="hsr-topbar-actions">
             {!readOnly && (
-              confirmDelete ? (
-                <>
-                  {/* <span className="hsr-action-label" style={{ color: "#ef4444", fontWeight: 600 }}>Sure?</span> */}
-                  <button className="hsr-action-btn" onClick={() => setConfirmDelete(false)}>
-                    <span className="hsr-action-label">Cancel</span>
-                  </button>
-                  <button className="hsr-action-btn hsr-action-btn--danger" onClick={confirmDeleteAction} disabled={isPending}>
-                    <span className="hsr-action-label">Delete!</span>
-                  </button>
-                </>
-              ) : (
                 <>
                   {subroute && (
                     <div style={{ 
@@ -204,7 +192,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                   )}
                   <button
                     className="hsr-action-btn hsr-action-btn--danger"
-                    onClick={() => setConfirmDelete(true)}
+                    onClick={handleDelete}
                     title="Delete beacon"
                     id={`btn-delete-${beacon.id}`}
                   >
@@ -212,7 +200,6 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                     <span className="hsr-action-label">Delete</span>
                   </button>
                 </>
-              )
             )}
             <button className="hsr-close-btn" onClick={handleClose} aria-label="Close">
               <XMarkIcon width={20} height={20} />

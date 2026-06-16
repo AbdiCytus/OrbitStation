@@ -1,5 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#0F0F13",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
@@ -22,7 +26,7 @@ export const metadata: Metadata = {
     siteName: "Orbit Station",
     images: [
       {
-        url: "/api/og?name=Orbit+Station",
+        url: "/banner.png",
         width: 1200,
         height: 630,
         alt: "Orbit Station - Your Personal Web Portal",
@@ -33,12 +37,13 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Orbit Station",
     description: "Your personal web portal in the stars.",
-    images: ["/api/og?name=Orbit+Station"],
+    images: ["/banner.png"],
   },
 };
 
 import MouseTrail from "@/components/mouse-trail";
 import { Toaster } from "sonner";
+import PwaRegister from "@/components/pwa-register";
 
 export default function RootLayout({
   children,
@@ -56,6 +61,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <PwaRegister />
         <MouseTrail />
         <Toaster 
           theme="dark" 

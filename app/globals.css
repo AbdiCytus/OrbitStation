@@ -3772,6 +3772,8 @@ code, kbd, pre {
 
 .beacon-shrinking { animation: beacon-shrink 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards !important; }
 @keyframes beacon-shrink { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.5); } }
+.beacon-growing { animation: beacon-grow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important; }
+@keyframes beacon-grow { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
 
 @media (max-width: 768px) { .station-section-header { flex-direction: row !important; align-items: center !important; } .station-section-header > div:first-child { flex: 1; min-width: 0; } .station-section-header > div:last-child { flex-shrink: 0; } }
 
