@@ -97,16 +97,18 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
       toast.success(newVal ? "Beacon pinned" : "Beacon unpinned");
     });
   }
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   function handleDelete() {
-    if (window.confirm("Are you sure you want to delete this beacon?")) {
-      startTransition(async () => {
-        const result = await deleteBeacon(beacon.id);
-        if (!result.error) {
-          if (onDeleted) onDeleted(beacon.id);
-          handleClose();
-        }
-      });
-    }
+    setShowDeleteConfirm(true);
+  }
+  function executeDelete() {
+    startTransition(async () => {
+      const result = await deleteBeacon(beacon.id);
+      if (!result.error) {
+        if (onDeleted) onDeleted(beacon.id);
+        handleClose();
+      }
+    });
   }
   function handleSaveNotes() {
     startTransition(async () => { await updateBeacon(beacon.id, { notes }); });
@@ -157,6 +159,21 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
         </div>
 
         {/* ── TOP ACTION BAR ──────────────────────────────── */}
+        
+        {showDeleteConfirm && (
+          <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "rgba(11, 12, 16, 0.9)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }}>
+            <div style={{ padding: "2rem", background: "#1f1f2e", borderRadius: "1rem", border: "1px solid rgba(239, 68, 68, 0.4)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+              <TrashIcon width={32} height={32} style={{ color: "#ef4444", margin: "0 auto 1rem" }} />
+              <h3 style={{ color: "#fff", fontSize: "1.2rem", marginBottom: "0.5rem" }}>Delete Beacon?</h3>
+              <p style={{ color: "#a1a1aa", fontSize: "0.9rem", marginBottom: "1.5rem" }}>Are you sure you want to delete <strong style={{ color: "#ef4444" }}>{beacon.title}</strong>? This action cannot be undone.</p>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+                <button type="button" className="btn btn-danger" style={{ flex: 1, background: "#ef4444" }} onClick={executeDelete}>Delete</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="hsr-topbar">
           <div className="hsr-topbar-left">
             <span className="hsr-topbar-icon"><InformationCircleIcon width={18} height={18} /></span>

@@ -11,6 +11,9 @@ import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { UserPlusIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { sendFriendRequest, recordStationVisit } from "@/lib/actions";
+import { motion, useAnimation, PanInfo } from "framer-motion";
+import FriendsModal from "@/components/friends-modal";
+import { useNotifications } from "@/hooks/use-notifications";
 import "./public-profile.css";
 
 type Props = {
@@ -56,6 +59,8 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
   const [stationSearch, setStationSearch] = useState("");
   const [isAddingFriend, setIsAddingFriend] = useState(false);
+  const [showFriendsModal, setShowFriendsModal] = useState(false);
+  const { stats, refetch: refetchNotifications } = useNotifications();
   const router = useRouter();
 
   const [hasVisited, setHasVisited] = useState(false);
@@ -108,6 +113,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
           }
         }}
         isPublicProfile={true}
+        onOpenFriends={() => setShowFriendsModal(true)}
       />
 
       {/* Background Canvas: Kosmik, Aurora, Komet, Blackhole */}
@@ -121,9 +127,23 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
         <CosmicBackground enabled={isAnimationEnabled} isMobile={isMobile} />
       )}
 
-      <div className="zzz-wrapper" style={{ top: "60px" }}>
+      <div className="zzz-wrapper" style={{ top: "60px", pointerEvents: "none" }}>
         {/* Modal Container */}
-        <div className={`zzz-modal ${isAnimationEnabled ? "floating" : ""}`}>
+        <motion.div 
+          className={`zzz-modal ${isAnimationEnabled ? "floating" : ""}`}
+          drag={isMobile ? "y" : false}
+          dragConstraints={{ top: 0, bottom: isMobile ? (typeof window !== "undefined" ? window.innerHeight - 200 : 500) : 0 }}
+          dragElastic={0.2}
+          dragMomentum={false}
+          style={{ pointerEvents: "auto", touchAction: isMobile ? "none" : "auto" }}
+        >
+          
+          {/* Draggable handle for mobile */}
+          {isMobile && (
+            <div style={{ width: "100%", height: "24px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "grab", flexShrink: 0, paddingTop: "8px" }}>
+              <div style={{ width: "40px", height: "4px", backgroundColor: "rgba(255,255,255,0.3)", borderRadius: "2px" }} />
+            </div>
+          )}
           
           {/* Modal Background Sparkles */}
           {isAnimationEnabled && (
@@ -326,7 +346,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {selectedBeacon && (
@@ -337,6 +357,14 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
           readOnly={true}
         />
       )}
+
+      <FriendsModal 
+        isOpen={showFriendsModal} 
+        onClose={() => setShowFriendsModal(false)} 
+        user={sessionUser} 
+        stats={stats}
+        refetchStats={refetchNotifications}
+      />
     </>
   );
 }

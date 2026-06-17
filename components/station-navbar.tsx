@@ -210,13 +210,11 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                 id="btn-user-menu"
                 className="navbar-avatar-btn"
                 onClick={() => {
-                  if (pathname === "/station" || pathname === "/settings" || pathname === "/analytics") {
-                    setMenuOpen((o) => !o);
-                  }
+                  setMenuOpen((o) => !o);
                 }}
                 aria-expanded={menuOpen}
                 aria-label="User menu"
-                style={{ position: "relative", cursor: (pathname === "/station" || pathname === "/settings" || pathname === "/analytics") ? "pointer" : "default" }}
+                style={{ position: "relative", cursor: "pointer" }}
               >
                 {stats?.hasNotifications && (
                   <span style={{ position: "absolute", top: 0, right: 0, width: "10px", height: "10px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423", zIndex: 10 }}></span>

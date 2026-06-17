@@ -279,7 +279,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
       }
     };
     const handleClickOutside = (e: MouseEvent) => {
-      if (!(e.target as Element).closest(".custom-dropdown")) {
+      const target = e.target as Element;
+      if (target && target.closest && !target.closest(".custom-dropdown")) {
         setOpenMenu(null);
       }
     };

@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
+import { sendEmail } from "@/lib/resend";
 
 export async function POST(req: Request) {
   const { email, password, name } = await req.json();
@@ -24,9 +26,34 @@ export async function POST(req: Request) {
     username = `Pilot${Math.floor(1000 + Math.random() * 9000)}`;
   }
 
-  await db.user.create({
+  const user = await db.user.create({
     data: { email, name, password: hashed, username },
   });
 
-  return NextResponse.json({ success: true });
+  const token = randomBytes(32).toString("hex");
+  await db.verificationToken.create({
+    data: {
+      identifier: email,
+      token,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    },
+  });
+
+  // Construct verification URL
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const verifyUrl = `${baseUrl}/api/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+
+  await sendEmail({
+    to: email,
+    subject: "Welcome to Orbit Station - Verify your email",
+    html: `
+      <h2>Welcome to Orbit Station, Pilot ${name}!</h2>
+      <p>Please verify your email address by clicking the link below:</p>
+      <p><a href="${verifyUrl}">Verify Email</a></p>
+      <br />
+      <p>Safe travels!</p>
+    `,
+  });
+
+  return NextResponse.json({ success: true, message: "Verification email sent" });
 }

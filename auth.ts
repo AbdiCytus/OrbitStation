@@ -4,6 +4,9 @@ import Credentials from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
 import { authConfig } from "@/auth.config";
 import bcrypt from "bcryptjs";
+import { cookies, headers } from "next/headers";
+import { sendEmail } from "@/lib/resend";
+import { randomBytes } from "crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -62,6 +65,54 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Don't store massive base64 images in JWT cookies
         delete token.picture;
         delete token.image;
+
+        // New Login Device Check
+        try {
+          const cookieStore = await cookies();
+          const deviceId = cookieStore.get("orbit_device_id")?.value;
+          
+          if (!deviceId) {
+            const reqHeaders = await headers();
+            const userAgent = reqHeaders.get("user-agent") || "Unknown Device";
+            const ip = reqHeaders.get("x-forwarded-for") || reqHeaders.get("x-real-ip") || "Unknown IP";
+            
+            const newDeviceId = randomBytes(16).toString("hex");
+            
+            // Try setting the cookie. May fail if headers are already sent in some edge cases.
+            cookieStore.set("orbit_device_id", newDeviceId, {
+              maxAge: 60 * 60 * 24 * 365,
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "lax",
+            });
+
+            // Send notification email asynchronously
+            if (user.email) {
+               sendEmail({
+                 to: user.email,
+                 subject: "New Login Detected - Orbit Station",
+                 html: `
+                   <div style="font-family: sans-serif; padding: 20px; color: #1f2937;">
+                     <h2 style="color: #6d28d9;">New Login Detected</h2>
+                     <p>Pilot <strong>${user.name || "Unknown"}</strong>,</p>
+                     <p>We detected a new login to your Orbit Station account.</p>
+                     <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                       <ul style="list-style: none; padding: 0; margin: 0;">
+                         <li style="margin-bottom: 8px;"><strong>Time:</strong> ${new Date().toUTCString()}</li>
+                         <li style="margin-bottom: 8px;"><strong>IP Address:</strong> ${ip}</li>
+                         <li><strong>Device/Browser:</strong> ${userAgent}</li>
+                       </ul>
+                     </div>
+                     <p>If this was you, you can safely ignore this email.</p>
+                     <p>If this wasn't you, please secure your account immediately.</p>
+                   </div>
+                 `
+               }).catch(console.error);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to check/set device cookie", e);
+        }
       }
       return token;
     },

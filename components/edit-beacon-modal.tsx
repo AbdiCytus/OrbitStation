@@ -27,6 +27,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
   const [isSectorDropdownOpen, setIsSectorDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   const [error, setError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{url?: string, title?: string}>({});
@@ -134,7 +135,6 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
   }
 
   async function handleDelete() {
-    if (!window.confirm("Are you sure you want to delete this beacon?")) return;
     const result = await deleteBeacon(beacon.id);
     if (result.error) {
       toast.error(result.error || "Failed to delete beacon");
@@ -325,21 +325,35 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
         </div>
       </form>
 
-      <div className="modal-actions" style={{ padding: "0 1.5rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem" }}>
-        <button type="button" className="btn btn-secondary" onClick={handleDelete} style={{ color: "#ef4444", borderColor: "rgba(239, 68, 68, 0.3)" }}>Delete</button>
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-          {error && <p className="form-error">{error}</p>}
-          <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
-          <button
-            id="btn-save-beacon"
-            type="button"
-            onClick={handleSave}
-            className="btn btn-primary"
-            disabled={loading}
-          >
-              {loading ? <span className="spinner" /> : "Save Changes"}
-            </button>
-        </div>
+      <div className="modal-actions" style={{ padding: "0 1.5rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexDirection: "column" }}>
+        {showDeleteConfirm ? (
+          <div style={{ width: "100%", padding: "1rem", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <p style={{ color: "#fff", fontSize: "0.9rem", textAlign: "center", margin: 0 }}>
+              Are you sure you want to delete <span style={{ fontWeight: "bold", color: "#ef4444" }}>{beacon.title}</span>? This action cannot be undone.
+            </p>
+            <div style={{ display: "flex", width: "100%", gap: "0.5rem" }}>
+              <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+              <button type="button" className="btn btn-danger" style={{ flex: 1, background: "#ef4444" }} onClick={handleDelete}>Yes, Delete</button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
+            <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirm(true)} style={{ color: "#ef4444", borderColor: "rgba(239, 68, 68, 0.3)" }}>Delete</button>
+            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+              {error && <p className="form-error">{error}</p>}
+              <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
+              <button
+                id="btn-save-beacon"
+                type="button"
+                onClick={handleSave}
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                  {loading ? <span className="spinner" /> : "Save Changes"}
+                </button>
+            </div>
+          </div>
+        )}
       </div>
       </div>
     </div>
