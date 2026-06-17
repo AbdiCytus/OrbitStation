@@ -11,7 +11,7 @@ import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { UserPlusIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { sendFriendRequest, recordStationVisit } from "@/lib/actions";
-import { motion, useAnimation, PanInfo } from "framer-motion";
+import { motion, useAnimation, PanInfo, useDragControls } from "framer-motion";
 import FriendsModal from "@/components/friends-modal";
 import { useNotifications } from "@/hooks/use-notifications";
 import "./public-profile.css";
@@ -81,6 +81,8 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const dragControls = useDragControls();
+
   const visibleBeacons = (sectors.find((s) => s.id === activeSectorId)?.beacons ?? []).slice(0, 10);
 
   function handleBeaconClick(beacon: Beacon) {
@@ -132,16 +134,21 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
         <motion.div 
           className={`zzz-modal ${isAnimationEnabled ? "floating" : ""}`}
           drag={isMobile ? "y" : false}
+          dragListener={false}
+          dragControls={dragControls}
           dragConstraints={{ top: 0, bottom: isMobile ? (typeof window !== "undefined" ? window.innerHeight - 200 : 500) : 0 }}
           dragElastic={0.2}
           dragMomentum={false}
-          style={{ pointerEvents: "auto", touchAction: isMobile ? "none" : "auto" }}
+          style={{ pointerEvents: "auto", touchAction: "auto" }}
         >
           
           {/* Draggable handle for mobile */}
           {isMobile && (
-            <div style={{ width: "100%", height: "24px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "grab", flexShrink: 0, paddingTop: "8px" }}>
-              <div style={{ width: "40px", height: "4px", backgroundColor: "rgba(255,255,255,0.3)", borderRadius: "2px" }} />
+            <div 
+              style={{ width: "100%", height: "40px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "grab", flexShrink: 0, touchAction: "none" }}
+              onPointerDown={(e) => dragControls.start(e)}
+            >
+              <div style={{ width: "40px", height: "4px", backgroundColor: "rgba(255,255,255,0.3)", borderRadius: "2px", pointerEvents: "none" }} />
             </div>
           )}
           
