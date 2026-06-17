@@ -138,6 +138,8 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
           dragListener={false}
           animate={controls}
           initial={{ y: 0 }}
+          dragConstraints={{ top: 0, bottom: isMobile ? (typeof window !== "undefined" ? window.innerHeight - 200 : 500) : 0 }}
+          dragElastic={0.2}
           onDragEnd={(e, info) => {
             if (!isMobile) return;
             const threshold = 100; // pixels to trigger snap
@@ -148,7 +150,11 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
               controls.start({ y: 0, transition: { type: "spring", bounce: 0, duration: 0.4 } });
             }
           }}
-          style={{ pointerEvents: "auto", touchAction: "auto", y: 0 }}
+          style={{ 
+            pointerEvents: "auto", 
+            touchAction: "auto",
+            animation: isMobile ? "none" : undefined
+          }}
         >
           
           {/* Draggable handle for mobile */}
