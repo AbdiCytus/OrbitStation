@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { PublicStationPage, Beacon } from "@/types";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import BeaconDetailModal from "@/components/beacon-detail-modal";
@@ -64,6 +64,18 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
   const router = useRouter();
   const controls = useAnimation();
   const dragControls = useDragControls();
+  const currentYRef = useRef(0);
+
+  // 3 snap positions (in px from top of wrapper): 0 = full, mid, bottom-peek
+  const getSnapPositions = () => {
+    if (typeof window === "undefined") return [0, 200, 420];
+    const vh = window.innerHeight - 60; // subtract navbar height
+    return [
+      0,            // full open (top)
+      vh * 0.35,    // mid (~35% down)
+      vh * 0.72,    // peeking (only header+handle visible)
+    ];
+  };
 
   const [hasVisited, setHasVisited] = useState(false);
 
@@ -138,17 +150,33 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
           dragListener={false}
           animate={controls}
           initial={{ y: 0 }}
-          dragConstraints={{ top: 0, bottom: isMobile ? (typeof window !== "undefined" ? window.innerHeight - 200 : 500) : 0 }}
-          dragElastic={0.2}
+          dragConstraints={{ top: 0, bottom: isMobile ? (typeof window !== "undefined" ? (window.innerHeight - 60) * 0.85 : 500) : 0 }}
+          dragElastic={0.05}
+          onDrag={(e, info) => {
+            currentYRef.current = info.offset.y;
+          }}
           onDragEnd={(e, info) => {
             if (!isMobile) return;
-            const threshold = 100; // pixels to trigger snap
-            const snapBottomY = typeof window !== "undefined" ? window.innerHeight - 250 : 500;
-            if (info.velocity.y > 200 || info.offset.y > threshold) {
-              controls.start({ y: snapBottomY, transition: { type: "spring", bounce: 0, duration: 0.4 } });
-            } else {
-              controls.start({ y: 0, transition: { type: "spring", bounce: 0, duration: 0.4 } });
-            }
+            const snaps = getSnapPositions();
+            const currentY = currentYRef.current;
+            const velocity = info.velocity.y;
+
+            // Find the nearest snap position based on current position & velocity
+            let targetSnap = snaps[0];
+            let minDist = Infinity;
+
+            snaps.forEach((snap) => {
+              // Weight by velocity direction: prefer snapping in direction of movement
+              const adjustedSnap = snap - velocity * 0.05;
+              const dist = Math.abs(currentY - adjustedSnap);
+              if (dist < minDist) {
+                minDist = dist;
+                targetSnap = snap;
+              }
+            });
+
+            currentYRef.current = targetSnap;
+            controls.start({ y: targetSnap, transition: { type: "spring", stiffness: 300, damping: 30 } });
           }}
           style={{ 
             pointerEvents: "auto", 
