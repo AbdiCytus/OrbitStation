@@ -62,6 +62,8 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const { stats, refetch: refetchNotifications } = useNotifications();
   const router = useRouter();
+  const controls = useAnimation();
+  const dragControls = useDragControls();
 
   const [hasVisited, setHasVisited] = useState(false);
 
@@ -80,8 +82,6 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  const dragControls = useDragControls();
 
   const visibleBeacons = (sectors.find((s) => s.id === activeSectorId)?.beacons ?? []).slice(0, 10);
 
@@ -134,21 +134,30 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
         <motion.div 
           className={`zzz-modal ${isAnimationEnabled ? "floating" : ""}`}
           drag={isMobile ? "y" : false}
-          dragListener={false}
           dragControls={dragControls}
-          dragConstraints={{ top: 0, bottom: isMobile ? (typeof window !== "undefined" ? window.innerHeight - 200 : 500) : 0 }}
-          dragElastic={0.2}
-          dragMomentum={false}
-          style={{ pointerEvents: "auto", touchAction: "auto" }}
+          dragListener={false}
+          animate={controls}
+          initial={{ y: 0 }}
+          onDragEnd={(e, info) => {
+            if (!isMobile) return;
+            const threshold = 100; // pixels to trigger snap
+            const snapBottomY = typeof window !== "undefined" ? window.innerHeight - 250 : 500;
+            if (info.velocity.y > 200 || info.offset.y > threshold) {
+              controls.start({ y: snapBottomY, transition: { type: "spring", bounce: 0, duration: 0.4 } });
+            } else {
+              controls.start({ y: 0, transition: { type: "spring", bounce: 0, duration: 0.4 } });
+            }
+          }}
+          style={{ pointerEvents: "auto", touchAction: "auto", y: 0 }}
         >
           
           {/* Draggable handle for mobile */}
           {isMobile && (
             <div 
-              style={{ width: "100%", height: "40px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "grab", flexShrink: 0, touchAction: "none" }}
               onPointerDown={(e) => dragControls.start(e)}
+              style={{ width: "100%", height: "30px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "grab", flexShrink: 0, paddingTop: "8px", touchAction: "none" }}
             >
-              <div style={{ width: "40px", height: "4px", backgroundColor: "rgba(255,255,255,0.3)", borderRadius: "2px", pointerEvents: "none" }} />
+              <div style={{ width: "50px", height: "5px", backgroundColor: "rgba(255,255,255,0.4)", borderRadius: "3px" }} />
             </div>
           )}
           

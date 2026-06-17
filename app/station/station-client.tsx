@@ -112,12 +112,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
     const diffY = touchEndY - touchStart.y;
 
     const isAnyModalOpen = showAddSector || showAddBeacon || !!editingSector || !!editingBeacon || !!selectedBeacon || showFriendsModal || !!viewingMembersSector;
-    
-    // Prevent swipe if touching a beacon card, so they don't accidentally open sidebar
-    const target = e.target as Element;
-    const isTouchingBeacon = target && target.closest && target.closest(".beacon-card-wrapper");
-
-    if (Math.abs(diffX) > Math.abs(diffY) && !isAnyModalOpen && !isTouchingBeacon) {
+    if (Math.abs(diffX) > Math.abs(diffY) && !isAnyModalOpen) {
       if (diffX > 50 && !isSidebarOpen) {
         setIsSidebarOpen(true);
       } else if (isSidebarOpen && diffX < -50) {
