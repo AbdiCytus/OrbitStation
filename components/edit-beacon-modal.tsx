@@ -325,10 +325,10 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
         </div>
       </form>
 
-      <div className="modal-actions" style={{ padding: "0 1.5rem 1.5rem" }}>
-        {error && <p className="form-error" style={{ marginRight: "auto" }}>{error}</p>}
-        <div style={{ display: "flex", gap: "0.75rem", marginLeft: "auto" }}>
-          <button type="button" className="btn btn-secondary" onClick={handleDelete} style={{ color: "#ef4444", borderColor: "rgba(239, 68, 68, 0.3)" }}>Delete</button>
+      <div className="modal-actions" style={{ padding: "0 1.5rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem" }}>
+        <button type="button" className="btn btn-secondary" onClick={handleDelete} style={{ color: "#ef4444", borderColor: "rgba(239, 68, 68, 0.3)" }}>Delete</button>
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          {error && <p className="form-error">{error}</p>}
           <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
           <button
             id="btn-save-beacon"

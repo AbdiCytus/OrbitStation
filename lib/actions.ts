@@ -970,7 +970,7 @@ export async function getStationAnalytics(stationId: string) {
       where: { sector: { stationId } },
       orderBy: { visits: 'desc' },
       take: 5,
-      select: { title: true, visits: true, imageUrl: true }
+      select: { title: true, visits: true, imageUrl: true, faviconUrl: true }
     });
 
     return { totalVisits, recentVisits, uniqueVisitorCount: uniqueVisitors.length, topBeacons };

@@ -166,18 +166,21 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             {!readOnly && (
                 <>
                   {subroute && (
-                    <div style={{ 
-                      background: "rgba(255, 255, 255, 0.1)", 
-                      padding: "0.2rem 0.5rem", 
-                      borderRadius: "6px", 
-                      fontSize: "0.75rem", 
-                      color: "#c4b5fd",
-                      marginRight: "0.5rem",
-                      display: "flex",
-                      alignItems: "center"
-                    }}>
-                      {subroute}
-                    </div>
+                    <>
+                      <style>{`@media (max-width: 639px) { .hsr-subroute-label { display: none !important; } }`}</style>
+                      <div className="hsr-subroute-label" style={{ 
+                        background: "rgba(255, 255, 255, 0.1)", 
+                        padding: "0.2rem 0.5rem", 
+                        borderRadius: "6px", 
+                        fontSize: "0.75rem", 
+                        color: "#c4b5fd",
+                        marginRight: "0.5rem",
+                        display: "flex",
+                        alignItems: "center"
+                      }}>
+                        {subroute}
+                      </div>
+                    </>
                   )}
                   {(!sector || sector.isPublic) && (
                     <button

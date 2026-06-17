@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const statusDiv = document.getElementById("status");
 
   // Ganti dengan URL produksi saat rilis
-  const API_BASE_URL = "http://localhost:3000";
+  const API_BASE_URL = "https://orbitstation.vercel.app";
   
   let pageDescription = "";
   let pageImageUrl = "";

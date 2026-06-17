@@ -19,6 +19,7 @@ export default async function AnalyticsPage() {
   ]);
 
   if (!station) redirect("/station");
+  if (!station.isPublic) redirect("/station");
 
   const analytics = await getStationAnalytics(station.id);
 

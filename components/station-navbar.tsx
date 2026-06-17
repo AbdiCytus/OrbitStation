@@ -109,7 +109,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
       <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
         {/* Logo */}
         <Link href={user ? "/station" : "/"} className="navbar-logo" style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-          <img src="/logo.png" alt="Orbit Station" style={{ height: "40px", width: "auto", objectFit: "contain", filter: "drop-shadow(0 0 10px rgba(139, 92, 246, 0.6))" }} />
+          <img src="/logo.png" alt="Orbit Station" fetchPriority="high" style={{ height: "40px", width: "auto", objectFit: "contain", filter: "drop-shadow(0 0 10px rgba(139, 92, 246, 0.6))" }} />
           <span style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#f8fafc", letterSpacing: "0.5px", textShadow: "0 0 10px rgba(139, 92, 246, 0.6), 0 0 20px rgba(139, 92, 246, 0.4)" }} className="hidden sm:inline">Orbit Station</span>
         </Link>
         {user && pathname !== "/station" && pathname !== "/settings" && pathname !== "/analytics" && !isPublicProfile && (
@@ -283,7 +283,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                           )}
                         </button>
                       )}
-                      {pathname !== '/analytics' && (
+                      {pathname !== '/analytics' && isPublicProfile && (
                         <Link
                           href="/analytics"
                           className="navbar-menu-item"

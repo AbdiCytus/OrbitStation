@@ -111,7 +111,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
     const diffX = touchEndX - touchStart.x;
     const diffY = touchEndY - touchStart.y;
 
-    if (Math.abs(diffX) > Math.abs(diffY)) {
+    const isAnyModalOpen = showAddSector || showAddBeacon || !!editingSector || !!editingBeacon || !!selectedBeacon || showFriendsModal || !!viewingMembersSector;
+    if (Math.abs(diffX) > Math.abs(diffY) && !isAnyModalOpen) {
       if (diffX > 50 && !isSidebarOpen) {
         setIsSidebarOpen(true);
       } else if (isSidebarOpen && diffX < -50) {

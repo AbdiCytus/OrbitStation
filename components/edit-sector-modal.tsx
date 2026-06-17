@@ -137,10 +137,41 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
   }
 
   return (
-    <div className={`modal-overlay ${isClosing ? "closing" : ""}`} onClick={handleClose} role="dialog" aria-modal="true" aria-label="Edit Sector" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", overflowY: "auto" }}>
-        <div style={{ display: "flex", rowGap: "1rem", flexDirection: "row", alignItems: "stretch", justifyContent: "center", width: "100%", maxWidth: "1170px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
+    <div
+      className={`modal-overlay ${isClosing ? "closing" : ""}`}
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Edit Sector"
+      style={{
+        display: "flex",
+        alignItems: isMobile ? "flex-end" : "center",
+        justifyContent: "center",
+        padding: isMobile ? "0" : "2rem",
+        overflowY: isMobile ? "hidden" : "auto",
+      }}
+    >
+        <div style={{ display: "flex", rowGap: "1rem", flexDirection: "row", alignItems: "stretch", justifyContent: "center", width: "100%", maxWidth: isMobile ? "100%" : "1170px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
         {/* MAIN PANEL */}
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ flex: "1 1 750px", maxWidth: "750px", margin: 0, display: "flex", flexDirection: "column", animation: isClosing ? undefined : "none" }}>
+        <motion.div
+          initial={isMobile ? { y: "100%", opacity: 1 } : { opacity: 0, scale: 0.95 }}
+          animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, scale: 1 }}
+          exit={isMobile ? { y: "100%", opacity: 1 } : { opacity: 0, scale: 0.95 }}
+          transition={isMobile ? { type: "tween", duration: 0.28, ease: [0.25, 0.8, 0.25, 1] } : { type: "spring", stiffness: 300, damping: 30 }}
+          className={`modal-panel ${isClosing ? "closing" : ""} glass`}
+          style={{
+            flex: isMobile ? "unset" : "1 1 750px",
+            maxWidth: isMobile ? "100%" : "750px",
+            width: isMobile ? "100%" : undefined,
+            borderRadius: isMobile ? "20px 20px 0 0" : undefined,
+            margin: 0,
+            display: "flex",
+            flexDirection: "column",
+            animation: "none",
+            maxHeight: isMobile ? "90dvh" : undefined,
+            overflowY: isMobile ? "auto" : undefined,
+          }}
+        >
         <div className="modal-header">
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <h2 className="modal-title">Edit Sector</h2>

@@ -267,6 +267,8 @@ export default function AnalyticsClient({ analytics, user, isPublicProfile }: Pr
                         <div className="w-10 h-10 md:w-12 md:h-12 shrink-0 rounded-lg bg-gray-800 overflow-hidden flex items-center justify-center">
                           {b.imageUrl ? (
                             <img src={b.imageUrl} alt={b.title} className="w-full h-full object-cover" />
+                          ) : b.faviconUrl ? (
+                            <img src={b.faviconUrl} alt={b.title} style={{ width: "24px", height: "24px", objectFit: "contain" }} onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                           ) : (
                             <span className="text-gray-400 font-bold">{b.title.charAt(0)}</span>
                           )}
