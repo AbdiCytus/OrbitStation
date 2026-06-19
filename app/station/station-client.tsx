@@ -16,13 +16,14 @@ import SpaceBackground from "@/components/space-background";
 import StaticStarfield from "@/components/static-starfield";
 import { deleteSector, reorderSectors } from "@/lib/actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
-import { 
+import {
   PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon, ArrowPathIcon, EllipsisVerticalIcon, ChatBubbleOvalLeftEllipsisIcon
 } from "@heroicons/react/24/outline";
 import GroupChatModal from "@/components/group-chat-modal";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
+import { pusherClient } from "@/lib/pusher-client";
 
 type Props = {
   initialStation: StationWithSectors | null;
@@ -44,7 +45,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
   const [shrinkingBeacons, setShrinkingBeacons] = useState<Set<string>>(new Set());
   const [growingBeacons, setGrowingBeacons] = useState<Set<string>>(new Set());
-  
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileMenuCaption, setMobileMenuCaption] = useState<"edit" | "add" | null>(null);
 
@@ -130,7 +131,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
     }
     // Always auto-close sidebar (desktop ignores this via CSS)
     setIsSidebarOpen(false);
-    
+
     if (sectorId === displaySectorId || isExiting) return;
     if (!user.animationEnabled) {
       setDisplaySectorId(sectorId);
@@ -152,7 +153,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
       setIsEntering(true);
     }, delay);
   };
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -161,7 +162,12 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [isFilterExiting, setIsFilterExiting] = useState(false);
   const [isFilterEntering, setIsFilterEntering] = useState(false);
-  
+  const [visibleLimit, setVisibleLimit] = useState(12);
+
+  useEffect(() => {
+    setVisibleLimit(12);
+  }, [displaySectorId, searchQuery, filterVisibility, sortBy, sortDir]);
+
   const applyFilterSort = (updateFn: () => void) => {
     if (!user.animationEnabled) {
       updateFn();
@@ -194,11 +200,30 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   // Track which private chat is open so useNotifications can suppress its toast
   const [activeFriendChatId, setActiveFriendChatId] = useState<string | null>(null);
 
-  const { stats, refetch: refetchNotifications } = useNotifications({
+  const { stats, refetch: refetchNotifications, unreadGroupSectors, clearGroupUnread } = useNotifications({
     userId: user?.id,
     activeSectorId: showGroupChat ? (displaySectorId !== "all" ? displaySectorId : null) : null,
     activeFriendId: activeFriendChatId,
   });
+
+  useEffect(() => {
+    if (showGroupChat && typeof displaySectorId === "string" && displaySectorId !== "all") {
+      clearGroupUnread(displaySectorId);
+    }
+  }, [showGroupChat, displaySectorId, clearGroupUnread]);
+
+  // Tentukan apakah sektor yang sedang dibuka punya pesan yang belum dibaca
+  const currentUnread = typeof displaySectorId === "string" ? unreadGroupSectors[displaySectorId] : null;
+  const hasUnreadInCurrentSector = currentUnread?.unread || false;
+  const hasMentionInCurrentSector = currentUnread?.mention || false;
+
+  // Hilangkan lencana saat modal chat dibuka
+  useEffect(() => {
+    if (showGroupChat && typeof displaySectorId === "string" && displaySectorId !== "all") {
+      clearGroupUnread(displaySectorId);
+    }
+  }, [showGroupChat, displaySectorId, clearGroupUnread]);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingSector, setEditingSector] = useState<SectorWithBeacons | null>(null);
   const [viewingMembersSector, setViewingMembersSector] = useState<SectorWithBeacons | null>(null);
@@ -271,13 +296,17 @@ export default function StationClient({ initialStation, initialCollabSectors = [
     return () => window.removeEventListener("resize", updateCols);
   }, []);
 
+  const paginatedBeacons = useMemo(() => {
+    return visibleBeacons.slice(0, visibleLimit);
+  }, [visibleBeacons, visibleLimit]);
+
   const columnWrapper = useMemo(() => {
     const wrapper = Array.from({ length: cols }, () => [] as { beacon: Beacon, globalIndex: number }[]);
-    visibleBeacons.forEach((beacon, index) => {
+    paginatedBeacons.forEach((beacon, index) => {
       wrapper[index % cols].push({ beacon, globalIndex: index });
     });
     return wrapper;
-  }, [visibleBeacons, cols]);
+  }, [paginatedBeacons, cols]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -342,7 +371,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
         ),
       };
     });
-    setCollabSectors((prev) => 
+    setCollabSectors((prev) =>
       prev.map(s => s.id === newBeacon.sectorId ? { ...s, beacons: [...s.beacons, newBeacon] } : s)
     );
     setShowAddBeacon(false);
@@ -361,7 +390,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
           setStation(p => {
             if (!p) return p;
             let ns = p.sectors.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== updated.id) }));
-            ns = ns.map(s => s.id === updated.sectorId ? { ...s, beacons: [...s.beacons, updated].sort((a,b) => a.order - b.order) } : s);
+            ns = ns.map(s => s.id === updated.sectorId ? { ...s, beacons: [...s.beacons, updated].sort((a, b) => a.order - b.order) } : s);
             return { ...p, sectors: ns };
           });
         }, 300);
@@ -369,12 +398,12 @@ export default function StationClient({ initialStation, initialCollabSectors = [
       }
 
       let newSectors = prev.sectors.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== updated.id) }));
-      newSectors = newSectors.map(s => s.id === updated.sectorId ? { ...s, beacons: [...s.beacons, updated].sort((a,b) => a.order - b.order) } : s);
+      newSectors = newSectors.map(s => s.id === updated.sectorId ? { ...s, beacons: [...s.beacons, updated].sort((a, b) => a.order - b.order) } : s);
       return { ...prev, sectors: newSectors };
     });
     setCollabSectors((prev) => {
       let ns = prev.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== updated.id) }));
-      ns = ns.map(s => s.id === updated.sectorId ? { ...s, beacons: [...s.beacons, updated].sort((a,b) => a.order - b.order) } : s);
+      ns = ns.map(s => s.id === updated.sectorId ? { ...s, beacons: [...s.beacons, updated].sort((a, b) => a.order - b.order) } : s);
       return ns;
     });
     setEditingBeacon(null);
@@ -393,7 +422,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
           })),
         };
       });
-      setCollabSectors((prev) => 
+      setCollabSectors((prev) =>
         prev.map(s => ({ ...s, beacons: s.beacons.filter(b => b.id !== beaconId) }))
       );
       setSelectedBeacon(null);
@@ -503,7 +532,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   };
 
   return (
-    <div 
+    <div
       className={`station-root${animEnabled ? "" : " no-animation"} ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -517,11 +546,11 @@ export default function StationClient({ initialStation, initialCollabSectors = [
           <div className="cosmic-dust"></div>
         </div>
       ) : animEnabled ? (
-        <SpaceBackground 
-          key="on" 
-          sector={activeSectorId} 
-          sectorColor={activeSector?.color} 
-          animEnabled={true} 
+        <SpaceBackground
+          key="on"
+          sector={activeSectorId}
+          sectorColor={activeSector?.color}
+          animEnabled={true}
           transitionDuration={(() => {
             if (typeof navigator !== "undefined" && "connection" in navigator) {
               const conn = (navigator as any).connection;
@@ -533,15 +562,16 @@ export default function StationClient({ initialStation, initialCollabSectors = [
           })()}
         />
       ) : (
-        <StaticStarfield 
-          seed={activeSectorId ? activeSectorId.split("").reduce((a, c) => a + c.charCodeAt(0), 0) : 42} 
-          sectorColor={activeSector?.color} 
+        <StaticStarfield
+          seed={activeSectorId ? activeSectorId.split("").reduce((a, c) => a + c.charCodeAt(0), 0) : 42}
+          sectorColor={activeSector?.color}
         />
       )}
 
       {/* Fun fact overlay */}
       {isExiting && user.animationEnabled && (
-        <div className="fun-fact-overlay" style={{ animationDuration: (() => {
+        <div className="fun-fact-overlay" style={{
+          animationDuration: (() => {
             if (typeof navigator !== "undefined" && "connection" in navigator) {
               const conn = (navigator as any).connection;
               if (conn.effectiveType === "slow-2g") return "3.5s";
@@ -549,7 +579,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
               if (conn.effectiveType === "3g") return "1.5s";
             }
             return "0.8s";
-          })() }}>
+          })()
+        }}>
           <p className="fun-fact-text">
             <SparklesIcon width={20} height={20} style={{ display: "inline-block", marginRight: "0.5rem", verticalAlign: "middle" }} />
             {funFact}
@@ -569,37 +600,37 @@ export default function StationClient({ initialStation, initialCollabSectors = [
 
       {/* Mobile Sidebar Toggle Button */}
       {!(showAddSector || showAddBeacon || !!editingSector || !!editingBeacon || !!selectedBeacon || showFriendsModal || !!viewingMembersSector) && (
-        <div 
+        <div
           className="mobile-only sidebar-toggle-btn"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        style={{
-           position: 'fixed',
-           left: isSidebarOpen ? '260px' : '0',
-           top: '50%',
-           transform: 'translateY(-50%)',
-           zIndex: 101, // Above backdrop
-           background: 'rgba(20, 20, 30, 0.95)',
-           border: '1px solid var(--border-subtle)',
-           borderLeft: 'none',
-           borderRadius: '0 8px 8px 0',
-           padding: '0.75rem 0.5rem',
-           display: 'flex',
-           flexDirection: 'row',
-           alignItems: 'center',
-           gap: '0.25rem',
-           transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease',
-           opacity: isIdle && !isSidebarOpen ? 0.3 : 1,
-           cursor: 'pointer',
-           boxShadow: '4px 0 12px rgba(0,0,0,0.5)'
-        }}
-      >
-        {isSidebarOpen ? <ChevronLeftIcon width={16} height={16} /> : <ChevronRightIcon width={16} height={16} />}
-      </div>
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          style={{
+            position: 'fixed',
+            left: isSidebarOpen ? '260px' : '0',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 101, // Above backdrop
+            background: 'rgba(20, 20, 30, 0.95)',
+            border: '1px solid var(--border-subtle)',
+            borderLeft: 'none',
+            borderRadius: '0 8px 8px 0',
+            padding: '0.75rem 0.5rem',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: '0.25rem',
+            transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease',
+            opacity: isIdle && !isSidebarOpen ? 0.3 : 1,
+            cursor: 'pointer',
+            boxShadow: '4px 0 12px rgba(0,0,0,0.5)'
+          }}
+        >
+          {isSidebarOpen ? <ChevronLeftIcon width={16} height={16} /> : <ChevronRightIcon width={16} height={16} />}
+        </div>
       )}
 
       <div className={`station-layout ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}>
-        <div 
-          className={`sidebar-backdrop mobile-only ${isSidebarOpen ? "open" : ""}`} 
+        <div
+          className={`sidebar-backdrop mobile-only ${isSidebarOpen ? "open" : ""}`}
           onClick={() => setIsSidebarOpen(false)}
           aria-hidden="true"
         />
@@ -631,22 +662,22 @@ export default function StationClient({ initialStation, initialCollabSectors = [
             </button>
 
             {personalSectors.map((sector, idx) => (
-              <div 
-                key={sector.id} 
+              <div
+                key={sector.id}
                 className="sector-tab-wrapper"
                 draggable
                 onDragStart={(e) => handleSectorDragStart(e, idx)}
                 onDragOver={(e) => handleSectorDragOver(e, idx)}
                 onDrop={(e) => handleSectorDrop(e, idx)}
                 onDragEnd={handleSectorDragEnd}
-                style={{ 
-                   transition: user.animationEnabled ? 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease' : 'none', 
-                   opacity: draggedSectorIndex === idx ? 0.5 : 1,
-                   transform: user.animationEnabled && dragOverSectorIndex === idx 
-                     ? (draggedSectorIndex !== null && draggedSectorIndex > idx ? 'translateY(-4px)' : 'translateY(4px)') 
-                     : 'none',
-                   borderTop: dragOverSectorIndex === idx && draggedSectorIndex !== null && draggedSectorIndex > idx ? '2px solid rgba(139, 92, 246, 0.5)' : '2px solid transparent',
-                   borderBottom: dragOverSectorIndex === idx && draggedSectorIndex !== null && draggedSectorIndex < idx ? '2px solid rgba(139, 92, 246, 0.5)' : '2px solid transparent',
+                style={{
+                  transition: user.animationEnabled ? 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease' : 'none',
+                  opacity: draggedSectorIndex === idx ? 0.5 : 1,
+                  transform: user.animationEnabled && dragOverSectorIndex === idx
+                    ? (draggedSectorIndex !== null && draggedSectorIndex > idx ? 'translateY(-4px)' : 'translateY(4px)')
+                    : 'none',
+                  borderTop: dragOverSectorIndex === idx && draggedSectorIndex !== null && draggedSectorIndex > idx ? '2px solid rgba(139, 92, 246, 0.5)' : '2px solid transparent',
+                  borderBottom: dragOverSectorIndex === idx && draggedSectorIndex !== null && draggedSectorIndex < idx ? '2px solid rgba(139, 92, 246, 0.5)' : '2px solid transparent',
                 }}
               >
                 <button
@@ -734,11 +765,21 @@ export default function StationClient({ initialStation, initialCollabSectors = [
           </nav>
         </aside>
 
-        <main className="station-main">
+        <main
+          className="station-main"
+          onScroll={(e) => {
+            const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+            // Toleransi scroll yang pas (100px dari bawah)
+            if (scrollHeight - scrollTop - clientHeight < 100) {
+              // Gunakan functional state agar tidak tereksekusi ganda
+              setVisibleLimit(prev => (prev < visibleBeacons.length ? prev + 6 : prev));
+            }
+          }}
+        >
           <div className="station-section-header relative" style={{ minHeight: "56px", display: "flex", alignItems: "center" }}>
             <AnimatePresence mode="wait">
               {!mobileMenuOpen ? (
-                <motion.div 
+                <motion.div
                   key="title"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -810,7 +851,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                   )}
                 </motion.div>
               ) : (
-                <motion.div 
+                <motion.div
                   key="menu"
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -820,7 +861,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                 >
                   {/* Invisible overlay to catch outside clicks */}
                   <div className="fixed inset-0 z-40" onClick={() => { setMobileMenuOpen(false); }} />
-                  
+
                   <div className="relative z-50 flex gap-2 items-center justify-end w-full">
                     <button className="flex shrink-0 items-center justify-center" style={{ background: "rgba(255, 255, 255, 0.05)", borderRadius: "8px", height: "38px", width: "38px", color: "var(--color-comet)", transition: "background 0.15s" }} onClick={() => {
                       handleRefresh();
@@ -830,29 +871,29 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                     </button>
 
                     {displaySectorId !== "all" && activeSector && activeSector.stationId === station?.id && (
-                      <button 
-                        className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap" 
-                        style={{ background: "rgba(255, 255, 255, 0.05)", borderRadius: "8px", height: "38px", padding: "0 0.8rem", width: "auto", color: "var(--color-comet)", transition: "background 0.15s" }} 
+                      <button
+                        className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
+                        style={{ background: "rgba(255, 255, 255, 0.05)", borderRadius: "8px", height: "38px", padding: "0 0.8rem", width: "auto", color: "var(--color-comet)", transition: "background 0.15s" }}
                         onClick={() => {
-                          setEditingSector(activeSector); 
+                          setEditingSector(activeSector);
                           setMobileMenuOpen(false);
                         }}
                       >
                         <PencilSquareIcon width={18} height={18} style={{ flexShrink: 0 }} />
-                        <span style={{fontSize: "0.85rem", marginLeft:"0.4rem", display: "inline-block", color: "var(--color-comet)"}}>Edit Sector</span>
+                        <span style={{ fontSize: "0.85rem", marginLeft: "0.4rem", display: "inline-block", color: "var(--color-comet)" }}>Edit Sector</span>
                       </button>
                     )}
 
-                    <button 
-                      className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap" 
-                      style={{ color: "#fff", height: "38px", padding: "0 0.8rem", width: "auto", borderRadius: "8px", background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)", border: "1px solid rgba(139, 92, 246, 0.5)", transition: "all 0.15s" }} 
+                    <button
+                      className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
+                      style={{ color: "#fff", height: "38px", padding: "0 0.8rem", width: "auto", borderRadius: "8px", background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)", border: "1px solid rgba(139, 92, 246, 0.5)", transition: "all 0.15s" }}
                       onClick={() => {
-                        setShowAddBeacon(true); 
+                        setShowAddBeacon(true);
                         setMobileMenuOpen(false);
                       }}
                     >
                       <PlusIcon width={18} height={18} style={{ flexShrink: 0 }} />
-                      <span style={{fontSize: "0.85rem", marginLeft:"0.4rem", display: "inline-block"}}>Add Beacon</span>
+                      <span style={{ fontSize: "0.85rem", marginLeft: "0.4rem", display: "inline-block" }}>Add Beacon</span>
                     </button>
 
                     <button className="flex shrink-0 items-center justify-center" style={{ height: "38px", width: "38px", color: "var(--color-comet)" }} onClick={() => { setMobileMenuOpen(false); }}>
@@ -866,7 +907,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
 
           <div key={`controls-${displaySectorId}`} className={`controls-anim-container ${isExiting && user.animationEnabled ? "exiting" : isEntering && user.animationEnabled ? "entering" : ""}`} style={{ marginBottom: "0.5rem", position: "relative", zIndex: 10 }}>
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-              <style dangerouslySetInnerHTML={{__html: `
+              <style dangerouslySetInnerHTML={{
+                __html: `
                 .custom-dropdown-btn {
                   height: 38px;
                   width: 38px;
@@ -915,119 +957,119 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                 }
                 .floating-controls { animation: floatControls 5s ease-in-out infinite; }
               `}} />
-              
+
               {baseBeacons.length > 0 && (
                 <>
                   {displaySectorId === "all" && (
-                <div className="staggered-item">
-                  <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
-                    <button
-                      className="custom-dropdown-btn"
-                      style={{ background: filterVisibility !== "all" ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)", border: `1px solid ${filterVisibility !== "all" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`, color: filterVisibility !== "all" ? "#fff" : "#a1a1aa" }}
-                      onClick={() => setOpenMenu(openMenu === "filter" ? null : "filter")}
-                      title="Filter by Visibility"
-                    >
-                      <FunnelIcon width={18} height={18} />
-                    </button>
-                    {openMenu === "filter" && (
-                      <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: 0, background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", padding: "0.5rem", zIndex: 50, minWidth: "150px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                        {[
-                          { id: "all", label: "All Visibility" },
-                          { id: "public", label: "Public" },
-                          { id: "private", label: "Private" }
-                        ].map(opt => (
-                          <button
-                            key={opt.id}
-                            className="dropdown-option-btn"
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", background: filterVisibility === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", textAlign: "left", fontSize: "0.85rem", transition: "all 0.2s" }}
-                            onClick={() => { applyFilterSort(() => setFilterVisibility(opt.id as any)); setOpenMenu(null); }}
-                          >
-                            {opt.label}
-                            {filterVisibility === opt.id && <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />}
-                          </button>
-                        ))}
+                    <div className="staggered-item">
+                      <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
+                        <button
+                          className="custom-dropdown-btn"
+                          style={{ background: filterVisibility !== "all" ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)", border: `1px solid ${filterVisibility !== "all" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`, color: filterVisibility !== "all" ? "#fff" : "#a1a1aa" }}
+                          onClick={() => setOpenMenu(openMenu === "filter" ? null : "filter")}
+                          title="Filter by Visibility"
+                        >
+                          <FunnelIcon width={18} height={18} />
+                        </button>
+                        {openMenu === "filter" && (
+                          <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: 0, background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", padding: "0.5rem", zIndex: 50, minWidth: "150px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                            {[
+                              { id: "all", label: "All Visibility" },
+                              { id: "public", label: "Public" },
+                              { id: "private", label: "Private" }
+                            ].map(opt => (
+                              <button
+                                key={opt.id}
+                                className="dropdown-option-btn"
+                                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", background: filterVisibility === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", textAlign: "left", fontSize: "0.85rem", transition: "all 0.2s" }}
+                                onClick={() => { applyFilterSort(() => setFilterVisibility(opt.id as any)); setOpenMenu(null); }}
+                              >
+                                {opt.label}
+                                {filterVisibility === opt.id && <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div className="staggered-item">
-                <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
-                  <button
-                    className="custom-dropdown-btn"
-                    style={{ background: sortBy !== "date" ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)", border: `1px solid ${sortBy !== "date" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`, color: sortBy !== "date" ? "#fff" : "#a1a1aa" }}
-                    onClick={() => setOpenMenu(openMenu === "sort" ? null : "sort")}
-                    title="Sort Beacons"
-                  >
-                    <ArrowsUpDownIcon width={18} height={18} />
-                  </button>
-                  {openMenu === "sort" && (
-                    <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: 0, background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", padding: "0.5rem", zIndex: 50, minWidth: "180px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                      {[
-                        { id: "date", label: "Date Added" },
-                        { id: "name", label: "Name" },
-                        { id: "visits", label: "Total Visits" },
-                        { id: "sector", label: "Sector Order", hide: displaySectorId !== "all" },
-                        { id: "creator", label: "Added By", hide: !(displaySectorId !== "all" && allCollabSectors.some(s => s.id === displaySectorId)) }
-                      ].filter(opt => !opt.hide).map(opt => (
-                        <div key={opt.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: sortBy === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", borderRadius: "6px", overflow: "hidden", transition: "all 0.2s" }}>
-                          <button
-                            className="dropdown-option-btn hover:bg-white/5"
-                            style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", border: "none", background: "transparent", color: "inherit", cursor: "pointer", textAlign: "left", fontSize: "0.85rem" }}
-                            onClick={() => { applyFilterSort(() => setSortBy(opt.id as any)); }}
-                          >
-                            {opt.label}
-                            {sortBy === opt.id && <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />}
-                          </button>
-                          {sortBy === opt.id && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); applyFilterSort(() => setSortDir(d => d === "asc" ? "desc" : "asc")); }}
-                              style={{ padding: "0.5rem", background: "rgba(255,255,255,0.05)", border: "none", borderLeft: "1px solid rgba(255,255,255,0.1)", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-                              className="hover:bg-white/10"
-                              title={`Sort ${sortDir === "asc" ? "Descending" : "Ascending"}`}
-                            >
-                              {sortDir === "asc" ? <BarsArrowUpIcon width={16} height={16} /> : <BarsArrowDownIcon width={16} height={16} />}
-                            </button>
-                          )}
-                        </div>
-                      ))}
                     </div>
                   )}
-                </div>
-              </div>
 
-              {(displaySectorId === "all" || (displaySectorId !== "all" && allCollabSectors.some(s => s.id === displaySectorId))) && (
-                <div className="staggered-item" style={{ flex: 1, minWidth: "200px", maxWidth: "250px" }}>
-                  <div className={`${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative", width: "100%", animationDelay: "0.4s" }}>
-                    <MagnifyingGlassIcon style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", width: "16px", color: "#a1a1aa" }} />
-                    <input
-                      id="beacon-search-input"
-                      type="text"
-                      placeholder="Search beacons... (Ctrl+K)"
-                      value={localSearchQuery}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      style={{
-                        width: "100%",
-                        height: "38px",
-                        background: "rgba(15, 15, 25, 0.6)",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
-                        borderRadius: "8px",
-                        padding: "0 1rem 0 36px",
-                        color: "#fff",
-                        outline: "none",
-                        transition: "all 0.2s"
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = "#a78bfa"}
-                      onBlur={(e) => e.target.style.borderColor = "rgba(255, 255, 255, 0.1)"}
-                    />
+                  <div className="staggered-item">
+                    <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
+                      <button
+                        className="custom-dropdown-btn"
+                        style={{ background: sortBy !== "date" ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)", border: `1px solid ${sortBy !== "date" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`, color: sortBy !== "date" ? "#fff" : "#a1a1aa" }}
+                        onClick={() => setOpenMenu(openMenu === "sort" ? null : "sort")}
+                        title="Sort Beacons"
+                      >
+                        <ArrowsUpDownIcon width={18} height={18} />
+                      </button>
+                      {openMenu === "sort" && (
+                        <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: 0, background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", padding: "0.5rem", zIndex: 50, minWidth: "180px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                          {[
+                            { id: "date", label: "Date Added" },
+                            { id: "name", label: "Name" },
+                            { id: "visits", label: "Total Visits" },
+                            { id: "sector", label: "Sector Order", hide: displaySectorId !== "all" },
+                            { id: "creator", label: "Added By", hide: !(displaySectorId !== "all" && allCollabSectors.some(s => s.id === displaySectorId)) }
+                          ].filter(opt => !opt.hide).map(opt => (
+                            <div key={opt.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: sortBy === opt.id ? "rgba(139, 92, 246, 0.2)" : "transparent", color: "#fff", borderRadius: "6px", overflow: "hidden", transition: "all 0.2s" }}>
+                              <button
+                                className="dropdown-option-btn hover:bg-white/5"
+                                style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem", border: "none", background: "transparent", color: "inherit", cursor: "pointer", textAlign: "left", fontSize: "0.85rem" }}
+                                onClick={() => { applyFilterSort(() => setSortBy(opt.id as any)); }}
+                              >
+                                {opt.label}
+                                {sortBy === opt.id && <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />}
+                              </button>
+                              {sortBy === opt.id && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); applyFilterSort(() => setSortDir(d => d === "asc" ? "desc" : "asc")); }}
+                                  style={{ padding: "0.5rem", background: "rgba(255,255,255,0.05)", border: "none", borderLeft: "1px solid rgba(255,255,255,0.1)", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                  className="hover:bg-white/10"
+                                  title={`Sort ${sortDir === "asc" ? "Descending" : "Ascending"}`}
+                                >
+                                  {sortDir === "asc" ? <BarsArrowUpIcon width={16} height={16} /> : <BarsArrowDownIcon width={16} height={16} />}
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+
+                  {(displaySectorId === "all" || (displaySectorId !== "all" && allCollabSectors.some(s => s.id === displaySectorId))) && (
+                    <div className="staggered-item" style={{ flex: 1, minWidth: "200px", maxWidth: "250px" }}>
+                      <div className={`${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative", width: "100%", animationDelay: "0.4s" }}>
+                        <MagnifyingGlassIcon style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", width: "16px", color: "#a1a1aa" }} />
+                        <input
+                          id="beacon-search-input"
+                          type="text"
+                          placeholder="Search beacons... (Ctrl+K)"
+                          value={localSearchQuery}
+                          onChange={(e) => handleSearchChange(e.target.value)}
+                          style={{
+                            width: "100%",
+                            height: "38px",
+                            background: "rgba(15, 15, 25, 0.6)",
+                            border: "1px solid rgba(255, 255, 255, 0.1)",
+                            borderRadius: "8px",
+                            padding: "0 1rem 0 36px",
+                            color: "#fff",
+                            outline: "none",
+                            transition: "all 0.2s"
+                          }}
+                          onFocus={(e) => e.target.style.borderColor = "#a78bfa"}
+                          onBlur={(e) => e.target.style.borderColor = "rgba(255, 255, 255, 0.1)"}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
-              </>
-            )}
+            </div>
           </div>
-        </div>
 
           {/* Beacon masonry grid */}
           {visibleBeacons.length === 0 ? (
@@ -1067,7 +1109,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
               {columnWrapper.map((colItems, colIndex) => (
                 <div className="beacon-masonry-col" key={`col-${colIndex}`}>
                   {colItems.map(({ beacon, globalIndex }) => (
-                    <div
+                    <motion.div
                       className={`
                         beacon-card-wrapper
                         ${isFilterExiting ? 'beacon-filter-exiting' : ''}
@@ -1075,9 +1117,16 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                         ${shrinkingBeacons.has(beacon.id) ? 'beacon-shrinking' : ''}
                         ${growingBeacons.has(beacon.id) ? 'beacon-growing' : ''}
                       `}
-                      style={{ 
-                        animationDelay: user.animationEnabled ? `${globalIndex * 0.03}s` : '0s',
+                      style={{
+                        animationDelay: user.animationEnabled ? `${(globalIndex % 6) * 0.05}s` : '0s',
                         transformOrigin: "center center"
+                      }}
+                      layout
+                      initial={user.animationEnabled ? { opacity: 0, y: 30 } : false}
+                      animate={user.animationEnabled ? { opacity: 1, y: 0 } : false}
+                      transition={{
+                        duration: 0.3, ease: "easeOut",
+                        delay: user.animationEnabled ? (globalIndex % 6) * 0.05 : 0
                       }}
                       key={beacon.id}
                     >
@@ -1090,36 +1139,56 @@ export default function StationClient({ initialStation, initialCollabSectors = [
                         sectorName={allSectors.find(s => s.id === beacon.sectorId)?.name}
                         isAllBeacons={displaySectorId === "all" && (user.hologramEnabled ?? true)}
                       />
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               ))}
             </div>
           )}
-          
+
+          {visibleLimit < visibleBeacons.length && (
+            <div className="w-full text-center py-6 text-gray-500 text-sm italic">
+              Scanning space for more signals...
+            </div>
+          )}
+
           {/* Group Chat FAB (only if collab sector) */}
           {displaySectorId !== "all" && allCollabSectors.some(s => s.id === displaySectorId) && (
             <motion.button
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
-              onClick={() => setShowGroupChat(true)}
-              style={{padding: "10px"}}
+              onClick={() => {
+                setShowGroupChat(true);
+                if (typeof displaySectorId === "string" && displaySectorId !== "all") {
+                  clearGroupUnread(displaySectorId);
+                }
+              }}
+              style={{ padding: "10px" }}
               className="fixed bottom-6 right-6 z-[9999] bg-violet-600 hover:bg-violet-500 text-white rounded-full shadow-[0_0_20px_rgba(139,92,246,0.6)] transition-transform hover:scale-110 flex items-center justify-center group"
             >
               <ChatBubbleOvalLeftEllipsisIcon width={32} height={32} />
-              
-              {/* Optional: Add unread badge here if implementing unread count per sector */}
+
+              <AnimatePresence>
+                {hasUnreadInCurrentSector && (
+                  <motion.div
+                    initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                    className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[rgba(20,20,30,1)] shadow-lg"
+                  >
+                    {hasMentionInCurrentSector ? "@" : "!"}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.button>
           )}
 
         </main>
       </div>
 
-      <FriendsModal 
-        isOpen={showFriendsModal} 
-        onClose={() => setShowFriendsModal(false)} 
-        user={user} 
+      <FriendsModal
+        isOpen={showFriendsModal}
+        onClose={() => setShowFriendsModal(false)}
+        user={user}
         stats={stats}
         refetchStats={refetchNotifications}
         onActiveChatChange={setActiveFriendChatId}
@@ -1158,8 +1227,8 @@ export default function StationClient({ initialStation, initialCollabSectors = [
           sector={viewingMembersSector}
           currentUserId={user.id}
           ownerData={
-            allOwnedSectors.find(s => s.id === viewingMembersSector.id) 
-              ? user 
+            allOwnedSectors.find(s => s.id === viewingMembersSector.id)
+              ? user
               : (viewingMembersSector as any).station?.user
           }
           onClose={() => setViewingMembersSector(null)}

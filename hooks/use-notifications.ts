@@ -20,7 +20,7 @@ interface UseNotificationsOptions {
   activeFriendId?: string | null;
 }
 
-const globalSpamTracker: Record<string, { count: number, firstMsgTime: number, suspendedUntil: number }> = {};
+const globalSpamTracker: Record<string, { count: number, firstMsgTime: number, suspendedUntil: number, mentionBypassUsed?: boolean }> = {};
 
 export function useNotifications({
   userId,
@@ -44,6 +44,16 @@ export function useNotifications({
     url: "/sounds/notif-default.mp3"
   });
 
+  const [unreadGroupSectors, setUnreadGroupSectors] = useState<Record<string, { unread: boolean, mention: boolean }>>({});
+
+  const clearGroupUnread = useCallback((sectorId: string) => {
+    setUnreadGroupSectors(prev => {
+      const next = { ...prev };
+      delete next[sectorId];
+      return next;
+    });
+  }, []);
+
   useEffect(() => { statsRef.current = stats; }, [stats]);
 
   useEffect(() => {
@@ -60,30 +70,45 @@ export function useNotifications({
     }
   }, [activeFriendId]);
 
-  const checkSpam = useCallback((sourceId: string) => {
+const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => {
     const now = Date.now();
     if (!globalSpamTracker[sourceId]) {
-      globalSpamTracker[sourceId] = { count: 0, firstMsgTime: now, suspendedUntil: 0 };
+      globalSpamTracker[sourceId] = { count: 0, firstMsgTime: now, suspendedUntil: 0, mentionBypassUsed: false };
     }
     const tracker = globalSpamTracker[sourceId];
 
-    if (now < tracker.suspendedUntil) return true;
+    // Jika sedang dalam hukuman spam
+    if (now < tracker.suspendedUntil) {
+      if (isMention && !tracker.mentionBypassUsed) {
+        tracker.mentionBypassUsed = true; // Tiket gratis terpakai
+        return false; // Loloskan notif!
+      }
+      return true; // Blokir
+    }
 
+    // Jika masa penangguhan sudah lewat (1 menit), reset hitungan
     if (now - tracker.firstMsgTime > 60000) {
       tracker.count = 0;
       tracker.firstMsgTime = now;
+      tracker.mentionBypassUsed = false;
     }
 
     tracker.count += 1;
-
     const unreadCount = statsRef.current.unreadPerFriend[sourceId] || 0;
 
+    // Jika pesan terlalu banyak masuk, aktifkan hukuman Spam
     if (tracker.count > 3 || unreadCount >= 3) {
       tracker.suspendedUntil = now + 60000;
       tracker.count = 0;
-      return true;
+      
+      if (isMention) {
+        tracker.mentionBypassUsed = true;
+        return false; 
+      }
+      return true; 
     }
-    return false;
+    
+    return false; 
   }, []);
 
   const fetchStats = useCallback(async () => {
@@ -157,7 +182,11 @@ export function useNotifications({
           } else if (payload.type === 'NEW_GROUP_MESSAGE') {
             const { sectorId, sectorName, senderName, content, isMention, messageId } = payload.data;
             if (activeSectorIdRef.current !== sectorId) {
-              const isSpam = checkSpam(sectorId);
+              setUnreadGroupSectors(prev => ({
+                ...prev,
+                [sectorId]: { unread: true, mention: prev[sectorId]?.mention || isMention }
+              }));
+              const isSpam = checkSpam(sectorId, isMention);
               if (!isSpam) {
                 const title = isMention
                   ? `${senderName} mentioned you in sector ${sectorName}`
@@ -193,5 +222,5 @@ export function useNotifications({
     };
   }, [fetchStats, userId, checkSpam]);
 
-  return { stats, refetch: fetchStats };
+ return { stats, refetch: fetchStats, unreadGroupSectors, clearGroupUnread };
 }

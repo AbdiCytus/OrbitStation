@@ -29,13 +29,28 @@ interface Props {
   isOwner: boolean;
 }
 
-export default function GroupChatModal({ isOpen, onClose, sector, user, isOwner }: Props) {
+export default function GroupChatModal({ isOpen, onClose, sector: incomingSector, user, isOwner }: Props) {
+  const prevSectorRef = useRef(incomingSector);
+  useEffect(() => {
+    if (incomingSector) prevSectorRef.current = incomingSector;
+  }, [incomingSector]);
+  const sector = incomingSector || prevSectorRef.current;
+
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) setIsVisible(true);
+    else setIsVisible(false);
+  }, [isOpen]);
+
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [inputMessage, setInputMessage] = useState("");
   const [mutedMembers, setMutedMembers] = useState<string[]>([]);
   const [showMembers, setShowMembers] = useState(false);
   const [typingUsers, setTypingUsers] = useState<any[]>([]);
+  const [isScrolledUp, setIsScrolledUp] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const [myFriends, setMyFriends] = useState<any[]>([]);
 
@@ -69,6 +84,19 @@ export default function GroupChatModal({ isOpen, onClose, sector, user, isOwner 
   };
 
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleCloseModal = () => {
+    if (!user?.animationEnabled) {
+      onClose();
+      return;
+    }
+
+    setIsVisible(false);
+
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  };
 
   const handlePressStart = (msgId: string) => {
     if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
@@ -113,27 +141,37 @@ export default function GroupChatModal({ isOpen, onClose, sector, user, isOwner 
 
     channel.bind('new-message', (msg: any) => {
       setTypingUsers(prev => prev.filter(u => u.id !== msg.senderId));
-      let senderImg = null;
-      if (sector.station?.userId === msg.senderId) {
-        senderImg = sector.station?.user?.image;
-      } else {
-        const collab = sector.collaborators?.find((c: any) => c.userId === msg.senderId);
-        if (collab) senderImg = collab.user.image;
-      }
-
-      const fixedMsg = {
-        ...msg,
-        sender: { ...msg.sender, image: senderImg }
-      };
 
       setMessages(prev => {
+        if (prev.some(m => m.id === msg.id)) return prev;
+        let finalSenderImg = null;
+
+        const existingMsg = prev.find(m => m.senderId === msg.senderId && m.sender?.image);
+        if (existingMsg) {
+          finalSenderImg = existingMsg.sender.image;
+        } else {
+          if (msg.senderId === user.id) {
+            finalSenderImg = user.image;
+          } else if (sector.station?.userId === msg.senderId || sector.station?.user?.id === msg.senderId) {
+            finalSenderImg = sector.station?.user?.image;
+          } else {
+            const collab = sector.collaborators?.find((c: any) => c.userId === msg.senderId || c.user?.id === msg.senderId);
+            if (collab?.user?.image) finalSenderImg = collab.user.image;
+          }
+        }
+
+        const fixedMsg = {
+          ...msg,
+          sender: { ...msg.sender, image: finalSenderImg }
+        };
+
         const tempIdx = prev.findIndex(m => m._isSending && m.content === fixedMsg.content && m.senderId === fixedMsg.senderId);
         if (tempIdx !== -1) {
           const next = [...prev];
           next[tempIdx] = fixedMsg;
           return next;
         }
-        if (prev.some(m => m.id === fixedMsg.id)) return prev;
+
         return [...prev, fixedMsg];
       });
     });
@@ -417,32 +455,63 @@ export default function GroupChatModal({ isOpen, onClose, sector, user, isOwner 
     if ((res as any).error) toast.error((res as any).error);
   };
 
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+
+    // Jika jarak ke bawah lebih dari 150px, berarti pengguna sedang scroll ke atas
+    const distanceToBottom = scrollHeight - scrollTop - clientHeight;
+    if (distanceToBottom > 150) {
+      if (!isScrolledUp) setIsScrolledUp(true);
+    } else {
+      if (isScrolledUp) setIsScrolledUp(false);
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: user?.animationEnabled ? "smooth" : "auto",
+        block: "end"
+      });
+      setIsScrolledUp(false); // Sembunyikan instan saat ditekan
+    }
+  };
+
   if (!sector) return null;
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isVisible && (
         <motion.div
+          key="group-chat-overlay"
           className="modal-overlay fixed inset-0 z-[110] flex items-center justify-center p-0 sm:p-8 bg-black/60 backdrop-blur-sm"
           style={{ zIndex: 110, animation: "none" }}
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
         >
           <motion.div
+            key="group-chat-container"
             className="flex flex-col shadow-2xl fm-modal-container w-full h-full rounded-none sm:max-w-[1200px] sm:max-h-[85vh] sm:rounded-[28px]"
             style={{
               position: "relative", overflow: "hidden",
               background: "rgba(15, 15, 25, 0.85)",
               border: "1px solid rgba(139, 92, 246, 0.3)",
-              willChange: "transform, opacity",
+              transform: "translateZ(0)",
+              WebkitMaskImage: "-webkit-radial-gradient(white, black)"
             }}
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            initial={{ opacity: 0, y: 30, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.95 }}
-            transition={{ type: "spring", bounce: 0.1, duration: 0.5 }}
+            exit={{ opacity: 0, y: 20, scale: 0.98 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
           >
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
-              <StaticStarfield />
-            </div>
+            {!user?.staticBackgroundEnabled && (
+              <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
+                <StaticStarfield />
+              </div>
+            )}
 
             <div
               className="flex flex-col flex-1 relative z-10 w-full h-full overflow-hidden"
@@ -472,7 +541,7 @@ export default function GroupChatModal({ isOpen, onClose, sector, user, isOwner 
                   <button onClick={() => setShowMembers(!showMembers)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showMembers ? "rgba(139,92,246,0.2)" : "transparent", color: showMembers ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
                     <UserGroupIcon width={22} height={22} />
                   </button>
-                  <button onClick={onClose} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: "transparent", color: "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                  <button onClick={handleCloseModal} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: "transparent", color: "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
                     <XMarkIcon width={22} height={22} />
                   </button>
                 </div>
@@ -507,7 +576,10 @@ export default function GroupChatModal({ isOpen, onClose, sector, user, isOwner 
                     )}
                   </AnimatePresence>
                   {/* Messages List */}
-                  <div style={{ flex: 1, overflowY: "auto", padding: "16px", paddingTop: pinnedMessage ? "64px" : "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div
+                    ref={messagesContainerRef}
+                    onScroll={handleScroll}
+                    style={{ flex: 1, overflowY: "auto", padding: "16px", paddingTop: pinnedMessage ? "64px" : "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
 
                     {isLoading ? (
                       <div className="flex flex-col items-center justify-center h-full gap-4 opacity-80 mt-10">
@@ -669,27 +741,27 @@ export default function GroupChatModal({ isOpen, onClose, sector, user, isOwner 
                                     setSelectedMsgId(null);
                                     setPinnedMessage(msg);
                                     await pinGroupMessageAction(sector.id, msg.id);
-                                  }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Pin Message">
+                                  }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Pin Message" style={{ padding: "10px" }}>
                                     <MapPinIcon width={18} height={18} />
                                   </button>
-                                  <button onClick={() => { setReplyToMsg(msg); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Reply">
+                                  <button onClick={() => { setReplyToMsg(msg); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Reply" style={{ padding: "10px" }}>
                                     <ArrowUturnLeftIcon width={18} height={18} />
                                   </button>
-                                  <button onClick={() => { navigator.clipboard.writeText(msg.content); toast.success("Copied to clipboard"); setSelectedMsgId(null); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Copy">
+                                  <button onClick={() => { navigator.clipboard.writeText(msg.content); toast.success("Copied to clipboard"); setSelectedMsgId(null); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Copy" style={{ padding: "10px" }}>
                                     <ClipboardDocumentIcon width={18} height={18} />
                                   </button>
                                   {msg.content.match(/https?:\/\/[^\s]+/) && (
-                                    <button onClick={() => window.open(msg.content.match(/https?:\/\/[^\s]+/)[0], "_blank")} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Open Link">
+                                    <button onClick={() => window.open(msg.content.match(/https?:\/\/[^\s]+/)[0], "_blank")} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Open Link" style={{ padding: "10px" }}>
                                       <LinkIcon width={18} height={18} />
                                     </button>
                                   )}
                                   {isMine && (
-                                    <button onClick={() => { setEditMsgId(msg.id); setInputMessage(msg.content); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Edit">
+                                    <button onClick={() => { setEditMsgId(msg.id); setInputMessage(msg.content); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Edi t" style={{ padding: "10px" }}>
                                       <PencilIcon width={18} height={18} />
                                     </button>
                                   )}
                                   {(isMine || isOwner) && (
-                                    <button onClick={() => handleDeleteMsg(msg.id)} className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Delete">
+                                    <button onClick={() => handleDeleteMsg(msg.id)} className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Delete" style={{ padding: "10px" }}>
                                       <TrashIcon width={18} height={18} />
                                     </button>
                                   )}
@@ -718,6 +790,28 @@ export default function GroupChatModal({ isOpen, onClose, sector, user, isOwner 
                       </div>
                     </div>
                   )}
+
+                  <AnimatePresence>
+                    {isScrolledUp && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.8 }}
+                        style={{ position: "absolute", bottom: "85px", right: "16px", zIndex: 30 }}
+                      >
+                        <button
+                          onClick={scrollToBottom}
+                          className="bg-violet-600 hover:bg-violet-500 text-white rounded-full p-2 shadow-[0_4px_15px_rgba(0,0,0,0.5)] border border-violet-400/50 cursor-pointer transition-colors"
+                          title="Scroll to bottom"
+                          style={{padding: "10px"}}
+                        >
+                          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                          </svg>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Input Area */}
                   <div style={{ padding: "12px 16px", background: "rgba(0,0,0,0.5)", borderTop: "1px solid rgba(255,255,255,0.07)", position: "relative", backdropFilter: "blur(10px)" }}>
