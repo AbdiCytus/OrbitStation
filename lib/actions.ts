@@ -156,7 +156,11 @@ export async function acceptCollab(messageId: string, sectorId: string) {
       data: { sectorId, senderId: user.id, content: `joined the sector`, type: "SYSTEM" },
       include: { sender: { select: { id: true, name: true, username: true, image: true } } }
     });
-    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+    const pusherPayload = {
+      ...sysMsg,
+      sender: { ...sysMsg.sender, image: null }
+    };
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', pusherPayload);
   } catch (e) {
     // If they already joined, just update the message
     await db.chatMessage.update({
@@ -1265,7 +1269,11 @@ export async function muteMember(sectorId: string, targetUserId: string) {
     }
   });
 
-  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+  const pusherPayload = {
+    ...sysMsg,
+    sender: { ...sysMsg.sender, image: null }
+  };
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', pusherPayload);
 
   return { success: true };
 }
@@ -1292,7 +1300,11 @@ export async function unmuteMember(sectorId: string, targetUserId: string) {
         replyTo: { include: { sender: { select: { name: true, username: true } } } }
       }
     });
-    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+    const pusherPayload = {
+      ...sysMsg,
+      sender: { ...sysMsg.sender, image: null }
+    };
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', pusherPayload);
   } catch (e) {
     // Ignore if not muted
   }
@@ -1331,8 +1343,12 @@ export async function clearGroupChat(sectorId: string) {
     }
   });
 
+  const pusherPayload = {
+    ...sysMsg,
+    sender: { ...sysMsg.sender, image: null }
+  };
   await pusherServer.trigger(`presence-sector-${sectorId}`, 'clear-messages', {});
-  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', pusherPayload);
 
   return { success: true };
 }
@@ -1359,7 +1375,11 @@ export async function kickMember(sectorId: string, targetUserId: string) {
         replyTo: { include: { sender: { select: { name: true, username: true } } } }
       }
     });
-    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+    const pusherPayload = {
+      ...sysMsg,
+      sender: { ...sysMsg.sender, image: null }
+    };
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', pusherPayload);
   } catch (e) {
     // Member might not exist
   }
@@ -1415,7 +1435,7 @@ export async function getTypingUsers(sectorId: string | null, chatWithId: string
 
 export async function pinGroupMessageAction(sectorId: string, msgId: string) {
   const user = await requireAuth();
-  const msg = await db.groupMessage.findUnique({ 
+  const msg = await db.groupMessage.findUnique({
     where: { id: msgId },
     include: { sender: { select: { name: true, username: true } } }
   });
@@ -1426,8 +1446,17 @@ export async function pinGroupMessageAction(sectorId: string, msgId: string) {
     include: { sender: { select: { id: true, name: true, username: true, image: true } } }
   });
 
-  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
-  await pusherServer.trigger(`presence-sector-${sectorId}`, 'pinned-message', msg);
+  const sysPayload = {
+    ...sysMsg,
+    sender: { ...sysMsg.sender, image: null }
+  };
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysPayload);
+
+  const pinPayload = {
+    ...msg,
+    sender: { ...msg.sender, image: null }
+  };
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'pinned-message', pinPayload);
 
   return { success: true };
 }
