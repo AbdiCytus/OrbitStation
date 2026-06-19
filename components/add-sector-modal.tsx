@@ -6,6 +6,7 @@ import type { SectorWithBeacons, Beacon } from "@/types";
 import { toast } from "sonner";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 type Props = {
   onClose: () => void;
@@ -119,29 +120,26 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
     >
       <div style={{ display: "flex", rowGap: "1rem", flexDirection: "row", alignItems: "stretch", justifyContent: "center", width: "100%", maxWidth: isMobile ? "100%" : "1170px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
       {/* MAIN PANEL */}
-      <motion.div
-        initial={isMobile ? { y: "100%", opacity: 1 } : { opacity: 0, scale: 0.95 }}
-        animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, scale: 1 }}
-        exit={isMobile ? { y: "100%", opacity: 1 } : { opacity: 0, scale: 0.95 }}
-        transition={isMobile ? { type: "tween", duration: 0.28, ease: [0.25, 0.8, 0.25, 1] } : { type: "spring", stiffness: 300, damping: 30 }}
+      <div
         className={`modal-panel ${isClosing ? "closing" : ""} glass`}
         style={{
           flex: isMobile ? "unset" : "1 1 750px",
           maxWidth: isMobile ? "100%" : "750px",
           width: isMobile ? "100%" : undefined,
           borderRadius: isMobile ? "20px 20px 0 0" : undefined,
-          margin: 0,
+          margin: isMobile ? "auto 0 0 0" : 0,
           display: "flex",
           flexDirection: "column",
-          animation: "none",
-          maxHeight: isMobile ? "90dvh" : undefined,
-          overflowY: isMobile ? "auto" : undefined,
+          maxHeight: isMobile ? "90dvh" : "85vh",
+          height: isMobile ? "auto" : "560px",
+          overflowY: "auto",
+          transform: isMobile ? "none" : undefined,
         }}
       >
         <div className="modal-header">
           <h2 className="modal-title">New Sector</h2>
           {!showInvite && (
-            <button type="button" className="btn-icon modal-close" onClick={handleClose} aria-label="Close">✕</button>
+            <button type="button" className="btn-icon modal-close" onClick={handleClose} aria-label="Close"><XMarkIcon width={18} height={18} /></button>
           )}
         </div>
 
@@ -352,14 +350,14 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
             </div>
           </div>
         </form>
-      </motion.div>
+      </div>
 
       {/* SECOND PANEL */}
       <AnimatePresence>
         {!isMobile && showInvite && !isPublic && (
           <motion.div 
             className={`modal-panel ${isClosing ? "closing" : ""} glass`} 
-            style={{ maxWidth: "400px", margin: 0, display: "flex", flexDirection: "column", animation: isClosing ? undefined : "none", overflow: "hidden" }}
+            style={{ maxWidth: "400px", margin: 0, display: "flex", flexDirection: "column", overflow: "hidden", height: "560px", maxHeight: "85vh" }}
             initial={{ opacity: 0, scale: 0.95, flex: "0 0 0px", marginLeft: 0 }}
             animate={{ opacity: 1, scale: 1, flex: "1 1 300px", marginLeft: "1rem" }}
             exit={{ opacity: 0, scale: 0.95, flex: "0 0 0px", marginLeft: 0 }}
@@ -368,7 +366,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
             <div style={{ minWidth: "300px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
             <div className="modal-header" style={{ paddingBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
               <h3 className="modal-title" style={{ fontSize: "1.1rem" }}>Invite Friends</h3>
-              <button className="btn-icon modal-close" style={{ display: isMobile ? "flex" : "none" }} onClick={() => setShowInvite(false)} aria-label="Close">✕</button>
+              <button className="btn-icon modal-close" style={{ display: isMobile ? "flex" : "none" }} onClick={() => setShowInvite(false)} aria-label="Close"><XMarkIcon width={18} height={18} /></button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "0 1.5rem 1.5rem 1.5rem" }}>
               <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>

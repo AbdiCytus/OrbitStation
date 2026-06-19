@@ -91,6 +91,11 @@ model User {
   collabSectors    SectorCollaborator[] @relation("CollabSectors")
   createdBeacons   Beacon[]
   visitedStations  StationVisit[] @relation("UserVisits")
+  sentGroupMessages GroupMessage[] @relation("SentGroupMessages")
+  mutedInSectors   MutedMember[]  @relation("MutedUsers")
+  notifSoundUrl    String?        // Custom SFX URL
+  notifSoundEnabled Boolean       @default(true)
+  typingIndicators TypingIndicator[]
 }
 
 /// Dasbor utama milik Pilot, disebut "Station"
@@ -136,6 +141,9 @@ model Sector {
   station Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
   beacons Beacon[]
   collaborators SectorCollaborator[]
+  groupMessages GroupMessage[]
+  mutedMembers  MutedMember[]
+  typingIndicators TypingIndicator[]
 }
 
 /// Shortcut web, disebut "Suar" (Beacon)
@@ -207,4 +215,57 @@ model SectorCollaborator {
 
   @@unique([sectorId, userId])
 }
- 
+
+// ============================================================
+// GROUP CHAT MODELS
+// ============================================================
+
+model GroupMessage {
+  id        String   @id @default(cuid())
+  sectorId  String
+  senderId  String
+  content   String
+  type      String   @default("TEXT") // TEXT, SYSTEM
+  replyToId String?
+  isDeleted Boolean  @default(false)
+  deletedBy String?  // userId who deleted (for owner-deleted messages)
+  editedAt  DateTime?
+  createdAt DateTime @default(now())
+
+  sector    Sector         @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  sender    User           @relation("SentGroupMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo   GroupMessage?  @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies   GroupMessage[] @relation("MessageReplies")
+
+  @@index([sectorId, createdAt])
+}
+
+model MutedMember {
+  id       String   @id @default(cuid())
+  sectorId String
+  userId   String
+  mutedAt  DateTime @default(now())
+
+  sector   Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  user     User     @relation("MutedUsers", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sectorId, userId])
+}
+
+/// Typing indicator untuk group chat dan private chat
+model TypingIndicator {
+  id         String   @id @default(cuid())
+  userId     String
+  sectorId   String?  // group chat context
+  chatWithId String?  // private chat context (other user's id)
+  updatedAt  DateTime @updatedAt
+
+  sector Sector? @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sectorId, userId])
+  @@unique([chatWithId, userId])
+
+  @@index([sectorId, userId])
+  @@index([chatWithId, userId])
+}

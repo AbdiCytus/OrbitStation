@@ -22,6 +22,8 @@ type Profile = {
   hologramEnabled: boolean;
   allowFriendRequests?: boolean;
   staticBackgroundEnabled?: boolean;
+  notifSoundEnabled?: boolean;
+  notifSoundUrl?: string | null;
   station: { isPublic: boolean } | null;
 };
 
@@ -85,12 +87,17 @@ export default function SettingsClient({ profile }: Props) {
   const [hologramEnabled, setHologramEnabled] = useState(profile.hologramEnabled);
   const [allowFriendRequests, setAllowFriendRequests] = useState(profile.allowFriendRequests ?? true);
   const [staticBackgroundEnabled, setStaticBackgroundEnabled] = useState(profile.staticBackgroundEnabled ?? false);
+  const [notifSoundEnabled, setNotifSoundEnabled] = useState(profile.notifSoundEnabled ?? true);
+  const [notifSoundUrl, setNotifSoundUrl] = useState(profile.notifSoundUrl ?? "/sounds/notif-default.mp3");
+  const [notifSoundType, setNotifSoundType] = useState<"default" | "custom">(
+    !profile.notifSoundUrl || profile.notifSoundUrl === "/sounds/notif-default.mp3" ? "default" : "custom"
+  );
   const [isPublic, setIsPublic] = useState(profile.station?.isPublic ?? false);
   const [image, setImage] = useState(profile.image ?? "");
-  
+
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const [formErrors, setFormErrors] = useState<{name?: string, username?: string}>({});
+  const [formErrors, setFormErrors] = useState<{ name?: string, username?: string }>({});
   const [, startTransition] = useTransition();
   const router = useRouter();
 
@@ -124,6 +131,26 @@ export default function SettingsClient({ profile }: Props) {
     }
   };
 
+  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+
+      // Batasi ukuran file audio maksimal 1 MB
+      if (file.size > 1 * 1024 * 1024) {
+        toast.error("Audio file is too large! Maximum allowed is 1MB.");
+        return;
+      }
+
+      // Konversi ke Base64 String agar bisa disimpan ke Database
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        setNotifSoundUrl(reader.result?.toString() || "");
+        toast.success("Audio loaded! Click 'Play Test' to preview.");
+      });
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleCropImage = async () => {
     try {
       if (imageSrc && croppedAreaPixels) {
@@ -152,7 +179,7 @@ export default function SettingsClient({ profile }: Props) {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    const errors: {name?: string, username?: string} = {};
+    const errors: { name?: string, username?: string } = {};
     if (!name.trim()) errors.name = "Display name is required.";
     if (!username.trim()) errors.username = "Username is required.";
     setFormErrors(errors);
@@ -162,10 +189,17 @@ export default function SettingsClient({ profile }: Props) {
     setErrorMsg("");
 
     try {
+      const finalSoundUrl = notifSoundType === "default" ? "/sounds/notif-default.mp3" : notifSoundUrl;
       const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, isPublic, image }),
+        body: JSON.stringify({
+          name, username, callsign, bio, bannerUrl, titleBadge,
+          animationEnabled, hologramEnabled, allowFriendRequests,
+          staticBackgroundEnabled, notifSoundEnabled,
+          notifSoundUrl: finalSoundUrl,
+          isPublic, image
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -312,6 +346,130 @@ export default function SettingsClient({ profile }: Props) {
                 </div>
               )}
 
+              {/* Notification Sound Group */}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+
+                {/* 1. Baris Toggle (Teks & Switch) */}
+                <div className="settings-toggle-row" style={{ marginTop: "1rem" }}>
+                  <div className="settings-toggle-info">
+                    <span className="settings-toggle-label">Notification Sound</span>
+                    <span className="settings-toggle-desc">
+                      Play a sound when you receive a new message or friend request.
+                    </span>
+                  </div>
+                  <label className="toggle-switch" htmlFor="toggle-notif-sound">
+                    <input
+                      id="toggle-notif-sound"
+                      type="checkbox"
+                      checked={notifSoundEnabled}
+                      onChange={(e) => setNotifSoundEnabled(e.target.checked)}
+                    />
+                    <span className="toggle-thumb" />
+                  </label>
+                </div>
+
+                {/* 2. Menu Tambahan (Hanya muncul di bawahnya jika Toggle AKTIF) */}
+                {notifSoundEnabled && (
+                  <div style={{
+                    marginTop: "0.5rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.75rem",
+                    padding: "1rem",
+                    background: "rgba(0,0,0,0.2)",
+                    borderRadius: "12px",
+                    border: "1px solid rgba(255,255,255,0.05)"
+                  }}>
+
+                    {/* Styled Radio Button Cards */}
+                    <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                      <label
+                        style={{
+                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", minWidth: "140px",
+                          padding: "12px", borderRadius: "10px", cursor: "pointer", transition: "all 0.2s",
+                          background: notifSoundType === "default" ? "rgba(139,92,246,0.15)" : "rgba(255,255,255,0.03)",
+                          border: notifSoundType === "default" ? "1px solid rgba(139,92,246,0.4)" : "1px solid rgba(255,255,255,0.1)",
+                          color: notifSoundType === "default" ? "#c4b5fd" : "#9ca3af"
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="soundType"
+                          style={{ display: "none" }}
+                          checked={notifSoundType === "default"}
+                          onChange={() => {
+                            setNotifSoundType("default");
+                            setNotifSoundUrl("/sounds/notif-default.mp3");
+                          }}
+                        />
+                        {/* Lingkaran Radio */}
+                        <div style={{ width: "16px", height: "16px", borderRadius: "50%", border: notifSoundType === "default" ? "5px solid #a78bfa" : "2px solid #4b5675", transition: "all 0.2s" }} />
+                        <span style={{ fontSize: "0.875rem", fontWeight: 600 }}>System Default</span>
+                      </label>
+
+                      <label
+                        style={{
+                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", minWidth: "140px",
+                          padding: "12px", borderRadius: "10px", cursor: "pointer", transition: "all 0.2s",
+                          background: notifSoundType === "custom" ? "rgba(139,92,246,0.15)" : "rgba(255,255,255,0.03)",
+                          border: notifSoundType === "custom" ? "1px solid rgba(139,92,246,0.4)" : "1px solid rgba(255,255,255,0.1)",
+                          color: notifSoundType === "custom" ? "#c4b5fd" : "#9ca3af"
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="soundType"
+                          style={{ display: "none" }}
+                          checked={notifSoundType === "custom"}
+                          onChange={() => {
+                            setNotifSoundType("custom");
+                            setNotifSoundUrl(""); // Reset url agar siap di-upload
+                          }}
+                        />
+                        {/* Lingkaran Radio */}
+                        <div style={{ width: "16px", height: "16px", borderRadius: "50%", border: notifSoundType === "custom" ? "5px solid #a78bfa" : "2px solid #4b5675", transition: "all 0.2s" }} />
+                        <span style={{ fontSize: "0.875rem", fontWeight: 600 }}>Custom Upload</span>
+                      </label>
+                    </div>
+
+                    {/* Custom Upload Area */}
+                    {notifSoundType === "custom" && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", padding: "12px", background: "rgba(0,0,0,0.2)", borderRadius: "10px", border: "1px dashed rgba(255,255,255,0.1)" }}>
+                        <input
+                          type="file"
+                          accept="audio/mp3, audio/mpeg, audio/wav, audio/ogg"
+                          onChange={handleAudioFileChange}
+                          style={{
+                            flex: 1, fontSize: "0.8rem", color: "#d1d5db", cursor: "pointer", minWidth: "180px"
+                          }}
+                        />
+                        <button
+                          type="button"
+                          disabled={!notifSoundUrl || notifSoundUrl === "/sounds/notif-default.mp3"}
+                          onClick={() => {
+                            const audio = new Audio(notifSoundUrl);
+                            audio.volume = 0.5;
+                            audio.play().catch(e => toast.error("Could not play sound. Format might be unsupported."));
+                          }}
+                          style={{
+                            fontSize: "0.8rem", padding: "8px 16px", borderRadius: "8px", fontWeight: 600,
+                            color: (!notifSoundUrl || notifSoundUrl === "/sounds/notif-default.mp3") ? "#6b7280" : "white",
+                            background: (!notifSoundUrl || notifSoundUrl === "/sounds/notif-default.mp3") ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #7c3aed, #4f46e5)",
+                            border: "none", cursor: (!notifSoundUrl || notifSoundUrl === "/sounds/notif-default.mp3") ? "not-allowed" : "pointer",
+                            transition: "all 0.2s", boxShadow: (!notifSoundUrl || notifSoundUrl === "/sounds/notif-default.mp3") ? "none" : "0 0 10px rgba(109,40,217,0.4)"
+                          }}
+                        >
+                          Play Test
+                        </button>
+                      </div>
+                    )}
+                    {notifSoundType === "custom" && notifSoundUrl && notifSoundUrl.startsWith("data:audio") && (
+                      <span style={{ fontSize: "0.75rem", color: "#10b981", marginLeft: "4px" }}>✓ Custom audio ready to be saved</span>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Friend Requests toggle */}
               <div className="settings-toggle-row" style={{ marginTop: "1rem" }}>
                 <div className="settings-toggle-info">
@@ -355,15 +513,15 @@ export default function SettingsClient({ profile }: Props) {
                 </label>
               </div>
             </section>
-            
+
             {/* Danger Zone (Mobile) */}
             <section className="settings-section mobile-only" style={{ borderColor: "rgba(239,68,68,0.2)" }}>
               <h2 className="settings-section-title" style={{ color: "#ef4444" }}>Danger Zone</h2>
               <p className="text-gray-400 text-sm mb-4" style={{ marginBottom: "1rem" }}>
                 Once you delete your account, there is no going back. Please be certain. All data will be permanently removed.
               </p>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setShowDeleteModal(true)}
                 style={{ padding: "8px 16px", borderRadius: "8px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", fontWeight: "500", fontSize: "0.875rem" }}
               >
@@ -379,15 +537,15 @@ export default function SettingsClient({ profile }: Props) {
 
               {/* Avatar row */}
               <div className="settings-avatar-row">
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  ref={fileInputRef} 
-                  style={{ display: "none" }} 
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
                   onChange={handleFileChange}
                 />
-                <div 
-                  className="settings-avatar group relative overflow-hidden" 
+                <div
+                  className="settings-avatar group relative overflow-hidden"
                   style={{ cursor: "pointer" }}
                   onClick={() => fileInputRef.current?.click()}
                   title="Change Avatar (Max 2MB)"
@@ -421,7 +579,7 @@ export default function SettingsClient({ profile }: Props) {
                   id="s-name"
                   className="input"
                   value={name}
-                  onChange={(e) => { setName(e.target.value); setFormErrors(p => ({...p, name: ""})); }}
+                  onChange={(e) => { setName(e.target.value); setFormErrors(p => ({ ...p, name: "" })); }}
                   maxLength={60}
                   placeholder="How others see your name"
                 />
@@ -438,7 +596,7 @@ export default function SettingsClient({ profile }: Props) {
                   id="s-username"
                   className="input"
                   value={username}
-                  onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "")); setFormErrors(p => ({...p, username: ""})); }}
+                  onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "")); setFormErrors(p => ({ ...p, username: "" })); }}
                   maxLength={32}
                   placeholder="yourname"
                 />
@@ -483,8 +641,8 @@ export default function SettingsClient({ profile }: Props) {
               <p className="text-gray-400 text-sm mb-4" style={{ marginBottom: "1rem" }}>
                 Once you delete your account, there is no going back. Please be certain. All data will be permanently removed.
               </p>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setShowDeleteModal(true)}
                 style={{ padding: "8px 16px", borderRadius: "8px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer", fontWeight: "500", fontSize: "0.875rem" }}
               >
@@ -501,7 +659,7 @@ export default function SettingsClient({ profile }: Props) {
       {/* Crop Modal */}
       <AnimatePresence>
         {imageSrc && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
@@ -522,13 +680,13 @@ export default function SettingsClient({ profile }: Props) {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <span style={{ color: "gray", fontSize: "0.875rem" }}>Zoom</span>
-                <input 
-                  type="range" 
-                  value={zoom} 
-                  min={1} 
-                  max={3} 
-                  step={0.1} 
-                  onChange={(e) => setZoom(Number(e.target.value))} 
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  onChange={(e) => setZoom(Number(e.target.value))}
                   style={{ flex: 1 }}
                 />
               </div>
@@ -548,14 +706,14 @@ export default function SettingsClient({ profile }: Props) {
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {showDeleteModal && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             <div style={{ background: "#111", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "16px", padding: "24px", width: "100%", maxWidth: "400px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#ef4444" }}>Delete Account</h3>
               <p style={{ color: "gray", fontSize: "0.875rem", lineHeight: "1.5" }}>
-                Are you absolutely sure you want to delete your account? This action cannot be undone. 
+                Are you absolutely sure you want to delete your account? This action cannot be undone.
                 All your data, settings, beacons, sectors, friendships, and messages will be permanently deleted from our servers.
               </p>
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "16px" }}>

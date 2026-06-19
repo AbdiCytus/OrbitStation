@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { pusherServer } from "@/lib/pusher";
 
 // ============================================================
 // HELPER — ambil session + pastikan Station user sudah ada
@@ -15,7 +16,7 @@ async function requireAuth() {
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
-  return session.user;
+  return { ...session.user, id: session.user.id };
 }
 
 async function requireStation(userId: string) {
@@ -75,6 +76,13 @@ export async function createSector(data: SectorFormData) {
       metadata: JSON.stringify({ sectorId: sector.id, sectorName: sector.name })
     }));
     await db.chatMessage.createMany({ data: messages });
+
+    await Promise.all(data.invitedFriendIds.map(id =>
+      pusherServer.trigger(`private-user-${id}`, 'new-notification', {
+        type: 'NEW_COLLAB_INVITE',
+        data: { sectorName: sector.name, senderName: user.name }
+      })
+    ));
   }
 
   revalidatePath("/station");
@@ -115,6 +123,13 @@ export async function updateSector(
       metadata: JSON.stringify({ sectorId: updated.id, sectorName: updated.name })
     }));
     await db.chatMessage.createMany({ data: messages });
+
+    await Promise.all(data.invitedFriendIds.map(id =>
+      pusherServer.trigger(`private-user-${id}`, 'new-notification', {
+        type: 'NEW_COLLAB_INVITE',
+        data: { sectorName: updated.name, senderName: user.name }
+      })
+    ));
   }
 
   revalidatePath("/station");
@@ -123,7 +138,7 @@ export async function updateSector(
 
 export async function acceptCollab(messageId: string, sectorId: string) {
   const user = await requireAuth();
-  
+
   try {
     await db.sectorCollaborator.create({
       data: {
@@ -136,6 +151,12 @@ export async function acceptCollab(messageId: string, sectorId: string) {
       where: { id: messageId },
       data: { type: "COLLAB_ACCEPTED", content: "accepted the sector collaboration" }
     });
+
+    const sysMsg = await db.groupMessage.create({
+      data: { sectorId, senderId: user.id, content: `joined the sector`, type: "SYSTEM" },
+      include: { sender: { select: { id: true, name: true, username: true, image: true } } }
+    });
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
   } catch (e) {
     // If they already joined, just update the message
     await db.chatMessage.update({
@@ -150,7 +171,7 @@ export async function acceptCollab(messageId: string, sectorId: string) {
 
 export async function rejectCollab(messageId: string) {
   await requireAuth();
-  
+
   await db.chatMessage.update({
     where: { id: messageId },
     data: { type: "COLLAB_REJECTED", content: "rejected the sector collaboration" }
@@ -377,8 +398,8 @@ export async function createBeacon(sectorId: string, data: BeaconFormData) {
 
   // Validasi sektor milik user
   const sector = await db.sector.findFirst({
-    where: { 
-      id: sectorId, 
+    where: {
+      id: sectorId,
       OR: [
         { station: { userId: user.id } },
         { collaborators: { some: { userId: user.id } } }
@@ -436,14 +457,14 @@ export async function updateBeacon(
   const user = await requireAuth();
 
   const beacon = await db.beacon.findFirst({
-    where: { 
-      id: beaconId, 
-      sector: { 
+    where: {
+      id: beaconId,
+      sector: {
         OR: [
           { station: { userId: user.id } },
           { collaborators: { some: { userId: user.id } } }
         ]
-      } 
+      }
     },
   });
   if (!beacon) {
@@ -491,14 +512,14 @@ export async function deleteBeacon(beaconId: string) {
   const user = await requireAuth();
 
   const beacon = await db.beacon.findFirst({
-    where: { 
-      id: beaconId, 
-      sector: { 
+    where: {
+      id: beaconId,
+      sector: {
         OR: [
           { station: { userId: user.id } },
           { collaborators: { some: { userId: user.id } } }
         ]
-      } 
+      }
     },
   });
   if (!beacon) {
@@ -526,14 +547,14 @@ export async function toggleBeaconPin(beaconId: string) {
   const user = await requireAuth();
 
   const beacon = await db.beacon.findFirst({
-    where: { 
-      id: beaconId, 
-      sector: { 
+    where: {
+      id: beaconId,
+      sector: {
         OR: [
           { station: { userId: user.id } },
           { collaborators: { some: { userId: user.id } } }
         ]
-      } 
+      }
     },
   });
   if (!beacon) {
@@ -567,8 +588,8 @@ export async function reorderBeacons(
 
   // Validasi sektor milik user atau kolaborator
   const sector = await db.sector.findFirst({
-    where: { 
-      id: sectorId, 
+    where: {
+      id: sectorId,
       OR: [
         { station: { userId: user.id } },
         { collaborators: { some: { userId: user.id } } }
@@ -652,7 +673,7 @@ export async function searchPilots(query: string) {
 
 export async function getFriends() {
   const user = await requireAuth();
-  
+
   const friendships = await db.friendship.findMany({
     where: {
       OR: [
@@ -679,7 +700,7 @@ export async function getFriends() {
 
 export async function getFriendRequests() {
   const user = await requireAuth();
-  
+
   const requests = await db.friendship.findMany({
     where: {
       receiverId: user.id,
@@ -712,24 +733,37 @@ export async function sendFriendRequest(receiverId: string) {
   if (existing) {
     if (existing.status === "PENDING") return { error: "Request already pending" };
     if (existing.status === "ACCEPTED") return { error: "Already friends" };
-    
-    // If REJECTED, we could update it back to PENDING. Let's do that.
+
     const updated = await db.friendship.update({
       where: { id: existing.id },
       data: { status: "PENDING", requesterId: user.id!, receiverId }
     });
+
+    // [PUSH DATA]
+    await pusherServer.trigger(`private-user-${receiverId}`, 'new-notification', {
+      type: 'NEW_FRIEND_REQUEST',
+      data: { requesterId: user.id }
+    });
+
     return { data: updated };
   }
 
   const friendship = await db.friendship.create({
     data: { requesterId: user.id!, receiverId, status: "PENDING" }
   });
+
+  // [PUSH DATA]
+  await pusherServer.trigger(`private-user-${receiverId}`, 'new-notification', {
+    type: 'NEW_FRIEND_REQUEST',
+    data: { requesterId: user.id }
+  });
+
   return { data: friendship };
 }
 
 export async function acceptFriendRequest(friendshipId: string) {
   const user = await requireAuth();
-  
+
   const friendship = await db.friendship.findUnique({ where: { id: friendshipId } });
   if (!friendship || friendship.receiverId !== user.id) return { error: "Request not found" };
 
@@ -742,7 +776,7 @@ export async function acceptFriendRequest(friendshipId: string) {
 
 export async function rejectFriendRequest(friendshipId: string) {
   const user = await requireAuth();
-  
+
   const friendship = await db.friendship.findUnique({ where: { id: friendshipId } });
   if (!friendship || friendship.receiverId !== user.id) return { error: "Request not found" };
 
@@ -752,7 +786,7 @@ export async function rejectFriendRequest(friendshipId: string) {
 
 export async function getChatMessages(friendId: string) {
   const user = await requireAuth();
-  
+
   const messages = await db.chatMessage.findMany({
     where: {
       OR: [
@@ -762,7 +796,7 @@ export async function getChatMessages(friendId: string) {
     },
     orderBy: { createdAt: "asc" }
   });
-  
+
   return messages;
 }
 
@@ -770,7 +804,6 @@ export async function sendChatMessage(receiverId: string, content: string) {
   const user = await requireAuth();
   if (!content.trim()) return { error: "Message is empty" };
 
-  // Check friendship
   const friendship = await db.friendship.findFirst({
     where: {
       OR: [
@@ -788,9 +821,30 @@ export async function sendChatMessage(receiverId: string, content: string) {
       senderId: user.id!,
       receiverId,
       content: content.trim()
+    },
+    include: {
+      sender: { select: { id: true, name: true, username: true, image: true } }
     }
   });
-  
+
+  const chatId = [user.id, receiverId].sort().join('_');
+  const pusherPayload = {
+    ...message,
+    sender: { ...message.sender, image: null }
+  };
+  await pusherServer.trigger(`private-chat-${chatId}`, 'new-private-message', pusherPayload);
+
+  await pusherServer.trigger(`private-user-${receiverId}`, 'new-notification', {
+    type: 'NEW_PRIVATE_MESSAGE',
+    data: {
+      messageId: message.id,
+      content: message.content,
+      senderId: user.id,
+      senderName: user.name || "Pilot",
+      timestamp: message.createdAt.toISOString()
+    }
+  });
+
   return { data: message };
 }
 
@@ -860,7 +914,7 @@ export async function deleteAccount() {
 export async function getNotificationStats() {
   const user = await requireAuth();
 
-  const [unreadMessages, pendingRequests] = await Promise.all([
+  const [unreadMessages, pendingRequests, dbUser] = await Promise.all([
     db.chatMessage.count({
       where: {
         receiverId: user.id,
@@ -872,6 +926,10 @@ export async function getNotificationStats() {
         receiverId: user.id,
         status: "PENDING"
       }
+    }),
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { notifSoundEnabled: true, notifSoundUrl: true }
     })
   ]);
 
@@ -892,17 +950,47 @@ export async function getNotificationStats() {
     return acc;
   }, {} as Record<string, number>);
 
+  // Latest group messages per sector to notify user
+  // We get the sectors the user is part of
+  const mySectors = await db.sector.findMany({
+    where: {
+      OR: [
+        { station: { userId: user.id } },
+        { collaborators: { some: { userId: user.id } } }
+      ]
+    },
+    select: { id: true }
+  });
+
+  const sectorIds = mySectors.map(s => s.id);
+
+  // Latest message for each sector
+  const latestGroupMessagesData = await db.groupMessage.findMany({
+    where: {
+      sectorId: { in: sectorIds },
+      senderId: { not: user.id }
+    },
+    orderBy: { createdAt: 'desc' },
+    distinct: ['sectorId'],
+    select: { id: true, sectorId: true, sender: { select: { name: true, username: true } }, content: true, createdAt: true, sector: { select: { name: true } } }
+  });
+
   return {
     totalUnreadMessages: unreadMessages,
     totalPendingRequests: pendingRequests,
     hasNotifications: unreadMessages > 0 || pendingRequests > 0,
-    unreadPerFriend
+    unreadPerFriend,
+    latestGroupMessages: latestGroupMessagesData,
+    soundConfig: {
+      enabled: dbUser?.notifSoundEnabled ?? true,
+      url: dbUser?.notifSoundUrl || "/sounds/notif-default.mp3"
+    }
   };
 }
 
 export async function markChatAsRead(senderId: string) {
   const user = await requireAuth();
-  
+
   await db.chatMessage.updateMany({
     where: {
       senderId,
@@ -922,9 +1010,7 @@ export async function recordStationVisit(stationId: string, visitorId?: string) 
   try {
     const headersList = await headers();
     const ip = headersList.get("x-forwarded-for") || "unknown-ip";
-    
-    // Batasi 1 kunjungan per IP setiap 5 menit (300000ms) untuk endpoint ini
-    // Untuk pengembangan/testing bisa diubah limitnya jika perlu
+
     if (!checkRateLimit(`visit_${ip}`, 1, 300000)) {
       return { success: false, message: "Rate limited" };
     }
@@ -949,7 +1035,7 @@ export async function recordStationVisit(stationId: string, visitorId?: string) 
 export async function getStationAnalytics(stationId: string) {
   try {
     const totalVisits = await db.stationVisit.count({ where: { stationId } });
-    
+
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const recentVisits = await db.stationVisit.findMany({
@@ -977,4 +1063,371 @@ export async function getStationAnalytics(stationId: string) {
   } catch (e: any) {
     return { error: e.message };
   }
+}
+
+// ============================================================
+// GROUP CHAT ACTIONS
+// ============================================================
+
+export async function getGroupMessages(sectorId: string) {
+  const user = await requireAuth();
+
+  // Validate member
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true, collaborators: true }
+  });
+
+  if (!sector) return [];
+
+  const isOwner = sector.station.userId === user.id;
+  const isCollab = sector.collaborators.some(c => c.userId === user.id);
+  if (!isOwner && !isCollab) return [];
+
+  const messages = await db.groupMessage.findMany({
+    where: { sectorId },
+    include: {
+      sender: {
+        select: { id: true, name: true, username: true, image: true, callsign: true }
+      },
+      replyTo: {
+        select: { id: true, content: true, senderId: true, sender: { select: { name: true, username: true } }, isDeleted: true }
+      }
+    },
+    orderBy: { createdAt: "asc" },
+    take: 100
+  });
+
+  return messages;
+}
+
+export async function sendGroupMessage(sectorId: string, content: string, replyToId?: string) {
+  const user = await requireAuth();
+
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: {
+      station: { include: { user: true } },
+      collaborators: { include: { user: true } }
+    }
+  });
+  if (!sector) return { error: "Sector not found" };
+
+  const isOwner = sector.station.userId === user.id;
+  const isCollab = sector.collaborators.some(c => c.userId === user.id);
+  if (!isOwner && !isCollab) return { error: "Not a member" };
+
+  const muted = await db.mutedMember.findUnique({
+    where: { sectorId_userId: { sectorId, userId: user.id } }
+  });
+  if (muted) return { error: "You are muted in this sector" };
+
+  const msg = await db.groupMessage.create({
+    data: {
+      sectorId,
+      senderId: user.id,
+      content,
+      replyToId: replyToId || null
+    },
+    include: {
+      sender: { select: { id: true, name: true, username: true, image: true } },
+      replyTo: { include: { sender: { select: { name: true, username: true } } } }
+    }
+  });
+
+  const pusherPayload = {
+    ...msg,
+    sender: { ...msg.sender, image: null }
+  };
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', pusherPayload);
+
+  const membersMap = new Map<string, string>();
+  if (sector.station.user) {
+    membersMap.set(sector.station.userId, sector.station.user.username || "");
+  }
+  sector.collaborators.forEach(c => {
+    membersMap.set(c.userId, c.user.username || "");
+  });
+
+  membersMap.delete(user.id!);
+
+  if (membersMap.size > 0) {
+    await Promise.all(
+      Array.from(membersMap.entries()).map(([memberId, memberUsername]) => {
+        const isMentioned = content.toLowerCase().includes(`@${memberUsername.toLowerCase()}`) || content.toLowerCase().includes('@all');
+
+        return pusherServer.trigger(`private-user-${memberId}`, 'new-notification', {
+          type: 'NEW_GROUP_MESSAGE',
+          data: {
+            messageId: msg.id,
+            sectorId: sector.id,
+            sectorName: sector.name,
+            content: msg.content,
+            senderName: user.name || "Pilot",
+            timestamp: msg.createdAt.toISOString(),
+            isMention: isMentioned
+          }
+        });
+      })
+    );
+  }
+
+  return { data: msg };
+}
+
+export async function editGroupMessage(messageId: string, content: string) {
+  const user = await requireAuth();
+
+  const msg = await db.groupMessage.findUnique({ where: { id: messageId } });
+  if (!msg || msg.senderId !== user.id) return { error: "Not authorized" };
+  if (msg.isDeleted) return { error: "Cannot edit deleted message" };
+
+  const updated = await db.groupMessage.update({
+    where: { id: messageId },
+    data: { content, editedAt: new Date() },
+    include: {
+      sender: { select: { id: true, name: true, username: true, image: true } },
+      replyTo: { include: { sender: { select: { name: true, username: true } } } }
+    }
+  });
+
+  const pusherPayload = {
+    ...updated,
+    sender: { ...updated.sender, image: null }
+  };
+  await pusherServer.trigger(`presence-sector-${msg.sectorId}`, 'update-message', pusherPayload);
+
+  return { success: true };
+}
+
+export async function deleteGroupMessage(messageId: string) {
+  const user = await requireAuth();
+
+  const msg = await db.groupMessage.findUnique({
+    where: { id: messageId },
+    include: { sector: { include: { station: true } } }
+  });
+
+  if (!msg) return { error: "Not found" };
+
+  const isOwner = msg.sector.station.userId === user.id;
+  if (msg.senderId !== user.id && !isOwner) {
+    return { error: "Not authorized to delete" };
+  }
+
+  const deletedMsg = await db.groupMessage.update({
+    where: { id: messageId },
+    data: {
+      isDeleted: true,
+      deletedBy: user.id,
+      content: ""
+    },
+    include: {
+      sender: { select: { id: true, name: true, username: true, image: true } },
+      replyTo: { include: { sender: { select: { name: true, username: true } } } }
+    }
+  });
+
+  const pusherPayload = {
+    ...deletedMsg,
+    sender: { ...deletedMsg.sender, image: null }
+  };
+  await pusherServer.trigger(`presence-sector-${msg.sectorId}`, 'update-message', pusherPayload);
+
+  return { success: true };
+}
+
+export async function muteMember(sectorId: string, targetUserId: string) {
+  const user = await requireAuth();
+
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true }
+  });
+  if (!sector || sector.station.userId !== user.id) return { error: "Only owner can mute" };
+
+  // Can't mute yourself
+  if (user.id === targetUserId) return { error: "Cannot mute yourself" };
+
+  await db.mutedMember.upsert({
+    where: { sectorId_userId: { sectorId, userId: targetUserId } },
+    update: {},
+    create: { sectorId, userId: targetUserId }
+  });
+
+  // System message
+  const targetUser = await db.user.findUnique({ where: { id: targetUserId }, select: { username: true } });
+  const sysMsg = await db.groupMessage.create({
+    data: { sectorId, senderId: user.id, content: `muted @${targetUser?.username}`, type: "SYSTEM" },
+    include: {
+      sender: { select: { id: true, name: true, username: true, image: true } },
+      replyTo: { include: { sender: { select: { name: true, username: true } } } }
+    }
+  });
+
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+
+  return { success: true };
+}
+
+export async function unmuteMember(sectorId: string, targetUserId: string) {
+  const user = await requireAuth();
+
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true }
+  });
+  if (!sector || sector.station.userId !== user.id) return { error: "Only owner can unmute" };
+
+  try {
+    await db.mutedMember.delete({
+      where: { sectorId_userId: { sectorId, userId: targetUserId } }
+    });
+    // System message
+    const targetUser = await db.user.findUnique({ where: { id: targetUserId }, select: { username: true } });
+    const sysMsg = await db.groupMessage.create({
+      data: { sectorId, senderId: user.id, content: `unmuted @${targetUser?.username}`, type: "SYSTEM" },
+      include: {
+        sender: { select: { id: true, name: true, username: true, image: true } },
+        replyTo: { include: { sender: { select: { name: true, username: true } } } }
+      }
+    });
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+  } catch (e) {
+    // Ignore if not muted
+  }
+
+  return { success: true };
+}
+
+export async function getMutedMembers(sectorId: string) {
+  const muted = await db.mutedMember.findMany({
+    where: { sectorId },
+    select: { userId: true }
+  });
+  return muted.map(m => m.userId);
+}
+
+export async function clearGroupChat(sectorId: string) {
+  const user = await requireAuth();
+
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true }
+  });
+  if (!sector || sector.station.userId !== user.id) return { error: "Only owner can clear chat" };
+
+  await db.groupMessage.deleteMany({
+    where: { sectorId }
+  });
+
+  const sysMsg = await db.groupMessage.create({
+    data: {
+      sectorId, senderId: user.id, content: `cleared the chat history`, type: "SYSTEM"
+    },
+    include: {
+      sender: { select: { id: true, name: true, username: true, image: true } },
+      replyTo: { include: { sender: { select: { name: true, username: true } } } }
+    }
+  });
+
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'clear-messages', {});
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+
+  return { success: true };
+}
+
+export async function kickMember(sectorId: string, targetUserId: string) {
+  const user = await requireAuth();
+
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true }
+  });
+  if (!sector || sector.station.userId !== user.id) return { error: "Only owner can kick members" };
+
+  try {
+    await db.sectorCollaborator.delete({
+      where: { sectorId_userId: { sectorId, userId: targetUserId } }
+    });
+    // System message
+    const targetUser = await db.user.findUnique({ where: { id: targetUserId }, select: { username: true } });
+    const sysMsg = await db.groupMessage.create({
+      data: { sectorId, senderId: user.id, content: `kicked @${targetUser?.username}`, type: "SYSTEM" },
+      include: {
+        sender: { select: { id: true, name: true, username: true, image: true } },
+        replyTo: { include: { sender: { select: { name: true, username: true } } } }
+      }
+    });
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+  } catch (e) {
+    // Member might not exist
+  }
+
+  return { success: true };
+}
+
+export async function updateTypingStatus(sectorId: string | null, chatWithId: string | null) {
+  const user = await requireAuth();
+
+  if (sectorId) {
+    const existing = await db.typingIndicator.findFirst({
+      where: { sectorId, userId: user.id }
+    });
+    if (existing) {
+      await db.typingIndicator.update({ where: { id: existing.id }, data: { updatedAt: new Date() } });
+    } else {
+      await db.typingIndicator.create({ data: { sectorId, userId: user.id } });
+    }
+  } else if (chatWithId) {
+    const existing = await db.typingIndicator.findFirst({
+      where: { chatWithId, userId: user.id }
+    });
+    if (existing) {
+      await db.typingIndicator.update({ where: { id: existing.id }, data: { updatedAt: new Date() } });
+    } else {
+      await db.typingIndicator.create({ data: { chatWithId, userId: user.id } });
+    }
+  }
+}
+
+export async function getTypingUsers(sectorId: string | null, chatWithId: string | null) {
+  const user = await requireAuth();
+  const fiveSecondsAgo = new Date(Date.now() - 5000);
+
+  if (sectorId) {
+    const indicators = await db.typingIndicator.findMany({
+      where: { sectorId, updatedAt: { gt: fiveSecondsAgo }, userId: { not: user.id } },
+      include: { user: { select: { id: true, name: true, username: true } } }
+    });
+    return indicators.map(i => i.user);
+  } else if (chatWithId) {
+    const indicator = await db.typingIndicator.findFirst({
+      where: { chatWithId: user.id, userId: chatWithId },
+      include: { user: { select: { id: true, name: true, username: true } } }
+    });
+    if (indicator && indicator.updatedAt > fiveSecondsAgo) {
+      return [indicator.user];
+    }
+  }
+  return [];
+}
+
+export async function pinGroupMessageAction(sectorId: string, msgId: string) {
+  const user = await requireAuth();
+  const msg = await db.groupMessage.findUnique({ 
+    where: { id: msgId },
+    include: { sender: { select: { name: true, username: true } } }
+  });
+  if (!msg) return { error: "Message not found" };
+
+  const sysMsg = await db.groupMessage.create({
+    data: { sectorId, senderId: user.id, content: `pinned a message`, type: "SYSTEM" },
+    include: { sender: { select: { id: true, name: true, username: true, image: true } } }
+  });
+
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysMsg);
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'pinned-message', msg);
+
+  return { success: true };
 }

@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  XMarkIcon, UserPlusIcon, UsersIcon, EnvelopeIcon, 
+import {
+  XMarkIcon, UserPlusIcon, UsersIcon, EnvelopeIcon,
   MagnifyingGlassIcon, ChatBubbleOvalLeftEllipsisIcon, GlobeAltIcon, CheckIcon, UserMinusIcon, ArrowsRightLeftIcon, TrashIcon, EllipsisVerticalIcon
 } from "@heroicons/react/24/outline";
 import SpaceBackground from "./space-background";
@@ -14,39 +14,45 @@ import {
   acceptCollab, rejectCollab, getFriends, getFriendRequests, acceptTransferOwnership, rejectTransferOwnership, markChatAsRead
 } from "@/lib/actions";
 import { toast } from "sonner";
+import { pusherClient } from "@/lib/pusher-client";
 
 type Tab = "add" | "list" | "requests";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  user: any; // Current user
+  user: any;
   stats?: any;
   refetchStats?: () => void;
+  /** Called with friendId when user opens a chat, null when chat is closed */
+  onActiveChatChange?: (friendId: string | null) => void;
 }
 
-export default function FriendsModal({ isOpen, onClose, user, stats, refetchStats }: Props) {
+export default function FriendsModal({ isOpen, onClose, user, stats, refetchStats, onActiveChatChange }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeChatName, setActiveChatName] = useState<string>("");
-  const [friendToRemove, setFriendToRemove] = useState<{id: string, name: string} | null>(null);
+  const [friendToRemove, setFriendToRemove] = useState<{ id: string, name: string } | null>(null);
   const [mobileOptionsId, setMobileOptionsId] = useState<string | null>(null);
 
   const [pilots, setPilots] = useState<any[]>([]);
   const [friends, setFriends] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
-  
+
   const [messages, setMessages] = useState<any[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [typingUsers, setTypingUsers] = useState<any[]>([]);
+  const lastTypingRef = useRef<number>(0);
 
   // Fetch data based on tab
   useEffect(() => {
     if (!isOpen) return;
-    
+
     if (activeTab === "list") {
       getFriends().then(setFriends);
     } else if (activeTab === "requests") {
@@ -68,60 +74,117 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
     }
   }, [searchQuery, activeTab]);
 
-  // Fetch chat messages and poll for real-time updates
+  // Realtime private chat via Pusher — no polling, no SSE
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    if (activeTab !== "list" || !activeChatId) return;
 
-    if (activeTab === "list" && activeChatId) {
-      // Initial fetch
-      getChatMessages(activeChatId).then(setMessages);
-      markChatAsRead(activeChatId).then(() => {
-        if (refetchStats) refetchStats();
+    let isSubscribed = true;
+
+    // Initial fetch + mark as read
+    setIsLoadingChat(true);
+    getChatMessages(activeChatId).then(msgs => {
+      if (isSubscribed) {
+        setMessages(msgs)
+        setIsLoadingChat(false);
+
+      };
+    });
+    markChatAsRead(activeChatId).then(() => {
+      if (refetchStats) refetchStats();
+    });
+
+    // Channel name: sorted so it's identical for both participants
+    const channelName = `private-chat-${[user.id, activeChatId].sort().join('_')}`;
+    const channel = pusherClient.subscribe(channelName);
+
+    channel.bind('new-private-message', (msg: any) => {
+      setTypingUsers(prev => prev.filter(u => u.id !== msg.senderId));
+      const friendData = friends.find(f => f.id === msg.senderId);
+      const fixedMsg = {
+        ...msg,
+        sender: { ...msg.sender, image: friendData?.image || null }
+      };
+
+      setMessages(prev => {
+        const tempIdx = prev.findIndex(m => m._isSending && m.content === fixedMsg.content && m.senderId === fixedMsg.senderId);
+        if (tempIdx !== -1) {
+          const next = [...prev];
+          next[tempIdx] = fixedMsg;
+          return next;
+        }
+        if (prev.some(m => m.id === fixedMsg.id)) return prev;
+        return [...prev, fixedMsg];
       });
-
-      // Poll every 3 seconds for new messages
-      intervalId = setInterval(() => {
-        getChatMessages(activeChatId).then((newMessages) => {
-          setMessages(prev => {
-            // Only update state if there are actual changes (new messages, read status changes, etc)
-            // JSON stringify is a simple way to deep compare the array of plain message objects
-            if (JSON.stringify(prev) !== JSON.stringify(newMessages)) {
-              // If new messages arrived, mark them as read
-              if (newMessages.length > prev.length) {
-                markChatAsRead(activeChatId).then(() => {
-                  if (refetchStats) refetchStats();
-                });
-              }
-              return newMessages;
-            }
-            return prev;
-          });
+      // Mark as read when message arrives while chat is open
+      if (isSubscribed) {
+        markChatAsRead(activeChatId).then(() => {
+          if (refetchStats) refetchStats();
         });
+      }
+    });
+
+    // Typing indicator via Pusher Client Events
+    const typingTimeouts = new Map<string, NodeJS.Timeout>();
+    channel.bind('client-is-typing', (data: { isTyping: boolean; userId: string; username: string; name: string }) => {
+      if (!data.isTyping || data.userId === user.id) return;
+      setTypingUsers(prev => {
+        if (!prev.find(u => u.id === data.userId)) {
+          return [...prev, { id: data.userId, username: data.username, name: data.name }];
+        }
+        return prev;
+      });
+      if (typingTimeouts.has(data.userId)) clearTimeout(typingTimeouts.get(data.userId)!);
+      const timeout = setTimeout(() => {
+        setTypingUsers(prev => prev.filter(u => u.id !== data.userId));
+        typingTimeouts.delete(data.userId);
       }, 3000);
-    }
+      typingTimeouts.set(data.userId, timeout);
+    });
 
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      isSubscribed = false;
+      channel.unbind('new-private-message');
+      channel.unbind('client-is-typing');
+      pusherClient.unsubscribe(channelName);
+      typingTimeouts.forEach(t => clearTimeout(t));
     };
-  }, [activeChatId, activeTab, refetchStats]);
+  }, [activeChatId, activeTab, refetchStats, user.id]);
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: user?.animationEnabled ? "smooth" : "auto" });
-    }
-  }, [messages.length, activeChatId, user?.animationEnabled]);
+    const timer = setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({
+          behavior: user?.animationEnabled ? "smooth" : "auto",
+          block: "end"
+        });
+      }
+    }, 100);
 
-  // Reset states when closed
+    return () => clearTimeout(timer);
+  }, [messages.length, isOpen, activeChatId]);
+
+  // Reset states when closed + notify parent active chat is gone
   useEffect(() => {
     if (!isOpen) {
       setTimeout(() => {
         setSearchQuery("");
-        setActiveChatId(null);
+        closeChat();
         setActiveTab("list");
         setMobileOptionsId(null);
+        onActiveChatChange?.(null);
       }, 300);
     }
   }, [isOpen]);
+
+  // Wrappers so every open/close also notifies parent (toast suppression)
+  const openChat = (id: string) => {
+    setActiveChatId(id);
+    onActiveChatChange?.(id);
+  };
+  const closeChat = () => {
+    setActiveChatId(null);
+    onActiveChatChange?.(null);
+  };
 
   const handleAddFriend = async (id: string) => {
     const res = await sendFriendRequest(id);
@@ -160,23 +223,38 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
       toast.success("Friend removed");
       setFriends(prev => prev.filter(f => f.id !== id));
       if (activeChatId === id) {
-        setActiveChatId(null);
+        closeChat();
       }
     } else {
       toast.error(res.error || "Failed to remove friend");
     }
   };
 
+  const handleMessageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageInput(e.target.value);
+    // Pusher Client Event for typing indicator (throttled to 1/sec)
+    const now = Date.now();
+    if (now - lastTypingRef.current > 1000 && activeChatId && e.target.value.trim().length > 0) {
+      const channelName = `private-chat-${[user.id, activeChatId].sort().join('_')}`;
+      const channel = pusherClient.channel(channelName);
+      if (channel && channel.subscribed) {
+        channel.trigger('client-is-typing', { isTyping: true, userId: user.id, username: user.username, name: user.name });
+        lastTypingRef.current = now;
+      }
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageInput.trim() || !activeChatId) return;
-    
+
     const content = messageInput;
     setMessageInput("");
-    
-    // optimistic update
+
+    // Optimistic update — mark _isSending so Pusher callback can replace it
     const tempMsg = {
-      id: Date.now().toString(),
+      id: `temp-${Date.now()}`,
+      _isSending: true,
       senderId: user.id,
       receiverId: activeChatId,
       content,
@@ -186,7 +264,6 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
     setMessages(prev => [...prev, tempMsg]);
 
     await sendChatMessage(activeChatId, content);
-    // optionally refetch messages
   };
 
   const handleClearChat = async () => {
@@ -209,8 +286,8 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div 
-          className="modal-overlay" 
+        <motion.div
+          className="modal-overlay"
           style={{ zIndex: 100, animation: "none" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -219,13 +296,13 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
         >
           <motion.div
             className="flex flex-col shadow-2xl fm-modal-container"
-            style={{ 
-              width: "90vw", 
-              height: "85vh", 
-              maxWidth: "1200px", 
-              position: "relative", 
-              overflow: "hidden", 
-              background: "rgba(20, 20, 35, 0.65)", 
+            style={{
+              width: "90vw",
+              height: "85vh",
+              maxWidth: "1200px",
+              position: "relative",
+              overflow: "hidden",
+              background: "rgba(20, 20, 35, 0.65)",
               backdropFilter: "blur(24px)",
               WebkitBackdropFilter: "blur(24px)",
               border: "1px solid rgba(139, 92, 246, 0.6)",
@@ -250,17 +327,17 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                     <>Friend List <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{friends.length}</span></>
                   ) : "Friend Requests"}
                 </div>
-                
+
                 <div className="relative flex-1 max-w-lg ml-6 fm-header-search">
                   <MagnifyingGlassIcon className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" width={20} height={20} />
-                    <input
-                      type="text"
-                      placeholder={activeTab === "add" ? "Search by name, username, or callsign..." : "Search friends..."}
-                      className="w-full bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.1)] text-white focus:outline-none focus:border-violet-500 focus:bg-[rgba(0,0,0,0.5)] transition-all"
-                      style={{ padding: "12px 24px 12px 48px", borderRadius: "9999px" }}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                  <input
+                    type="text"
+                    placeholder={activeTab === "add" ? "Search by name, username, or callsign..." : "Search friends..."}
+                    className="w-full bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.1)] text-white focus:outline-none focus:border-violet-500 focus:bg-[rgba(0,0,0,0.5)] transition-all"
+                    style={{ padding: "12px 24px 12px 48px", borderRadius: "9999px" }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -273,14 +350,14 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
             <div className="flex flex-1 overflow-hidden relative z-10 fm-modal-body" style={{ gap: "24px" }}>
               {/* Sidebar Tabs */}
               <div className="w-24 flex flex-col items-center border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] glass-sm fm-sidebar" style={{ padding: "24px 0", gap: "24px", borderRadius: "16px" }}>
-                <button 
-                  onClick={() => { setActiveTab("add"); setActiveChatId(null); setSearchQuery(""); setMobileOptionsId(null); }}
+                <button
+                  onClick={() => { setActiveTab("add"); closeChat(); setSearchQuery(""); setMobileOptionsId(null); }}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${activeTab === "add" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
                   title="Find Pilots"
                 >
                   <UserPlusIcon width={28} height={28} />
                 </button>
-                <button 
+                <button
                   onClick={() => { setActiveTab("list"); setSearchQuery(""); setMobileOptionsId(null); }}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "list" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
                   title="Friend List"
@@ -290,8 +367,8 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                     <span style={{ position: "absolute", top: "2px", right: "2px", width: "12px", height: "12px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423" }}></span>
                   )}
                 </button>
-                <button 
-                  onClick={() => { setActiveTab("requests"); setActiveChatId(null); setSearchQuery(""); setMobileOptionsId(null); }}
+                <button
+                  onClick={() => { setActiveTab("requests"); closeChat(); setSearchQuery(""); setMobileOptionsId(null); }}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "requests" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
                   title="Friend Requests"
                 >
@@ -305,7 +382,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
               {/* Main Content Area */}
               <div className="flex-1 flex overflow-hidden border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] fm-content-wrapper" style={{ borderRadius: "16px" }}>
                 {/* Left Section (List) */}
-                <motion.div 
+                <motion.div
                   className={`flex flex-col h-full overflow-y-auto bg-[rgba(0,0,0,0.2)] backdrop-blur-sm fm-list-section ${activeTab === 'list' && activeChatId ? 'fm-list-hidden-on-mobile' : ''}`}
                   initial={false}
                   animate={{
@@ -315,7 +392,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                   style={{ padding: "24px", gap: "8px", flexShrink: 0 }}
                 >
-                  
+
                   <AnimatePresence mode="wait">
                     {activeTab === "add" && pilots.map((p, i) => (
                       <motion.div
@@ -351,7 +428,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                             </a>
                           )}
                           {p.friendshipStatus === "ACCEPTED" ? (
-                            <button onClick={() => { setActiveTab("list"); setActiveChatId(p.id); setActiveChatName(p.name || p.username); }} className="rounded-full bg-white/5 hover:bg-cyan-500/20 text-gray-300 hover:text-cyan-400 border border-white/10 hover:border-cyan-500/50 transition-all" title="Chat" style={{ padding: "10px" }}>
+                            <button onClick={() => { setActiveTab("list"); openChat(p.id); setActiveChatName(p.name || p.username); }} className="rounded-full bg-white/5 hover:bg-cyan-500/20 text-gray-300 hover:text-cyan-400 border border-white/10 hover:border-cyan-500/50 transition-all" title="Chat" style={{ padding: "10px" }}>
                               <ChatBubbleOvalLeftEllipsisIcon width={22} height={22} />
                             </button>
                           ) : p.friendshipStatus === "PENDING" ? (
@@ -370,11 +447,11 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                       </motion.div>
                     ))}
 
-                    {activeTab === "list" && friends.filter(f => !searchQuery || (f.name||"").toLowerCase().includes(searchQuery.toLowerCase()) || (f.username||"").toLowerCase().includes(searchQuery.toLowerCase())).map((f, i) => (
+                    {activeTab === "list" && friends.filter(f => !searchQuery || (f.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || (f.username || "").toLowerCase().includes(searchQuery.toLowerCase())).map((f, i) => (
                       <motion.div
                         key={`list-${f.id}`}
                         className={`glass flex transition-colors group fm-list-row ${activeChatId === f.id ? "bg-[rgba(139,92,246,0.2)]" : ""} ${mobileOptionsId === f.id ? "fm-show-options" : ""}`}
-                        style={{ 
+                        style={{
                           padding: "16px", border: activeChatId === f.id ? "1px solid rgba(139,92,246,0.5)" : "1px solid rgba(255,255,255,0.05)", borderRadius: "16px",
                           flexDirection: activeChatId ? "column" : "row",
                           alignItems: "center",
@@ -388,8 +465,8 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         whileHover={user.animationEnabled ? { scale: 1.02, boxShadow: "0 0 15px rgba(139,92,246,0.3)" } : {}}
                       >
                         <div className="flex items-center gap-3">
-                          <motion.div 
-                            className="relative flex shrink-0" 
+                          <motion.div
+                            className="relative flex shrink-0"
                             initial={{ width: activeChatId ? 64 : 48, height: activeChatId ? 64 : 48 }}
                             animate={{ width: activeChatId ? 64 : 48, height: activeChatId ? 64 : 48 }}
                             transition={user.animationEnabled ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
@@ -398,8 +475,8 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                               {f.image ? (
                                 <img src={f.image} alt={f.name} fetchPriority="high" className="w-full h-full object-cover" />
                               ) : (
-                                <motion.span 
-                                  className="text-gray-400 font-bold" 
+                                <motion.span
+                                  className="text-gray-400 font-bold"
                                   animate={{ fontSize: activeChatId ? 24 : 16 }}
                                 >
                                   {(f.name || f.username || "?")[0].toUpperCase()}
@@ -435,25 +512,25 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                               <GlobeAltIcon width={22} height={22} />
                             </a>
                           )}
-                          <button 
+                          <button
                             onClick={() => {
                               if (activeChatId === f.id) {
-                                setActiveChatId(null);
+                                closeChat();
                               } else {
-                                setActiveChatId(f.id);
+                                openChat(f.id);
                                 setActiveChatName(f.name || f.username);
                               }
                             }}
-                            className={`rounded-full border transition-all ${activeChatId === f.id ? "bg-violet-500 text-white border-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.5)]" : "bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border-white/10 hover:border-violet-500/50"}`} 
+                            className={`rounded-full border transition-all ${activeChatId === f.id ? "bg-violet-500 text-white border-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.5)]" : "bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border-white/10 hover:border-violet-500/50"}`}
                             title="Chat"
                             style={{ padding: "10px" }}
                           >
                             <ChatBubbleOvalLeftEllipsisIcon width={22} height={22} />
                           </button>
                           {!activeChatId && (
-                            <button 
-                              onClick={() => setFriendToRemove({id: f.id, name: f.name || f.username})} 
-                              className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all" 
+                            <button
+                              onClick={() => setFriendToRemove({ id: f.id, name: f.name || f.username })}
+                              className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all"
                               title="Remove Friend"
                               style={{ padding: "10px" }}
                             >
@@ -497,7 +574,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         </div>
 
                         <div className="flex items-center gap-2 transition-opacity fm-action-buttons">
-                          <button 
+                          <button
                             onClick={() => handleRejectRequest(r.id, r.friendshipId)}
                             className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all flex items-center justify-center"
                             title="Refuse"
@@ -505,7 +582,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           >
                             <XMarkIcon width={24} height={24} />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleAcceptRequest(r.id, r.friendshipId)}
                             className="rounded-full bg-violet-500 hover:bg-violet-400 text-white font-medium text-sm transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.4)] fm-text-btn"
                             style={{ height: "48px", padding: "0 24px" }}
@@ -520,7 +597,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                     ))}
 
                     {activeTab === "add" && pilots.length === 0 && searchQuery.length >= 2 && (
-                      <motion.div 
+                      <motion.div
                         key="empty-add-1"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
@@ -530,7 +607,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                       </motion.div>
                     )}
                     {activeTab === "add" && searchQuery.length < 2 && (
-                      <motion.div 
+                      <motion.div
                         key="empty-add-2"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
@@ -541,7 +618,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                       </motion.div>
                     )}
                     {activeTab === "list" && friends.length === 0 && (
-                      <motion.div 
+                      <motion.div
                         key="empty-list"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
@@ -552,7 +629,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                       </motion.div>
                     )}
                     {activeTab === "requests" && requests.length === 0 && (
-                      <motion.div 
+                      <motion.div
                         key="empty-requests"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
@@ -569,216 +646,229 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                 {/* Right Section (Chat Conversation) */}
                 <AnimatePresence>
                   {activeTab === "list" && activeChatId && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, x: 30, width: 0 }}
                       animate={{ opacity: 1, x: 0, width: "auto" }}
                       exit={{ opacity: 0, x: 30, width: 0 }}
                       transition={user.animationEnabled ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
-                      className="flex-1 flex flex-col h-full relative backdrop-blur-sm overflow-hidden fm-chat-section" 
+                      className="flex-1 flex flex-col h-full relative backdrop-blur-sm overflow-hidden fm-chat-section"
                       style={{ backgroundColor: "rgba(20, 15, 35, 0.5)", padding: "24px", gap: "16px" }}
                     >
                       <div className="flex items-center justify-between backdrop-blur-md z-10" style={{ backgroundColor: "rgba(139, 92, 246, 0.05)", padding: "16px 24px", borderRadius: "16px", border: "1px solid rgba(139, 92, 246, 0.2)" }}>
-                       <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-full bg-violet-500/20 border border-violet-500/50 flex items-center justify-center">
-                           <span className="text-violet-300 font-bold">{activeChatName[0]?.toUpperCase()}</span>
-                         </div>
-                         <div>
-                           <h3 className="font-bold text-white" style={{ fontSize: "16px" }}>{activeChatName}</h3>
-                           {(() => {
-                             const chatFriend = friends.find(f => f.id === activeChatId);
-                             const isTyping = chatFriend?.isTyping;
-                             const isOnline = chatFriend?.status === "ONLINE" || !chatFriend?.status;
-                             if (isTyping) return <p className="text-xs text-violet-400">typing...</p>;
-                             if (isOnline) return <p className="text-xs text-green-400">Connected</p>;
-                             return null;
-                           })()}
-                         </div>
-                       </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-violet-500/20 border border-violet-500/50 flex items-center justify-center">
+                            <span className="text-violet-300 font-bold">{activeChatName[0]?.toUpperCase()}</span>
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-white" style={{ fontSize: "16px" }}>{activeChatName}</h3>
+                            {(() => {
+                              const chatFriend = friends.find(f => f.id === activeChatId);
+                              const isTyping = typingUsers.some(u => u.id === activeChatId);
+                              const isOnline = chatFriend?.status === "ONLINE" || !chatFriend?.status;
+                              if (isTyping) return <p className="text-xs text-violet-400">typing...</p>;
+                              if (isOnline) return <p className="text-xs text-green-400">Connected</p>;
+                              return null;
+                            })()}
+                          </div>
+                        </div>
                         <div className="flex items-center gap-2">
                           <button onClick={handleClearChat} className="text-gray-400 hover:text-red-400 transition-colors" style={{ padding: "8px" }} title="Clear Chat">
                             <TrashIcon width={20} height={20} />
                           </button>
-                          <button onClick={() => setActiveChatId(null)} className="text-gray-400 hover:text-white transition-colors" style={{ padding: "8px" }}>
+                          <button onClick={() => closeChat()} className="text-gray-400 hover:text-white transition-colors" style={{ padding: "8px" }}>
                             <XMarkIcon width={24} height={24} />
                           </button>
                         </div>
-                     </div>
-                    
-                    <AnimatePresence>
-                    {showClearConfirm && (
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" 
-                        style={{ borderRadius: "16px" }}
-                      >
-                        <motion.div 
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          style={{
-                            backgroundColor: "#141423",
-                            border: "1px solid rgba(139, 92, 246, 0.3)",
-                            padding: "32px",
-                            borderRadius: "20px",
-                            boxShadow: "0 10px 40px rgba(0,0,0,0.8)",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "20px",
-                            textAlign: "center",
-                            maxWidth: "340px",
-                            width: "90%"
-                          }}
-                        >
-                          <TrashIcon width={48} height={48} style={{ color: "#f87171", opacity: 0.8 }} />
-                          <h3 style={{ color: "white", fontWeight: "bold", fontSize: "1.125rem", margin: 0 }}>Clear Chat?</h3>
-                          <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0, lineHeight: 1.5 }}>This will permanently delete all messages in this conversation. This cannot be undone.</p>
-                          <div style={{ display: "flex", width: "100%", gap: "12px", marginTop: "8px" }}>
-                            <button style={{ flex: 1, padding: "10px 16px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", color: "white", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"} onClick={() => setShowClearConfirm(false)}>Cancel</button>
-                            <button style={{ flex: 1, padding: "10px 16px", background: "rgba(239, 68, 68, 0.2)", color: "#f87171", borderRadius: "8px", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.3)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"} onClick={confirmClearChat}>Clear</button>
-                          </div>
-                        </motion.div>
-                      </motion.div>
-                    )}
-                    </AnimatePresence>
+                      </div>
 
-                    <div className="flex-1 overflow-y-auto flex flex-col" style={{ gap: "16px", padding: "8px" }}>
-                      {messages.map((msg) => {
-                        const isMine = msg.senderId === user.id;
-                        return (
-                          <div key={msg.id} style={{
-                            padding: "10px 16px",
-                            borderRadius: "16px",
-                            borderTopRightRadius: isMine ? "4px" : "16px",
-                            borderTopLeftRadius: !isMine ? "4px" : "16px",
-                            backgroundColor: isMine ? "rgba(139, 92, 246, 0.7)" : "rgba(255, 255, 255, 0.05)",
-                            border: isMine ? "1px solid rgba(139, 92, 246, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
-                            color: "white",
-                            maxWidth: "70%",
-                            backdropFilter: "blur(8px)",
-                            alignSelf: isMine ? "flex-end" : "flex-start",
-                            fontSize: "14px",
-                            boxShadow: "0 2px 10px rgba(0,0,0,0.2)"
-                          }}>
-                            {msg.type === "TEXT" && msg.content}
-                            
-                            {(msg.type === "COLLAB_INVITE" || msg.type === "OWNERSHIP_TRANSFER_INVITE") && (
-                              <div className="flex flex-col gap-3">
-                                <div className="text-sm text-white/90 leading-relaxed">
-                                  <span className="font-semibold text-violet-300">{isMine ? "You" : activeChatName}</span> 
-                                  {msg.type === "OWNERSHIP_TRANSFER_INVITE" ? (
-                                    <>
-                                      {isMine ? " want to transfer ownership of sector " : " wants to transfer ownership of sector "}
-                                      <span className="font-bold text-white">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch(e){ return "Unknown Sector"; } })()}"</span>
-                                      {" to "}
-                                      <span className="font-semibold text-violet-300">{isMine ? "them" : "you"}</span>.
-                                    </>
-                                  ) : (
-                                    <>
-                                      {" invited "}
-                                      <span className="font-semibold text-violet-300">{isMine ? "them" : "you"}</span>
-                                      {" to collaborate on sector "}
-                                      <span className="font-bold text-white">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch(e){ return "Unknown Sector"; } })()}"</span>.
-                                    </>
-                                  )}
-                                </div>
-                                {!isMine && (
-                                  <div className="flex gap-2 mt-1">
-                                    <button 
-                                      onClick={async () => {
-                                        if (msg.type === "COLLAB_INVITE") {
-                                          const res = await rejectCollab(msg.id);
-                                          if (!(res as any)?.error) {
-                                            toast.success("Collab invite rejected");
-                                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_REJECTED", content: "rejected the sector collaboration" } : m));
-                                          } else toast.error((res as any).error);
-                                        } else {
-                                          const res = await rejectTransferOwnership(msg.id);
-                                          if (!(res as any)?.error) {
-                                            toast.success("Ownership transfer rejected");
-                                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_REJECTED", content: "rejected the ownership transfer" } : m));
-                                          } else toast.error((res as any).error);
-                                        }
-                                      }}
-                                      className="flex-1 bg-white/10 hover:bg-pink-500/80 text-white rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
-                                      style={{ padding: "0.75rem 0" }}
-                                    >
-                                      <XMarkIcon width={18} height={18} /> Reject
-                                    </button>
-                                    <button 
-                                      onClick={async () => {
-                                        try {
-                                          if (msg.type === "COLLAB_INVITE") {
-                                            const meta = JSON.parse(msg.metadata);
-                                            const res = await acceptCollab(msg.id, meta.sectorId);
-                                            if (!(res as any)?.error) {
-                                              toast.success("Collab invite accepted");
-                                              setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_ACCEPTED", content: "accepted the sector collaboration" } : m));
-                                            } else toast.error((res as any).error);
-                                          } else {
-                                            const res = await acceptTransferOwnership(msg.id);
-                                            if (!(res as any)?.error) {
-                                              toast.success("Ownership transfer accepted");
-                                              setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_ACCEPTED", content: "accepted the ownership transfer" } : m));
-                                            } else toast.error((res as any).error);
-                                          }
-                                        } catch (e) {}
-                                      }}
-                                      className="flex-1 bg-violet-600 hover:bg-violet-500 text-white rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
-                                      style={{ padding: "0.75rem 0" }}
-                                    >
-                                      <CheckIcon width={18} height={18} /> Accept
-                                    </button>
+                      <AnimatePresence>
+                        {showClearConfirm && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                            style={{ borderRadius: "16px" }}
+                          >
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              style={{
+                                backgroundColor: "#141423",
+                                border: "1px solid rgba(139, 92, 246, 0.3)",
+                                padding: "32px",
+                                borderRadius: "20px",
+                                boxShadow: "0 10px 40px rgba(0,0,0,0.8)",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: "20px",
+                                textAlign: "center",
+                                maxWidth: "340px",
+                                width: "90%"
+                              }}
+                            >
+                              <TrashIcon width={48} height={48} style={{ color: "#f87171", opacity: 0.8 }} />
+                              <h3 style={{ color: "white", fontWeight: "bold", fontSize: "1.125rem", margin: 0 }}>Clear Chat?</h3>
+                              <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0, lineHeight: 1.5 }}>This will permanently delete all messages in this conversation. This cannot be undone.</p>
+                              <div style={{ display: "flex", width: "100%", gap: "12px", marginTop: "8px" }}>
+                                <button style={{ flex: 1, padding: "10px 16px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", color: "white", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"} onClick={() => setShowClearConfirm(false)}>Cancel</button>
+                                <button style={{ flex: 1, padding: "10px 16px", background: "rgba(239, 68, 68, 0.2)", color: "#f87171", borderRadius: "8px", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.3)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"} onClick={confirmClearChat}>Clear</button>
+                              </div>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      <div className="flex-1 overflow-y-auto flex flex-col" style={{ gap: "16px", padding: "8px" }}>
+
+                        {isLoadingChat ? (
+                          <div className="flex flex-col items-center justify-center h-full gap-4 opacity-80 mt-10">
+                            <div className="w-10 h-10 border-4 border-white/5 border-t-violet-500 rounded-full animate-spin"></div>
+                            <span className="text-violet-400 text-xs font-bold tracking-[0.2em] uppercase animate-pulse">
+                              Decrypting Transmission...
+                            </span>
+                          </div>
+                        ) : messages.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-full gap-2 opacity-50 mt-10">
+                            <span className="text-4xl">🛰️</span>
+                            <span className="text-gray-400 text-sm text-center px-4">
+                              This is the beginning of your transmission history with {activeChatName}.
+                            </span>
+                          </div>
+                        ) : (
+                          messages.map((msg) => {
+                            const isMine = msg.senderId === user.id;
+                            return (
+                              <div key={msg.id} style={{
+                                padding: "10px 16px",
+                                borderRadius: "16px",
+                                width: "fit-content",
+                                borderTopRightRadius: isMine ? "4px" : "16px",
+                                borderTopLeftRadius: !isMine ? "4px" : "16px",
+                                backgroundColor: isMine ? "rgba(139, 92, 246, 0.7)" : "rgba(255, 255, 255, 0.05)",
+                                border: isMine ? "1px solid rgba(139, 92, 246, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
+                                color: "white",
+                                maxWidth: "70%",
+                                backdropFilter: "blur(8px)",
+                                alignSelf: isMine ? "flex-end" : "flex-start",
+                                fontSize: "14px",
+                                boxShadow: "0 2px 10px rgba(0,0,0,0.2)"
+                              }}>
+                                {msg.type === "TEXT" && msg.content}
+
+                                {(msg.type === "COLLAB_INVITE" || msg.type === "OWNERSHIP_TRANSFER_INVITE") && (
+                                  <div className="flex flex-col gap-3">
+                                    <div className="text-sm text-white/90 leading-relaxed">
+                                      <span className="font-semibold text-violet-300">{isMine ? "You" : activeChatName}</span>
+                                      {msg.type === "OWNERSHIP_TRANSFER_INVITE" ? (
+                                        <>
+                                          {isMine ? " want to transfer ownership of sector " : " wants to transfer ownership of sector "}
+                                          <span className="font-bold text-white">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch (e) { return "Unknown Sector"; } })()}"</span>
+                                          {" to "}
+                                          <span className="font-semibold text-violet-300">{isMine ? "them" : "you"}</span>.
+                                        </>
+                                      ) : (
+                                        <>
+                                          {" invited "}
+                                          <span className="font-semibold text-violet-300">{isMine ? "them" : "you"}</span>
+                                          {" to collaborate on sector "}
+                                          <span className="font-bold text-white">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch (e) { return "Unknown Sector"; } })()}"</span>.
+                                        </>
+                                      )}
+                                    </div>
+                                    {!isMine && (
+                                      <div className="flex gap-2 mt-1">
+                                        <button
+                                          onClick={async () => {
+                                            if (msg.type === "COLLAB_INVITE") {
+                                              const res = await rejectCollab(msg.id);
+                                              if (!(res as any)?.error) {
+                                                toast.success("Collab invite rejected");
+                                                setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_REJECTED", content: "rejected the sector collaboration" } : m));
+                                              } else toast.error((res as any).error);
+                                            } else {
+                                              const res = await rejectTransferOwnership(msg.id);
+                                              if (!(res as any)?.error) {
+                                                toast.success("Ownership transfer rejected");
+                                                setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_REJECTED", content: "rejected the ownership transfer" } : m));
+                                              } else toast.error((res as any).error);
+                                            }
+                                          }}
+                                          className="flex-1 bg-white/10 hover:bg-pink-500/80 text-white rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
+                                          style={{ padding: "0.75rem 0" }}
+                                        >
+                                          <XMarkIcon width={18} height={18} /> Reject
+                                        </button>
+                                        <button
+                                          onClick={async () => {
+                                            try {
+                                              if (msg.type === "COLLAB_INVITE") {
+                                                const meta = JSON.parse(msg.metadata);
+                                                const res = await acceptCollab(msg.id, meta.sectorId);
+                                                if (!(res as any)?.error) {
+                                                  toast.success("Collab invite accepted");
+                                                  setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "COLLAB_ACCEPTED", content: "accepted the sector collaboration" } : m));
+                                                } else toast.error((res as any).error);
+                                              } else {
+                                                const res = await acceptTransferOwnership(msg.id);
+                                                if (!(res as any)?.error) {
+                                                  toast.success("Ownership transfer accepted");
+                                                  setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, type: "OWNERSHIP_TRANSFER_ACCEPTED", content: "accepted the ownership transfer" } : m));
+                                                } else toast.error((res as any).error);
+                                              }
+                                            } catch (e) { }
+                                          }}
+                                          className="flex-1 bg-violet-600 hover:bg-violet-500 text-white rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
+                                          style={{ padding: "0.75rem 0" }}
+                                        >
+                                          <CheckIcon width={18} height={18} /> Accept
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {msg.type === "COLLAB_ACCEPTED" && (
+                                  <div className="text-green-300 italic">
+                                    {isMine ? activeChatName : "You"} accepted the sector collaboration
+                                  </div>
+                                )}
+
+                                {msg.type === "COLLAB_REJECTED" && (
+                                  <div className="text-pink-300 italic">
+                                    {isMine ? activeChatName : "You"} rejected the sector collaboration
+                                  </div>
+                                )}
+
+                                {msg.type === "OWNERSHIP_TRANSFER_ACCEPTED" && (
+                                  <div className="text-green-300 italic">
+                                    {isMine ? activeChatName : "You"} accepted the ownership transfer
+                                  </div>
+                                )}
+
+                                {msg.type === "OWNERSHIP_TRANSFER_REJECTED" && (
+                                  <div className="text-pink-300 italic">
+                                    {isMine ? activeChatName : "You"} rejected the ownership transfer
                                   </div>
                                 )}
                               </div>
-                            )}
-
-                            {msg.type === "COLLAB_ACCEPTED" && (
-                              <div className="text-green-300 italic">
-                                {isMine ? activeChatName : "You"} accepted the sector collaboration
-                              </div>
-                            )}
-
-                            {msg.type === "COLLAB_REJECTED" && (
-                              <div className="text-pink-300 italic">
-                                {isMine ? activeChatName : "You"} rejected the sector collaboration
-                              </div>
-                            )}
-                            
-                            {msg.type === "OWNERSHIP_TRANSFER_ACCEPTED" && (
-                              <div className="text-green-300 italic">
-                                {isMine ? activeChatName : "You"} accepted the ownership transfer
-                              </div>
-                            )}
-
-                            {msg.type === "OWNERSHIP_TRANSFER_REJECTED" && (
-                              <div className="text-pink-300 italic">
-                                {isMine ? activeChatName : "You"} rejected the ownership transfer
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                      {messages.length === 0 && (
-                        <div className="text-center text-gray-500 mt-10 text-sm">
-                          This is the beginning of your transmission history with {activeChatName}.
-                        </div>
-                      )}
-                      <div ref={messagesEndRef} />
-                    </div>
+                            );
+                          })
+                        )}
+                        <div ref={messagesEndRef} />
+                      </div>
 
                       <form onSubmit={handleSendMessage} className="backdrop-blur-md z-10" style={{ backgroundColor: "rgba(139, 92, 246, 0.05)", padding: "16px", borderRadius: "16px", border: "1px solid rgba(139, 92, 246, 0.2)", display: "flex" }}>
                         <div className="relative w-full">
-                          <input 
-                            type="text" 
-                            placeholder="Transmit message..." 
+                          <input
+                            type="text"
+                            placeholder="Transmit message..."
                             className="w-full text-white focus:outline-none transition-all"
                             style={{ backgroundColor: "rgba(0, 0, 0, 0.2)", border: "1px solid rgba(139, 92, 246, 0.3)", padding: "14px 60px 14px 24px", borderRadius: "9999px" }}
                             value={messageInput}
-                            onChange={(e) => setMessageInput(e.target.value)}
+                            onChange={handleMessageInputChange}
                           />
                           <button type="submit" disabled={!messageInput.trim()} className="absolute disabled:bg-gray-600 disabled:text-gray-400 transition-colors" style={{ right: "8px", top: "50%", transform: "translateY(-50%)", padding: "10px", borderRadius: "9999px", backgroundColor: messageInput.trim() ? "rgba(139, 92, 246, 1)" : "rgba(75, 85, 99, 1)", color: "white" }}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
@@ -797,7 +887,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
             <AnimatePresence>
               {friendToRemove && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ borderRadius: "24px" }}>
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}

@@ -17,8 +17,9 @@ import StaticStarfield from "@/components/static-starfield";
 import { deleteSector, reorderSectors } from "@/lib/actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { 
-  PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon, ArrowPathIcon, EllipsisVerticalIcon
+  PlusIcon, LockClosedIcon, PencilSquareIcon, MagnifyingGlassIcon, SparklesIcon, RocketLaunchIcon, FunnelIcon, ArrowsUpDownIcon, CheckIcon, BarsArrowUpIcon, BarsArrowDownIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon, UserIcon, ArrowPathIcon, EllipsisVerticalIcon, ChatBubbleOvalLeftEllipsisIcon
 } from "@heroicons/react/24/outline";
+import GroupChatModal from "@/components/group-chat-modal";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
@@ -46,8 +47,6 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileMenuCaption, setMobileMenuCaption] = useState<"edit" | "add" | null>(null);
-
-  const { stats, refetch: refetchNotifications } = useNotifications();
 
   const FUN_FACTS = [
     "Did you know? A day on Venus is longer than a year on Venus.",
@@ -111,7 +110,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
     const diffX = touchEndX - touchStart.x;
     const diffY = touchEndY - touchStart.y;
 
-    const isAnyModalOpen = showAddSector || showAddBeacon || !!editingSector || !!editingBeacon || !!selectedBeacon || showFriendsModal || !!viewingMembersSector;
+    const isAnyModalOpen = showAddSector || showAddBeacon || !!editingSector || !!editingBeacon || !!selectedBeacon || showFriendsModal || !!viewingMembersSector || showGroupChat;
     if (Math.abs(diffX) > Math.abs(diffY) && !isAnyModalOpen) {
       if (diffX > 50 && !isSidebarOpen) {
         setIsSidebarOpen(true);
@@ -191,6 +190,15 @@ export default function StationClient({ initialStation, initialCollabSectors = [
   const [showAddBeacon, setShowAddBeacon] = useState(false);
   const [showAddSector, setShowAddSector] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
+  const [showGroupChat, setShowGroupChat] = useState(false);
+  // Track which private chat is open so useNotifications can suppress its toast
+  const [activeFriendChatId, setActiveFriendChatId] = useState<string | null>(null);
+
+  const { stats, refetch: refetchNotifications } = useNotifications({
+    userId: user?.id,
+    activeSectorId: showGroupChat ? (displaySectorId !== "all" ? displaySectorId : null) : null,
+    activeFriendId: activeFriendChatId,
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingSector, setEditingSector] = useState<SectorWithBeacons | null>(null);
   const [viewingMembersSector, setViewingMembersSector] = useState<SectorWithBeacons | null>(null);
@@ -1088,6 +1096,23 @@ export default function StationClient({ initialStation, initialCollabSectors = [
               ))}
             </div>
           )}
+          
+          {/* Group Chat FAB (only if collab sector) */}
+          {displaySectorId !== "all" && allCollabSectors.some(s => s.id === displaySectorId) && (
+            <motion.button
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              onClick={() => setShowGroupChat(true)}
+              style={{padding: "10px"}}
+              className="fixed bottom-6 right-6 z-[9999] bg-violet-600 hover:bg-violet-500 text-white rounded-full shadow-[0_0_20px_rgba(139,92,246,0.6)] transition-transform hover:scale-110 flex items-center justify-center group"
+            >
+              <ChatBubbleOvalLeftEllipsisIcon width={32} height={32} />
+              
+              {/* Optional: Add unread badge here if implementing unread count per sector */}
+            </motion.button>
+          )}
+
         </main>
       </div>
 
@@ -1097,6 +1122,7 @@ export default function StationClient({ initialStation, initialCollabSectors = [
         user={user} 
         stats={stats}
         refetchStats={refetchNotifications}
+        onActiveChatChange={setActiveFriendChatId}
       />
 
       {/* Modals */}
@@ -1157,6 +1183,16 @@ export default function StationClient({ initialStation, initialCollabSectors = [
           onClose={() => setSelectedBeacon(null)}
           onUpdated={handleBeaconUpdated}
           onDeleted={handleBeaconDeleted}
+        />
+      )}
+
+      {displaySectorId !== "all" && (
+        <GroupChatModal
+          isOpen={showGroupChat}
+          onClose={() => setShowGroupChat(false)}
+          sector={allCollabSectors.find(s => s.id === displaySectorId) || null}
+          user={user}
+          isOwner={allOwnedSectors.some(s => s.id === displaySectorId)}
         />
       )}
     </div>

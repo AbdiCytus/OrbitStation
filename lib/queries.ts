@@ -30,6 +30,9 @@ export async function getMyStation() {
             include: {
               user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } }
             }
+          },
+          station: {
+            select: { user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } } }
           }
         },
       },
@@ -171,6 +174,8 @@ export async function getMyProfile() {
       hologramEnabled: true,
       allowFriendRequests: true,
       staticBackgroundEnabled: true,
+      notifSoundEnabled: true,
+      notifSoundUrl: true,
       createdAt: true,
       station: {
         select: {
