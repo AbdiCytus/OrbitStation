@@ -1157,6 +1157,7 @@ export async function getGroupMessages(sectorId: string) {
   const isCollab = sector.collaborators.some(c => c.userId === user.id);
   if (!isOwner && !isCollab) return [];
 
+  // Ambil 100 pesan TERBARU dengan descending
   const messages = await db.groupMessage.findMany({
     where: { sectorId },
     include: {
@@ -1167,11 +1168,11 @@ export async function getGroupMessages(sectorId: string) {
         select: { id: true, content: true, senderId: true, sender: { select: { name: true, username: true } }, isDeleted: true }
       }
     },
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: "desc" },
     take: 100
   });
 
-  return messages;
+  return messages.reverse();
 }
 
 export async function sendGroupMessage(sectorId: string, content: string, replyToId?: string) {
@@ -1566,11 +1567,29 @@ export async function getTypingUsers(sectorId: string | null, chatWithId: string
 
 export async function pinGroupMessageAction(sectorId: string, msgId: string) {
   const user = await requireAuth();
+
+  // Verifikasi akses
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true, collaborators: true }
+  });
+  if (!sector) return { error: "Sector not found" };
+
+  const isOwner = sector.station.userId === user.id;
+  const isAdmin = sector.collaborators.some((c: any) => c.userId === user.id && c.role === "ADMIN");
+  if (!isOwner && !isAdmin) return { error: "Access denied" };
+
   const msg = await db.groupMessage.findUnique({
     where: { id: msgId },
     include: { sender: { select: { name: true, username: true } } }
   });
   if (!msg) return { error: "Message not found" };
+
+  // Simpan ke database
+  await db.sector.update({
+    where: { id: sectorId },
+    data: { pinnedMessageId: msgId }
+  });
 
   const sysMsg = await db.groupMessage.create({
     data: { sectorId, senderId: user.id, content: `pinned a message`, type: "SYSTEM" },
@@ -1588,6 +1607,40 @@ export async function pinGroupMessageAction(sectorId: string, msgId: string) {
     sender: { ...msg.sender, image: null }
   };
   await pusherServer.trigger(`presence-sector-${sectorId}`, 'pinned-message', pinPayload);
+
+  return { success: true };
+}
+
+export async function unpinGroupMessageAction(sectorId: string) {
+  const user = await requireAuth();
+
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true, collaborators: true }
+  });
+  if (!sector) return { error: "Sector not found" };
+
+  const isOwner = sector.station.userId === user.id;
+  const isAdmin = sector.collaborators.some((c: any) => c.userId === user.id && c.role === "ADMIN");
+  if (!isOwner && !isAdmin) return { error: "Access denied" };
+
+  await db.sector.update({
+    where: { id: sectorId },
+    data: { pinnedMessageId: null }
+  });
+
+  const sysMsg = await db.groupMessage.create({
+    data: { sectorId, senderId: user.id, content: `unpinned the message`, type: "SYSTEM" },
+    include: { sender: { select: { id: true, name: true, username: true, image: true } } }
+  });
+
+  const sysPayload = {
+    ...sysMsg,
+    sender: { ...sysMsg.sender, image: null }
+  };
+
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysPayload);
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'unpinned-message', {});
 
   return { success: true };
 }

@@ -15,7 +15,8 @@ import {
   deleteGroupMessage, muteMember, unmuteMember,
   clearGroupChat, kickMember, getMutedMembers,
   sendFriendRequest, getFriends, pinGroupMessageAction,
-  setCollabRole, blindMember, sightMember, getBlindedMembers
+  setCollabRole, blindMember, sightMember, getBlindedMembers,
+  unpinGroupMessageAction
 } from "@/lib/actions";
 import { toast } from "sonner";
 import type { SectorWithBeacons } from "@/types";
@@ -59,6 +60,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
 
   // Actions states
+  const amIAdmin = localCollaborators.find((c: any) => c.userId === user.id)?.role === "ADMIN";
   const [replyToMsg, setReplyToMsg] = useState<any | null>(null);
   const [editMsgId, setEditMsgId] = useState<string | null>(null);
   const [selectedMsgId, setSelectedMsgId] = useState<string | null>(null);
@@ -207,6 +209,12 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
       const msgs = await getGroupMessages(sector.id);
       if (isSubscribed) {
         setMessages(msgs);
+
+        if (sector.pinnedMessageId) {
+          const pinned = msgs.find((m: any) => m.id === sector.pinnedMessageId);
+          if (pinned) setPinnedMessage(pinned);
+        }
+
         setIsLoading(false);
       }
 
@@ -301,6 +309,10 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
 
     channel.bind('pinned-message', (msg: any) => {
       setPinnedMessage(msg);
+    });
+
+    channel.bind('unpinned-message', () => {
+      setPinnedMessage(null);
     });
 
     channel.bind('update-message', (msg: any) => {
@@ -761,9 +773,14 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                             <span className="text-gray-200 text-sm truncate line-clamp-1">{pinnedMessage.content}</span>
                           </div>
                         </div>
-                        <button onClick={() => setPinnedMessage(null)} className="text-gray-500 hover:text-white bg-transparent border-none cursor-pointer" style={{ padding: "10px 0", marginRight: "20px" }}>
-                          <XMarkIcon width={18} height={18} />
-                        </button>
+                        {(isOwner || amIAdmin) && (
+                          <button onClick={async () => {
+                            setPinnedMessage(null);
+                            await unpinGroupMessageAction(sector.id);
+                          }} className="text-gray-500 hover:text-white bg-transparent border-none cursor-pointer" style={{ padding: "10px 0", marginRight: "20px" }}>
+                            <XMarkIcon width={18} height={18} />
+                          </button>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
