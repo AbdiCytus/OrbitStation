@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Beacon } from "@/types";
 import { incrementBeaconVisit } from "@/lib/actions";
 import { PencilSquareIcon, ArrowTopRightOnSquareIcon, InformationCircleIcon } from "@heroicons/react/20/solid";
@@ -16,6 +17,9 @@ type Props = {
 };
 
 export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isCollab = false, sectorName, isAllBeacons }: Props) {
+  const [imgError, setImgError] = useState(false);
+  const [favError, setFavError] = useState(false);
+
   function handleVisit(e: React.MouseEvent) {
     e.stopPropagation();
     incrementBeaconVisit(beacon.id);
@@ -50,17 +54,24 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
     >
       {/* OG Image */}
       <div className="beacon-card-image">
-        {beacon.imageUrl ? (
+        {beacon.imageUrl && !imgError ? (
           <img
             src={beacon.imageUrl}
             alt={beacon.title}
             loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="beacon-card-image-placeholder">
-            {beacon.faviconUrl ? (
-              <img src={beacon.faviconUrl} alt="" width={36} height={36} style={{ borderRadius: 6 }} />
+            {beacon.faviconUrl && !favError ? (
+              <img
+                src={beacon.faviconUrl}
+                alt=""
+                width={36}
+                height={36}
+                style={{ borderRadius: 6 }}
+                onError={() => setFavError(true)}
+              />
             ) : (
               <span className="beacon-card-domain-initial">
                 {domain.charAt(0).toUpperCase()}

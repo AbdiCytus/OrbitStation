@@ -24,6 +24,7 @@
   ],
   "host_permissions": [
     "*://*.orbstation.com/*",
+    "*://orbitstation.vercel.app/*", 
     "http://localhost:3000/*"
   ]
 }

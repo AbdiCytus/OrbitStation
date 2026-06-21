@@ -29,6 +29,7 @@ interface Props {
 }
 
 export default function FriendsModal({ isOpen, onClose, user, stats, refetchStats, onActiveChatChange }: Props) {
+  if (!user) return null;
   const [activeTab, setActiveTab] = useState<Tab>("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [showClearConfirm, setShowClearConfirm] = useState(false);

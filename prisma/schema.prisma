@@ -96,6 +96,7 @@ model User {
   notifSoundUrl    String?        // Custom SFX URL
   notifSoundEnabled Boolean       @default(true)
   typingIndicators TypingIndicator[]
+  blindedInSectors BlindedMember[] @relation("BlindedUsers")
 }
 
 /// Dasbor utama milik Pilot, disebut "Station"
@@ -133,6 +134,7 @@ model Sector {
   color     String? // Accent color untuk sektor ini (hex)
   order     Int     @default(0)
   isPublic  Boolean @default(true) // false = sektor privat, tidak ditampilkan di profil publik
+  isMuteAll Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -144,6 +146,7 @@ model Sector {
   groupMessages GroupMessage[]
   mutedMembers  MutedMember[]
   typingIndicators TypingIndicator[]
+  blindedMembers BlindedMember[]
 }
 
 /// Shortcut web, disebut "Suar" (Beacon)
@@ -208,6 +211,7 @@ model SectorCollaborator {
   id        String   @id @default(cuid())
   sectorId  String
   userId    String
+  role      String   @default("MEMBER")
   joinedAt  DateTime @default(now())
 
   sector    Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
@@ -268,4 +272,17 @@ model TypingIndicator {
 
   @@index([sectorId, userId])
   @@index([chatWithId, userId])
+}
+
+// User yang terkena blind
+model BlindedMember {
+  id       String   @id @default(cuid())
+  sectorId String
+  userId   String
+  blindedAt DateTime @default(now())
+
+  sector   Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  user     User     @relation("BlindedUsers", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sectorId, userId])
 }

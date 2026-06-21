@@ -333,7 +333,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
             </p>
             <div style={{ display: "flex", width: "100%", gap: "0.5rem" }}>
               <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
-              <button type="button" className="btn btn-danger" style={{ flex: 1, background: "#ef4444" }} onClick={handleDelete}>Yes, Delete</button>
+              <button type="button" className="btn btn-danger" style={{ flex: 1, background: "#ef4444", color: "white" }} onClick={handleDelete}>Yes, Delete</button>
             </div>
           </div>
         ) : (

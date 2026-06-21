@@ -54,6 +54,27 @@ export function useNotifications({
     });
   }, []);
 
+  // 1. MINTA IZIN SAAT PERTAMA KALI LOAD
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }
+  }, []);
+
+  // 2. FUNGSI HELPER UNTUK MENGIRIM NOTIFIKASI OS/SISTEM
+  const showSystemNotification = useCallback((title: string, body: string) => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "granted" && document.hidden) {
+        new Notification(title, {
+          body: body,
+          icon: "/icon.png"
+        });
+      }
+    }
+  }, []);
+
   useEffect(() => { statsRef.current = stats; }, [stats]);
 
   useEffect(() => {
@@ -70,7 +91,7 @@ export function useNotifications({
     }
   }, [activeFriendId]);
 
-const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => {
+  const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => {
     const now = Date.now();
     if (!globalSpamTracker[sourceId]) {
       globalSpamTracker[sourceId] = { count: 0, firstMsgTime: now, suspendedUntil: 0, mentionBypassUsed: false };
@@ -100,15 +121,15 @@ const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => 
     if (tracker.count > 3 || unreadCount >= 3) {
       tracker.suspendedUntil = now + 60000;
       tracker.count = 0;
-      
+
       if (isMention) {
         tracker.mentionBypassUsed = true;
-        return false; 
+        return false;
       }
-      return true; 
+      return true;
     }
-    
-    return false; 
+
+    return false;
   }, []);
 
   const fetchStats = useCallback(async () => {
@@ -133,6 +154,8 @@ const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => 
       channelName = `private-user-${userId}`;
       const channel = pusherClient.subscribe(channelName);
 
+      pusherClient.subscribe('presence-global');
+
       channel.bind("new-notification", (payload: any) => {
         if (payload && payload.type) {
 
@@ -145,6 +168,9 @@ const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => 
                   description: content,
                   id: `priv-msg-${messageId}`
                 });
+                // ---> NOTIF BROWSER <---
+                showSystemNotification(`Message from ${senderName}`, content);
+
                 const sound = soundConfigRef.current;
                 if (sound?.enabled) {
                   const audio = new Audio(sound.url);
@@ -157,6 +183,9 @@ const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => 
 
           } else if (payload.type === 'NEW_FRIEND_REQUEST') {
             toast.success("New friend request received", { id: `new-req-${Date.now()}` });
+            // ---> NOTIF BROWSER <---
+            showSystemNotification("Friend Request", "You have a new friend request.");
+
             const sound = soundConfigRef.current;
             if (sound?.enabled) {
               const audio = new Audio(sound.url);
@@ -171,6 +200,9 @@ const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => 
               description: `${senderName} invited you to sector ${sectorName}`,
               id: `collab-${Date.now()}`
             });
+            // ---> NOTIF BROWSER <---
+            showSystemNotification("Collaboration Invite", `${senderName} invited you to sector ${sectorName}`);
+
             const sound = soundConfigRef.current;
             if (sound?.enabled) {
               const audio = new Audio(sound.url);
@@ -189,13 +221,16 @@ const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => 
               const isSpam = checkSpam(sectorId, isMention);
               if (!isSpam) {
                 const title = isMention
-                  ? `${senderName} mentioned you in sector ${sectorName}`
-                  : `New message from sector ${sectorName}`;
+                  ? `${senderName} mentioned you in Sector: ${sectorName}`
+                  : `Message from Sector: ${sectorName}`;
 
                 toast.info(title, {
                   description: `${senderName}: ${content}`,
                   id: `grp-msg-${messageId}`
                 });
+                // ---> NOTIF BROWSER <---
+                showSystemNotification(title, `${senderName}: ${content}`);
+
                 const sound = soundConfigRef.current;
                 if (sound?.enabled) {
                   const audio = new Audio(sound.url);
@@ -216,11 +251,12 @@ const checkSpam = useCallback((sourceId: string, isMention: boolean = false) => 
 
     return () => {
       window.removeEventListener("focus", onFocus);
+      pusherClient.unsubscribe('presence-global');
       if (channelName) {
         pusherClient.unsubscribe(channelName);
       }
     };
   }, [fetchStats, userId, checkSpam]);
 
- return { stats, refetch: fetchStats, unreadGroupSectors, clearGroupUnread };
+  return { stats, refetch: fetchStats, unreadGroupSectors, clearGroupUnread };
 }

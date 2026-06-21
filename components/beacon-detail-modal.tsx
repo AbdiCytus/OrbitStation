@@ -25,9 +25,10 @@ type Props = {
   onDeleted?: (id: string) => void;
   onUpdated?: (beacon: Beacon) => void;
   readOnly?: boolean;
+  canEdit?: boolean;
 };
 
-export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, onUpdated, readOnly = false }: Props) {
+export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, onUpdated, readOnly = false, canEdit = false }: Props) {
   const [isPinned, setIsPinned] = useState(beacon.isPinned);
   const [notes, setNotes] = useState(beacon.notes ?? "");
   const [editingNotes, setEditingNotes] = useState(false);
@@ -58,8 +59,8 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     rafRef.current = requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;   // 0-1
-      const y = (e.clientY - rect.top)  / rect.height;  // 0-1
-      const rotY =  (x - 0.5) * 28;   // -14 to +14 deg
+      const y = (e.clientY - rect.top) / rect.height;  // 0-1
+      const rotY = (x - 0.5) * 28;   // -14 to +14 deg
       const rotX = -(y - 0.5) * 20;   // -10 to +10 deg
       const shine = `radial-gradient(circle at ${x * 100}% ${y * 100}%,
         rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 50%, transparent 80%)`;
@@ -92,8 +93,8 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     const newVal = !isPinned;
     setIsPinned(newVal);
     if (onUpdated) onUpdated({ ...beacon, isPinned: newVal });
-    startTransition(async () => { 
-      await toggleBeaconPin(beacon.id); 
+    startTransition(async () => {
+      await toggleBeaconPin(beacon.id);
       toast.success(newVal ? "Beacon pinned" : "Beacon unpinned");
     });
   }
@@ -121,7 +122,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   })();
 
   const subroute = (() => {
-    try { 
+    try {
       const url = new URL(beacon.url);
       return url.pathname && url.pathname !== "/" ? url.pathname : null;
     } catch { return null; }
@@ -148,8 +149,8 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               className="hsr-star-particle"
               style={{
                 left: `${Math.random() * 100}%`,
-                top:  `${Math.random() * 100}%`,
-                width:  `${Math.random() * 2 + 1}px`,
+                top: `${Math.random() * 100}%`,
+                width: `${Math.random() * 2 + 1}px`,
                 height: `${Math.random() * 2 + 1}px`,
                 animationDelay: `${Math.random() * 4}s`,
                 animationDuration: `${Math.random() * 3 + 2}s`,
@@ -159,7 +160,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
         </div>
 
         {/* ── TOP ACTION BAR ──────────────────────────────── */}
-        
+
         {showDeleteConfirm && (
           <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "rgba(11, 12, 16, 0.9)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }}>
             <div style={{ padding: "2rem", background: "#1f1f2e", borderRadius: "1rem", border: "1px solid rgba(239, 68, 68, 0.4)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
@@ -168,7 +169,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               <p style={{ color: "#a1a1aa", fontSize: "0.9rem", marginBottom: "1.5rem" }}>Are you sure you want to delete <strong style={{ color: "#ef4444" }}>{beacon.title}</strong>? This action cannot be undone.</p>
               <div style={{ display: "flex", gap: "1rem" }}>
                 <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
-                <button type="button" className="btn btn-danger" style={{ flex: 1, background: "#ef4444" }} onClick={executeDelete}>Delete</button>
+                <button type="button" className="btn btn-danger" style={{ flex: 1, background: "#ef4444", color: "white" }} onClick={executeDelete}>Delete</button>
               </div>
             </div>
           </div>
@@ -181,45 +182,49 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
           </div>
           <div className="hsr-topbar-actions">
             {!readOnly && (
-                <>
-                  {subroute && (
-                    <>
-                      <style>{`@media (max-width: 639px) { .hsr-subroute-label { display: none !important; } }`}</style>
-                      <div className="hsr-subroute-label" style={{ 
-                        background: "rgba(255, 255, 255, 0.1)", 
-                        padding: "0.2rem 0.5rem", 
-                        borderRadius: "6px", 
-                        fontSize: "0.75rem", 
-                        color: "#c4b5fd",
-                        marginRight: "0.5rem",
-                        display: "flex",
-                        alignItems: "center"
-                      }}>
-                        {subroute}
-                      </div>
-                    </>
-                  )}
-                  {(!sector || sector.isPublic) && (
+              <>
+                {subroute && (
+                  <>
+                    <style>{`@media (max-width: 639px) { .hsr-subroute-label { display: none !important; } }`}</style>
+                    <div className="hsr-subroute-label" style={{
+                      background: "rgba(255, 255, 255, 0.1)",
+                      padding: "0.2rem 0.5rem",
+                      borderRadius: "6px",
+                      fontSize: "0.75rem",
+                      color: "#c4b5fd",
+                      marginRight: "0.5rem",
+                      display: "flex",
+                      alignItems: "center"
+                    }}>
+                      {subroute}
+                    </div>
+                  </>
+                )}
+                {canEdit && (
+                  <>
+                    {(!sector || sector.isPublic) && (
+                      <button
+                        className={`hsr-action-btn ${isPinned ? "hsr-action-btn--active" : ""}`}
+                        onClick={handleTogglePin}
+                        title={isPinned ? "Unpin" : "Pin beacon"}
+                        id={`btn-pin-${beacon.id}`}
+                      >
+                        <span>{isPinned ? <MapPinSolid width={16} height={16} /> : <MapPinIcon width={16} height={16} />}</span>
+                        <span className="hsr-action-label">{isPinned ? "Pinned" : "Pin"}</span>
+                      </button>
+                    )}
                     <button
-                      className={`hsr-action-btn ${isPinned ? "hsr-action-btn--active" : ""}`}
-                      onClick={handleTogglePin}
-                      title={isPinned ? "Unpin" : "Pin beacon"}
-                      id={`btn-pin-${beacon.id}`}
+                      className="hsr-action-btn hsr-action-btn--danger"
+                      onClick={handleDelete}
+                      title="Delete beacon"
+                      id={`btn-delete-${beacon.id}`}
                     >
-                      <span>{isPinned ? <MapPinSolid width={16} height={16} /> : <MapPinIcon width={16} height={16} />}</span>
-                      <span className="hsr-action-label">{isPinned ? "Pinned" : "Pin"}</span>
+                      <span><TrashIcon width={16} height={16} /></span>
+                      <span className="hsr-action-label">Delete</span>
                     </button>
-                  )}
-                  <button
-                    className="hsr-action-btn hsr-action-btn--danger"
-                    onClick={handleDelete}
-                    title="Delete beacon"
-                    id={`btn-delete-${beacon.id}`}
-                  >
-                    <span><TrashIcon width={16} height={16} /></span>
-                    <span className="hsr-action-label">Delete</span>
-                  </button>
-                </>
+                  </>
+                )}
+              </>
             )}
             <button className="hsr-close-btn" onClick={handleClose} aria-label="Close">
               <XMarkIcon width={20} height={20} />

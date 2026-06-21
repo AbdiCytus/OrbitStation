@@ -19,7 +19,7 @@ export const config = {
      * - favicon.ico, sitemap.xml, robots.txt
      * - halaman publik (/, /login, /register, /[username])
      */
-    "/station/:path*",
+    "/station",
     "/settings/:path*",
   ],
 };

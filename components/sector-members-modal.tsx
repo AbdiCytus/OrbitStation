@@ -17,7 +17,7 @@ type Props = {
 export default function SectorMembersModal({ sector, currentUserId, ownerData, onClose }: Props) {
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
-  
+
   const [friends, setFriends] = useState<any[]>([]);
   const [isFriendsLoading, setIsFriendsLoading] = useState(true);
   const sectorOwner = ownerData;
@@ -50,41 +50,56 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
   const isFriend = (id: string) => friends.some(f => f.id === id);
 
   return (
-    <div className={`modal-overlay ${isClosing ? "closing" : ""}`} onClick={handleClose} role="dialog" aria-modal="true" aria-label="Sector Members" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", overflowY: "auto" }}>
-      <div style={{ display: "flex", gap: "1rem", flexDirection: "column", width: "100%", maxWidth: "400px", minHeight: "600px", maxHeight: "85vh" }} onClick={(e) => e.stopPropagation()}>
-        <div className={`modal-panel ${isClosing ? "closing" : ""} glass`} style={{ margin: 0, display: "flex", flexDirection: "column", padding: 0, flex: 1 }}>
-          <div className="modal-header" style={{ padding: "1.5rem 1.5rem 1rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
+    <div
+      className={`modal-overlay ${isClosing ? "closing" : ""} flex items-end sm:items-center justify-center p-0 sm:p-8`}
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Sector Members"
+      style={{ overflowY: "hidden" }}
+    >
+      <div
+        className="w-full sm:max-w-[400px] flex flex-col"
+        style={{ maxHeight: "85vh", minHeight: "50vh" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className={`modal-panel ${isClosing ? "closing" : ""} glass rounded-t-3xl rounded-b-none sm:rounded-2xl`}
+          style={{ margin: 0, display: "flex", flexDirection: "column", padding: 0, flex: 1, borderBottom: "none" }}
+        >        <div className="modal-header" style={{ padding: "1.5rem 1.5rem 1rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
             <h2 className="modal-title flex items-center gap-2" style={{ fontSize: "1.1rem" }}>
               Members of {sector.name}
               <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span>
             </h2>
             <button className="btn-icon modal-close" onClick={handleClose} aria-label="Close" style={{ right: "1.5rem", top: "1.5rem" }}>✕</button>
           </div>
-          
-          <motion.div 
-            className="form-group" 
+
+          <motion.div
+            className="form-group"
             style={{ marginBottom: 0, flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", padding: "0 1.5rem 1.5rem 1.5rem" }}
             initial="hidden" animate="visible"
             variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } }}
           >
             {/* Owner */}
             {sectorOwner && (
-              <motion.div 
-                className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" 
+              <motion.div
+                className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
                 style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                  <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", border: "2px solid #FFD700", boxShadow: "0 0 10px rgba(255,215,0,0.6)" }}>
                     {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
                   </div>
-                  <p className="text-sm font-medium text-gray-300 truncate">
-                    {sectorOwner.name || sectorOwner.username}
-                    {sectorOwner.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
-                  </p>
+                  <div className="flex flex-col min-w-0">
+                    <p className="text-sm font-medium text-gray-300 truncate leading-tight">
+                      {sectorOwner.name || sectorOwner.username}
+                      {sectorOwner.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
+                    </p>
+                    <span className="text-[10px] font-bold text-[#FFD700] uppercase tracking-widest mt-0.5">Owner</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest mr-2">Owner</span>
                   {(sectorOwner.isPublic || sectorOwner.station?.isPublic) && sectorOwner.username && (
                     <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />
@@ -104,20 +119,23 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
 
             {/* Members */}
             {localCollaborators.map((c: any) => (
-              <motion.div 
-                key={c.user.id} 
-                className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group" 
+              <motion.div
+                key={c.user.id}
+                className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
                 style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                  <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", border: c.role === "ADMIN" ? "2px solid #10B981" : "1px solid rgba(255,255,255,0.1)" }}>
                     {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
                   </div>
-                  <p className="text-sm font-medium text-gray-300 truncate">
-                    {c.user.name || c.user.username}
-                    {c.user.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
-                  </p>
+                  <div className="flex flex-col min-w-0">
+                    <p className="text-sm font-medium text-gray-300 truncate leading-tight">
+                      {c.user.name || c.user.username}
+                      {c.user.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
+                    </p>
+                    <span className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: c.role === 'ADMIN' ? '#10B981' : '#9CA3AF' }}>{c.role || 'MEMBER'}</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1">
                   {(c.user as any).station?.isPublic && c.user.username && (
@@ -136,7 +154,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                 </div>
               </motion.div>
             ))}
-            
+
             {localCollaborators.length === 0 && !sectorOwner && (
               <p className="text-sm text-gray-400 text-center py-4">No members found.</p>
             )}

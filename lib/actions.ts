@@ -206,13 +206,24 @@ export async function sendTransferOwnershipInvite(sectorId: string, newOwnerId: 
   });
   if (!sector) return { error: "Access denied" };
 
-  await db.chatMessage.create({
+  const msg = await db.chatMessage.create({
     data: {
       senderId: user.id!,
       receiverId: newOwnerId,
       content: `wants to transfer ownership of sector`,
       type: "OWNERSHIP_TRANSFER_INVITE",
       metadata: JSON.stringify({ sectorId, sectorName: sector.name })
+    }
+  });
+
+  await pusherServer.trigger(`private-user-${newOwnerId}`, 'new-notification', {
+    type: 'NEW_PRIVATE_MESSAGE',
+    data: {
+      messageId: msg.id,
+      content: `Wants to transfer ownership of Sector "${sector.name}"`,
+      senderId: user.id,
+      senderName: user.name || "System",
+      timestamp: msg.createdAt.toISOString()
     }
   });
 
@@ -400,18 +411,19 @@ export type BeaconFormData = {
 export async function createBeacon(sectorId: string, data: BeaconFormData) {
   const user = await requireAuth();
 
-  // Validasi sektor milik user
-  const sector = await db.sector.findFirst({
-    where: {
-      id: sectorId,
-      OR: [
-        { station: { userId: user.id } },
-        { collaborators: { some: { userId: user.id } } }
-      ]
-    },
+  // Validasi sektor milik user DAN cek role kolaborator
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true, collaborators: true }
   });
-  if (!sector) {
-    return { error: "Sector not found or access denied" };
+
+  if (!sector) return { error: "Sector not found" };
+
+  const isOwner = sector.station.userId === user.id;
+  const isAdmin = sector.collaborators.some((c: any) => c.userId === user.id && c.role === "ADMIN");
+
+  if (!isOwner && !isAdmin) {
+    return { error: "Access Denied: Only Admins or Owner can modify beacons." };
   }
 
   if (!data.url?.trim()) return { error: "URL is required" };
@@ -449,6 +461,28 @@ export async function createBeacon(sectorId: string, data: BeaconFormData) {
     include: { creator: { select: { name: true, image: true } } }
   });
 
+  const userIdsToNotify = new Set([sector.station.userId, ...sector.collaborators.map((c: any) => c.userId)]);
+  userIdsToNotify.delete(user.id); // Jangan kirim ke diri sendiri
+
+  if (userIdsToNotify.size > 0) {
+    const safeBeacon = {
+      ...beacon,
+      imageUrl: beacon.imageUrl && beacon.imageUrl.length > 2000 ? null : beacon.imageUrl,
+      faviconUrl: beacon.faviconUrl && beacon.faviconUrl.length > 2000 ? null : beacon.faviconUrl,
+      description: beacon.description && beacon.description.length > 500 ? beacon.description.substring(0, 500) + '...' : beacon.description,
+      notes: beacon.notes && beacon.notes.length > 500 ? beacon.notes.substring(0, 500) + '...' : beacon.notes,
+    };
+
+    if (safeBeacon.creator?.image && safeBeacon.creator.image.length > 2000) {
+      safeBeacon.creator = { ...safeBeacon.creator, image: null };
+    }
+
+    await Promise.all(Array.from(userIdsToNotify).map(id =>
+      pusherServer.trigger(`private-user-${id}`, 'beacon-update', { type: 'BEACON_CREATED', data: safeBeacon })
+    ));
+  }
+  // -----------------------------------
+
   revalidatePath("/station");
   return { data: beacon };
 }
@@ -460,19 +494,22 @@ export async function updateBeacon(
 ) {
   const user = await requireAuth();
 
-  const beacon = await db.beacon.findFirst({
-    where: {
-      id: beaconId,
+  const beacon = await db.beacon.findUnique({
+    where: { id: beaconId },
+    include: {
       sector: {
-        OR: [
-          { station: { userId: user.id } },
-          { collaborators: { some: { userId: user.id } } }
-        ]
+        include: { station: true, collaborators: true }
       }
-    },
+    }
   });
-  if (!beacon) {
-    return { error: "Beacon not found or access denied" };
+
+  if (!beacon) return { error: "Beacon not found" };
+
+  const isOwner = beacon.sector.station.userId === user.id;
+  const isAdmin = beacon.sector.collaborators.some((c: any) => c.userId === user.id && c.role === "ADMIN");
+
+  if (!isOwner && !isAdmin) {
+    return { error: "Access Denied: Only Admins or Owner can modify beacons." };
   }
 
   if (data.url !== undefined) {
@@ -507,6 +544,27 @@ export async function updateBeacon(
     include: { creator: { select: { name: true, image: true } } }
   });
 
+  const userIdsToNotify = new Set([beacon.sector.station.userId, ...beacon.sector.collaborators.map((c: any) => c.userId)]);
+  userIdsToNotify.delete(user.id);
+
+  if (userIdsToNotify.size > 0) {
+    const safeUpdated = {
+      ...updated,
+      imageUrl: updated.imageUrl && updated.imageUrl.length > 2000 ? null : updated.imageUrl,
+      faviconUrl: updated.faviconUrl && updated.faviconUrl.length > 2000 ? null : updated.faviconUrl,
+      description: updated.description && updated.description.length > 500 ? updated.description.substring(0, 500) + '...' : updated.description,
+      notes: updated.notes && updated.notes.length > 500 ? updated.notes.substring(0, 500) + '...' : updated.notes,
+    };
+
+    if (safeUpdated.creator?.image && safeUpdated.creator.image.length > 2000) {
+      safeUpdated.creator = { ...safeUpdated.creator, image: null };
+    }
+
+    await Promise.all(Array.from(userIdsToNotify).map(id =>
+      pusherServer.trigger(`private-user-${id}`, 'beacon-update', { type: 'BEACON_UPDATED', data: safeUpdated })
+    ));
+  }
+
   revalidatePath("/station");
   return { data: updated };
 }
@@ -515,22 +573,33 @@ export async function updateBeacon(
 export async function deleteBeacon(beaconId: string) {
   const user = await requireAuth();
 
-  const beacon = await db.beacon.findFirst({
-    where: {
-      id: beaconId,
+  const beacon = await db.beacon.findUnique({
+    where: { id: beaconId },
+    include: {
       sector: {
-        OR: [
-          { station: { userId: user.id } },
-          { collaborators: { some: { userId: user.id } } }
-        ]
+        include: { station: true, collaborators: true }
       }
-    },
+    }
   });
-  if (!beacon) {
-    return { error: "Beacon not found or access denied" };
+
+  if (!beacon) return { error: "Beacon not found" };
+
+  const isOwner = beacon.sector.station.userId === user.id;
+  const isAdmin = beacon.sector.collaborators.some((c: any) => c.userId === user.id && c.role === "ADMIN");
+
+  if (!isOwner && !isAdmin) {
+    return { error: "Access Denied: Only Admins or Owner can modify beacons." };
   }
 
   await db.beacon.delete({ where: { id: beaconId } });
+
+  const userIdsToNotify = new Set([beacon.sector.station.userId, ...beacon.sector.collaborators.map((c: any) => c.userId)]);
+  userIdsToNotify.delete(user.id);
+  if (userIdsToNotify.size > 0) {
+    await Promise.all(Array.from(userIdsToNotify).map(id =>
+      pusherServer.trigger(`private-user-${id}`, 'beacon-update', { type: 'BEACON_DELETED', data: { id: beaconId } })
+    ));
+  }
 
   revalidatePath("/station");
   return { success: true };
@@ -1243,73 +1312,135 @@ export async function deleteGroupMessage(messageId: string) {
 
 export async function muteMember(sectorId: string, targetUserId: string) {
   const user = await requireAuth();
-
-  const sector = await db.sector.findUnique({
-    where: { id: sectorId },
-    include: { station: true }
-  });
+  const sector = await db.sector.findUnique({ where: { id: sectorId }, include: { station: true } });
   if (!sector || sector.station.userId !== user.id) return { error: "Only owner can mute" };
 
-  // Can't mute yourself
+  if (targetUserId === "all") {
+    await db.sector.update({ where: { id: sectorId }, data: { isMuteAll: true } });
+    await db.mutedMember.deleteMany({ where: { sectorId } }); // Hapus semua pengecualian
+
+    const sysMsg = await db.groupMessage.create({ data: { sectorId, senderId: user.id, content: `muted everyone in the sector`, type: "SYSTEM" }, include: { sender: { select: { id: true, name: true, username: true, image: true } } } });
+    const sysPayload = { ...sysMsg, sender: { ...sysMsg.sender, image: null } };
+
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'sector-update', { isMuteAll: true, clearMuted: true });
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysPayload);
+    return { success: true };
+  }
+
   if (user.id === targetUserId) return { error: "Cannot mute yourself" };
 
-  await db.mutedMember.upsert({
-    where: { sectorId_userId: { sectorId, userId: targetUserId } },
-    update: {},
-    create: { sectorId, userId: targetUserId }
-  });
-
-  // System message
+  if (sector.isMuteAll) {
+    // Cabut Pengecualian (Kembali Mute saat Mute All)
+    await db.mutedMember.deleteMany({ where: { sectorId: sectorId, userId: targetUserId } });
+  } else {
+    // Mute Normal
+    await db.mutedMember.upsert({ where: { sectorId_userId: { sectorId, userId: targetUserId } }, update: {}, create: { sectorId, userId: targetUserId } });
+  }
   const targetUser = await db.user.findUnique({ where: { id: targetUserId }, select: { username: true } });
-  const sysMsg = await db.groupMessage.create({
-    data: { sectorId, senderId: user.id, content: `muted @${targetUser?.username}`, type: "SYSTEM" },
-    include: {
-      sender: { select: { id: true, name: true, username: true, image: true } },
-      replyTo: { include: { sender: { select: { name: true, username: true } } } }
-    }
-  });
+  const sysMsg = await db.groupMessage.create({ data: { sectorId, senderId: user.id, content: `muted @${targetUser?.username}`, type: "SYSTEM" }, include: { sender: { select: { id: true, name: true, username: true, image: true } } } });
 
-  const pusherPayload = {
-    ...sysMsg,
-    sender: { ...sysMsg.sender, image: null }
-  };
-  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', pusherPayload);
-
+  const sysPayload = { ...sysMsg, sender: { ...sysMsg.sender, image: null } };
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'sector-update', { mutedUser: targetUserId, isMuteAll: sector.isMuteAll });
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysPayload);
   return { success: true };
 }
 
 export async function unmuteMember(sectorId: string, targetUserId: string) {
   const user = await requireAuth();
-
-  const sector = await db.sector.findUnique({
-    where: { id: sectorId },
-    include: { station: true }
-  });
+  const sector = await db.sector.findUnique({ where: { id: sectorId }, include: { station: true } });
   if (!sector || sector.station.userId !== user.id) return { error: "Only owner can unmute" };
 
-  try {
-    await db.mutedMember.delete({
-      where: { sectorId_userId: { sectorId, userId: targetUserId } }
-    });
-    // System message
-    const targetUser = await db.user.findUnique({ where: { id: targetUserId }, select: { username: true } });
-    const sysMsg = await db.groupMessage.create({
-      data: { sectorId, senderId: user.id, content: `unmuted @${targetUser?.username}`, type: "SYSTEM" },
-      include: {
-        sender: { select: { id: true, name: true, username: true, image: true } },
-        replyTo: { include: { sender: { select: { name: true, username: true } } } }
-      }
-    });
-    const pusherPayload = {
-      ...sysMsg,
-      sender: { ...sysMsg.sender, image: null }
-    };
-    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', pusherPayload);
-  } catch (e) {
-    // Ignore if not muted
+  if (targetUserId === "all") {
+    await db.sector.update({ where: { id: sectorId }, data: { isMuteAll: false } });
+    await db.mutedMember.deleteMany({ where: { sectorId } }); // Hapus semua mute tunggal
+
+    const sysMsg = await db.groupMessage.create({ data: { sectorId, senderId: user.id, content: `unmuted everyone in the sector`, type: "SYSTEM" }, include: { sender: { select: { id: true, name: true, username: true, image: true } } } });
+    const sysPayload = { ...sysMsg, sender: { ...sysMsg.sender, image: null } };
+
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'sector-update', { isMuteAll: false, clearMuted: true });
+    await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysPayload);
+    return { success: true };
   }
 
+  if (sector.isMuteAll) {
+    // Berikan Pengecualian (Unmute) saat Mute All aktif
+    await db.mutedMember.upsert({ where: { sectorId_userId: { sectorId, userId: targetUserId } }, update: {}, create: { sectorId, userId: targetUserId } });
+  } else {
+    // Unmute Normal
+    await db.mutedMember.deleteMany({ where: { sectorId: sectorId, userId: targetUserId } });
+  }
+
+  const targetUser = await db.user.findUnique({ where: { id: targetUserId }, select: { username: true } });
+  const sysMsg = await db.groupMessage.create({ data: { sectorId, senderId: user.id, content: `unmuted @${targetUser?.username}`, type: "SYSTEM" }, include: { sender: { select: { id: true, name: true, username: true, image: true } } } });
+
+  const sysPayload = { ...sysMsg, sender: { ...sysMsg.sender, image: null } };
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'sector-update', { unmutedUser: targetUserId, isMuteAll: sector.isMuteAll });
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysPayload);
   return { success: true };
+}
+
+export async function setCollabRole(sectorId: string, targetUserId: string, role: string) {
+  const user = await requireAuth();
+  const sector = await db.sector.findUnique({ where: { id: sectorId }, include: { station: true } });
+  if (!sector || sector.station.userId !== user.id) return { error: "Only owner can change roles" };
+
+  await db.sectorCollaborator.update({ where: { sectorId_userId: { sectorId, userId: targetUserId } }, data: { role } });
+
+  const targetUser = await db.user.findUnique({ where: { id: targetUserId }, select: { username: true } });
+  const contentMsg = role === "ADMIN" ? `promoted @${targetUser?.username} to Admin` : `demoted @${targetUser?.username} to Member`;
+  const sysMsg = await db.groupMessage.create({ data: { sectorId, senderId: user.id, content: contentMsg, type: "SYSTEM" }, include: { sender: { select: { id: true, name: true, username: true, image: true } } } });
+
+  const sysPayload = { ...sysMsg, sender: { ...sysMsg.sender, image: null } };
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysPayload);
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'sector-update', { roleChanged: { userId: targetUserId, role } });
+  await pusherServer.trigger(`private-user-${targetUserId}`, 'role-updated', { sectorId, sectorName: sector.name, role });
+
+  return { success: true };
+}
+
+export async function blindMember(sectorId: string, targetUserId: string) {
+  const user = await requireAuth();
+  const sector = await db.sector.findUnique({ where: { id: sectorId }, include: { station: true } });
+  if (!sector || sector.station.userId !== user.id) return { error: "Only owner can blind" };
+
+  await db.blindedMember.upsert({
+    where: { sectorId_userId: { sectorId, userId: targetUserId } },
+    update: {}, create: { sectorId, userId: targetUserId }
+  });
+
+  const targetUser = await db.user.findUnique({ where: { id: targetUserId }, select: { username: true } });
+  const sysMsg = await db.groupMessage.create({
+    data: { sectorId, senderId: user.id, content: `blinded @${targetUser?.username}`, type: "SYSTEM" },
+    include: { sender: { select: { id: true, name: true, username: true, image: true } } }
+  });
+
+  const sysPayload = { ...sysMsg, sender: { ...sysMsg.sender, image: null } };
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysPayload);
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'blind-update', { userId: targetUserId, isBlinded: true });
+  return { success: true };
+}
+
+export async function sightMember(sectorId: string, targetUserId: string) {
+  const user = await requireAuth();
+  const sector = await db.sector.findUnique({ where: { id: sectorId }, include: { station: true } });
+  if (!sector || sector.station.userId !== user.id) return { error: "Only owner can restore sight" };
+
+  await db.blindedMember.deleteMany({ where: { sectorId, userId: targetUserId } });
+  const targetUser = await db.user.findUnique({ where: { id: targetUserId }, select: { username: true } });
+  const sysMsg = await db.groupMessage.create({
+    data: { sectorId, senderId: user.id, content: `restored sight to @${targetUser?.username}`, type: "SYSTEM" },
+    include: { sender: { select: { id: true, name: true, username: true, image: true } } }
+  });
+
+  const sysPayload = { ...sysMsg, sender: { ...sysMsg.sender, image: null } };
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'new-message', sysPayload);
+  await pusherServer.trigger(`presence-sector-${sectorId}`, 'blind-update', { userId: targetUserId, isBlinded: false });
+  return { success: true };
+}
+
+export async function getBlindedMembers(sectorId: string) {
+  const blinded = await db.blindedMember.findMany({ where: { sectorId }, select: { userId: true } });
+  return blinded.map((m: any) => m.userId);
 }
 
 export async function getMutedMembers(sectorId: string) {

@@ -14,7 +14,8 @@ import {
   getGroupMessages, sendGroupMessage, editGroupMessage,
   deleteGroupMessage, muteMember, unmuteMember,
   clearGroupChat, kickMember, getMutedMembers,
-  sendFriendRequest, getFriends, pinGroupMessageAction
+  sendFriendRequest, getFriends, pinGroupMessageAction,
+  setCollabRole, blindMember, sightMember, getBlindedMembers
 } from "@/lib/actions";
 import { toast } from "sonner";
 import type { SectorWithBeacons } from "@/types";
@@ -44,15 +45,18 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   }, [isOpen]);
 
   const [messages, setMessages] = useState<any[]>([]);
+  const [localCollaborators, setLocalCollaborators] = useState<any[]>(sector?.collaborators || []);
   const [isLoading, setIsLoading] = useState(true);
   const [inputMessage, setInputMessage] = useState("");
   const [mutedMembers, setMutedMembers] = useState<string[]>([]);
+  const [blindedMembers, setBlindedMembers] = useState<string[]>([]);
+  const [isMuteAll, setIsMuteAll] = useState(sector?.isMuteAll || false);
   const [showMembers, setShowMembers] = useState(false);
   const [typingUsers, setTypingUsers] = useState<any[]>([]);
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-
   const [myFriends, setMyFriends] = useState<any[]>([]);
+  const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
 
   // Actions states
   const [replyToMsg, setReplyToMsg] = useState<any | null>(null);
@@ -67,6 +71,12 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   const [selectedBeaconIdForDetail, setSelectedBeaconIdForDetail] = useState<string | null>(null);
   const [pinnedMessage, setPinnedMessage] = useState<any | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ type: "kick" | "clear", targetUser?: any } | null>(null);
+
+  useEffect(() => {
+    if (sector && sector.collaborators) {
+      setLocalCollaborators(sector.collaborators);
+    }
+  }, [sector]);
 
   const executeClearChat = async () => {
     setMessages([]);
@@ -114,6 +124,79 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionContainerRef = useRef<HTMLDivElement>(null);
 
+  // 1. Variabel Pelacak
+  const initialScrollDone = useRef(false);
+  const hasOpenedBefore = useRef(false); // Mengingat apakah ini pertama kali dibuka di sektor ini
+  const [chatReady, setChatReady] = useState(false);
+
+  // 2. Reset pelacak (hanya reset status buka/tutup, BUKAN memori "pernah dibuka")
+  useEffect(() => {
+    if (!isOpen) {
+      initialScrollDone.current = false;
+      setChatReady(false);
+    }
+  }, [isOpen]);
+
+  // 3. Logika Scroll (Kombinasi Pertama = Smooth, Kedua = Instan)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (messages.length > 0 && !initialScrollDone.current) {
+      const isFirstTime = !hasOpenedBefore.current;
+
+      if (isFirstTime) {
+        // --- KASUS A: BUKA PERTAMA KALI (ANIMASI SMOOTH) ---
+        setChatReady(true); // Buka tirai langsung agar proses scroll terlihat elegan
+
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: user?.animationEnabled ? "smooth" : "auto",
+            block: "end"
+          });
+          initialScrollDone.current = true;
+          hasOpenedBefore.current = true; // Tandai bahwa ia sudah pernah dibuka
+        }, 100);
+
+      } else {
+        // --- KASUS B: BUKA KEDUA KALI & SETERUSNYA (INSTAN & KILAT) ---
+        setChatReady(false); // Tutup tirai agar perpindahan instan tidak terlihat mata
+
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                if (messagesContainerRef.current) {
+                  messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+                }
+                setChatReady(true); // Buka tirai setelah posisi terkunci di bawah
+                initialScrollDone.current = true;
+              }, 100);
+            });
+          });
+        }
+      }
+    }
+    // KASUS C: Chat Kosong (Belum ada yang kirim pesan)
+    else if (messages.length === 0 && !initialScrollDone.current) {
+      const emptyTimer = setTimeout(() => {
+        setChatReady(true);
+        hasOpenedBefore.current = true; // Tetap tandai sudah dibuka
+      }, 500);
+      return () => clearTimeout(emptyTimer);
+    }
+    // KASUS D: Ada pesan baru masuk & User tidak sedang membaca riwayat di atas
+    else if (messages.length > 0 && initialScrollDone.current && !isScrolledUp) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: user?.animationEnabled ? "smooth" : "auto",
+          block: "end"
+        });
+      }, 50);
+    }
+  }, [isOpen, messages, isScrolledUp, user?.animationEnabled]);
+
   useEffect(() => {
     if (!isOpen || !sector) return;
 
@@ -128,7 +211,12 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
       }
 
       const muted = await getMutedMembers(sector.id);
-      if (isSubscribed) setMutedMembers(muted);
+      const blinded = await getBlindedMembers(sector.id);
+      if (isSubscribed) {
+        setMutedMembers(muted);
+        setBlindedMembers(blinded);
+        setIsMuteAll(sector?.isMuteAll || false);
+      }
 
       const friendsData = await getFriends();
       if (isSubscribed) setMyFriends(friendsData);
@@ -138,6 +226,41 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
 
     const channelName = `presence-sector-${sector.id}`;
     const channel = pusherClient.subscribe(channelName);
+    const globalChannel = pusherClient.subscribe('presence-global');
+
+    const syncGlobalMembers = () => {
+      const presenceChannel = globalChannel as any;
+
+      if (presenceChannel.members) {
+        const ids = new Set<string>();
+        presenceChannel.members.each((member: any) => ids.add(member.id));
+        setOnlineUserIds(ids);
+      }
+    };
+
+    if (globalChannel.subscribed) {
+      syncGlobalMembers();
+    }
+
+    // 2. JIKA BARU AKAN SUBSCRIBE (Fallback jika use-notifications lambat)
+    const handleGlobalSub = () => {
+      if (!isSubscribed) return;
+      syncGlobalMembers();
+    };
+
+    const handleGlobalAdd = (member: any) => {
+      if (!isSubscribed) return;
+      setOnlineUserIds(prev => { const next = new Set(prev); next.add(member.id); return next; });
+    };
+
+    const handleGlobalRemove = (member: any) => {
+      if (!isSubscribed) return;
+      setOnlineUserIds(prev => { const next = new Set(prev); next.delete(member.id); return next; });
+    };
+
+    globalChannel.bind('pusher:subscription_succeeded', handleGlobalSub);
+    globalChannel.bind('pusher:member_added', handleGlobalAdd);
+    globalChannel.bind('pusher:member_removed', handleGlobalRemove);
 
     channel.bind('new-message', (msg: any) => {
       setTypingUsers(prev => prev.filter(u => u.id !== msg.senderId));
@@ -155,7 +278,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
           } else if (sector.station?.userId === msg.senderId || sector.station?.user?.id === msg.senderId) {
             finalSenderImg = sector.station?.user?.image;
           } else {
-            const collab = sector.collaborators?.find((c: any) => c.userId === msg.senderId || c.user?.id === msg.senderId);
+            const collab = localCollaborators?.find((c: any) => c.userId === msg.senderId || c.user?.id === msg.senderId);
             if (collab?.user?.image) finalSenderImg = collab.user.image;
           }
         }
@@ -186,6 +309,29 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
 
     channel.bind('clear-messages', () => {
       setMessages([]);
+    });
+
+    channel.bind('sector-update', (data: any) => {
+      if (data.isMuteAll !== undefined) setIsMuteAll(data.isMuteAll);
+      if (data.clearMuted) setMutedMembers([]);
+
+      if (data.isMuteAll) {
+        if (data.unmutedUser) setMutedMembers(prev => [...prev, data.unmutedUser]);
+        if (data.mutedUser) setMutedMembers(prev => prev.filter(id => id !== data.mutedUser));
+      } else {
+        if (data.mutedUser) setMutedMembers(prev => [...prev, data.mutedUser]);
+        if (data.unmutedUser) setMutedMembers(prev => prev.filter(id => id !== data.unmutedUser));
+      }
+
+      if (data.roleChanged) {
+        setLocalCollaborators(prev => prev.map(c => c.user.id === data.roleChanged.userId ? { ...c, role: data.roleChanged.role } : c));
+        window.dispatchEvent(new CustomEvent('role-updated-global', { detail: { sectorId: sector.id, userId: data.roleChanged.userId, role: data.roleChanged.role } }));
+      }
+    });
+
+    channel.bind('blind-update', (data: any) => {
+      if (data.isBlinded) setBlindedMembers(prev => [...prev, data.userId]);
+      else setBlindedMembers(prev => prev.filter(id => id !== data.userId));
     });
 
     const typingTimeouts = new Map<string, NodeJS.Timeout>();
@@ -222,6 +368,9 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
       channel.unbind('update-message');
       channel.unbind('clear-messages');
       channel.unbind('client-is-typing');
+      globalChannel.unbind('pusher:subscription_succeeded', handleGlobalSub);
+      globalChannel.unbind('pusher:member_added', handleGlobalAdd);
+      globalChannel.unbind('pusher:member_removed', handleGlobalRemove);
       pusherClient.unsubscribe(channelName);
       clearInterval(intervalId);
       typingTimeouts.forEach(t => clearTimeout(t));
@@ -270,7 +419,11 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
     }
   };
 
-  const isUserMuted = mutedMembers.includes(user.id);
+  // const amIAdmin = localCollaborators.find((c: any) => c.userId === user.id)?.role === "ADMIN";
+  const isUserMuted = isMuteAll
+    ? (!isOwner && !mutedMembers.includes(user.id))
+    : (!isOwner && mutedMembers.includes(user.id));
+  const amIBlinded = blindedMembers.includes(user.id);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -321,46 +474,61 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
 
   const handleCommand = async (cmdString: string) => {
     if (!isOwner || !sector) return;
-
     const parts = cmdString.trim().split(":");
     const cmd = parts[0].toLowerCase();
     const arg = parts[1]?.trim();
 
-    if (cmd === "/clear") {
-      setConfirmAction({ type: "clear" });
+    if (cmd === "/clear") { setConfirmAction({ type: "clear" }); return; }
+    if (!arg) { toast.error("Command requires a target user (e.g. /mute:username)"); return; }
+
+    // CEK VALIDASI MUTE ALL
+    if (cmd === "/mute" && arg === "all") {
+      if (isMuteAll) { toast.error("Everyone is already muted!"); return; }
+      toast.promise(muteMember(sector.id, "all"), { loading: "Muting everyone...", success: "Mute All active!", error: "Failed" });
+      return;
+    }
+    if (cmd === "/unmute" && arg === "all") {
+      if (!isMuteAll) { toast.error("Mute All is not active!"); return; }
+      toast.promise(unmuteMember(sector.id, "all"), { loading: "Unmuting everyone...", success: "Mute All lifted!", error: "Failed" });
       return;
     }
 
-    if (!arg) {
-      toast.error("Command requires a username, e.g., /mute:username");
-      return;
-    }
+    const targetUser = localCollaborators.find((c: any) => c.user.username === arg)?.user;
+    if (!targetUser) { toast.error(`User @${arg} not found`); return; }
 
-    const targetUser = sector.collaborators?.find((c: any) => c.user.username === arg)?.user;
-    if (!targetUser) {
-      toast.error(`User @${arg} not found in this sector`);
-      return;
-    }
-
+    // CEK VALIDASI STATUS TARGET SEBELUM EKSEKUSI
     if (cmd === "/mute") {
-      const res = await muteMember(sector.id, targetUser.id);
-      if ((res as any).error) toast.error((res as any).error);
-      else {
-        toast.success(`Muted ${targetUser.name || targetUser.username} (@${targetUser.username}).`);
-        setMutedMembers(prev => [...prev, targetUser.id]);
-      }
-    } else if (cmd === "/unmute") {
-      const res = await unmuteMember(sector.id, targetUser.id);
-      if ((res as any).error) toast.error((res as any).error);
-      else {
-        toast.success(`Unmuted ${targetUser.name || targetUser.username} (@${targetUser.username}).`);
-        setMutedMembers(prev => prev.filter(id => id !== targetUser.id));
-      }
-    } else if (cmd === "/kick") {
-      setConfirmAction({ type: "kick", targetUser });
-    } else {
-      toast.error(`Unknown command: ${cmd}`);
+      const currentlyMuted = isMuteAll ? !mutedMembers.includes(targetUser.id) : mutedMembers.includes(targetUser.id);
+      if (currentlyMuted) { toast.error(`@${arg} is already muted!`); return; }
+      toast.promise(muteMember(sector.id, targetUser.id), { loading: "Muting...", success: `@${arg} muted!`, error: "Failed" });
     }
+    else if (cmd === "/unmute") {
+      const currentlyMuted = isMuteAll ? !mutedMembers.includes(targetUser.id) : mutedMembers.includes(targetUser.id);
+      if (!currentlyMuted) { toast.error(`@${arg} is not muted!`); return; }
+      toast.promise(unmuteMember(sector.id, targetUser.id), { loading: "Unmuting...", success: `@${arg} unmuted!`, error: "Failed" });
+    }
+    else if (cmd === "/blind") {
+      if (blindedMembers.includes(targetUser.id)) { toast.error(`@${arg} is already blinded!`); return; }
+      toast.promise(blindMember(sector.id, targetUser.id), { loading: "Blinding...", success: `@${arg} blinded!`, error: "Failed" });
+    }
+    else if (cmd === "/sight") {
+      if (!blindedMembers.includes(targetUser.id)) { toast.error(`@${arg} can already see!`); return; }
+      toast.promise(sightMember(sector.id, targetUser.id), { loading: "Restoring sight...", success: `@${arg} sight restored!`, error: "Failed" });
+    }
+    else if (cmd === "/promote") {
+      const currentRole = localCollaborators.find((c: any) => c.userId === targetUser.id)?.role;
+      if (currentRole === "ADMIN") { toast.error(`@${arg} is already an Admin!`); return; }
+      toast.promise(setCollabRole(sector.id, targetUser.id, "ADMIN"), { loading: "Promoting...", success: `@${arg} promoted to Admin!`, error: "Failed" });
+    }
+    else if (cmd === "/demote") {
+      const currentRole = localCollaborators.find((c: any) => c.userId === targetUser.id)?.role;
+      if (currentRole !== "ADMIN") { toast.error(`@${arg} is already a Member!`); return; }
+      toast.promise(setCollabRole(sector.id, targetUser.id, "MEMBER"), { loading: "Demoting...", success: `@${arg} demoted to Member!`, error: "Failed" });
+    }
+    else if (cmd === "/kick") {
+      setConfirmAction({ type: "kick", targetUser });
+    }
+    else { toast.error(`Unknown command: ${cmd}`); }
   };
 
   const mentionSuggestions = useMemo(() => {
@@ -370,26 +538,50 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
       if (!isOwner) return [];
       const q = mentionQuery.text.toLowerCase();
 
-      const cmdMatch = q.match(/^(mute|unmute|kick):(.*)/);
+      const cmdMatch = q.match(/^(mute|unmute|kick|blind|sight|promote|demote):(.*)/);
       if (cmdMatch) {
         const cmdPart = cmdMatch[1];
         const searchPart = cmdMatch[2];
-        const members = sector.collaborators?.filter((c: any) => c.user.id !== user.id).map((c: any) => ({
+
+        let members = localCollaborators.filter((c: any) => c.user.id !== user.id);
+
+        if (cmdPart === "mute") {
+          members = members.filter((c: any) => isMuteAll ? mutedMembers.includes(c.user.id) : !mutedMembers.includes(c.user.id));
+        } else if (cmdPart === "unmute") {
+          members = members.filter((c: any) => isMuteAll ? !mutedMembers.includes(c.user.id) : mutedMembers.includes(c.user.id));
+        } else if (cmdPart === "blind") {
+          members = members.filter((c: any) => !blindedMembers.includes(c.user.id));
+        } else if (cmdPart === "sight") {
+          members = members.filter((c: any) => blindedMembers.includes(c.user.id));
+        } else if (cmdPart === "promote") {
+          members = members.filter((c: any) => c.role !== "ADMIN");
+        } else if (cmdPart === "demote") {
+          members = members.filter((c: any) => c.role === "ADMIN");
+        }
+
+        let suggestions = members.map((c: any) => ({
           text: `${cmdPart}:${c.user.username}`,
           label: c.user.name || c.user.username,
           subtitle: `@${c.user.username}`,
           image: c.user.image
-        })) || [];
-        return members.filter((m: any) => m.label.toLowerCase().includes(searchPart) || m.subtitle.toLowerCase().includes(searchPart));
+        }));
+
+        if (cmdPart === "mute" && !isMuteAll) {
+          suggestions.unshift({ text: "mute:all", label: "Everyone (All Members)", subtitle: "Apply to all", image: null });
+        } else if (cmdPart === "unmute" && isMuteAll) {
+          suggestions.unshift({ text: "unmute:all", label: "Everyone (All Members)", subtitle: "Apply to all", image: null });
+        }
+
+        return suggestions.filter((m: any) => m.label.toLowerCase().includes(searchPart) || m.subtitle.toLowerCase().includes(searchPart));
       }
 
-      const cmds = ["mute:", "unmute:", "kick:", "clear"];
+      const cmds = ["mute:", "unmute:", "kick:", "clear", "blind:", "sight:", "promote:", "demote:"];
       return cmds.filter(c => c.includes(q)).map(c => ({ text: c, label: `/${c}`, subtitle: "Command", image: null }));
     }
 
     if (mentionQuery.type === "@") {
       const q = mentionQuery.text.toLowerCase();
-      const members = sector.collaborators?.filter((c: any) => c.user.id !== user.id).map((c: any) => ({
+      const members = localCollaborators?.filter((c: any) => c.user.id !== user.id).map((c: any) => ({
         text: `@${c.user.username}`,
         label: c.user.name || c.user.username,
         subtitle: `@${c.user.username}`,
@@ -532,7 +724,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                     <h3 style={{ fontWeight: 700, color: "white", fontSize: "1.125rem", lineHeight: 1.2, margin: 0 }}>{sector.name} Chat</h3>
                     <div style={{ fontSize: "0.75rem", color: "#C4B5FD", display: "flex", alignItems: "center", gap: "4px" }}>
                       <UserGroupIcon width={12} height={12} />
-                      {1 + (sector.collaborators?.length || 0)} Members
+                      {1 + (localCollaborators?.length || 0)} Members
                     </div>
                   </div>
                 </div>
@@ -579,7 +771,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                   <div
                     ref={messagesContainerRef}
                     onScroll={handleScroll}
-                    style={{ flex: 1, overflowY: "auto", padding: "16px", paddingTop: pinnedMessage ? "64px" : "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                    style={{ flex: 1, overflowY: "auto", padding: "16px", paddingTop: pinnedMessage ? "64px" : "16px", display: "flex", flexDirection: "column", gap: "12px", opacity: chatReady ? 1 : 0, transition: chatReady ? "opacity 0.2s ease-out" : "none", visibility: chatReady ? "visible" : "hidden" }}>
 
                     {isLoading ? (
                       <div className="flex flex-col items-center justify-center h-full gap-4 opacity-80 mt-10">
@@ -597,6 +789,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                     ) : (
                       messages.map(msg => {
                         const isMine = msg.senderId === user.id;
+                        const isMsgOwner = msg.senderId === sector.station?.userId || msg.senderId === sector.station?.user?.id || (isOwner && isMine);
                         const showOptions = selectedMsgId === msg.id;
                         const isSending = !!msg._isSending;
 
@@ -621,11 +814,16 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const targetUser = sector.collaborators?.find((c: any) => c.user.id === msg.senderId)?.user || (sector.station?.userId === msg.senderId ? sector.station.user : msg.sender);
+                                    const targetUser = localCollaborators?.find((c: any) => c.user.id === msg.senderId)?.user || (sector.station?.userId === msg.senderId ? sector.station.user : msg.sender);
                                     if (targetUser) setMentionDetail({ type: 'user', data: targetUser });
                                   }}
                                   className="cursor-pointer hover:opacity-80 transition-opacity"
-                                  style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#374151", overflow: "hidden", flexShrink: 0, border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }}
+                                  style={{
+                                    width: "32px", height: "32px", borderRadius: "50%", background: "#374151", overflow: "hidden", flexShrink: 0,
+                                    ...(isMsgOwner ? { border: "2px solid #FFD700", boxShadow: "0 0 12px 2px rgba(255,215,0,0.8)" } :
+                                      localCollaborators.find((c: any) => c.userId === msg.senderId)?.role === "ADMIN" ? { border: "2px solid #10B981" } :
+                                        { border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" })
+                                  }}
                                 >
                                   {msg.sender?.image ? (
                                     <img src={msg.sender.image} alt={msg.sender.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -683,7 +881,9 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
 
                                   <div>
                                     {msg.isDeleted ? (
-                                      msg.deletedBy === user.id ? "You deleted this message" : msg.deletedBy === sector.station?.userId ? "Owner has deleted this message" : "This message was deleted"
+                                      "This message was deleted"
+                                    ) : (amIBlinded && !isMine && msg.type !== "SYSTEM") ? (
+                                      <div style={{ padding: "0 10px", opacity: 0.3 }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
                                     ) : (
                                       msg.content.split(/(\s+)/).map((word: string, i: number) => {
                                         if (word.match(/^https?:\/\//)) {
@@ -702,7 +902,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 setSelectedMsgId(null);
-                                                const targetUser = sector.collaborators?.find((c: any) => c.user.username.toLowerCase() === clean.toLowerCase())?.user || (sector.station?.user?.username.toLowerCase() === clean.toLowerCase() ? sector.station.user : null);
+                                                const targetUser = localCollaborators?.find((c: any) => c.user.username.toLowerCase() === clean.toLowerCase())?.user || (sector.station?.user?.username.toLowerCase() === clean.toLowerCase() ? sector.station.user : null);
                                                 if (targetUser) { setMentionDetail({ type: 'user', data: targetUser }); return; }
                                                 const targetBeacon = sector.beacons?.find((b: any) => b.title.replace(/\s+/g, '').toLowerCase() === clean.toLowerCase());
                                                 if (targetBeacon) setMentionDetail({ type: 'beacon', data: targetBeacon });
@@ -803,7 +1003,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                           onClick={scrollToBottom}
                           className="bg-violet-600 hover:bg-violet-500 text-white rounded-full p-2 shadow-[0_4px_15px_rgba(0,0,0,0.5)] border border-violet-400/50 cursor-pointer transition-colors"
                           title="Scroll to bottom"
-                          style={{padding: "10px"}}
+                          style={{ padding: "10px" }}
                         >
                           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -853,7 +1053,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                             >
                               {sg.image ? <img src={sg.image} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} /> : <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#374151", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", flexShrink: 0 }}>{sg.label[0]?.toUpperCase()}</div>}
                               <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                                <span style={{ fontSize: "14px", fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sg.label}</span>
+                                <span style={{ fontSize: "14px", fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px", display: "block" }}>{sg.label}</span>
                                 {sg.subtitle && <span style={{ fontSize: "12px", color: "#9CA3AF", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sg.subtitle}</span>}
                               </div>
                             </div>
@@ -914,7 +1114,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                       <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", gap: "8px" }}>
                         <UserGroupIcon width={16} height={16} style={{ color: "#A78BFA", flexShrink: 0 }} />
                         <h4 style={{ color: "white", fontWeight: 700, fontSize: "14px", margin: 0 }}>Members</h4>
-                        <span style={{ fontSize: "12px", color: "#6B7280", marginLeft: "auto" }}>{1 + (sector.collaborators?.length || 0)}</span>
+                        <span style={{ fontSize: "12px", color: "#6B7280", marginLeft: "auto" }}>{1 + (localCollaborators?.length || 0)}</span>
                       </div>
 
                       {/* Members List */}
@@ -922,11 +1122,23 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                         {sector.station?.user && (
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", marginBottom: "4px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                              <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "#374151", overflow: "hidden", flexShrink: 0 }}>
-                                {sector.station.user.image
-                                  ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                  : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
-                                }
+                              <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
+                                <div
+                                  onClick={(e) => { e.stopPropagation(), setMentionDetail({ type: 'user', data: sector.station.user }) }}
+                                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                                  style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden", border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)" }}
+                                >
+                                  {sector.station.user.image
+                                    ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
+                                  }
+                                </div>
+                                {/* Titik Online */}
+                                <div style={{
+                                  position: "absolute", bottom: -2, right: -2, width: "12px", height: "12px", borderRadius: "50%",
+                                  background: onlineUserIds.has(sector.station.user.id) ? "#10B981" : "#4B5563", border: "2px solid rgba(15,15,25,0.95)",
+                                  transition: "background 0.3s"
+                                }} title={onlineUserIds.has(sector.station.user.id) ? "Online" : "Offline"} />
                               </div>
                               <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
                                 <span style={{ fontSize: "14px", fontWeight: 500, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "130px" }}>{sector.station.user.name || sector.station.user.username}</span>
@@ -936,23 +1148,46 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                           </div>
                         )}
 
-                        {sector.collaborators?.map((c: any) => {
-                          const isMuted = mutedMembers.includes(c.user.id);
+                        {localCollaborators?.map((c: any) => {
+                          const isMuted = isMuteAll
+                            ? (!mutedMembers.includes(c.user.id))
+                            : (mutedMembers.includes(c.user.id));
+                          const isOnline = onlineUserIds.has(c.user.id);
                           return (
                             <div key={c.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", borderRadius: "10px", marginBottom: "2px", transition: "background 0.15s", cursor: "default" }}
                               onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
                               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                             >
                               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "#374151", overflow: "hidden", flexShrink: 0 }}>
-                                  {c.user.image
-                                    ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{c.user.username?.[0]?.toUpperCase()}</div>
-                                  }
+
+                                {/* STRUKTUR AVATAR MEMBER YANG BARU */}
+                                <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
+                                  <div
+                                    onClick={(e) => { e.stopPropagation(); setMentionDetail({ type: 'user', data: c.user }) }}
+                                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                                    style={{
+                                      width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden",
+                                      ...(c.role === "ADMIN" ? { border: "2px solid #10B981" } : { border: "1px solid rgba(255,255,255,0.1)" })
+                                    }}
+                                  >
+                                    {c.user.image
+                                      ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                      : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{c.user.username?.[0]?.toUpperCase()}</div>
+                                    }
+                                  </div>
+
+                                  {/* Titik Online Indicator */}
+                                  <div style={{
+                                    position: "absolute", bottom: -2, right: -2, width: "12px", height: "12px", borderRadius: "50%",
+                                    background: isOnline ? "#10B981" : "#4B5563", border: "2px solid rgba(15,15,25,0.95)",
+                                    transition: "background 0.3s"
+                                  }} title={isOnline ? "Online" : "Offline"} />
                                 </div>
+                                {/* END AVATAR MEMBER */}
+
                                 <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
                                   <span style={{ fontSize: "14px", fontWeight: 500, color: "#E5E7EB", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100px" }}>{c.user.name || c.user.username}</span>
-                                  {isMuted && <span style={{ fontSize: "10px", color: "#F87171", fontWeight: 700, textTransform: "uppercase" }}>Muted</span>}
+                                  <span style={{ fontSize: "10px", color: c.role === "ADMIN" ? "#10B981" : "#9CA3AF", fontWeight: 700, textTransform: "uppercase" }}>{c.role} {isMuted && <span style={{ color: "#F87171" }}>• MUTED</span>}</span>
                                 </div>
                               </div>
                               {isOwner && (
@@ -1087,7 +1322,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
             beacon={targetBeacon}
             sector={sector}
             onClose={() => setSelectedBeaconIdForDetail(null)}
-            readOnly={!(isOwner || sector.collaborators?.some((c: any) => c.userId === user.id))}
+            readOnly={!(isOwner || localCollaborators?.some((c: any) => c.userId === user.id))}
           />
         );
       })()}

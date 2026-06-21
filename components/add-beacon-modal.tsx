@@ -12,6 +12,7 @@ type Props = {
   initialSectorId?: string;
   onClose: () => void;
   onCreated: (beacon: Beacon) => void;
+  currentStationId?: string;
 };
 
 function normalizeUrl(raw: string): string {
@@ -24,21 +25,21 @@ function normalizeUrl(raw: string): string {
   return `https://${trimmed}`;
 }
 
-export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCreated }: Props) {
+export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCreated, currentStationId }: Props) {
   const [sectorId, setSectorId] = useState(initialSectorId ?? sectors[0]?.id ?? "");
   const [urlRaw, setUrlRaw] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [customImageUrl, setCustomImageUrl] = useState("");
   const [customFaviconUrl, setCustomFaviconUrl] = useState("");
-  
+
   const [isSectorDropdownOpen, setIsSectorDropdownOpen] = useState(false);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   const [error, setError] = useState<string | null>(null);
-  const [formErrors, setFormErrors] = useState<{url?: string, title?: string, sector?: string}>({});
+  const [formErrors, setFormErrors] = useState<{ url?: string, title?: string, sector?: string }>({});
   const [showImageEdit, setShowImageEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -52,7 +53,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
       if (meta.imageUrl) setCustomImageUrl(meta.imageUrl);
       if (meta.faviconUrl) setCustomFaviconUrl(meta.faviconUrl);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meta]);
 
   // Lock body scroll + focus on mount
@@ -117,11 +118,11 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const finalUrl = normalizeUrl(urlRaw);
-    const errors: {url?: string, title?: string, sector?: string} = {};
+    const errors: { url?: string, title?: string, sector?: string } = {};
     if (!finalUrl || finalUrl === "https://") errors.url = "URL is required.";
     if (!title.trim()) errors.title = "Title is required.";
     if (!sectorId) errors.sector = "Sector is required.";
-    
+
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
@@ -178,16 +179,35 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   <>
                     <div style={{ position: "fixed", inset: 0, zIndex: 90 }} onClick={() => setIsSectorDropdownOpen(false)} />
                     <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", zIndex: 100, overflow: "hidden", overflowY: "auto", maxHeight: "200px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
-                      {sectors.map((s) => (
-                        <div
-                          key={s.id}
-                          className="dropdown-option-btn hover:bg-white/5"
-                          style={{ padding: "0.6rem 1rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
-                          onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
-                        >
-                          {s.name}
-                        </div>
-                      ))}
+                      {sectors.map((s, index) => {
+                        const isOwned = currentStationId ? (s as any).stationId === currentStationId : true;
+                        const prevIsOwned = index > 0 && currentStationId ? (sectors[index - 1] as any).stationId === currentStationId : true;
+
+                        const showMySectorsHeader = index === 0 && isOwned;
+                        const showCollabSectorsHeader = (!isOwned && prevIsOwned) || (index === 0 && !isOwned);
+
+                        return (
+                          <div key={s.id}>
+                            {showMySectorsHeader && (
+                              <div style={{ padding: "0.4rem 1rem", fontSize: "0.7rem", color: "#a1a1aa", background: "rgba(0,0,0,0.3)", borderBottom: "1px solid rgba(255,255,255,0.05)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "bold" }}>
+                                My Sectors
+                              </div>
+                            )}
+                            {showCollabSectorsHeader && (
+                              <div style={{ padding: "0.4rem 1rem", fontSize: "0.7rem", color: "#a1a1aa", background: "rgba(0,0,0,0.3)", borderTop: index > 0 ? "1px solid rgba(255,255,255,0.05)" : "none", borderBottom: "1px solid rgba(255,255,255,0.05)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "bold" }}>
+                                Collab Sectors
+                              </div>
+                            )}
+                            <div
+                              className="dropdown-option-btn hover:bg-white/5"
+                              style={{ padding: "0.6rem 1rem", paddingLeft: "1.5rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
+                              onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
+                            >
+                              {s.name}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </>
                 )}
@@ -210,7 +230,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   type="text"
                   placeholder="example.com"
                   value={urlRaw}
-                  onChange={(e) => { handleUrlChange(e.target.value); setFormErrors(p => ({...p, url: undefined})); }}
+                  onChange={(e) => { handleUrlChange(e.target.value); setFormErrors(p => ({ ...p, url: undefined })); }}
                   onBlur={handleUrlBlur}
                   style={{ border: "none", borderRadius: 0, flex: 1, outline: "none", boxShadow: "none", background: "transparent", color: "var(--color-starlight)", fontFamily: "var(--font-sans)", fontSize: "0.9rem", padding: "0.625rem 1rem 0.625rem 0" }}
                 />
@@ -227,7 +247,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                 type="text"
                 placeholder="Beacon title"
                 value={title}
-                onChange={(e) => { setTitle(e.target.value); setFormErrors(p => ({...p, title: undefined})); }}
+                onChange={(e) => { setTitle(e.target.value); setFormErrors(p => ({ ...p, title: undefined })); }}
                 maxLength={100}
               />
               {formErrors.title && <span className="text-red-500 text-xs mt-1 block">{formErrors.title}</span>}
