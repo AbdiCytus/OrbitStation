@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/banner-icon.png" alt="Orbit Station Logo" width="120" height="120" />
+  <img src="public/banner-icon.png" alt="Orbit Station Logo" width="300" height="120" />
 
   # 🌌 Orbit Station
 
