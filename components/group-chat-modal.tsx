@@ -38,12 +38,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   }, [incomingSector]);
   const sector = incomingSector || prevSectorRef.current;
 
-  const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) setIsVisible(true);
-    else setIsVisible(false);
-  }, [isOpen]);
 
   const [messages, setMessages] = useState<any[]>([]);
   const [localCollaborators, setLocalCollaborators] = useState<any[]>(sector?.collaborators || []);
@@ -57,6 +52,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [myFriends, setMyFriends] = useState<any[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<Set<string>>(new Set());
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
 
   // Actions states
@@ -98,17 +94,19 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleCloseModal = () => {
-    if (!user?.animationEnabled) {
-      onClose();
-      return;
-    }
-
-    setIsVisible(false);
-
-    setTimeout(() => {
-      onClose();
-    }, 300);
+    // Prevent framer-motion drag bug from freezing body interactions
+    document.body.style.pointerEvents = "";
+    document.body.style.userSelect = "";
+    onClose();
   };
+
+  useEffect(() => {
+    return () => {
+      // Cleanup on unmount just in case
+      document.body.style.pointerEvents = "";
+      document.body.style.userSelect = "";
+    };
+  }, []);
 
   const handlePressStart = (msgId: string) => {
     if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
@@ -206,13 +204,16 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
 
     const fetchData = async () => {
       setIsLoading(true);
-      const msgs = await getGroupMessages(sector.id);
+      const data = await getGroupMessages(sector.id);
       if (isSubscribed) {
-        setMessages(msgs);
+        setMessages(data.messages);
 
-        if (sector.pinnedMessageId) {
-          const pinned = msgs.find((m: any) => m.id === sector.pinnedMessageId);
+        if (data.pinnedMessageId) {
+          const pinned = data.messages.find((m: any) => m.id === data.pinnedMessageId);
           if (pinned) setPinnedMessage(pinned);
+          else setPinnedMessage(null);
+        } else {
+          setPinnedMessage(null);
         }
 
         setIsLoading(false);
@@ -685,9 +686,10 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   if (!sector) return null;
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
           key="group-chat-overlay"
           className="modal-overlay fixed inset-0 z-[110] flex items-center justify-center p-0 sm:p-8 bg-black/60 backdrop-blur-sm"
           style={{ zIndex: 110, animation: "none" }}
@@ -867,7 +869,13 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                   </div>
                                 )}
 
-                                <div
+                                <motion.div
+                                  drag="x"
+                                  dragConstraints={{ left: 0, right: 0 }}
+                                  dragElastic={0.15}
+                                  onDragEnd={(_, info) => {
+                                    if (info.offset.x > 50) setReplyToMsg(msg);
+                                  }}
                                   onMouseDown={() => handlePressStart(msg.id)}
                                   onMouseUp={handlePressEnd}
                                   onMouseLeave={handlePressEnd}
@@ -878,7 +886,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                   style={{
                                     userSelect: "none",
                                     WebkitUserSelect: "none",
-                                    padding: "10px 14px", borderRadius: "18px", width: "fit-content", cursor: "pointer", transition: "all 0.15s", wordBreak: "break-word", fontSize: "15px", lineHeight: "1.5",
+                                    padding: "10px 14px", borderRadius: "18px", width: "fit-content", cursor: "pointer", transition: "background 0.15s, border 0.15s, color 0.15s, border-radius 0.15s, box-shadow 0.15s", wordBreak: "break-word", fontSize: "15px", lineHeight: "1.5",
                                     ...(msg.isDeleted ? {
                                       background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.05)", color: "#6B7280", fontStyle: "italic"
                                     } : isMine ? {
@@ -890,7 +898,14 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                   }}
                                 >
                                   {msg.replyTo && !msg.isDeleted && (
-                                    <div style={{ marginBottom: "8px", padding: "6px 10px", background: "rgba(0,0,0,0.25)", borderRadius: "10px", borderLeft: "3px solid rgba(139,92,246,0.8)", fontSize: "12px" }}>
+                                    <div
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const el = document.getElementById(`msg-${msg.replyTo.id}`);
+                                        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                      }}
+                                      style={{ cursor: "pointer", marginBottom: "8px", padding: "6px 10px", background: "rgba(0,0,0,0.25)", borderRadius: "10px", borderLeft: "3px solid rgba(139,92,246,0.8)", fontSize: "12px" }}
+                                    >
                                       <div style={{ color: "#A78BFA", fontWeight: 600, marginBottom: "2px" }}>{msg.replyTo.sender?.name || msg.replyTo.sender?.username}</div>
                                       <div style={{ color: "#D1D5DB", opacity: 0.85, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" as any }}>{msg.replyTo.isDeleted ? "Message deleted" : msg.replyTo.content}</div>
                                     </div>
@@ -935,7 +950,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     )}
                                   </div>
                                   {msg.editedAt && !msg.isDeleted && <span style={{ fontSize: "10px", opacity: 0.5, marginLeft: "6px", fontStyle: "italic" }}>(edited)</span>}
-                                </div>
+                                </motion.div>
                               </div>
                             </div>
 
@@ -1239,6 +1254,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                   const allowAddFriend = isUserType && mentionDetail.data.allowFriendRequests !== false;
                   const allowVisitProfile = isUserType && mentionDetail.data.station?.isPublic !== false;
                   const isAlreadyFriend = isUserType && myFriends.some(f => f.id === mentionDetail.data.id);
+                  const isPending = isUserType && pendingRequests.has(mentionDetail.data.id);
 
                   return (
                     <motion.div
@@ -1270,18 +1286,29 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                           <>
                             {allowAddFriend && (
                               <button
-                                disabled={isAlreadyFriend}
+                                disabled={isAlreadyFriend || isPending}
                                 onClick={async () => {
-                                  if (isAlreadyFriend) return;
+                                  if (isAlreadyFriend || isPending) return;
+                                  
+                                  setPendingRequests(prev => new Set(prev).add(mentionDetail.data.id));
+                                  toast.success("Friend request sent!");
                                   const res = await sendFriendRequest(mentionDetail.data.id);
-                                  if ((res as any).error) toast.error((res as any).error);
-                                  else toast.success("Friend request sent!");
+                                  if ((res as any).error) {
+                                    toast.error((res as any).error);
+                                    setPendingRequests(prev => {
+                                      const next = new Set(prev);
+                                      next.delete(mentionDetail.data.id);
+                                      return next;
+                                    });
+                                  }
                                 }}
                                 style={{ padding: "5px 0" }}
-                                className={`flex-1 flex justify-center items-center gap-2 rounded-xl text-sm font-semibold transition-colors border-none ${isAlreadyFriend ? 'bg-white/5 text-gray-400 cursor-default' : 'bg-violet-600 hover:bg-violet-500 text-white cursor-pointer'}`}
+                                className={`flex-1 flex justify-center items-center gap-2 rounded-xl text-sm font-semibold transition-colors border-none ${
+                                  isAlreadyFriend || isPending ? 'bg-white/5 text-gray-400 cursor-default' : 'bg-violet-600 hover:bg-violet-500 text-white cursor-pointer'
+                                }`}
                               >
                                 {isAlreadyFriend ? <UsersIcon width={18} height={18} /> : <UserPlusIcon width={18} height={18} />}
-                                {isAlreadyFriend ? "Friends" : "Add Friend"}
+                                {isAlreadyFriend ? "Friends" : isPending ? "Pending" : "Add Friend"}
                               </button>
                             )}
                             {allowVisitProfile && (
@@ -1330,6 +1357,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
           </motion.div>
         </motion.div>
       )}
+      </AnimatePresence>
 
       {selectedBeaconIdForDetail && (() => {
         const targetBeacon = sector.beacons?.find((b: any) => b.id === selectedBeaconIdForDetail);
@@ -1383,6 +1411,6 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
           </motion.div>
         )}
       </AnimatePresence>
-    </AnimatePresence>
+    </>
   );
 }

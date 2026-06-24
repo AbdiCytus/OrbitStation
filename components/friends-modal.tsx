@@ -26,9 +26,11 @@ interface Props {
   refetchStats?: () => void;
   /** Called with friendId when user opens a chat, null when chat is closed */
   onActiveChatChange?: (friendId: string | null) => void;
+  targetChatId?: string | null;
+  onTargetChatHandled?: () => void;
 }
 
-export default function FriendsModal({ isOpen, onClose, user, stats, refetchStats, onActiveChatChange }: Props) {
+export default function FriendsModal({ isOpen, onClose, user, stats, refetchStats, onActiveChatChange, targetChatId, onTargetChatHandled }: Props) {
   if (!user) return null;
   const [activeTab, setActiveTab] = useState<Tab>("list");
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,6 +76,19 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
       }
     }
   }, [searchQuery, activeTab]);
+
+  useEffect(() => {
+    if (isOpen && targetChatId) {
+      setActiveTab("list");
+      setActiveChatId(targetChatId);
+      
+      const f = friends.find(f => f.id === targetChatId);
+      if (f) setActiveChatName(f.name || f.username);
+      else setActiveChatName("Pilot");
+
+      if (onTargetChatHandled) onTargetChatHandled();
+    }
+  }, [isOpen, targetChatId, friends, onTargetChatHandled]);
 
   // Realtime private chat via Pusher — no polling, no SSE
   useEffect(() => {
@@ -203,6 +218,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
     if (!res?.error) {
       toast.success("Friend request accepted");
       setRequests(prev => prev.filter(r => r.id !== id));
+      if (refetchStats) refetchStats();
     } else {
       toast.error(res.error || "Failed to accept request");
     }
@@ -213,6 +229,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
     if (!res?.error) {
       toast.success("Friend request rejected");
       setRequests(prev => prev.filter(r => r.id !== id));
+      if (refetchStats) refetchStats();
     } else {
       toast.error(res.error || "Failed to reject request");
     }

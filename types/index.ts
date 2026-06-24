@@ -33,6 +33,8 @@ export type SectorWithBeacons = Sector & {
 /** Station lengkap dengan semua Sektor dan Beacon (untuk dasbor) */
 export type StationWithSectors = Station & {
   sectors: SectorWithBeacons[];
+  totalSectors?: number;
+  totalBeacons?: number;
 };
 
 /** Profil publik user (tanpa data sensitif) */

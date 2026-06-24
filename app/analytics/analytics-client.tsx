@@ -198,7 +198,7 @@ export default function AnalyticsClient({ analytics, user, isPublicProfile }: Pr
                 </div>
                 <div className="stat-box">
                   <div className="stat-value">{analytics?.uniqueVisitorCount || 0}</div>
-                  <div className="stat-label">Unique Logged-in Visitors</div>
+                  <div className="stat-label">Guest Visitors</div>
                 </div>
                 <div className="stat-box">
                   <div className="stat-value">{analytics?.topBeacons?.length || 0}</div>
@@ -219,7 +219,7 @@ export default function AnalyticsClient({ analytics, user, isPublicProfile }: Pr
             >
               <h2 className="text-3xl font-bold shrink-0" style={{ marginBottom: "0.5rem" }}>Traffic (Last 7 Days)</h2>
               <p className="text-gray-400 text-sm shrink-0" style={{ marginBottom: "2rem" }}>
-                This chart displays the number of unique logged-in users who visited your public profile each day.
+                This chart displays the number of guest users who visited your public profile each day.
               </p>
               <div className="bar-chart-container w-full h-[250px] shrink-0" style={{ minHeight: "250px" }}>
                 {last7Days.map((day, i) => (

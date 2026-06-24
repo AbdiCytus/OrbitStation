@@ -256,9 +256,18 @@ export default function StationClient({
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showGroupChat, setShowGroupChat] = useState(false);
   // Track which private chat is open so useNotifications can suppress its toast
-  const [activeFriendChatId, setActiveFriendChatId] = useState<string | null>(
-    null,
-  );
+  const [activeFriendChatId, setActiveFriendChatId] = useState<string | null>(null);
+  const [targetFriendChatId, setTargetFriendChatId] = useState<string | null>(null);
+
+  const handleChatNotificationClick = useCallback((type: 'private' | 'group', id: string) => {
+    if (type === 'private') {
+      setTargetFriendChatId(id);
+      setShowFriendsModal(true);
+    } else if (type === 'group') {
+      setDisplaySectorId(id);
+      setShowGroupChat(true);
+    }
+  }, []);
 
   const {
     stats,
@@ -273,6 +282,7 @@ export default function StationClient({
         : null
       : null,
     activeFriendId: activeFriendChatId,
+    onChatNotificationClick: handleChatNotificationClick,
   });
 
   useEffect(() => {
@@ -1400,9 +1410,8 @@ export default function StationClient({
                       </button>
                     )}
 
-                    {/* Logika Akses: Hanya Owner atau Admin yang bisa edit/tambah */}
-                    {displaySectorId !== "all" && activeSector &&
-                      (activeSector.stationId === station?.id || (activeSector as any)?.collaborators?.find((c: any) => c.userId === user.id)?.role === "ADMIN") && (
+                    {/* Logika Akses: Hanya Owner atau Admin yang bisa tambah beacon */}
+                    {isCurrentSectorAdminOrOwner && (
                         <button
                           className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
                           style={{ color: "#fff", height: "38px", padding: "0 0.8rem", width: "auto", borderRadius: "8px", background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)", border: "1px solid rgba(139, 92, 246, 0.5)", transition: "all 0.15s" }}
@@ -1956,6 +1965,8 @@ export default function StationClient({
         stats={stats}
         refetchStats={refetchNotifications}
         onActiveChatChange={setActiveFriendChatId}
+        targetChatId={targetFriendChatId}
+        onTargetChatHandled={() => setTargetFriendChatId(null)}
       />
 
       {/* Modals */}

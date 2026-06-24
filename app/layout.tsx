@@ -75,6 +75,15 @@ export default function RootLayout({
               color: "#e2e8f0",
               borderRadius: "12px",
             },
+            actionButtonStyle: {
+              background: "rgba(139, 92, 246, 0.2)",
+              color: "#c4b5fd",
+              border: "1px solid rgba(139, 92, 246, 0.4)",
+              borderRadius: "8px",
+              padding: "4px 12px",
+              fontSize: "13px",
+              fontWeight: 600,
+            },
             className: "font-sans",
           }}
         />

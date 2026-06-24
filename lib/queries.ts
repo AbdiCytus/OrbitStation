@@ -95,6 +95,16 @@ export async function getPublicStation(username: string) {
 
   if (!user?.station) return null;
 
+  const totalSectors = await db.sector.count({ where: { stationId: user.station.id } });
+  const totalBeacons = await db.beacon.count({
+    where: {
+      sector: {
+        stationId: user.station.id,
+        collaborators: { none: {} }
+      }
+    }
+  });
+
   return {
     user: {
       id: user.id,
@@ -108,7 +118,11 @@ export async function getPublicStation(username: string) {
       animationEnabled: user.animationEnabled,
       allowFriendRequests: user.allowFriendRequests,
     },
-    station: user.station,
+    station: {
+      ...user.station,
+      totalSectors,
+      totalBeacons,
+    },
   };
 }
 

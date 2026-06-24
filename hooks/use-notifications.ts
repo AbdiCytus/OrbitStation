@@ -18,6 +18,7 @@ interface UseNotificationsOptions {
   userId?: string;
   activeSectorId?: string | null;
   activeFriendId?: string | null;
+  onChatNotificationClick?: (type: 'private' | 'group', id: string) => void;
 }
 
 const globalSpamTracker: Record<string, { count: number, firstMsgTime: number, suspendedUntil: number, mentionBypassUsed?: boolean }> = {};
@@ -26,6 +27,7 @@ export function useNotifications({
   userId,
   activeSectorId,
   activeFriendId,
+  onChatNotificationClick,
 }: UseNotificationsOptions = {}) {
   const [stats, setStats] = useState<NotificationStats>({
     totalUnreadMessages: 0,
@@ -166,7 +168,13 @@ export function useNotifications({
               if (!isSpam) {
                 toast.success(`Message from ${senderName}`, {
                   description: content,
-                  id: `priv-msg-${messageId}`
+                  id: `priv-msg-${messageId}`,
+                  action: {
+                    label: "View",
+                    onClick: () => {
+                      if (onChatNotificationClick) onChatNotificationClick('private', senderId);
+                    }
+                  }
                 });
                 // ---> NOTIF BROWSER <---
                 showSystemNotification(`Message from ${senderName}`, content);
@@ -226,7 +234,13 @@ export function useNotifications({
 
                 toast.info(title, {
                   description: `${senderName}: ${content}`,
-                  id: `grp-msg-${messageId}`
+                  id: `grp-msg-${messageId}`,
+                  action: {
+                    label: "View",
+                    onClick: () => {
+                      if (onChatNotificationClick) onChatNotificationClick('group', sectorId);
+                    }
+                  }
                 });
                 // ---> NOTIF BROWSER <---
                 showSystemNotification(title, `${senderName}: ${content}`);
@@ -239,6 +253,17 @@ export function useNotifications({
                 }
               }
             }
+          } else if (payload.type === 'TOAST') {
+            toast.success(payload.message, { id: `toast-${Date.now()}` });
+            showSystemNotification("Orbit Station Notification", payload.message);
+
+            const sound = soundConfigRef.current;
+            if (sound?.enabled) {
+              const audio = new Audio(sound.url);
+              audio.volume = 0.5;
+              audio.play().catch(() => { });
+            }
+            fetchStats();
           }
         } else {
           fetchStats();

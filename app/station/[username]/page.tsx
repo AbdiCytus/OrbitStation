@@ -23,8 +23,9 @@ export async function generateMetadata({
     return { title: "User not found — Orbit Station" };
   }
 
-  const allBeaconsCount = data.station.sectors.reduce((acc, s) => acc + s.beacons.length, 0);
-  const statsStr = `${data.station.sectors.length} Sectors · ${allBeaconsCount} Beacons`;
+  const totalSectorsCount = data.station.totalSectors ?? data.station.sectors.length;
+  const allBeaconsCount = data.station.totalBeacons ?? data.station.sectors.reduce((acc, s) => acc + s.beacons.length, 0);
+  const statsStr = `${totalSectorsCount} Sectors · ${allBeaconsCount} Beacons`;
   
   const searchParams = new URLSearchParams();
   searchParams.set("name", data.user.name ?? username);

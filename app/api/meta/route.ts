@@ -119,7 +119,13 @@ function parseMetaTags(html: string, baseUrl: URL): MetaResult {
     getMeta("twitter:title") ??
     html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() ??
     null;
-  if (title) title = decodeHTMLEntities(title);
+  if (title) {
+    title = decodeHTMLEntities(title);
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes("just a moment") || lowerTitle.includes("attention required") || lowerTitle.includes("cloudflare")) {
+      title = baseUrl.hostname;
+    }
+  }
 
   // Description — prioritas: og:description > twitter:description > description
   const description =

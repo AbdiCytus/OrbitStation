@@ -98,11 +98,11 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
   const visibleBeacons = (sectors.find((s) => s.id === activeSectorId)?.beacons ?? []).slice(0, 10);
 
   function handleBeaconClick(beacon: Beacon) {
-    incrementBeaconVisit(beacon.id);
     setSelectedBeacon(beacon);
   }
 
-  const allBeaconsCount = station.sectors.reduce((acc, s) => acc + s.beacons.length, 0);
+  const allBeaconsCount = station.totalBeacons ?? station.sectors.reduce((acc: number, s: any) => acc + s.beacons.length, 0);
+  const totalSectorsCount = station.totalSectors ?? station.sectors.length;
 
   const isOwnProfile = sessionUser?.id === user.id;
   const profileTitle = isOwnProfile ? user.name : `${user.name}'s Station`;
@@ -255,7 +255,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                 <div className="zzz-banner-right">
                   <div className="zzz-stats-row">
                     <div className="zzz-stat">
-                      <div className="zzz-stat-val">{station.sectors.length}</div>
+                      <div className="zzz-stat-val">{totalSectorsCount}</div>
                       <div className="zzz-stat-label">Sectors</div>
                     </div>
                     <div className="zzz-stat">

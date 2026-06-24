@@ -139,6 +139,9 @@ export async function updateSector(
 export async function acceptCollab(messageId: string, sectorId: string) {
   const user = await requireAuth();
 
+  const msg = await db.chatMessage.findUnique({ where: { id: messageId } });
+  if (!msg) return { error: "Message not found" };
+
   try {
     await db.sectorCollaborator.create({
       data: {
@@ -169,17 +172,34 @@ export async function acceptCollab(messageId: string, sectorId: string) {
     });
   }
 
+  if (msg.senderId) {
+    await pusherServer.trigger(`private-user-${msg.senderId}`, 'new-notification', {
+      type: 'TOAST',
+      message: `${user.name || (user as any).username} accepted your collaboration invite!`
+    });
+  }
+
   revalidatePath("/station");
   return { success: true };
 }
 
 export async function rejectCollab(messageId: string) {
-  await requireAuth();
+  const user = await requireAuth();
+
+  const msg = await db.chatMessage.findUnique({ where: { id: messageId } });
+  if (!msg) return { error: "Message not found" };
 
   await db.chatMessage.update({
     where: { id: messageId },
     data: { type: "COLLAB_REJECTED", content: "rejected the sector collaboration" }
   });
+
+  if (msg.senderId) {
+    await pusherServer.trigger(`private-user-${msg.senderId}`, 'new-notification', {
+      type: 'TOAST',
+      message: `${user.name || (user as any).username} declined your collaboration invite.`
+    });
+  }
 
   revalidatePath("/station");
   return { success: true };
@@ -275,6 +295,13 @@ export async function acceptTransferOwnership(messageId: string) {
     data: { type: "OWNERSHIP_TRANSFER_ACCEPTED", content: "accepted the ownership transfer" }
   });
 
+  if (message.senderId) {
+    await pusherServer.trigger(`private-user-${message.senderId}`, 'new-notification', {
+      type: 'TOAST',
+      message: `${user.name || (user as any).username} accepted ownership of sector "${sector.name}"!`
+    });
+  }
+
   revalidatePath("/station");
   return { success: true };
 }
@@ -288,6 +315,14 @@ export async function rejectTransferOwnership(messageId: string) {
     where: { id: messageId },
     data: { type: "OWNERSHIP_TRANSFER_REJECTED", content: "rejected the ownership transfer" }
   });
+
+  const meta = JSON.parse(message.metadata || "{}");
+  if (message.senderId) {
+    await pusherServer.trigger(`private-user-${message.senderId}`, 'new-notification', {
+      type: 'TOAST',
+      message: `${user.name || (user as any).username} declined ownership of sector "${meta.sectorName || ''}".`
+    });
+  }
 
   revalidatePath("/station");
   return { success: true };
@@ -844,6 +879,12 @@ export async function acceptFriendRequest(friendshipId: string) {
     where: { id: friendshipId },
     data: { status: "ACCEPTED" }
   });
+
+  await pusherServer.trigger(`private-user-${friendship.requesterId}`, 'new-notification', {
+    type: 'TOAST',
+    message: `${user.name || (user as any).username} accepted your friend request!`
+  });
+
   return { data: updated };
 }
 
@@ -854,6 +895,12 @@ export async function rejectFriendRequest(friendshipId: string) {
   if (!friendship || friendship.receiverId !== user.id) return { error: "Request not found" };
 
   await db.friendship.delete({ where: { id: friendshipId } });
+
+  await pusherServer.trigger(`private-user-${friendship.requesterId}`, 'new-notification', {
+    type: 'TOAST',
+    message: `${user.name || (user as any).username} declined your friend request.`
+  });
+
   return { success: true };
 }
 
@@ -1114,15 +1161,14 @@ export async function getStationAnalytics(stationId: string) {
     const recentVisits = await db.stationVisit.findMany({
       where: {
         stationId,
+        visitorId: null,
         createdAt: { gte: sevenDaysAgo }
       },
       select: { createdAt: true }
     });
 
-    const uniqueVisitors = await db.stationVisit.groupBy({
-      by: ['visitorId'],
-      where: { stationId, visitorId: { not: null } },
-      _count: true,
+    const guestVisitorsCount = await db.stationVisit.count({
+      where: { stationId, visitorId: null }
     });
 
     const topBeacons = await db.beacon.findMany({
@@ -1132,7 +1178,7 @@ export async function getStationAnalytics(stationId: string) {
       select: { title: true, visits: true, imageUrl: true, faviconUrl: true }
     });
 
-    return { totalVisits, recentVisits, uniqueVisitorCount: uniqueVisitors.length, topBeacons };
+    return { totalVisits, recentVisits, uniqueVisitorCount: guestVisitorsCount, topBeacons };
   } catch (e: any) {
     return { error: e.message };
   }
@@ -1151,11 +1197,11 @@ export async function getGroupMessages(sectorId: string) {
     include: { station: true, collaborators: true }
   });
 
-  if (!sector) return [];
+  if (!sector) return { messages: [], pinnedMessageId: null };
 
   const isOwner = sector.station.userId === user.id;
   const isCollab = sector.collaborators.some(c => c.userId === user.id);
-  if (!isOwner && !isCollab) return [];
+  if (!isOwner && !isCollab) return { messages: [], pinnedMessageId: null };
 
   // Ambil 100 pesan TERBARU dengan descending
   const messages = await db.groupMessage.findMany({
@@ -1172,7 +1218,7 @@ export async function getGroupMessages(sectorId: string) {
     take: 100
   });
 
-  return messages.reverse();
+  return { messages: messages.reverse(), pinnedMessageId: sector.pinnedMessageId };
 }
 
 export async function sendGroupMessage(sectorId: string, content: string, replyToId?: string) {
