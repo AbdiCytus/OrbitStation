@@ -60,6 +60,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   const [replyToMsg, setReplyToMsg] = useState<any | null>(null);
   const [editMsgId, setEditMsgId] = useState<string | null>(null);
   const [selectedMsgId, setSelectedMsgId] = useState<string | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState<{ id: string, x: number } | null>(null);
 
   // Mentions
   const [mentionQuery, setMentionQuery] = useState<{ type: "@" | "/", text: string, startIndex: number } | null>(null);
@@ -92,11 +93,49 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   };
 
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const swipeStartRef = useRef<{ x: number, y: number } | null>(null);
+
+  const handleTouchStartSwipe = (e: React.TouchEvent, msgId: string) => {
+    handlePressStart(msgId);
+    swipeStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+
+  const handleTouchMoveSwipe = (e: React.TouchEvent, msg: any) => {
+    handlePressEnd();
+    if (!swipeStartRef.current) return;
+    const deltaX = e.touches[0].clientX - swipeStartRef.current.x;
+    const deltaY = e.touches[0].clientY - swipeStartRef.current.y;
+    
+    // Only animate if horizontal swipe
+    if (deltaX > 0 && Math.abs(deltaY) < 40) {
+      setSwipeOffset({ id: msg.id, x: Math.min(deltaX, 80) }); // Cap visual drag at 80px
+      // If pulled past threshold, trigger reply
+      if (deltaX > 50) {
+        setReplyToMsg(msg);
+        swipeStartRef.current = null;
+        inputRef.current?.focus(); // Call synchronously to ensure mobile browsers open the keyboard
+        setTimeout(() => setSwipeOffset(null), 100);
+      }
+    }
+  };
+
+  const handleTouchEndSwipe = () => {
+    handlePressEnd();
+    swipeStartRef.current = null;
+    setSwipeOffset(null); // Spring back
+  };
 
   const handleCloseModal = () => {
     // Prevent framer-motion drag bug from freezing body interactions
     document.body.style.pointerEvents = "";
     document.body.style.userSelect = "";
+    document.documentElement.style.pointerEvents = "";
+    document.documentElement.style.userSelect = "";
+    document.querySelectorAll("style").forEach((style) => {
+      if (style.innerHTML.includes("pointer-events: none") && style.innerHTML.includes("user-select: none")) {
+        style.remove();
+      }
+    });
     onClose();
   };
 
@@ -105,6 +144,13 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
       // Cleanup on unmount just in case
       document.body.style.pointerEvents = "";
       document.body.style.userSelect = "";
+      document.documentElement.style.pointerEvents = "";
+      document.documentElement.style.userSelect = "";
+      document.querySelectorAll("style").forEach((style) => {
+        if (style.innerHTML.includes("pointer-events: none") && style.innerHTML.includes("user-select: none")) {
+          style.remove();
+        }
+      });
     };
   }, []);
 
@@ -692,7 +738,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
           <motion.div
           key="group-chat-overlay"
           className="modal-overlay fixed inset-0 z-[110] flex items-center justify-center p-0 sm:p-8 bg-black/60 backdrop-blur-sm"
-          style={{ zIndex: 110, animation: "none" }}
+          style={{ zIndex: 110, animation: "none", pointerEvents: isOpen ? "auto" : "none" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -870,18 +916,14 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                 )}
 
                                 <motion.div
-                                  drag="x"
-                                  dragConstraints={{ left: 0, right: 0 }}
-                                  dragElastic={0.15}
-                                  onDragEnd={(_, info) => {
-                                    if (info.offset.x > 50) setReplyToMsg(msg);
-                                  }}
+                                  animate={{ x: (swipeOffset && swipeOffset.id === msg.id) ? swipeOffset.x : 0 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                   onMouseDown={() => handlePressStart(msg.id)}
                                   onMouseUp={handlePressEnd}
                                   onMouseLeave={handlePressEnd}
-                                  onTouchStart={() => handlePressStart(msg.id)}
-                                  onTouchEnd={handlePressEnd}
-                                  onTouchMove={handlePressEnd}
+                                  onTouchStart={(e) => handleTouchStartSwipe(e, msg.id)}
+                                  onTouchEnd={handleTouchEndSwipe}
+                                  onTouchMove={(e) => handleTouchMoveSwipe(e, msg)}
                                   onClick={(e) => { e.stopPropagation() }}
                                   style={{
                                     userSelect: "none",
