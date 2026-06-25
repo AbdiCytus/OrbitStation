@@ -551,11 +551,11 @@
   content: '';
   position: absolute;
   top: 50%; left: 50%;
-  width: 160px; height: 160px;
-  margin-top: -80px; margin-left: -80px;
+  width: 300px; height: 300px;
+  margin-top: -150px; margin-left: -150px;
   border: 1px dashed rgba(168, 85, 247, 0.5);
   border-radius: 50%;
-  transform: rotateZ(-25deg) rotateX(55deg);
+  transform: rotateZ(-15deg) rotateX(70deg);
   pointer-events: none;
   z-index: 8;
 }
@@ -597,23 +597,23 @@
 
 @keyframes diagonal-orbit-3d {
   0% { 
-    transform: rotateZ(-25deg) rotateX(55deg) rotate(0deg) translateX(80px) rotate(0deg) rotateX(-55deg) rotateZ(25deg) scale(1) translateZ(50px); 
+    transform: rotateZ(-15deg) rotateX(70deg) rotate(0deg) translateX(150px) rotate(0deg) rotateX(-70deg) rotateZ(15deg) scale(1) translateZ(50px); 
     z-index: 9999; filter: brightness(1);
   }
   25% { 
-    transform: rotateZ(-25deg) rotateX(55deg) rotate(90deg) translateX(80px) rotate(-90deg) rotateX(-55deg) rotateZ(25deg) scale(1.2) translateZ(50px); 
+    transform: rotateZ(-15deg) rotateX(70deg) rotate(90deg) translateX(150px) rotate(-90deg) rotateX(-70deg) rotateZ(15deg) scale(1.2) translateZ(50px); 
     z-index: 9999; filter: brightness(1.2);
   }
   50% { 
-    transform: rotateZ(-25deg) rotateX(55deg) rotate(180deg) translateX(80px) rotate(-180deg) rotateX(-55deg) rotateZ(25deg) scale(0.8) translateZ(-50px); 
+    transform: rotateZ(-15deg) rotateX(70deg) rotate(180deg) translateX(150px) rotate(-180deg) rotateX(-70deg) rotateZ(15deg) scale(0.8) translateZ(-50px); 
     z-index: -9999; filter: brightness(0.6);
   }
   75% { 
-    transform: rotateZ(-25deg) rotateX(55deg) rotate(270deg) translateX(80px) rotate(-270deg) rotateX(-55deg) rotateZ(25deg) scale(0.6) translateZ(-50px); 
+    transform: rotateZ(-15deg) rotateX(70deg) rotate(270deg) translateX(150px) rotate(-270deg) rotateX(-70deg) rotateZ(15deg) scale(0.6) translateZ(-50px); 
     z-index: -9999; filter: brightness(0.4);
   }
   100% { 
-    transform: rotateZ(-25deg) rotateX(55deg) rotate(360deg) translateX(80px) rotate(-360deg) rotateX(-55deg) rotateZ(25deg) scale(1) translateZ(50px); 
+    transform: rotateZ(-15deg) rotateX(70deg) rotate(360deg) translateX(150px) rotate(-360deg) rotateX(-70deg) rotateZ(15deg) scale(1) translateZ(50px); 
     z-index: 9999; filter: brightness(1);
   }
 }
