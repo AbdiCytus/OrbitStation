@@ -156,12 +156,21 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     rarity: "super-ekslusif"
   },
   {
-    id: "creator-confidant",
-    name: "Creator's Confidant",
-    hint: "Befriended The Creator of Orbit Station.",
+    id: "cosmic-charmer",
+    name: "Cosmic Charmer",
+    hint: "Have a 100+ day chat streak with a friend.",
     color: "pink",
     icon: "HeartIcon",
     effectClass: "badge-confidant",
+    rarity: "super-ekslusif"
+  },
+  {
+    id: "creator-ally",
+    name: "Creator's Ally",
+    hint: "Befriended The Creator of Orbit Station.",
+    color: "emerald",
+    icon: "BoltIcon",
+    effectClass: "badge-creator-ally",
     rarity: "super-ekslusif"
   }
 ];
