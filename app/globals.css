@@ -3877,3 +3877,12 @@ code, kbd, pre {
 body.no-loading-anim #warp-loader {
   display: none !important;
 }
+
+/* Scrollbar Hide Utility */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

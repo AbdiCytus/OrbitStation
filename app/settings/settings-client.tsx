@@ -486,11 +486,11 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                             }`}>
                               <DynamicIcon name={badge.icon} className="w-5 h-5" />
                             </div>
-                            <div className="flex-1 min-w-0 pr-6">
+                            <div className="flex-1 min-w-0 pr-10">
                               <h4 className={`text-sm font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-400'}`}>
                                 {badge.name}
                               </h4>
-                              <p className="text-xs text-gray-500 leading-snug mt-0.5">
+                              <p className="text-xs text-gray-500 leading-snug mt-0.5 max-h-[2.5rem] overflow-y-auto hide-scrollbar">
                                 {badge.hint}
                               </p>
                             </div>

@@ -66,6 +66,11 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
 };
 
 export async function getUnlockedBadges(userId: string): Promise<string[]> {
+  // DEV MODE BYPASS: Unlock all badges for easy testing
+  if (process.env.NODE_ENV === "development") {
+    return BADGE_REGISTRY.map(b => b.id);
+  }
+
   const unlocked: string[] = [];
   
   const checks = BADGE_REGISTRY.map(async (badge: any) => {
