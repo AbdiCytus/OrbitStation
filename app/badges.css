@@ -270,11 +270,15 @@
 }
 .badge-galactic {
   position: relative;
-  background: linear-gradient(45deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.1)) padding-box,
-              conic-gradient(from var(--galactic-angle), transparent 0deg, #f59e0b 40deg, transparent 80deg, transparent 180deg, #f59e0b 220deg, transparent 260deg) border-box;
-  background-size: 200% 200%, 100% 100%;
-  animation: galactic-bg-pan 3s infinite, galactic-spin 4s linear infinite;
-  border: 1.5px solid transparent !important;
+  background-image: 
+    radial-gradient(1px 1px at 10% 20%, #fcd34d, transparent),
+    radial-gradient(1.5px 1.5px at 40% 70%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(2px 2px at 80% 30%, #f59e0b, transparent),
+    radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,0.8), transparent),
+    linear-gradient(45deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.1));
+  background-size: 100px 100px, 100px 100px, 100px 100px, 100px 100px, 200% 200%;
+  animation: galactic-combo 10s infinite linear;
+  border-color: rgba(251, 191, 36, 0.4);
   box-shadow: 0 0 30px rgba(251, 191, 36, 0.2), inset 0 0 15px rgba(251, 191, 36, 0.2);
 }
 .badge-galactic .badge-icon {
@@ -283,25 +287,25 @@
   animation: pulse-galactic 1.5s infinite alternate;
   box-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
 }
+/* Border Tracer */
 .badge-galactic::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background-image: radial-gradient(1px 1px at 10% 20%, #fcd34d, transparent),
-                    radial-gradient(1.5px 1.5px at 40% 70%, #fff, transparent),
-                    radial-gradient(2px 2px at 80% 30%, #f59e0b, transparent),
-                    radial-gradient(1px 1px at 60% 80%, #fff, transparent);
-  background-size: 100px 100px;
-  opacity: 0.6;
-  animation: galactic-stars 10s linear infinite;
-  pointer-events: none;
-  z-index: 0;
+  inset: -1px;
   border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--galactic-angle), transparent 0deg, #f59e0b 40deg, transparent 80deg, transparent 180deg, #f59e0b 220deg, transparent 260deg);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: galactic-spin 4s linear infinite;
+  z-index: 10;
 }
-@keyframes galactic-bg-pan {
-  0% { background-position: 0% 50%, 0 0; }
-  50% { background-position: 100% 50%, 0 0; }
-  100% { background-position: 0% 50%, 0 0; }
+@keyframes galactic-combo {
+  0% { background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0% 50%; }
+  50% { background-position: 50px 50px, 50px 50px, 50px 50px, 50px 50px, 100% 50%; }
+  100% { background-position: 100px 100px, 100px 100px, 100px 100px, 100px 100px, 0% 50%; }
 }
 @keyframes galactic-spin {
   to { --galactic-angle: 360deg; }
@@ -321,12 +325,20 @@
   perspective: 1000px;
   overflow: visible !important;
 }
-.badge-creator {
+.badge-creator::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(168, 85, 247, 0.05)),
               linear-gradient(90deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px),
               linear-gradient(0deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px);
   background-size: 100% 100%, 20px 20px, 20px 20px;
   animation: creator-grid 5s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+.badge-creator {
   border-color: rgba(168, 85, 247, 0.6);
   box-shadow: inset 0 0 20px rgba(168, 85, 247, 0.2);
 }
@@ -335,12 +347,20 @@
   color: #4c1d95;
   box-shadow: 0 0 25px rgba(168, 85, 247, 0.8);
 }
-.badge-assistant {
+.badge-assistant::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(96, 165, 250, 0.05)),
               linear-gradient(90deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px),
               linear-gradient(0deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px);
   background-size: 100% 100%, 20px 20px, 20px 20px;
   animation: creator-grid 5s linear infinite reverse;
+  pointer-events: none;
+  z-index: 0;
+}
+.badge-assistant {
   border-color: rgba(96, 165, 250, 0.6);
   box-shadow: inset 0 0 20px rgba(96, 165, 250, 0.2);
 }
@@ -354,8 +374,8 @@
   100% { background-position: 0 0, 40px 0, 0 40px; }
 }
 
-/* Diagonal Orbiting Planets */
-.badge-creator::before, .badge-assistant::before {
+/* Diagonal Orbiting Planets (Anchored via .badge-icon) */
+.badge-creator .badge-icon::before, .badge-assistant .badge-icon::before {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
@@ -367,11 +387,11 @@
   pointer-events: none;
   z-index: 0;
 }
-.badge-assistant::before {
+.badge-assistant .badge-icon::before {
   border-color: rgba(59, 130, 246, 0.5);
 }
 
-.badge-creator::after, .badge-assistant::after {
+.badge-creator .badge-icon::after, .badge-assistant .badge-icon::after {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
@@ -381,12 +401,12 @@
   pointer-events: none;
   z-index: 10;
 }
-.badge-creator::after {
+.badge-creator .badge-icon::after {
   background: radial-gradient(circle at 30% 30%, #fff, #a855f7 50%, #4c1d95 90%);
   box-shadow: inset -3px -3px 5px rgba(0,0,0,0.6), 0 0 15px #c084fc;
   animation: diagonal-orbit-3d 5s linear infinite;
 }
-.badge-assistant::after {
+.badge-assistant .badge-icon::after {
   background: radial-gradient(circle at 30% 30%, #fff, #3b82f6 50%, #1e3a8a 90%);
   box-shadow: inset -3px -3px 5px rgba(0,0,0,0.6), 0 0 15px #60a5fa;
   animation: diagonal-orbit-3d 6s linear infinite reverse;
