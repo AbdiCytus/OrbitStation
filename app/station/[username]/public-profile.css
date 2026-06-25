@@ -139,14 +139,7 @@
   margin-bottom: 0.25rem;
 }
 .zzz-user-badge {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #fde047;
-  background: rgba(253, 224, 71, 0.15);
-  padding: 0.25rem 0.75rem;
-  border-radius: 8px;
   width: max-content;
-  border: 1px solid rgba(253, 224, 71, 0.3);
 }
 .zzz-banner-right {
   display: flex;
@@ -547,11 +540,7 @@
     text-overflow: ellipsis;
     width: 100%;
   }
-  .zzz-user-badge {
-    font-size: 0.7rem;
-    padding: 0.15rem 0.5rem;
-    margin-top: 0.25rem;
-  }
+
   .zzz-banner-right {
     display: none; /* Hide stats */
   }
