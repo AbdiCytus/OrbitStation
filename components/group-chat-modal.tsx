@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import type { SectorWithBeacons } from "@/types";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { pusherClient } from "@/lib/pusher-client";
+import { BADGE_REGISTRY } from "@/lib/badges/registry";
 
 interface Props {
   isOpen: boolean;
@@ -1296,7 +1297,8 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                   const isAlreadyFriend = isUserType && myFriends.some(f => f.id === mentionDetail.data.id);
                   const isPending = isUserType && pendingRequests.has(mentionDetail.data.id);
 
-                  const badge = isUserType && mentionDetail.data.titleBadge ? BADGE_REGISTRY.find(b => b.id === mentionDetail.data.titleBadge) : null;
+                  const dataAsUser = mentionDetail.data as any;
+                  const badge = isUserType && dataAsUser.titleBadge ? BADGE_REGISTRY.find(b => b.id === dataAsUser.titleBadge) : null;
                   const isSpecial = badge?.rarity === "ekslusif";
                   const isExclusive = badge?.rarity === "super-ekslusif";
 
