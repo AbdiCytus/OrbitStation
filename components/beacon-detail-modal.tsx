@@ -43,35 +43,58 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   const rafRef = useRef<number>(0);
   const [isCapturing, setIsCapturing] = useState(false);
 
-  // Proxy URL logic moved to html-to-image fetchRequest
+  const getProxyUrl = (url?: string | null) => {
+    if (!url) return undefined;
+    if (url.startsWith('/')) return url;
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  };
 
   const captureScreenshot = async () => {
     if (!panelRef.current) return;
     setIsCapturing(true);
 
-    // Add a small delay to ensure UI updates (like the button spinner) are flushed
-    await new Promise(res => setTimeout(res, 100));
-
     try {
+      // Create a clone to prevent modifying the actual UI and to handle CORS safely
+      const clone = panelRef.current.cloneNode(true) as HTMLElement;
+      
+      // We must append the clone to the DOM to ensure styles are computed correctly
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'absolute';
+      wrapper.style.left = '-9999px';
+      wrapper.style.top = '-9999px';
+      wrapper.appendChild(clone);
+      panelRef.current.parentElement?.appendChild(wrapper);
+
+      // Force all images in the clone to use the proxy and crossOrigin
+      const images = clone.querySelectorAll('img');
+      const loadPromises: Promise<void>[] = [];
+      
+      images.forEach(img => {
+        const src = img.getAttribute('src');
+        if (src && src.startsWith('http')) {
+          img.crossOrigin = 'anonymous';
+          img.src = getProxyUrl(src) || src;
+          
+          loadPromises.push(new Promise((resolve) => {
+            if (img.complete) resolve();
+            else {
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+            }
+          }));
+        }
+      });
+
+      // Wait for all proxied images to load in the clone
+      await Promise.all(loadPromises);
+      // Extra small delay to ensure DOM is flushed
+      await new Promise(res => setTimeout(res, 100));
+
       const emptyPixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-      const dataUrl = await toPng(panelRef.current, {
+      const dataUrl = await toPng(clone, {
         backgroundColor: "#0f0f16",
         pixelRatio: 2,
         imagePlaceholder: emptyPixel,
-        fetchRequest: async (url, options) => {
-          try {
-            // First try fetching directly
-            const res = await fetch(url, options);
-            if (!res.ok) throw new Error("Status " + res.status);
-            return res;
-          } catch (e) {
-            // If it fails (e.g. CORS), proxy it!
-            if (url && !url.startsWith('data:') && !url.startsWith('/')) {
-              return fetch(`/api/proxy-image?url=${encodeURIComponent(url)}`, options);
-            }
-            throw e;
-          }
-        },
         style: {
           transform: 'scale(1)', // Reset any transforms that might mess up coordinates
         },
@@ -81,6 +104,10 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
           return true;
         }
       });
+
+      // Clean up clone
+      wrapper.remove();
+      
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = `beacon-${beacon.title.replace(/[\s/]/g, '-').toLowerCase()}.png`;
