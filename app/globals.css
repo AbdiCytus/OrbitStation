@@ -3874,7 +3874,6 @@ code, kbd, pre {
 /* ---------------------------------
    GLOBAL ANIMATION CONTROL
 --------------------------------- */
-body.no-loading-anim #warp-loader * {
-  animation: none !important;
-  transition: none !important;
+body.no-loading-anim #warp-loader {
+  display: none !important;
 }
