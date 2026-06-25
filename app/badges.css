@@ -410,7 +410,7 @@
     linear-gradient(0deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px);
   background-size: 60px 60px, 80px 80px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
   background-repeat: no-repeat, no-repeat, repeat, repeat, repeat, no-repeat, repeat, repeat;
-  animation: creator-fx 8s linear infinite reverse;
+  animation: creator-fx 8s linear infinite;
 }
 .badge-creator .badge-icon {
   background: linear-gradient(135deg, #7e22ce, #e9d5ff);
@@ -423,11 +423,11 @@
   box-shadow: 0 0 25px rgba(96, 165, 250, 0.8);
 }
 @keyframes creator-fx {
-  0% { background-position: 150px -50px, 200px -100px, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
-  15% { background-position: -50px 150px, 200px -100px, 0 -6px, 0 -9px, 0 -7px, 0 0, 6px 0, 0 6px; }
-  45% { background-position: -50px 150px, 200px -100px, 0 -18px, 0 -27px, 0 -21px, 0 0, 18px 0, 0 18px; }
-  60% { background-position: -50px 150px, -100px 200px, 0 -24px, 0 -36px, 0 -28px, 0 0, 24px 0, 0 24px; }
-  100% { background-position: -50px 150px, -100px 200px, 0 -40px, 0 -60px, 0 -50px, 0 0, 40px 0, 0 40px; }
+  0% { background-position: 120% -20%, 150% -50%, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  15% { background-position: -20% 120%, 150% -50%, 0 -6px, 0 -9px, 0 -7px, 0 0, 6px 0, 0 6px; }
+  45% { background-position: -20% 120%, 150% -50%, 0 -18px, 0 -27px, 0 -21px, 0 0, 18px 0, 0 18px; }
+  60% { background-position: -20% 120%, -50% 150%, 0 -24px, 0 -36px, 0 -28px, 0 0, 24px 0, 0 24px; }
+  100% { background-position: -20% 120%, -50% 150%, 0 -40px, 0 -60px, 0 -50px, 0 0, 40px 0, 0 40px; }
 }
 @keyframes creator-spin {
   to { --creator-angle: 360deg; }
@@ -470,8 +470,8 @@
   content: '';
   position: absolute;
   top: 50%; left: 50%;
-  width: 130px; height: 130px;
-  margin-top: -65px; margin-left: -65px;
+  width: 160px; height: 160px;
+  margin-top: -80px; margin-left: -80px;
   border: 1px dashed rgba(168, 85, 247, 0.5);
   border-radius: 50%;
   transform: rotateZ(-25deg) rotateX(75deg);
@@ -504,29 +504,29 @@
 
 @keyframes diagonal-orbit-3d {
   0% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(0deg) translateX(65px) rotate(0deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(0deg) translateX(80px) rotate(0deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: 10; filter: brightness(1);
   }
   25% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(90deg) translateX(65px) rotate(-90deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(90deg) translateX(80px) rotate(-90deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: 10; filter: brightness(1.2);
   }
   49.9% { 
     z-index: 10; 
   }
   50% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(180deg) translateX(65px) rotate(-180deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(180deg) translateX(80px) rotate(-180deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: -1; filter: brightness(0.8);
   }
   75% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(270deg) translateX(65px) rotate(-270deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(270deg) translateX(80px) rotate(-270deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: -1; filter: brightness(0.3);
   }
   99.9% { 
     z-index: -1; 
   }
   100% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(360deg) translateX(65px) rotate(-360deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(360deg) translateX(80px) rotate(-360deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: 10; filter: brightness(1);
   }
 }
