@@ -1,3 +1,5 @@
+export type BadgeRarity = "biasa" | "ekslusif" | "super-ekslusif";
+
 export interface BadgeDef {
   id: string;
   name: string;
@@ -5,6 +7,7 @@ export interface BadgeDef {
   color: string;
   icon: string;
   effectClass: string;
+  rarity: BadgeRarity;
 }
 
 export const BADGE_REGISTRY: BadgeDef[] = [
@@ -14,7 +17,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Given to all new pilots joining the station.",
     color: "gray",
     icon: "RocketLaunchIcon",
-    effectClass: "badge-rookie"
+    effectClass: "badge-rookie",
+    rarity: "biasa"
   },
   {
     id: "sector-magnate",
@@ -22,7 +26,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by establishing at least 7 sectors and 35 beacons.",
     color: "amber",
     icon: "BuildingLibraryIcon",
-    effectClass: "badge-magnate"
+    effectClass: "badge-magnate",
+    rarity: "biasa"
   },
   {
     id: "viral-voyager",
@@ -30,7 +35,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by creating at least 5 beacons that each have 1,000+ visits.",
     color: "rose",
     icon: "FireIcon",
-    effectClass: "badge-viral"
+    effectClass: "badge-viral",
+    rarity: "ekslusif"
   },
   {
     id: "social-butterfly",
@@ -38,7 +44,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by having at least 20 friends.",
     color: "pink",
     icon: "UserGroupIcon",
-    effectClass: "badge-social"
+    effectClass: "badge-social",
+    rarity: "biasa"
   },
   {
     id: "collaborative-spirit",
@@ -46,7 +53,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by joining 10 different collaborative sectors.",
     color: "cyan",
     icon: "HandRaisedIcon",
-    effectClass: "badge-collab"
+    effectClass: "badge-collab",
+    rarity: "ekslusif"
   },
   {
     id: "guild-master",
@@ -54,7 +62,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by having 20+ members in a sector you created.",
     color: "emerald",
     icon: "ShieldCheckIcon",
-    effectClass: "badge-guild"
+    effectClass: "badge-guild",
+    rarity: "ekslusif"
   },
   {
     id: "early-adopter",
@@ -62,7 +71,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by keeping your account active for more than 30 days.",
     color: "purple",
     icon: "StarIcon",
-    effectClass: "badge-early"
+    effectClass: "badge-early",
+    rarity: "biasa"
   },
   {
     id: "data-hoarder",
@@ -70,7 +80,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by creating 100+ beacons across any sectors.",
     color: "blue",
     icon: "ServerStackIcon",
-    effectClass: "badge-hoarder"
+    effectClass: "badge-hoarder",
+    rarity: "biasa"
   },
   {
     id: "chatterbox",
@@ -78,7 +89,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by sending at least 100 private messages across 15+ different friends.",
     color: "pink",
     icon: "ChatBubbleLeftRightIcon",
-    effectClass: "badge-chatterbox"
+    effectClass: "badge-chatterbox",
+    rarity: "biasa"
   },
   {
     id: "cosmic-explorer",
@@ -86,7 +98,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by visiting 100 different public stations.",
     color: "indigo",
     icon: "GlobeAsiaAustraliaIcon",
-    effectClass: "badge-explorer"
+    effectClass: "badge-explorer",
+    rarity: "biasa"
   },
   {
     id: "sector-heiress",
@@ -94,7 +107,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Receive ownership transfers for 50 different sectors.",
     color: "rose",
     icon: "KeyIcon",
-    effectClass: "badge-heiress"
+    effectClass: "badge-heiress",
+    rarity: "ekslusif"
   },
   {
     id: "prominent-admin",
@@ -102,7 +116,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Get promoted to Admin in 8 different collaborative sectors.",
     color: "cyan",
     icon: "BriefcaseIcon",
-    effectClass: "badge-admin"
+    effectClass: "badge-admin",
+    rarity: "biasa"
   },
   {
     id: "galactic-center",
@@ -110,7 +125,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Your Public Station has been visited 100,000+ times.",
     color: "amber",
     icon: "SparklesIcon",
-    effectClass: "badge-galactic"
+    effectClass: "badge-galactic",
+    rarity: "super-ekslusif"
   },
   {
     id: "reliable-contributor",
@@ -118,7 +134,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Add 10+ beacons across 5 different collaborative sectors.",
     color: "emerald",
     icon: "WrenchScrewdriverIcon",
-    effectClass: "badge-contributor"
+    effectClass: "badge-contributor",
+    rarity: "biasa"
   },
   {
     id: "the-creator",
@@ -126,7 +143,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "The mastermind behind Orbit Station.",
     color: "purple",
     icon: "CpuChipIcon",
-    effectClass: "badge-creator"
+    effectClass: "badge-creator",
+    rarity: "super-ekslusif"
   },
   {
     id: "the-creator-assistant",
@@ -134,7 +152,8 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "The AI agent that helped build Orbit Station.",
     color: "blue",
     icon: "CommandLineIcon",
-    effectClass: "badge-assistant"
+    effectClass: "badge-assistant",
+    rarity: "super-ekslusif"
   }
 ];
 
