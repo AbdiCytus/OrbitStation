@@ -104,19 +104,19 @@ export default function SettingsClient({ profile }: Props) {
     e.preventDefault();
     const key = e.key;
     if (key === "Tab" || key === "Escape" || key === "Enter") return;
-    
+
     const modifiers = [];
     if (e.ctrlKey) modifiers.push("Ctrl");
     if (e.altKey) modifiers.push("Alt");
     if (e.shiftKey) modifiers.push("Shift");
     if (e.metaKey) modifiers.push("Meta");
-    
+
     // Ignore if only modifier keys are pressed
     if (["Control", "Alt", "Shift", "Meta"].includes(key)) return;
-    
+
     const keyString = key === " " ? "Space" : key.length === 1 ? key.toUpperCase() : key;
     const finalCombo = [...modifiers, keyString].join("+");
-    
+
     setShortcuts(s => ({ ...s, [keyName]: finalCombo }));
     (e.target as HTMLInputElement).blur();
   };
@@ -417,7 +417,7 @@ export default function SettingsClient({ profile }: Props) {
 
                 <div className="flex flex-col">
                   {/* Public Profile toggle */}
-                  <div className="settings-toggle-row bg-white/5 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
+                  <div className="settings-toggle-row rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-info">
                       <span className="settings-toggle-label text-white font-medium">Public Station</span>
                       <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -480,7 +480,7 @@ export default function SettingsClient({ profile }: Props) {
 
                 <div className="flex flex-col gap-4">
                   {/* Animation toggle */}
-                  <div className="settings-toggle-row bg-white/5 p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
+                  <div className="settings-toggle-row p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-info">
                       <span className="settings-toggle-label text-white font-medium">Enable Animations</span>
                       <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -504,7 +504,7 @@ export default function SettingsClient({ profile }: Props) {
                   </div>
 
                   {/* Hologram toggle */}
-                  <div className="settings-toggle-row bg-white/5 p-4 rounded-lg border border-white/10 md:flex hidden" style={{ padding: "1rem" }}>
+                  <div className="settings-toggle-row p-4 rounded-lg border border-white/10 md:flex hidden" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-info">
                       <span className="settings-toggle-label text-white font-medium">Hologram Effect</span>
                       <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -524,7 +524,7 @@ export default function SettingsClient({ profile }: Props) {
 
                   {/* Static Background toggle */}
                   {!animationEnabled && (
-                    <div className="settings-toggle-row bg-white/5 p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
+                    <div className="settings-toggle-row p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                       <div className="settings-toggle-info">
                         <span className="settings-toggle-label text-white font-medium">Static Background Mode</span>
                         <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -544,7 +544,7 @@ export default function SettingsClient({ profile }: Props) {
                   )}
 
                   {/* Friend Requests toggle */}
-                  <div className="settings-toggle-row bg-white/5 p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
+                  <div className="settings-toggle-row p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-info">
                       <span className="settings-toggle-label text-white font-medium">Allow Friend Requests</span>
                       <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -563,7 +563,7 @@ export default function SettingsClient({ profile }: Props) {
                   </div>
 
                   {/* Notification Sound Group */}
-                  <div className="bg-white/5 p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
+                  <div className="p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-row">
                       <div className="settings-toggle-info">
                         <span className="settings-toggle-label text-white font-medium">Notification Sound</span>
@@ -584,10 +584,10 @@ export default function SettingsClient({ profile }: Props) {
 
                     {notifSoundEnabled && (
                       <div className="mt-4 p-4 bg-black/20 rounded-lg border border-white/5 flex flex-col gap-4" style={{ padding: "1rem" }}>
-                        <div className="flex gap-3 flex-wrap">
+                        <div className="flex gap-3 flex-wrap flex-col md:flex-row" style={{ padding: "0.5rem" }}>
                           <label
-                            className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${notifSoundType === "default" ? "bg-purple-500/15 border-purple-500/40 text-purple-300" : "bg-white/5 border-white/10 text-gray-400"}`}
-                            style={{ borderStyle: "solid", borderWidth: "1px" }}
+                            className={`flex-1 flex items-center justify-center gap-2 rounded-md cursor-pointer transition-all ${notifSoundType === "default" ? "bg-purple-500/15 border-purple-500/40 text-purple-300" : "bg-white/5 border-white/10 text-gray-400"}`}
+                            style={{ borderStyle: "solid", borderWidth: "1px", padding: "0.5rem" }}
                           >
                             <input
                               type="radio"
@@ -604,8 +604,8 @@ export default function SettingsClient({ profile }: Props) {
                           </label>
 
                           <label
-                            className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${notifSoundType === "custom" ? "bg-purple-500/15 border-purple-500/40 text-purple-300" : "bg-white/5 border-white/10 text-gray-400"}`}
-                            style={{ borderStyle: "solid", borderWidth: "1px" }}
+                            className={`flex-1 flex items-center justify-center gap-2 rounded-md cursor-pointer transition-all ${notifSoundType === "custom" ? "bg-purple-500/15 border-purple-500/40 text-purple-300" : "bg-white/5 border-white/10 text-gray-400"}`}
+                            style={{ borderStyle: "solid", borderWidth: "1px", padding: "0.5rem" }}
                           >
                             <input
                               type="radio"
@@ -623,7 +623,7 @@ export default function SettingsClient({ profile }: Props) {
                         </div>
 
                         {notifSoundType === "custom" && (
-                          <div className="flex items-center gap-3 p-3 bg-black/30 rounded-lg border border-dashed border-white/20 flex-wrap">
+                          <div className="flex items-center bg-black/30 rounded-lg border border-dashed border-white/20 flex-wrap" style={{ padding: "1rem" }}>
                             <input
                               type="file"
                               accept="audio/mp3, audio/mpeg, audio/wav, audio/ogg"
@@ -638,7 +638,8 @@ export default function SettingsClient({ profile }: Props) {
                                 audio.volume = 0.5;
                                 audio.play().catch(e => toast.error("Could not play sound. Format might be unsupported."));
                               }}
-                              className={`text-xs px-4 py-2 rounded-lg font-semibold transition-all ${(!notifSoundUrl || notifSoundUrl === "/sounds/notif-default.mp3") ? "bg-white/5 text-gray-500 cursor-not-allowed" : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_10px_rgba(109,40,217,0.4)]"}`}
+                              className={`text-xs px-4 py-2 rounded-sm font-semibold transition-all ${(!notifSoundUrl || notifSoundUrl === "/sounds/notif-default.mp3") ? "bg-white/5 text-gray-500 cursor-not-allowed" : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_10px_rgba(109,40,217,0.4)]"}`}
+                              style={{ padding: "0.5rem"}}
                             >
                               Play Test
                             </button>
@@ -659,7 +660,7 @@ export default function SettingsClient({ profile }: Props) {
                 <p className="text-gray-400 text-sm mb-6">Configure keyboard shortcuts for quick navigation on desktop.</p>
 
                 <div className="flex flex-col gap-4">
-                  <div className="form-group flex flex-row items-center justify-between bg-white/5 rounded-lg border border-white/10">
+                  <div className="form-group flex flex-row items-center justify-between rounded-lg border border-white/10">
                     <label className="form-label text-sm text-gray-300 mb-0">Public Station</label>
                     <input
                       className="input bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
@@ -669,7 +670,7 @@ export default function SettingsClient({ profile }: Props) {
                       placeholder="Press key..."
                     />
                   </div>
-                  <div className="form-group flex flex-row items-center justify-between bg-white/5 rounded-lg border border-white/10">
+                  <div className="form-group flex flex-row items-center justify-between rounded-lg border border-white/10">
                     <label className="form-label text-sm text-gray-300 mb-0">Friends</label>
                     <input
                       className="input bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
@@ -679,7 +680,7 @@ export default function SettingsClient({ profile }: Props) {
                       placeholder="Press key..."
                     />
                   </div>
-                  <div className="form-group flex flex-row items-center justify-between bg-white/5 rounded-lg border border-white/10">
+                  <div className="form-group flex flex-row items-center justify-between rounded-lg border border-white/10">
                     <label className="form-label text-sm text-gray-300 mb-0">Analytics</label>
                     <input
                       className="input bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
@@ -689,7 +690,7 @@ export default function SettingsClient({ profile }: Props) {
                       placeholder="Press key..."
                     />
                   </div>
-                  <div className="form-group flex flex-row items-center justify-between bg-white/5 rounded-lg border border-white/10">
+                  <div className="form-group flex flex-row items-center justify-between rounded-lg border border-white/10">
                     <label className="form-label text-sm text-gray-300 mb-0">Settings</label>
                     <input
                       className="input bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
@@ -724,9 +725,9 @@ export default function SettingsClient({ profile }: Props) {
                 type="button"
                 onClick={() => setShowDeleteModal(true)}
                 className="rounded-md bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-colors font-medium text-sm whitespace-nowrap"
-                style={{padding: "0.5rem 1rem"}}
+                style={{ padding: "0.5rem 1rem" }}
               >
-                Delete Account  
+                Delete Account
               </button>
             </div>
           </section>
