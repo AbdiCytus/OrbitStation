@@ -3111,6 +3111,47 @@ code, kbd, pre {
   padding: 0.75rem 1rem !important;
 }
 
+/* ------------------- SETTINGS OVERRIDES ------------------- */
+.settings-right-pane {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 2rem;
+}
+@media (max-width: 767px) {
+  /* Force all sections to show on mobile since there is no sidebar */
+  .settings-inner-section {
+    display: flex !important;
+  }
+}
+/* Desktop Overrides */
+@media (min-width: 768px) {
+  .settings-modal-wrapper {
+    height: 75vh !important;
+    min-height: 500px !important;
+    max-height: 800px !important;
+  }
+  .settings-scroll-container {
+    flex-direction: row !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .settings-right-pane {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 2.5rem 3rem !important;
+    min-height: 0 !important;
+    gap: 2.5rem !important;
+  }
+  .settings-inner-section {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
+
 .settings-section-title {
   font-size: 0.75rem;
   font-weight: 700;

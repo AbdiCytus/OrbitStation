@@ -249,43 +249,8 @@ export default function SettingsClient({ profile }: Props) {
   return (
     <>
       <form onSubmit={handleSave} className="settings-content" style={{ padding: "2rem 1rem", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 80px)", width: "100%", gap: "1rem" }}>
-        <style>{`
-          /* Mobile First Defaults */
-          .settings-right-pane {
-            padding: 1.5rem 1rem;
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            gap: 2rem;
-          }
-          /* Desktop Overrides */
-          @media (min-width: 768px) {
-            .settings-modal-wrapper {
-              height: 75vh !important;
-              min-height: 500px !important;
-              max-height: 800px !important;
-            }
-            .settings-scroll-container {
-              flex-direction: row !important;
-              min-height: 0 !important;
-              overflow: hidden !important;
-            }
-            .settings-right-pane {
-              flex: 1 !important;
-              overflow-y: auto !important;
-              padding: 2.5rem 3rem !important;
-              min-height: 0 !important;
-              gap: 2.5rem !important;
-            }
-            .settings-inner-section {
-              background: transparent !important;
-              border: none !important;
-              box-shadow: none !important;
-              padding: 0 !important;
-            }
-          }
-        `}</style>
-        <div className="settings-modal-wrapper" style={{ width: "100%", maxWidth: "900px", background: "rgba(0, 0, 0, 0.2)", WebkitBackdropFilter: "blur(24px)", backdropFilter: "blur(24px)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+
+        <div className="settings-modal-wrapper" style={{ width: "100%", maxWidth: "900px", background: "rgba(0, 0, 0, 0.2)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
 
           {/* Header */}
           <div className="settings-page-header" style={{ padding: "2rem", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", background: "transparent" }}>
