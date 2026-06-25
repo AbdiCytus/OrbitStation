@@ -52,7 +52,13 @@ export async function PATCH(req: Request) {
       });
     }
 
-    return NextResponse.json({ data: updated });
+    const res = NextResponse.json({ data: updated });
+    
+    if (animationEnabled !== undefined) {
+      res.cookies.set("animationEnabled", String(animationEnabled), { maxAge: 60 * 60 * 24 * 365, path: "/" });
+    }
+
+    return res;
   } catch (err) {
     console.error("[PATCH /api/settings]", err);
     return NextResponse.json({ error: "Failed to save settings" }, { status: 500 });

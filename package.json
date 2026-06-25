@@ -22,6 +22,7 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "framer-motion": "^11.2.10",
+    "html2canvas": "^1.4.1",
     "next": "16.2.7",
     "next-auth": "5.0.0-beta.25",
     "pg": "^8.21.0",

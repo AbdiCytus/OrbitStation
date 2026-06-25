@@ -14,8 +14,10 @@ import {
   DocumentTextIcon,
   InformationCircleIcon,
   XMarkIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
+  CameraIcon
 } from "@heroicons/react/24/outline";
+import html2canvas from "html2canvas";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
 type Props = {
@@ -37,7 +39,32 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   const [isPending, startTransition] = useTransition();
   const cardRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const captureScreenshot = async () => {
+    if (!panelRef.current) return;
+    setIsCapturing(true);
+    try {
+      const canvas = await html2canvas(panelRef.current, {
+        backgroundColor: "#0f0f16",
+        scale: 2,
+        useCORS: true,
+      });
+      const dataUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `beacon-${beacon.title.replace(/[\s/]/g, '-').toLowerCase()}.png`;
+      a.click();
+      toast.success("Screenshot saved to device!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to capture screenshot");
+    } finally {
+      setIsCapturing(false);
+    }
+  };
 
   // Close on Escape + lock body scroll
   useEffect(() => {
@@ -137,7 +164,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
 
   return (
     <div className={"hsr-overlay" + (isClosing ? " closing" : "")} onClick={handleClose} role="dialog" aria-modal="true" aria-label={beacon.title}>
-      <div className={"hsr-panel" + (isClosing ? " closing" : "")} onClick={(e) => e.stopPropagation()}>
+      <div ref={panelRef} className={"hsr-panel" + (isClosing ? " closing" : "")} onClick={(e) => e.stopPropagation()}>
 
         {/* ── STARFIELD BG ────────────────────────────────── */}
         <div className="hsr-bg" aria-hidden="true">
@@ -181,6 +208,15 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             <span className="hsr-topbar-label">Beacon Details</span>
           </div>
           <div className="hsr-topbar-actions">
+            <button
+              className="hsr-action-btn"
+              onClick={captureScreenshot}
+              disabled={isCapturing}
+              title="Capture screenshot"
+            >
+              <span>{isCapturing ? <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" /> : <CameraIcon width={16} height={16} />}</span>
+              <span className="hsr-action-label hidden sm:inline">{isCapturing ? "Capturing..." : "Screenshot"}</span>
+            </button>
             {!readOnly && (
               <>
                 {subroute && (
