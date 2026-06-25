@@ -267,7 +267,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                           <div className="zzz-user-username">@{user.username}</div>
                         )}
                         {badge && (
-                          <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg overflow-hidden`} style={{ width: 'fit-content', marginTop: '4px' }}>
+                          <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg`} style={{ width: 'fit-content', marginTop: '4px' }}>
                             <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
                               <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
                             </div>

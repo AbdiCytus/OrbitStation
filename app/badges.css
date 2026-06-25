@@ -797,9 +797,13 @@
 }
 
 .badge-creator-ally {
-  background: rgba(16, 185, 129, 0.05);
+  background-color: rgba(16, 185, 129, 0.05);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0,20 L30,20 L35,10 L45,35 L55,5 L65,25 L70,20 L100,20' fill='none' stroke='%2334d399' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.4'/%3E%3C/svg%3E");
+  background-size: 100px 100%;
+  background-repeat: repeat-x;
   border-color: transparent !important;
   box-shadow: inset 0 0 30px rgba(16, 185, 129, 0.1);
+  animation: ally-ecg 2.5s linear infinite;
 }
 
 .badge-creator-ally::before {
@@ -818,23 +822,10 @@
   filter: drop-shadow(0 0 8px #10b981) drop-shadow(0 0 15px #34d399);
 }
 
-.badge-creator-ally::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0,20 L30,20 L35,10 L45,35 L55,5 L65,25 L70,20 L100,20' fill='none' stroke='%2334d399' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.4'/%3E%3C/svg%3E");
-  background-size: 100px 100%;
-  background-repeat: repeat-x;
-  animation: ally-ecg 2.5s linear infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
 .badge-creator-ally .badge-icon { 
   background: linear-gradient(135deg, #059669, #34d399); 
   color: #fff; 
   box-shadow: 0 0 15px rgba(16, 185, 129, 0.6), 0 0 30px rgba(52, 211, 153, 0.3);
-  animation: ally-pulse 1.5s infinite;
 }
 
 @keyframes ally-spin {
@@ -846,12 +837,6 @@
   100% { background-position-x: 0px; }
 }
 
-@keyframes ally-pulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
-  10% { transform: scale(1.15); box-shadow: 0 0 25px rgba(16, 185, 129, 0.8), 0 0 40px rgba(52, 211, 153, 0.5); }
-  25% { transform: scale(1.05); }
-  35% { transform: scale(1.15); box-shadow: 0 0 25px rgba(16, 185, 129, 0.8); }
-  50% { transform: scale(1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
-}
+
 
 
