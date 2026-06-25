@@ -271,14 +271,20 @@
 .badge-galactic {
   position: relative;
   background-image: 
+    radial-gradient(ellipse at 0% 0%, rgba(251, 191, 36, 0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 100% 100%, rgba(245, 158, 11, 0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 120%, rgba(254, 243, 199, 0.3) 0%, transparent 60%),
     radial-gradient(1px 1px at 10% 20%, #fcd34d, transparent),
     radial-gradient(1.5px 1.5px at 40% 70%, rgba(255,255,255,0.8), transparent),
     radial-gradient(2px 2px at 80% 30%, #f59e0b, transparent),
     radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,0.8), transparent),
     linear-gradient(45deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.1));
-  background-size: 100px 100px, 100px 100px, 100px 100px, 100px 100px, 200% 200%;
-  animation: galactic-combo 10s infinite linear;
-  border-color: rgba(251, 191, 36, 0.4);
+  background-size: 
+    150% 150%, 150% 150%, 150% 150%,
+    100px 100px, 100px 100px, 100px 100px, 100px 100px,
+    200% 200%;
+  animation: galactic-aurora 8s ease-in-out infinite alternate;
+  border-color: transparent !important;
   box-shadow: 0 0 30px rgba(251, 191, 36, 0.2), inset 0 0 15px rgba(251, 191, 36, 0.2);
 }
 .badge-galactic .badge-icon {
@@ -291,7 +297,7 @@
 .badge-galactic::before {
   content: '';
   position: absolute;
-  inset: -1px;
+  inset: -1.5px;
   border-radius: inherit;
   padding: 1.5px;
   background: conic-gradient(from var(--galactic-angle), transparent 0deg, #f59e0b 40deg, transparent 80deg, transparent 180deg, #f59e0b 220deg, transparent 260deg);
@@ -301,11 +307,21 @@
   pointer-events: none;
   animation: galactic-spin 4s linear infinite;
   z-index: 10;
+  filter: drop-shadow(0 0 8px #f59e0b) drop-shadow(0 0 15px #fcd34d);
 }
-@keyframes galactic-combo {
-  0% { background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0% 50%; }
-  50% { background-position: 50px 50px, 50px 50px, 50px 50px, 50px 50px, 100% 50%; }
-  100% { background-position: 100px 100px, 100px 100px, 100px 100px, 100px 100px, 0% 50%; }
+@keyframes galactic-aurora {
+  0% { 
+    background-position: 
+      0% 0%, 100% 100%, 50% 100%,
+      0px 0px, 0px 0px, 0px 0px, 0px 0px,
+      0% 50%;
+  }
+  100% { 
+    background-position: 
+      100% 100%, 0% 0%, 50% 0%,
+      50px 50px, 50px 50px, 50px 50px, 50px 50px,
+      100% 50%;
+  }
 }
 @keyframes galactic-spin {
   to { --galactic-angle: 360deg; }
@@ -320,58 +336,99 @@
 }
 
 /* The Creator & Assistant (Super Exclusive) */
+@property --creator-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
 .badge-creator, .badge-assistant {
   transform-style: preserve-3d;
   perspective: 1000px;
   overflow: visible !important;
 }
-.badge-creator::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(168, 85, 247, 0.05)),
-              linear-gradient(90deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px),
-              linear-gradient(0deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px);
-  background-size: 100% 100%, 20px 20px, 20px 20px;
-  animation: creator-grid 5s linear infinite;
-  pointer-events: none;
-  z-index: 0;
-}
 .badge-creator {
-  border-color: rgba(168, 85, 247, 0.6);
-  box-shadow: inset 0 0 20px rgba(168, 85, 247, 0.2);
+  border-color: transparent !important;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.2), inset 0 0 20px rgba(168, 85, 247, 0.2);
+  background-image: 
+    linear-gradient(135deg, transparent 48%, rgba(255,255,255,0.8) 50%, transparent 50.5%),
+    linear-gradient(135deg, transparent 48%, rgba(255,255,255,0.5) 50%, transparent 50.5%),
+    radial-gradient(1.5px 1.5px at 20% 80%, rgba(216, 180, 254, 0.8), transparent),
+    radial-gradient(2px 2px at 70% 90%, rgba(216, 180, 254, 0.6), transparent),
+    radial-gradient(1px 1px at 40% 60%, rgba(216, 180, 254, 0.9), transparent),
+    linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(168, 85, 247, 0.05)),
+    linear-gradient(90deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px);
+  background-size: 100px 100px, 150px 150px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat, no-repeat, repeat, repeat;
+  animation: creator-fx 8s linear infinite;
+}
+.badge-assistant {
+  border-color: transparent !important;
+  box-shadow: 0 0 30px rgba(96, 165, 250, 0.2), inset 0 0 20px rgba(96, 165, 250, 0.2);
+  background-image: 
+    linear-gradient(135deg, transparent 48%, rgba(255,255,255,0.8) 50%, transparent 50.5%),
+    linear-gradient(135deg, transparent 48%, rgba(255,255,255,0.5) 50%, transparent 50.5%),
+    radial-gradient(1.5px 1.5px at 20% 80%, rgba(147, 197, 253, 0.8), transparent),
+    radial-gradient(2px 2px at 70% 90%, rgba(147, 197, 253, 0.6), transparent),
+    radial-gradient(1px 1px at 40% 60%, rgba(147, 197, 253, 0.9), transparent),
+    linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.05)),
+    linear-gradient(90deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px);
+  background-size: 100px 100px, 150px 150px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat, no-repeat, repeat, repeat;
+  animation: creator-fx 8s linear infinite reverse;
 }
 .badge-creator .badge-icon {
   background: linear-gradient(135deg, #7e22ce, #e9d5ff);
   color: #4c1d95;
   box-shadow: 0 0 25px rgba(168, 85, 247, 0.8);
 }
-.badge-assistant::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(96, 165, 250, 0.05)),
-              linear-gradient(90deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px),
-              linear-gradient(0deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px);
-  background-size: 100% 100%, 20px 20px, 20px 20px;
-  animation: creator-grid 5s linear infinite reverse;
-  pointer-events: none;
-  z-index: 0;
-}
-.badge-assistant {
-  border-color: rgba(96, 165, 250, 0.6);
-  box-shadow: inset 0 0 20px rgba(96, 165, 250, 0.2);
-}
 .badge-assistant .badge-icon {
   background: linear-gradient(135deg, #1d4ed8, #dbeafe);
   color: #1e3a8a;
   box-shadow: 0 0 25px rgba(96, 165, 250, 0.8);
 }
-@keyframes creator-grid {
-  0% { background-position: 0 0, 0 0, 0 0; }
-  100% { background-position: 0 0, 40px 0, 0 40px; }
+@keyframes creator-fx {
+  0% { background-position: -100px -100px, -150px -150px, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  15% { background-position: 400px 400px, -150px -150px, 0 -6px, 0 -9px, 0 -7px, 0 0, 6px 0, 0 6px; }
+  45% { background-position: 400px 400px, -150px -150px, 0 -18px, 0 -27px, 0 -21px, 0 0, 18px 0, 0 18px; }
+  60% { background-position: 400px 400px, 400px 400px, 0 -24px, 0 -36px, 0 -28px, 0 0, 24px 0, 0 24px; }
+  100% { background-position: 400px 400px, 400px 400px, 0 -40px, 0 -60px, 0 -50px, 0 0, 40px 0, 0 40px; }
+}
+@keyframes creator-spin {
+  to { --creator-angle: 360deg; }
+}
+
+/* Border Tracers */
+.badge-creator::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--creator-angle), transparent 0deg, #a855f7 40deg, transparent 80deg, transparent 180deg, #a855f7 220deg, transparent 260deg);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: creator-spin 4s linear infinite;
+  z-index: 10;
+  filter: drop-shadow(0 0 8px #a855f7) drop-shadow(0 0 15px #c084fc);
+}
+.badge-assistant::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--creator-angle), transparent 0deg, #3b82f6 40deg, transparent 80deg, transparent 180deg, #3b82f6 220deg, transparent 260deg);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: creator-spin 4s linear infinite reverse;
+  z-index: 10;
+  filter: drop-shadow(0 0 8px #3b82f6) drop-shadow(0 0 15px #60a5fa);
 }
 
 /* Diagonal Orbiting Planets (Anchored via .badge-icon) */
