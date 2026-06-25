@@ -30,9 +30,15 @@ export const getAvatarBadgeClass = (titleBadge?: string | null) => {
   if (!badge) return '';
   const isSpecial = badge.rarity === "ekslusif";
   const isExclusive = badge.rarity === "super-ekslusif";
-  if (isExclusive) return `avatar-badge avatar-exclusive-${badge.id} public-badge-sweep`;
-  if (isSpecial) return `avatar-badge avatar-badge-special-${badge.color} public-badge-sweep`;
+  if (isExclusive) return `avatar-badge avatar-exclusive-${badge.id}`;
+  if (isSpecial) return `avatar-badge avatar-badge-special-${badge.color}`;
   return `avatar-badge avatar-badge-common-${badge.color}`;
+};
+
+export const getAvatarSweepClass = (titleBadge?: string | null) => {
+  if (!titleBadge) return '';
+  const badge = BADGE_REGISTRY.find(b => b.id === titleBadge);
+  return badge && (badge.rarity === "ekslusif" || badge.rarity === "super-ekslusif") ? 'public-badge-sweep' : '';
 };
 
 interface Props {
@@ -894,12 +900,13 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                   }}
                                   className={`cursor-pointer hover:opacity-80 transition-opacity ${getAvatarBadgeClass(msg.sender?.titleBadge)}`}
                                   style={{ '--avatar-radius': '20px',
-                                    width: "32px", height: "32px", borderRadius: "50%", background: "#374151", overflow: "hidden", flexShrink: 0,
+                                    width: "32px", height: "32px", borderRadius: "50%", background: "#374151", overflow: "visible", flexShrink: 0,
                                     ...(msg.sender?.titleBadge ? {} : isMsgOwner ? { border: "2px solid #FFD700", boxShadow: "0 0 12px 2px rgba(255,215,0,0.8)" } :
                                       localCollaborators.find((c: any) => c.userId === msg.senderId)?.role === "ADMIN" ? { border: "2px solid #10B981" } :
                                         { border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" })
-                                  }}
+                                  } as any}
                                 >
+                                  <div className={`w-full h-full rounded-full overflow-hidden relative ${getAvatarSweepClass(msg.sender?.titleBadge)}`}>
                                   {msg.sender?.image ? (
                                     <img src={msg.sender.image} alt={msg.sender.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                   ) : (
@@ -907,6 +914,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                       {msg.sender?.username?.[0]?.toUpperCase()}
                                     </div>
                                   )}
+                                </div>
                                 </div>
                               )}
 
@@ -1210,12 +1218,14 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                 <div
                                   onClick={(e) => { e.stopPropagation(), setMentionDetail({ type: 'user', data: sector.station.user }) }}
                                   className={`cursor-pointer hover:opacity-80 transition-opacity ${getAvatarBadgeClass(sector.station.user.titleBadge)}`}
-                                  style={{ '--avatar-radius': '20px', width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden", ...(sector.station.user.titleBadge ? {} : { border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)" }) } as React.CSSProperties}
+                                  style={{ '--avatar-radius': '20px', overflow: 'visible', width: "100%", height: "100%", borderRadius: "50%", background: "#374151", ...(sector.station.user.titleBadge ? {} : { border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)" }) } as any}
                                 >
-                                  {sector.station.user.image
-                                    ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
-                                  }
+                                  <div className={`w-full h-full rounded-full overflow-hidden relative ${getAvatarSweepClass(sector.station.user.titleBadge)}`}>
+                                    {sector.station.user.image
+                                      ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                      : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
+                                    }
+                                  </div>
                                 </div>
                                 {/* Titik Online */}
                                 <div style={{
@@ -1250,14 +1260,16 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     onClick={(e) => { e.stopPropagation(); setMentionDetail({ type: 'user', data: c.user }) }}
                                     className={`cursor-pointer hover:opacity-80 transition-opacity ${getAvatarBadgeClass(c.user.titleBadge)}`}
                                     style={{
-                                      '--avatar-radius': '20px', width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden",
+                                      '--avatar-radius': '20px', overflow: 'visible', width: "100%", height: "100%", borderRadius: "50%", background: "#374151",
                                       ...(c.user.titleBadge ? {} : c.role === "ADMIN" ? { border: "2px solid #10B981" } : { border: "1px solid rgba(255,255,255,0.1)" })
-                                    } as React.CSSProperties}
+                                    } as any}
                                   >
-                                    {c.user.image
-                                      ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                      : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{c.user.username?.[0]?.toUpperCase()}</div>
-                                    }
+                                    <div className={`w-full h-full rounded-full overflow-hidden relative ${getAvatarSweepClass(c.user.titleBadge)}`}>
+                                      {c.user.image
+                                        ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                        : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{c.user.username?.[0]?.toUpperCase()}</div>
+                                      }
+                                    </div>
                                   </div>
 
                                   {/* Titik Online Indicator */}
@@ -1315,30 +1327,34 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
 
                   const avatarBadgeClass = badge 
                     ? isExclusive 
-                      ? `avatar-badge avatar-exclusive-${badge.id} public-badge-sweep`
+                      ? `avatar-badge avatar-exclusive-${badge.id}`
                       : isSpecial 
-                        ? `avatar-badge avatar-badge-special-${badge.color} public-badge-sweep`
+                        ? `avatar-badge avatar-badge-special-${badge.color}`
                         : `avatar-badge avatar-badge-common-${badge.color}`
                     : '';
+                  
+                  const avatarSweepClass = isExclusive || isSpecial ? 'public-badge-sweep' : '';
 
                   return (
                     <motion.div
                       onClick={(e) => e.stopPropagation()}
                       initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                      className={`!absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-violet-500/30 flex flex-col gap-4 min-w-[300px] ${badge ? badge.effectClass : ''} ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`}
+                      className={`!absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-violet-500/30 flex flex-col gap-4 min-w-[300px] ${badge ? badge.effectClass : ''}`}
                       style={{ padding: "1.5rem", background: badge ? "rgba(20,20,30,0.85)" : "rgba(20,20,30,0.95)", backdropFilter: "blur(20px)" }}
                     >
                       {(isExclusive || isSpecial) && <div className="badge-content" />}
-                      <button onClick={() => setMentionDetail(null)} className="absolute top-3 right-3 text-gray-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer p-1 z-20 relative">
+                      <button onClick={() => setMentionDetail(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-transparent border-none cursor-pointer z-50">
                         <XMarkIcon width={20} height={20} />
                       </button>
 
                       <div className="flex items-center gap-5 relative z-10">
                         <div 
                           className={`p-1 rounded-full bg-white/5 shrink-0 flex items-center justify-center ${avatarBadgeClass}`} 
-                          style={{ '--avatar-radius': '34px' } as React.CSSProperties}
+                          style={{ '--avatar-radius': '34px', overflow: 'visible' } as any}
                         >
-                          <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-16 h-16 rounded-full object-cover relative z-10" />
+                          <div className={`w-16 h-16 rounded-full overflow-hidden relative ${avatarSweepClass}`}>
+                            <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-full h-full object-cover relative z-10" />
+                          </div>
                         </div>
                         <div className="flex flex-col pr-6">
                           <h4 className="text-white font-bold text-lg m-0">{mentionDetail.data.name || mentionDetail.data.title}</h4>

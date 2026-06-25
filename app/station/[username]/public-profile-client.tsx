@@ -251,7 +251,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                     <div className="zzz-banner-left">
                       <div 
                         className={`zzz-avatar ${avatarBadgeClass}`} 
-                        style={{ '--avatar-radius': '46px' } as React.CSSProperties}
+                        style={{ '--avatar-radius': '46px' } as any}
                       >
                         {user.image ? (
                           <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 10 }} />
