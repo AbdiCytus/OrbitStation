@@ -38,13 +38,25 @@
 
 /* Viral */
 .badge-viral {
-  background: linear-gradient(145deg, rgba(225, 29, 72, 0.1), rgba(244, 63, 94, 0.05));
+  background: linear-gradient(45deg, rgba(225, 29, 72, 0.1), rgba(244, 63, 94, 0.25), rgba(225, 29, 72, 0.1));
+  background-size: 200% 200%;
   border-color: rgba(244, 63, 94, 0.4);
+  animation: viral-bg-pan 3s ease infinite;
+}
+.badge-viral::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(251, 113, 133, 0.8) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.3;
+  animation: floating-embers 4s linear infinite;
+  pointer-events: none;
 }
 .badge-viral .badge-icon { 
   background: linear-gradient(135deg, #e11d48, #fb7185); 
   color: #fff; 
-  box-shadow: 0 0 15px rgba(225, 29, 72, 0.4); 
+  animation: pulse-fire 2s infinite alternate; 
 }
 
 /* Social */
