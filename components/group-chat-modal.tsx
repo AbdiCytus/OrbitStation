@@ -38,8 +38,6 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   }, [incomingSector]);
   const sector = incomingSector || prevSectorRef.current;
 
-
-
   const [messages, setMessages] = useState<any[]>([]);
   const [localCollaborators, setLocalCollaborators] = useState<any[]>(sector?.collaborators || []);
   const [isLoading, setIsLoading] = useState(true);

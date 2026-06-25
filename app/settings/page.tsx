@@ -27,6 +27,9 @@ export default async function SettingsPage() {
     name: profile.name ?? session.user.name ?? null,
     image: profile.image ?? session.user.image ?? null,
     callsign: profile.callsign ?? null,
+    username: profile.username ?? null,
+    shortcuts: profile.shortcuts ?? null,
+    station: { isPublic: profile.station?.isPublic ?? false },
   };
 
   const displayName = profile.callsign ?? profile.name ?? "Pilot";

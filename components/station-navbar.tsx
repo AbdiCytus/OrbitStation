@@ -9,7 +9,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { searchPilots } from "@/lib/actions";
 
 type Props = {
-  user?: { id: string; name: string | null; image: string | null; callsign?: string | null; username?: string | null } | null;
+  user?: { 
+    id: string; 
+    name: string | null; 
+    image: string | null; 
+    callsign?: string | null; 
+    username?: string | null; 
+    shortcuts?: string | null; 
+    station?: { isPublic: boolean } | null; 
+  } | null;
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
   onSearchSubmit?: () => void;
@@ -103,6 +111,31 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
     }
   };
 
+  const defaultShortcuts = { publicStation: "F1", friends: "F2", analytics: "F3", settings: "F4" };
+  const parsedShortcuts = user?.shortcuts ? { ...defaultShortcuts, ...JSON.parse(user.shortcuts) } : defaultShortcuts;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if typing in an input
+      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") return;
+      
+      if (e.key === parsedShortcuts.publicStation && user?.station?.isPublic && user?.username) {
+        e.preventDefault();
+        router.push(`/station/${user.username}`);
+      } else if (e.key === parsedShortcuts.friends) {
+        e.preventDefault();
+        onOpenFriends?.();
+      } else if (e.key === parsedShortcuts.analytics && user?.station?.isPublic) {
+        e.preventDefault();
+        router.push("/analytics");
+      } else if (e.key === parsedShortcuts.settings) {
+        e.preventDefault();
+        router.push("/settings");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [parsedShortcuts, user, router, onOpenFriends]);
 
   return (
     <header className="station-navbar glass-nav">
@@ -202,6 +235,28 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
         {!hideProfile ? (
           user ? (
             <>
+              <div className="hidden md:flex items-center gap-2 mr-4">
+                {user.station?.isPublic && user.username && (
+                  <Link href={`/station/${user.username}`} className="navbar-icon-btn" title={`Public Station (${parsedShortcuts.publicStation})`} style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                    <GlobeAltIcon width={20} height={20} />
+                  </Link>
+                )}
+                <button onClick={onOpenFriends} className="navbar-icon-btn" title={`Friends (${parsedShortcuts.friends})`} style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s", position: "relative" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <UsersIcon width={20} height={20} />
+                  {stats?.hasNotifications && (
+                    <span style={{ position: "absolute", top: "2px", right: "2px", width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423" }}></span>
+                  )}
+                </button>
+                {user.station?.isPublic && (
+                  <Link href="/analytics" className="navbar-icon-btn" title={`Analytics (${parsedShortcuts.analytics})`} style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                    <ChartBarIcon width={20} height={20} />
+                  </Link>
+                )}
+                <Link href="/settings" className="navbar-icon-btn" title={`Settings (${parsedShortcuts.settings})`} style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <Cog8ToothIcon width={20} height={20} />
+                </Link>
+              </div>
+
               <div className="navbar-user-info" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", marginRight: "0.75rem", justifyContent: "center" }}>
                 <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#fff", lineHeight: 1 }}>{user.name ?? "Pilot"}</span>
                 {user.callsign && <span style={{ fontSize: "0.7rem", color: "#a78bfa", marginTop: "0.2rem" }}>{user.callsign}</span>}
@@ -217,7 +272,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                 style={{ position: "relative", cursor: "pointer" }}
               >
                 {stats?.hasNotifications && (
-                  <span style={{ position: "absolute", top: 0, right: 0, width: "10px", height: "10px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423", zIndex: 10 }}></span>
+                  <span className="md:hidden" style={{ position: "absolute", top: 0, right: 0, width: "10px", height: "10px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423", zIndex: 10 }}></span>
                 )}
                 {user.image ? (
                   <img
@@ -257,10 +312,10 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                           <UserIcon width={18} height={18} /> My Station
                         </Link>
                       )}
-                      {user.username && isPublicProfile && (
+                      {user.username && user.station?.isPublic && (
                         <Link
                           href={`/station/${user.username}`}
-                          className="navbar-menu-item"
+                          className="navbar-menu-item md:hidden"
                           onClick={() => setMenuOpen(false)}
                         >
                           <GlobeAltIcon width={18} height={18} /> Public Station
@@ -268,7 +323,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                       )}
                       {pathname !== '/settings' && pathname !== '/analytics' && (
                         <button
-                          className="navbar-menu-item"
+                          className="navbar-menu-item md:hidden"
                           onClick={() => {
                             setMenuOpen(false);
                             onOpenFriends?.();
@@ -281,10 +336,10 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                           )}
                         </button>
                       )}
-                      {pathname !== '/analytics' && isPublicProfile && (
+                      {pathname !== '/analytics' && user.station?.isPublic && (
                         <Link
                           href="/analytics"
-                          className="navbar-menu-item"
+                          className="navbar-menu-item md:hidden"
                           onClick={() => setMenuOpen(false)}
                         >
                           <ChartBarIcon width={18} height={18} /> Analytics
@@ -292,7 +347,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                       )}
                       <Link
                         href="/settings"
-                        className="navbar-menu-item"
+                        className="navbar-menu-item md:hidden"
                         onClick={() => setMenuOpen(false)}
                       >
                         <Cog8ToothIcon width={18} height={18} /> Settings

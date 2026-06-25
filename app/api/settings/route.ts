@@ -9,7 +9,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
-  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, notifSoundEnabled, notifSoundUrl, isPublic, image } = body;
+  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, notifSoundEnabled, notifSoundUrl, shortcuts, isPublic, image } = body;
 
   // Validate username uniqueness if changed
   if (username) {
@@ -37,6 +37,7 @@ export async function PATCH(req: Request) {
         ...(staticBackgroundEnabled !== undefined && { staticBackgroundEnabled: Boolean(staticBackgroundEnabled) }),
         ...(notifSoundEnabled !== undefined && { notifSoundEnabled: Boolean(notifSoundEnabled) }),
         ...(notifSoundUrl !== undefined && { notifSoundUrl: notifSoundUrl.trim() || null }),
+        ...(shortcuts !== undefined && { shortcuts }),
         ...(image !== undefined && { image: image || null }),
       },
     });

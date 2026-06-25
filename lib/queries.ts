@@ -190,6 +190,7 @@ export async function getMyProfile() {
       staticBackgroundEnabled: true,
       notifSoundEnabled: true,
       notifSoundUrl: true,
+      shortcuts: true,
       createdAt: true,
       station: {
         select: {

@@ -95,6 +95,7 @@ model User {
   mutedInSectors   MutedMember[]  @relation("MutedUsers")
   notifSoundUrl    String?        // Custom SFX URL
   notifSoundEnabled Boolean       @default(true)
+  shortcuts        String?        @default("{\"publicStation\":\"F1\",\"friends\":\"F2\",\"analytics\":\"F3\",\"settings\":\"F4\"}")
   typingIndicators TypingIndicator[]
   blindedInSectors BlindedMember[] @relation("BlindedUsers")
 }
