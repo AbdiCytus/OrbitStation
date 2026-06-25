@@ -228,7 +228,7 @@ export default function SettingsClient({ profile }: Props) {
   return (
     <>
       <form onSubmit={handleSave} className="settings-content" style={{ padding: "2rem 1rem", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 80px)", width: "100%", gap: "1rem" }}>
-        <div style={{ width: "100%", maxWidth: "900px", background: "#0f0f16", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+        <div style={{ width: "100%", maxWidth: "900px", background: "rgba(18, 18, 28, 0.75)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
           
           {/* Header */}
           <div className="settings-page-header" style={{ padding: "2rem", borderBottom: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)" }}>

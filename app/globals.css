@@ -3102,6 +3102,15 @@ code, kbd, pre {
   backdrop-filter: var(--glass-blur);
 }
 
+/* Force padding fixes for Tailwind stripping */
+.settings-section .form-group {
+  padding: 1.25rem !important;
+  gap: 1rem !important;
+}
+.settings-section .input, .settings-section textarea {
+  padding: 0.75rem 1rem !important;
+}
+
 .settings-section-title {
   font-size: 0.75rem;
   font-weight: 700;
