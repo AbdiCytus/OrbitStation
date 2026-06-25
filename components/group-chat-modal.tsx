@@ -1373,7 +1373,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                       style={{ 
                         padding: "1.5rem", 
                         backgroundColor: "rgba(15,15,25,0.95)",
-                        backgroundImage: badge ? `radial-gradient(circle at top right, ${getModalTint(badge.color)}, transparent)` : undefined,
+                        backgroundImage: badge && !(isExclusive || isSpecial) ? `radial-gradient(circle at top right, ${getModalTint(badge.color)}, transparent)` : undefined,
                         borderColor: getModalBorder(badge?.color),
                         backdropFilter: "blur(20px)" 
                       }}

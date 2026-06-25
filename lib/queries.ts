@@ -28,11 +28,11 @@ export async function getMyStation() {
           },
           collaborators: {
             include: {
-              user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } }
+              user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
             }
           },
           station: {
-            select: { user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } } }
+            select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
           }
         },
       },
@@ -60,11 +60,11 @@ export async function getCollabSectors() {
       },
       collaborators: {
         include: {
-          user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } }
+          user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
         }
       },
       station: {
-        select: { user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } } }
+        select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
       }
     }
   });
