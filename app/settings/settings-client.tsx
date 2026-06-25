@@ -236,6 +236,11 @@ export default function SettingsClient({ profile }: Props) {
       } else {
         setStatus("saved");
         toast.success("Settings saved successfully");
+        if (animationEnabled) {
+          document.body.classList.remove("no-loading-anim");
+        } else {
+          document.body.classList.add("no-loading-anim");
+        }
         router.refresh();
         setTimeout(() => setStatus("idle"), 2500);
       }

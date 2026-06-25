@@ -17,7 +17,7 @@ import {
   RocketLaunchIcon,
   CameraIcon
 } from "@heroicons/react/24/outline";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
 type Props = {
@@ -46,13 +46,23 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   const captureScreenshot = async () => {
     if (!panelRef.current) return;
     setIsCapturing(true);
+
+    // Add a small delay to ensure UI updates (like the button spinner) are flushed
+    await new Promise(res => setTimeout(res, 100));
+
     try {
-      const canvas = await html2canvas(panelRef.current, {
+      const dataUrl = await toPng(panelRef.current, {
         backgroundColor: "#0f0f16",
-        scale: 2,
-        useCORS: true,
+        pixelRatio: 2,
+        style: {
+          transform: 'scale(1)', // Reset any transforms that might mess up coordinates
+        },
+        filter: (node) => {
+          // Ignore elements with the 'screenshot-ignore' class
+          if (node.classList?.contains('screenshot-ignore')) return false;
+          return true;
+        }
       });
-      const dataUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = `beacon-${beacon.title.replace(/[\s/]/g, '-').toLowerCase()}.png`;
@@ -60,7 +70,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
       toast.success("Screenshot saved to device!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to capture screenshot");
+      toast.error("Failed to capture screenshot. The image might have CORS restrictions.");
     } finally {
       setIsCapturing(false);
     }
@@ -207,7 +217,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             <span className="hsr-topbar-icon"><InformationCircleIcon width={18} height={18} /></span>
             <span className="hsr-topbar-label">Beacon Details</span>
           </div>
-          <div className="hsr-topbar-actions">
+          <div className="hsr-topbar-actions screenshot-ignore">
             <button
               className="hsr-action-btn"
               onClick={captureScreenshot}
@@ -262,7 +272,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                 )}
               </>
             )}
-            <button className="hsr-close-btn" onClick={handleClose} aria-label="Close">
+            <button className="hsr-close-btn screenshot-ignore" onClick={handleClose} aria-label="Close">
               <XMarkIcon width={20} height={20} />
             </button>
           </div>
@@ -397,7 +407,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             {/* CTA */}
             <button
               id={`btn-visit-hsr-${beacon.id}`}
-              className="hsr-visit-btn"
+              className="hsr-visit-btn screenshot-ignore"
               onClick={handleVisit}
               style={{ padding: "0.6rem 1rem", fontSize: "0.9rem" }}
             >
