@@ -1398,7 +1398,19 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                         <div className="flex flex-col pr-6">
                           <h4 className="text-white font-bold text-lg m-0">{mentionDetail.data.name || mentionDetail.data.title}</h4>
                           {isUserType ? (
-                            <p className="text-gray-400 text-sm m-0">@{mentionDetail.data.username} {mentionDetail.data.callsign ? `• ${mentionDetail.data.callsign}` : ''}</p>
+                            <>
+                              <p className="text-gray-400 text-sm m-0">@{mentionDetail.data.username} {mentionDetail.data.callsign ? `• ${mentionDetail.data.callsign}` : ''}</p>
+                              {badge && (
+                                <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg overflow-hidden mt-1.5`} style={{ width: 'fit-content' }}>
+                                  <div className="badge-icon w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <DynamicIcon name={badge.icon as any} className="w-3.5 h-3.5 relative z-10" />
+                                  </div>
+                                  <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[12px] drop-shadow-md" style={{marginRight: "0.5rem"}}>
+                                    {badge.name}
+                                  </span>
+                                </div>
+                              )}
+                            </>
                           ) : (
                             <p className="text-violet-400 text-sm m-0">Sector Beacon Reference</p>
                           )}

@@ -157,7 +157,7 @@ export async function acceptCollab(messageId: string, sectorId: string) {
 
     const sysMsg = await db.groupMessage.create({
       data: { sectorId, senderId: user.id, content: `joined the sector`, type: "SYSTEM" },
-      include: { sender: { select: { id: true, name: true, username: true, image: true } } }
+      include: { sender: { select: { id: true, name: true, username: true, image: true, titleBadge: true } } }
     });
     const pusherPayload = {
       ...sysMsg,
@@ -943,7 +943,7 @@ export async function sendChatMessage(receiverId: string, content: string) {
       content: content.trim()
     },
     include: {
-      sender: { select: { id: true, name: true, username: true, image: true } }
+      sender: { select: { id: true, name: true, username: true, image: true, titleBadge: true } }
     }
   });
 
@@ -1208,7 +1208,7 @@ export async function getGroupMessages(sectorId: string) {
     where: { sectorId },
     include: {
       sender: {
-        select: { id: true, name: true, username: true, image: true, callsign: true }
+        select: { id: true, name: true, username: true, image: true, callsign: true, titleBadge: true }
       },
       replyTo: {
         select: { id: true, content: true, senderId: true, sender: { select: { name: true, username: true } }, isDeleted: true }
@@ -1250,8 +1250,8 @@ export async function sendGroupMessage(sectorId: string, content: string, replyT
       replyToId: replyToId || null
     },
     include: {
-      sender: { select: { id: true, name: true, username: true, image: true } },
-      replyTo: { include: { sender: { select: { name: true, username: true } } } }
+      sender: { select: { id: true, name: true, username: true, image: true, titleBadge: true } },
+      replyTo: { include: { sender: { select: { name: true, username: true, titleBadge: true } } } }
     }
   });
 
