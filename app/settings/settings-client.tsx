@@ -473,7 +473,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                               if (isUnlocked) setTitleBadge(badge.id);
                               else toast.error("You haven't unlocked this badge yet!");
                             }}
-                            className={`badge-card relative p-3 rounded-xl border flex gap-3 items-center cursor-pointer ${
+                            className={`badge-card relative p-4 rounded-xl border flex gap-3 items-center cursor-pointer ${
                               isSelected 
                                 ? `ring-2 ring-purple-500 ring-offset-2 ring-offset-[#0f0f16]` 
                                 : isUnlocked 

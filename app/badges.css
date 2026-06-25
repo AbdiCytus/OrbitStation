@@ -38,8 +38,20 @@
 
 /* Viral */
 .badge-viral {
-  background: linear-gradient(145deg, rgba(225, 29, 72, 0.15), rgba(244, 63, 94, 0.05));
+  background: linear-gradient(45deg, rgba(225, 29, 72, 0.1), rgba(244, 63, 94, 0.25), rgba(225, 29, 72, 0.1));
+  background-size: 200% 200%;
   border-color: rgba(244, 63, 94, 0.4);
+  animation: viral-bg-pan 3s ease infinite;
+}
+.badge-viral::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(251, 113, 133, 0.8) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.3;
+  animation: floating-embers 4s linear infinite;
+  pointer-events: none;
 }
 .badge-viral .badge-icon { 
   background: linear-gradient(135deg, #e11d48, #fb7185); 
@@ -120,12 +132,41 @@
   0% { box-shadow: 0 0 5px rgba(225, 29, 72, 0.5); } 
   100% { box-shadow: 0 0 15px rgba(251, 113, 133, 0.8), 0 0 30px rgba(225, 29, 72, 0.4); } 
 }
+@keyframes viral-bg-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes floating-embers {
+  0% { background-position: 0 20px; }
+  100% { background-position: 10px -20px; }
+}
 @keyframes scanline { 
   0% { background-position: 0 -100%; } 
   100% { background-position: 0 200%; } 
 }
 @keyframes spin-slow { 
   100% { transform: rotate(360deg); } 
+}
+
+/* Public Badge Sweep Effect */
+.public-badge-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0; 
+  left: -100%; 
+  width: 50%; 
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transform: skewX(-20deg);
+  animation: shine-sweep 4s infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+@keyframes shine-sweep {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
 }
 
 /* -------------------------------------

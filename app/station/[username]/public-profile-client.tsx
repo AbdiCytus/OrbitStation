@@ -251,11 +251,11 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                       const badge = getBadgeById(user.titleBadge);
                       if (!badge) return null;
                       return (
-                        <div className={`badge-card ${badge.effectClass} pr-4 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg`} style={{ width: 'fit-content', marginTop: '4px' }}>
+                        <div className={`badge-card public-badge-sweep ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg overflow-hidden`} style={{ width: 'fit-content', marginTop: '4px' }}>
                            <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
                              <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
                            </div>
-                           <span className="badge-content relative z-10 text-white font-bold tracking-widest uppercase text-[11px] drop-shadow-md">
+                           <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[13px] drop-shadow-md">
                              {badge.name}
                            </span>
                         </div>
