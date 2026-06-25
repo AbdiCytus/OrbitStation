@@ -154,6 +154,15 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     icon: "CommandLineIcon",
     effectClass: "badge-assistant",
     rarity: "super-ekslusif"
+  },
+  {
+    id: "creator-confidant",
+    name: "Creator's Confidant",
+    hint: "Befriended The Creator of Orbit Station.",
+    color: "pink",
+    icon: "HeartIcon",
+    effectClass: "badge-confidant",
+    rarity: "super-ekslusif"
   }
 ];
 

@@ -280,10 +280,9 @@
 .badge-label-admin { background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.4); }
 .badge-label-contributor { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(6, 182, 212, 0.4); }
 .badge-label-heiress { background: rgba(147, 51, 234, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.5); }
+.badge-label-confidant { background: linear-gradient(90deg, #d946ef, #f472b6); color: #fff; border-color: transparent; box-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
 
-
-
-/* Heiress */
+/* Confidant */
 .badge-heiress {
   background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(192, 132, 252, 0.2));
   border-color: rgba(192, 132, 252, 0.6);
@@ -724,6 +723,51 @@
 @keyframes avatar-spin-rotate {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Confidant */
+.badge-confidant {
+  background: linear-gradient(45deg, rgba(217, 70, 239, 0.15), rgba(236, 72, 153, 0.25), rgba(139, 92, 246, 0.15));
+  background-size: 200% 200%;
+  border-color: rgba(236, 72, 153, 0.6);
+  box-shadow: 0 0 20px rgba(217, 70, 239, 0.3), inset 0 0 15px rgba(236, 72, 153, 0.2);
+  animation: confidant-bg-pan 4s ease infinite, confidant-glow 3s alternate infinite;
+}
+.badge-confidant::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(244, 114, 182, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(167, 139, 250, 0.4) 0%, transparent 50%);
+  opacity: 0.7;
+  animation: confidant-pulse 4s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+.badge-confidant .badge-icon { 
+  background: linear-gradient(135deg, #d946ef, #f472b6, #8b5cf6);
+  background-size: 200% 200%;
+  color: #fff; 
+  animation: confidant-shine 3s linear infinite;
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.8), 0 0 10px rgba(139, 92, 246, 0.6);
+}
+@keyframes confidant-bg-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes confidant-glow {
+  0% { box-shadow: 0 0 20px rgba(217, 70, 239, 0.3), inset 0 0 15px rgba(236, 72, 153, 0.2); }
+  100% { box-shadow: 0 0 30px rgba(236, 72, 153, 0.6), inset 0 0 25px rgba(139, 92, 246, 0.4); }
+}
+@keyframes confidant-pulse {
+  0% { opacity: 0.4; transform: scale(0.95); }
+  100% { opacity: 0.9; transform: scale(1.05); }
+}
+@keyframes confidant-shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
 
 
