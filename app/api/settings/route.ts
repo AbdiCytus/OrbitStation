@@ -30,7 +30,6 @@ export async function PATCH(req: Request) {
         ...(callsign !== undefined && { callsign: callsign.trim() || null }),
         ...(bio !== undefined && { bio: bio.trim() || null }),
         ...(bannerUrl !== undefined && { bannerUrl: bannerUrl.trim() || null }),
-        ...(titleBadge !== undefined && { titleBadge: titleBadge.trim() || null }),
         ...(animationEnabled !== undefined && { animationEnabled: Boolean(animationEnabled) }),
         ...(hologramEnabled !== undefined && { hologramEnabled: Boolean(hologramEnabled) }),
         ...(allowFriendRequests !== undefined && { allowFriendRequests: Boolean(allowFriendRequests) }),
@@ -38,12 +37,30 @@ export async function PATCH(req: Request) {
         ...(notifSoundEnabled !== undefined && { notifSoundEnabled: Boolean(notifSoundEnabled) }),
         ...(notifSoundUrl !== undefined && { notifSoundUrl: notifSoundUrl.trim() || null }),
         ...(shortcuts !== undefined && { shortcuts }),
-        ...(image !== undefined && { image: image || null }),
+        ...(image !== undefined && { image }),
       },
     });
 
-
-
+    // Verify Title Badge Eligibility
+    if (titleBadge !== undefined) {
+      const trimmedBadge = titleBadge.trim() || null;
+      if (trimmedBadge) {
+        // We import dynamically to avoid polluting the file scope
+        const { getUnlockedBadges } = await import("@/lib/badges");
+        const unlockedBadges = await getUnlockedBadges(session.user.id);
+        if (unlockedBadges.includes(trimmedBadge)) {
+          await db.user.update({
+            where: { id: session.user.id },
+            data: { titleBadge: trimmedBadge }
+          });
+        }
+      } else {
+        await db.user.update({
+          where: { id: session.user.id },
+          data: { titleBadge: null }
+        });
+      }
+    }
     if (isPublic !== undefined) {
       await db.station.upsert({
         where: { userId: session.user.id },

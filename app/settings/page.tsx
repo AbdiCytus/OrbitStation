@@ -7,6 +7,8 @@ import SpaceBackground from "@/components/space-background";
 import StaticStarfield from "@/components/static-starfield";
 import type { Metadata } from "next";
 
+import { getUnlockedBadges } from "@/lib/badges";
+
 export const metadata: Metadata = {
   title: "Settings — Orbit Station",
   robots: {
@@ -21,6 +23,8 @@ export default async function SettingsPage() {
 
   const profile = await getMyProfile();
   if (!profile) redirect("/login");
+
+  const unlockedBadges = await getUnlockedBadges(profile.id);
 
   const user = {
     id: session.user.id ?? "",
@@ -52,24 +56,27 @@ export default async function SettingsPage() {
         displayName={displayName}
         hideSearch
       />
-      <SettingsClient profile={{
-        id: profile.id,
-        name: profile.name,
-        username: profile.username,
-        email: profile.email,
-        image: profile.image,
-        bio: profile.bio,
-        bannerUrl: profile.bannerUrl,
-        titleBadge: profile.titleBadge,
-        callsign: profile.callsign,
-        animationEnabled: profile.animationEnabled,
-        hologramEnabled: (profile as any).hologramEnabled ?? true,
-        allowFriendRequests: (profile as any).allowFriendRequests ?? true,
-        staticBackgroundEnabled: (profile as any).staticBackgroundEnabled ?? false,
-        notifSoundEnabled: (profile as any).notifSoundEnabled ?? true,
-        notifSoundUrl: (profile as any).notifSoundUrl ?? null,
-        station: profile.station,
-      }} />
+      <SettingsClient 
+        profile={{
+          id: profile.id,
+          name: profile.name,
+          username: profile.username,
+          email: profile.email,
+          image: profile.image,
+          bio: profile.bio,
+          bannerUrl: profile.bannerUrl,
+          titleBadge: profile.titleBadge,
+          callsign: profile.callsign,
+          animationEnabled: profile.animationEnabled,
+          hologramEnabled: (profile as any).hologramEnabled ?? true,
+          allowFriendRequests: (profile as any).allowFriendRequests ?? true,
+          staticBackgroundEnabled: (profile as any).staticBackgroundEnabled ?? false,
+          notifSoundEnabled: (profile as any).notifSoundEnabled ?? true,
+          notifSoundUrl: (profile as any).notifSoundUrl ?? null,
+          station: profile.station,
+        }} 
+        unlockedBadges={unlockedBadges}
+      />
     </div>
   );
 }

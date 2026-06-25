@@ -7,6 +7,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import Cropper from "react-easy-crop";
 import { deleteAccount } from "@/lib/actions";
 import { toast } from "sonner";
+import { BADGE_REGISTRY, BADGE_COLORS } from "@/lib/badges/registry";
+import * as SolidIcons from "@heroicons/react/24/solid";
+
+const DynamicIcon = ({ name, className }: { name: string, className?: string }) => {
+  const Icon = (SolidIcons as any)[name];
+  return Icon ? <Icon className={className} /> : <SolidIcons.StarIcon className={className} />;
+};
 
 type Profile = {
   id: string;
@@ -28,7 +35,10 @@ type Profile = {
   station: { isPublic: boolean } | null;
 };
 
-type Props = { profile: Profile };
+type Props = { 
+  profile: Profile;
+  unlockedBadges: string[];
+};
 
 const createImage = (url: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
@@ -77,7 +87,7 @@ async function getCroppedImg(
   })
 }
 
-export default function SettingsClient({ profile }: Props) {
+export default function SettingsClient({ profile, unlockedBadges = [] }: Props) {
   const [name, setName] = useState(profile.name ?? "");
   const [username, setUsername] = useState(profile.username ?? "");
   const [callsign, setCallsign] = useState(profile.callsign ?? "");
@@ -445,17 +455,59 @@ export default function SettingsClient({ profile }: Props) {
                     </label>
                   </div>
 
-                  {/* Title badge */}
+                  {/* Title badge selection */}
                   <div className="form-group">
-                    <label className="form-label text-sm text-gray-300" htmlFor="s-badge">Title Badge</label>
-                    <input
-                      id="s-badge"
-                      className="input w-full p-3 bg-white/5 border border-white/10 rounded-lg focus:border-purple-500 transition-colors"
-                      value={titleBadge}
-                      onChange={(e) => setTitleBadge(e.target.value)}
-                      maxLength={40}
-                      placeholder="e.g. Pioneer Pilot, Star Navigator…"
-                    />
+                    <label className="form-label text-sm text-gray-300">Title Badge</label>
+                    <p className="text-xs text-gray-500 mb-3">
+                      Unlock prestigious badges by reaching milestones in Orbit Station.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {BADGE_REGISTRY.map((badge) => {
+                        const isUnlocked = unlockedBadges.includes(badge.id);
+                        const isSelected = titleBadge === badge.id;
+                        
+                        return (
+                          <div 
+                            key={badge.id}
+                            onClick={() => {
+                              if (isUnlocked) setTitleBadge(badge.id);
+                              else toast.error("You haven't unlocked this badge yet!");
+                            }}
+                            className={`relative p-3 rounded-xl border flex gap-3 items-center transition-all cursor-pointer ${
+                              isSelected 
+                                ? 'bg-purple-500/10 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.15)]' 
+                                : isUnlocked 
+                                  ? 'bg-white/5 border-white/10 hover:border-white/20' 
+                                  : 'bg-black/40 border-white/5 opacity-60 grayscale'
+                            }`}
+                          >
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border ${
+                              isUnlocked ? (BADGE_COLORS[badge.color] || "bg-gray-500/20 text-gray-400 border-gray-500/30") : 'bg-gray-800 text-gray-500 border-gray-700'
+                            }`}>
+                              <DynamicIcon name={badge.icon} className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1 min-w-0 pr-6">
+                              <h4 className={`text-sm font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-400'}`}>
+                                {badge.name}
+                              </h4>
+                              <p className="text-xs text-gray-500 leading-snug mt-0.5">
+                                {badge.hint}
+                              </p>
+                            </div>
+                            {isSelected && (
+                              <div className="absolute top-3 right-3 text-purple-400">
+                                <SolidIcons.CheckCircleIcon className="w-5 h-5" />
+                              </div>
+                            )}
+                            {!isUnlocked && (
+                              <div className="absolute top-3 right-3 text-gray-600">
+                                <SolidIcons.LockClosedIcon className="w-4 h-4" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Banner URL */}

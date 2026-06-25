@@ -12,6 +12,7 @@ import { UserPlusIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { sendFriendRequest, recordStationVisit } from "@/lib/actions";
 import { motion, useAnimation, PanInfo, useDragControls } from "framer-motion";
+import { getBadgeById, BADGE_COLORS } from "@/lib/badges/registry";
 import FriendsModal from "@/components/friends-modal";
 import { useNotifications } from "@/hooks/use-notifications";
 import "./public-profile.css";
@@ -246,9 +247,16 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                     {user.username && (
                       <div className="zzz-user-username">@{user.username}</div>
                     )}
-                    {user.titleBadge && (
-                      <div className="zzz-user-badge">{user.titleBadge}</div>
-                    )}
+                    {user.titleBadge && (() => {
+                      const badge = getBadgeById(user.titleBadge);
+                      if (!badge) return null;
+                      return (
+                        <div className={`zzz-user-badge px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1.5 ${BADGE_COLORS[badge.color] || 'bg-gray-500/20 text-gray-400 border-gray-500/30'} border`} style={{ width: 'fit-content', marginTop: '4px' }}>
+                           <DynamicIcon name={badge.icon} className="w-3.5 h-3.5" />
+                           {badge.name}
+                        </div>
+                      )
+                    })()}
                   </div>
                 </div>
                 
