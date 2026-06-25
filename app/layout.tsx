@@ -45,11 +45,17 @@ import MouseTrail from "@/components/mouse-trail";
 import { Toaster } from "sonner";
 import PwaRegister from "@/components/pwa-register";
 
-export default function RootLayout({
+import { cookies } from "next/headers";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const animCookie = cookieStore.get("animationEnabled");
+  const isAnim = animCookie ? animCookie.value !== "false" : true;
+
   return (
     <html lang="en" className="dark">
       <head>
@@ -60,7 +66,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body>
+      <body className={!isAnim ? "no-loading-anim" : ""}>
         <PwaRegister />
         <MouseTrail />
         <Toaster 
