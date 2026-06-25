@@ -249,7 +249,43 @@ export default function SettingsClient({ profile }: Props) {
   return (
     <>
       <form onSubmit={handleSave} className="settings-content" style={{ padding: "2rem 1rem", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 80px)", width: "100%", gap: "1rem" }}>
-        <div style={{ width: "100%", maxWidth: "900px", height: "75vh", minHeight: "500px", maxHeight: "800px", background: "rgba(255, 255, 255, 0.03)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+        <style>{`
+          /* Mobile First Defaults */
+          .settings-right-pane {
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 2rem;
+          }
+          /* Desktop Overrides */
+          @media (min-width: 768px) {
+            .settings-modal-wrapper {
+              height: 75vh !important;
+              min-height: 500px !important;
+              max-height: 800px !important;
+            }
+            .settings-scroll-container {
+              flex-direction: row !important;
+              min-height: 0 !important;
+              overflow: hidden !important;
+            }
+            .settings-right-pane {
+              flex: 1 !important;
+              overflow-y: auto !important;
+              padding: 2.5rem 3rem !important;
+              min-height: 0 !important;
+              gap: 2.5rem !important;
+            }
+            .settings-inner-section {
+              background: transparent !important;
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+            }
+          }
+        `}</style>
+        <div className="settings-modal-wrapper" style={{ width: "100%", maxWidth: "900px", background: "rgba(0, 0, 0, 0.2)", WebkitBackdropFilter: "blur(24px)", backdropFilter: "blur(24px)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
 
           {/* Header */}
           <div className="settings-page-header" style={{ padding: "2rem", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", background: "transparent" }}>
@@ -280,7 +316,7 @@ export default function SettingsClient({ profile }: Props) {
             </div>
           </div>
 
-          <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }} className="md:flex-row flex-col">
+          <div style={{ display: "flex", flex: 1 }} className="settings-scroll-container flex-col">
             {/* Left Sidebar (Desktop Only) */}
             <div className="hidden md:flex md:flex-col md:w-64" style={{ padding: "1.5rem", gap: "0.5rem", borderRight: "1px solid rgba(255, 255, 255, 0.1)", background: "transparent" }}>
               <button type="button" onClick={() => setActiveTab("profile")} className={`text-left rounded-lg flex items-center transition-colors ${activeTab === "profile" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`} style={{ padding: "0.75rem 1rem", gap: "0.75rem" }}>
@@ -302,10 +338,10 @@ export default function SettingsClient({ profile }: Props) {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto w-full" style={{ padding: "2.5rem 3rem", display: "flex", flexDirection: "column", minHeight: 0 }}>
+            <div className="settings-right-pane">
 
               {/* Profile Section */}
-              <section className="settings-section" style={{ display: activeTab === "profile" ? "flex" : "none", border: "none", padding: "2rem" }}>
+              <section className="settings-section settings-inner-section" style={{ display: activeTab === "profile" ? "flex" : "none" }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Profile</h2>
 
                 {/* Avatar row */}
@@ -411,7 +447,7 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Public Station Section */}
-              <section className="settings-section" style={{ display: activeTab === "public" ? "flex" : "none", border: "none", padding: "2rem" }}>
+              <section className="settings-section settings-inner-section" style={{ display: activeTab === "public" ? "flex" : "none" }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Public Station</h2>
 
                 <div className="flex flex-col">
@@ -474,7 +510,7 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Preferences Section */}
-              <section className="settings-section" style={{ display: activeTab === "preferences" ? "flex" : "none", border: "none", padding: "2rem" }}>
+              <section className="settings-section settings-inner-section" style={{ display: activeTab === "preferences" ? "flex" : "none" }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Preferences</h2>
 
                 <div className="flex flex-col gap-4">
@@ -653,7 +689,7 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Shortcuts Section */}
-              <section className="settings-section" style={{ display: activeTab === "shortcuts" ? "flex" : "none", border: "none", padding: "1rem" }}>
+              <section className="settings-section settings-inner-section" style={{ display: activeTab === "shortcuts" ? "flex" : "none" }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Shortcuts</h2>
                 <p className="text-gray-400 text-sm mb-6">Configure keyboard shortcuts for quick navigation on desktop.</p>
 
