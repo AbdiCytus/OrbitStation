@@ -241,9 +241,9 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
 
                   const avatarBadgeClass = badge 
                     ? isExclusive 
-                      ? `avatar-badge avatar-exclusive-${badge.id} public-badge-sweep`
+                      ? `avatar-badge avatar-exclusive-${badge.id}`
                       : isSpecial 
-                        ? `avatar-badge avatar-badge-special-${badge.color} public-badge-sweep`
+                        ? `avatar-badge avatar-badge-special-${badge.color}`
                         : `avatar-badge avatar-badge-common-${badge.color}`
                     : '';
 
@@ -251,13 +251,15 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                     <div className="zzz-banner-left">
                       <div 
                         className={`zzz-avatar ${avatarBadgeClass}`} 
-                        style={{ '--avatar-radius': '46px' } as any}
+                        style={{ '--avatar-radius': '46px', overflow: 'visible' } as any}
                       >
-                        {user.image ? (
-                          <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 10 }} />
-                        ) : (
-                          <span style={{ position: 'relative', zIndex: 10 }}>{user.name?.[0]?.toUpperCase() ?? "?"}</span>
-                        )}
+                        <div className={`w-full h-full rounded-full overflow-hidden relative ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`}>
+                          {user.image ? (
+                            <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 10 }} />
+                          ) : (
+                            <span style={{ position: 'relative', zIndex: 10 }}>{user.name?.[0]?.toUpperCase() ?? "?"}</span>
+                          )}
+                        </div>
                       </div>
                       <div className="zzz-user-info">
                         <h1 className="zzz-user-name">{profileTitle || "Pilot"}</h1>

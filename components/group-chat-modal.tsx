@@ -1339,7 +1339,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                     <motion.div
                       onClick={(e) => e.stopPropagation()}
                       initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                      className={`!absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-violet-500/30 flex flex-col gap-4 min-w-[300px] ${badge ? badge.effectClass : ''}`}
+                      className={`!absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-violet-500/30 flex flex-col gap-4 min-w-[300px] chat-mention-modal ${badge ? badge.effectClass : ''}`}
                       style={{ padding: "1.5rem", background: badge ? "rgba(20,20,30,0.85)" : "rgba(20,20,30,0.95)", backdropFilter: "blur(20px)" }}
                     >
                       {(isExclusive || isSpecial) && <div className="badge-content" />}
