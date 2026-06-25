@@ -586,14 +586,14 @@
 @keyframes diagonal-orbit-3d {
   0% { 
     transform: rotateZ(-25deg) rotateX(75deg) rotate(0deg) translateX(80px) rotate(0deg) rotateX(-75deg) rotateZ(25deg); 
-    z-index: 10; filter: brightness(1);
+    z-index: 20; filter: brightness(1);
   }
   25% { 
     transform: rotateZ(-25deg) rotateX(75deg) rotate(90deg) translateX(80px) rotate(-90deg) rotateX(-75deg) rotateZ(25deg); 
-    z-index: 10; filter: brightness(1.2);
+    z-index: 20; filter: brightness(1.2);
   }
   49.9% { 
-    z-index: 10; 
+    z-index: 20; 
   }
   50% { 
     transform: rotateZ(-25deg) rotateX(75deg) rotate(180deg) translateX(80px) rotate(-180deg) rotateX(-75deg) rotateZ(25deg); 
@@ -608,7 +608,7 @@
   }
   100% { 
     transform: rotateZ(-25deg) rotateX(75deg) rotate(360deg) translateX(80px) rotate(-360deg) rotateX(-75deg) rotateZ(25deg); 
-    z-index: 10; filter: brightness(1);
+    z-index: 20; filter: brightness(1);
   }
 }
 
