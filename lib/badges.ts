@@ -115,11 +115,11 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
   },
   "the-creator": async (userId: string) => {
     const user = await db.user.findUnique({ where: { id: userId }, select: { email: true } });
-    return user?.email === "abdiprayuda89@gmail.com" || user?.email?.includes("abdi"); 
+    return Boolean(user?.email === "abdiprayuda89@gmail.com" || user?.email?.includes("abdi")); 
   },
   "the-creator-assistant": async (userId: string) => {
     const user = await db.user.findUnique({ where: { id: userId }, select: { email: true, username: true } });
-    return user?.username === "antigravity" || user?.username === "assistant";
+    return Boolean(user?.username === "antigravity" || user?.username === "assistant");
   }
 };
 
