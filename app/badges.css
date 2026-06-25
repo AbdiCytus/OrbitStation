@@ -19,10 +19,6 @@
   z-index: 1;
 }
 
-.badge-icon {
-  position: relative;
-}
-
 /* Rookie */
 .badge-rookie { background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.3); }
 .badge-rookie .badge-icon { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; }
