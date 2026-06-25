@@ -100,6 +100,27 @@ export default function SettingsClient({ profile }: Props) {
   const [shortcuts, setShortcuts] = useState<typeof defaultShortcuts>(profile.shortcuts ? { ...defaultShortcuts, ...JSON.parse(profile.shortcuts) } : defaultShortcuts);
   const [activeTab, setActiveTab] = useState<"profile" | "public" | "preferences" | "shortcuts">("profile");
 
+  const handleShortcutKeyDown = (keyName: keyof typeof defaultShortcuts) => (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const key = e.key;
+    if (key === "Tab" || key === "Escape" || key === "Enter") return;
+    
+    const modifiers = [];
+    if (e.ctrlKey) modifiers.push("Ctrl");
+    if (e.altKey) modifiers.push("Alt");
+    if (e.shiftKey) modifiers.push("Shift");
+    if (e.metaKey) modifiers.push("Meta");
+    
+    // Ignore if only modifier keys are pressed
+    if (["Control", "Alt", "Shift", "Meta"].includes(key)) return;
+    
+    const keyString = key === " " ? "Space" : key.length === 1 ? key.toUpperCase() : key;
+    const finalCombo = [...modifiers, keyString].join("+");
+    
+    setShortcuts(s => ({ ...s, [keyName]: finalCombo }));
+    (e.target as HTMLInputElement).blur();
+  };
+
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [formErrors, setFormErrors] = useState<{ name?: string, username?: string }>({});
@@ -228,8 +249,8 @@ export default function SettingsClient({ profile }: Props) {
   return (
     <>
       <form onSubmit={handleSave} className="settings-content" style={{ padding: "2rem 1rem", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 80px)", width: "100%", gap: "1rem" }}>
-        <div style={{ width: "100%", maxWidth: "900px", background: "rgba(18, 18, 28, 0.75)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
-          
+        <div style={{ width: "100%", maxWidth: "900px", height: "75vh", minHeight: "500px", maxHeight: "800px", background: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+
           {/* Header */}
           <div className="settings-page-header" style={{ padding: "2rem", borderBottom: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)" }}>
             <div>
@@ -259,7 +280,7 @@ export default function SettingsClient({ profile }: Props) {
             </div>
           </div>
 
-          <div style={{ display: "flex", flex: 1, minHeight: "65vh", overflow: "hidden" }} className="md:flex-row flex-col">
+          <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }} className="md:flex-row flex-col">
             {/* Left Sidebar (Desktop Only) */}
             <div className="hidden md:flex md:flex-col md:w-64" style={{ padding: "1.5rem", gap: "0.5rem", borderRight: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)" }}>
               <button type="button" onClick={() => setActiveTab("profile")} className={`text-left rounded-lg flex items-center transition-colors ${activeTab === "profile" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`} style={{ padding: "0.75rem 1rem", gap: "0.75rem" }}>
@@ -281,12 +302,12 @@ export default function SettingsClient({ profile }: Props) {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto w-full" style={{ padding: "2.5rem 3rem", display: "flex", flexDirection: "column", gap: "2rem" }}>
-              
+            <div className="flex-1 overflow-y-auto w-full" style={{ padding: "2.5rem 3rem", display: "flex", flexDirection: "column", minHeight: 0 }}>
+
               {/* Profile Section */}
-              <section className="settings-section" style={{ display: activeTab === "profile" ? "flex" : "none", border: "none", padding: 0 }}>
+              <section className="settings-section" style={{ display: activeTab === "profile" ? "flex" : "none", border: "none", padding: "2rem" }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Profile</h2>
-                
+
                 {/* Avatar row */}
                 <div className="settings-avatar-row mb-8">
                   <input
@@ -324,7 +345,7 @@ export default function SettingsClient({ profile }: Props) {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col">
                   {/* Display name */}
                   <div className="form-group">
                     <label className="form-label text-sm text-gray-300" htmlFor="s-name">Display Name</label>
@@ -390,12 +411,12 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Public Station Section */}
-              <section className="settings-section" style={{ display: activeTab === "public" ? "flex" : "none", border: "none", padding: 0 }}>
+              <section className="settings-section" style={{ display: activeTab === "public" ? "flex" : "none", border: "none", padding: "2rem" }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Public Station</h2>
-                
-                <div className="flex flex-col gap-6">
+
+                <div className="flex flex-col">
                   {/* Public Profile toggle */}
-                  <div className="settings-toggle-row bg-white/5 p-4 rounded-xl border border-white/10">
+                  <div className="settings-toggle-row bg-white/5 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-info">
                       <span className="settings-toggle-label text-white font-medium">Public Station</span>
                       <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -453,12 +474,12 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Preferences Section */}
-              <section className="settings-section" style={{ display: activeTab === "preferences" ? "flex" : "none", border: "none", padding: 0 }}>
+              <section className="settings-section" style={{ display: activeTab === "preferences" ? "flex" : "none", border: "none", padding: "2rem" }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Preferences</h2>
-                
+
                 <div className="flex flex-col gap-4">
                   {/* Animation toggle */}
-                  <div className="settings-toggle-row bg-white/5 p-4 rounded-xl border border-white/10">
+                  <div className="settings-toggle-row bg-white/5 p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-info">
                       <span className="settings-toggle-label text-white font-medium">Enable Animations</span>
                       <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -482,7 +503,7 @@ export default function SettingsClient({ profile }: Props) {
                   </div>
 
                   {/* Hologram toggle */}
-                  <div className="settings-toggle-row bg-white/5 p-4 rounded-xl border border-white/10 md:flex hidden">
+                  <div className="settings-toggle-row bg-white/5 p-4 rounded-lg border border-white/10 md:flex hidden" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-info">
                       <span className="settings-toggle-label text-white font-medium">Hologram Effect</span>
                       <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -502,7 +523,7 @@ export default function SettingsClient({ profile }: Props) {
 
                   {/* Static Background toggle */}
                   {!animationEnabled && (
-                    <div className="settings-toggle-row bg-white/5 p-4 rounded-xl border border-white/10">
+                    <div className="settings-toggle-row bg-white/5 p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                       <div className="settings-toggle-info">
                         <span className="settings-toggle-label text-white font-medium">Static Background Mode</span>
                         <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -522,7 +543,7 @@ export default function SettingsClient({ profile }: Props) {
                   )}
 
                   {/* Friend Requests toggle */}
-                  <div className="settings-toggle-row bg-white/5 p-4 rounded-xl border border-white/10">
+                  <div className="settings-toggle-row bg-white/5 p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-info">
                       <span className="settings-toggle-label text-white font-medium">Allow Friend Requests</span>
                       <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
@@ -541,7 +562,7 @@ export default function SettingsClient({ profile }: Props) {
                   </div>
 
                   {/* Notification Sound Group */}
-                  <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                  <div className="bg-white/5 p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
                     <div className="settings-toggle-row">
                       <div className="settings-toggle-info">
                         <span className="settings-toggle-label text-white font-medium">Notification Sound</span>
@@ -561,7 +582,7 @@ export default function SettingsClient({ profile }: Props) {
                     </div>
 
                     {notifSoundEnabled && (
-                      <div className="mt-4 p-4 bg-black/20 rounded-xl border border-white/5 flex flex-col gap-4">
+                      <div className="mt-4 p-4 bg-black/20 rounded-lg border border-white/5 flex flex-col gap-4" style={{ padding: "1rem" }}>
                         <div className="flex gap-3 flex-wrap">
                           <label
                             className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${notifSoundType === "default" ? "bg-purple-500/15 border-purple-500/40 text-purple-300" : "bg-white/5 border-white/10 text-gray-400"}`}
@@ -632,45 +653,49 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Shortcuts Section */}
-              <section className="settings-section" style={{ display: activeTab === "shortcuts" ? "flex" : "none", border: "none", padding: 0 }}>
+              <section className="settings-section" style={{ display: activeTab === "shortcuts" ? "flex" : "none", border: "none", padding: "1rem" }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Shortcuts</h2>
                 <p className="text-gray-400 text-sm mb-6">Configure keyboard shortcuts for quick navigation on desktop.</p>
-                
+
                 <div className="flex flex-col gap-4">
-                  <div className="form-group flex flex-row items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                  <div className="form-group flex flex-row items-center justify-between bg-white/5 rounded-lg border border-white/10">
                     <label className="form-label text-sm text-gray-300 mb-0">Public Station</label>
                     <input
-                      className="input w-24 p-2 bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
+                      className="input bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
                       value={shortcuts.publicStation}
-                      onChange={(e) => setShortcuts(s => ({ ...s, publicStation: e.target.value.toUpperCase() }))}
-                      maxLength={3}
+                      readOnly
+                      onKeyDown={handleShortcutKeyDown("publicStation")}
+                      placeholder="Press key..."
                     />
                   </div>
-                  <div className="form-group flex flex-row items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                  <div className="form-group flex flex-row items-center justify-between bg-white/5 rounded-lg border border-white/10">
                     <label className="form-label text-sm text-gray-300 mb-0">Friends</label>
                     <input
-                      className="input w-24 p-2 bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
+                      className="input bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
                       value={shortcuts.friends}
-                      onChange={(e) => setShortcuts(s => ({ ...s, friends: e.target.value.toUpperCase() }))}
-                      maxLength={3}
+                      readOnly
+                      onKeyDown={handleShortcutKeyDown("friends")}
+                      placeholder="Press key..."
                     />
                   </div>
-                  <div className="form-group flex flex-row items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                  <div className="form-group flex flex-row items-center justify-between bg-white/5 rounded-lg border border-white/10">
                     <label className="form-label text-sm text-gray-300 mb-0">Analytics</label>
                     <input
-                      className="input w-24 p-2 bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
+                      className="input bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
                       value={shortcuts.analytics}
-                      onChange={(e) => setShortcuts(s => ({ ...s, analytics: e.target.value.toUpperCase() }))}
-                      maxLength={3}
+                      readOnly
+                      onKeyDown={handleShortcutKeyDown("analytics")}
+                      placeholder="Press key..."
                     />
                   </div>
-                  <div className="form-group flex flex-row items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                  <div className="form-group flex flex-row items-center justify-between bg-white/5 rounded-lg border border-white/10">
                     <label className="form-label text-sm text-gray-300 mb-0">Settings</label>
                     <input
-                      className="input w-24 p-2 bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
+                      className="input bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
                       value={shortcuts.settings}
-                      onChange={(e) => setShortcuts(s => ({ ...s, settings: e.target.value.toUpperCase() }))}
-                      maxLength={3}
+                      readOnly
+                      onKeyDown={handleShortcutKeyDown("settings")}
+                      placeholder="Press key..."
                     />
                   </div>
                 </div>
@@ -697,9 +722,10 @@ export default function SettingsClient({ profile }: Props) {
               <button
                 type="button"
                 onClick={() => setShowDeleteModal(true)}
-                className="px-4 py-2 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-colors font-medium text-sm whitespace-nowrap"
+                className="rounded-md bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-colors font-medium text-sm whitespace-nowrap"
+                style={{padding: "0.5rem 1rem"}}
               >
-                Delete Account
+                Delete Account  
               </button>
             </div>
           </section>
