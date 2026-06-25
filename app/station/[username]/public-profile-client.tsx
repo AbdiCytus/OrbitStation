@@ -251,9 +251,13 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                       const badge = getBadgeById(user.titleBadge);
                       if (!badge) return null;
                       return (
-                        <div className={`zzz-user-badge px-4 py-1 rounded-full text-[11px] uppercase tracking-widest font-bold flex items-center gap-1.5 border ${badge.effectClass ? badge.effectClass.replace('badge-', 'badge-label-') : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`} style={{ width: 'fit-content', marginTop: '4px' }}>
-                           <DynamicIcon name={badge.icon} className="w-3.5 h-3.5" />
-                           {badge.name}
+                        <div className={`badge-card ${badge.effectClass} pr-4 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg`} style={{ width: 'fit-content', marginTop: '4px' }}>
+                           <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
+                             <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
+                           </div>
+                           <span className="badge-content relative z-10 text-white font-bold tracking-widest uppercase text-[11px] drop-shadow-md">
+                             {badge.name}
+                           </span>
                         </div>
                       )
                     })()}
