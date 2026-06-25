@@ -585,24 +585,24 @@
 
 @keyframes diagonal-orbit-3d {
   0% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(0deg) translateX(80px) rotate(0deg) rotateX(-75deg) rotateZ(25deg) scale(1); 
-    z-index: 20; filter: brightness(1);
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(0deg) translateX(80px) rotate(0deg) rotateX(-75deg) rotateZ(25deg) scale(1) translateZ(50px); 
+    z-index: 9999; filter: brightness(1);
   }
   25% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(90deg) translateX(80px) rotate(-90deg) rotateX(-75deg) rotateZ(25deg) scale(1.2); 
-    z-index: 20; filter: brightness(1.2);
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(90deg) translateX(80px) rotate(-90deg) rotateX(-75deg) rotateZ(25deg) scale(1.2) translateZ(50px); 
+    z-index: 9999; filter: brightness(1.2);
   }
   50% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(180deg) translateX(80px) rotate(-180deg) rotateX(-75deg) rotateZ(25deg) scale(0.8); 
-    z-index: 8; filter: brightness(0.6);
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(180deg) translateX(80px) rotate(-180deg) rotateX(-75deg) rotateZ(25deg) scale(0.8) translateZ(-50px); 
+    z-index: -9999; filter: brightness(0.6);
   }
   75% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(270deg) translateX(80px) rotate(-270deg) rotateX(-75deg) rotateZ(25deg) scale(0.6); 
-    z-index: 8; filter: brightness(0.4);
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(270deg) translateX(80px) rotate(-270deg) rotateX(-75deg) rotateZ(25deg) scale(0.6) translateZ(-50px); 
+    z-index: -9999; filter: brightness(0.4);
   }
   100% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(360deg) translateX(80px) rotate(-360deg) rotateX(-75deg) rotateZ(25deg) scale(1); 
-    z-index: 20; filter: brightness(1);
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(360deg) translateX(80px) rotate(-360deg) rotateX(-75deg) rotateZ(25deg) scale(1) translateZ(50px); 
+    z-index: 9999; filter: brightness(1);
   }
 }
 
