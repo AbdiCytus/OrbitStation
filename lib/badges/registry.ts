@@ -105,7 +105,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     id: "sector-heiress",
     name: "Sector Heiress",
     hint: "Receive ownership transfers for 50 different sectors.",
-    color: "rose",
+    color: "purple",
     icon: "KeyIcon",
     effectClass: "badge-heiress",
     rarity: "ekslusif"
@@ -114,7 +114,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     id: "prominent-admin",
     name: "Prominent Admin",
     hint: "Get promoted to Admin in 8 different collaborative sectors.",
-    color: "cyan",
+    color: "emerald",
     icon: "BriefcaseIcon",
     effectClass: "badge-admin",
     rarity: "biasa"
@@ -132,7 +132,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     id: "reliable-contributor",
     name: "Reliable Contributor",
     hint: "Add 10+ beacons across 5 different collaborative sectors.",
-    color: "emerald",
+    color: "cyan",
     icon: "WrenchScrewdriverIcon",
     effectClass: "badge-contributor",
     rarity: "biasa"
