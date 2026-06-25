@@ -24,6 +24,17 @@ import { DynamicIcon } from "@/components/dynamic-icon";
 import { pusherClient } from "@/lib/pusher-client";
 import { BADGE_REGISTRY } from "@/lib/badges/registry";
 
+export const getAvatarBadgeClass = (titleBadge?: string | null) => {
+  if (!titleBadge) return '';
+  const badge = BADGE_REGISTRY.find(b => b.id === titleBadge);
+  if (!badge) return '';
+  const isSpecial = badge.rarity === "ekslusif";
+  const isExclusive = badge.rarity === "super-ekslusif";
+  if (isExclusive) return `avatar-badge avatar-exclusive-${badge.id} public-badge-sweep`;
+  if (isSpecial) return `avatar-badge avatar-badge-special-${badge.color} public-badge-sweep`;
+  return `avatar-badge avatar-badge-common-${badge.color}`;
+};
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -881,10 +892,10 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     const targetUser = localCollaborators?.find((c: any) => c.user.id === msg.senderId)?.user || (sector.station?.userId === msg.senderId ? sector.station.user : msg.sender);
                                     if (targetUser) setMentionDetail({ type: 'user', data: targetUser });
                                   }}
-                                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                                  style={{
+                                  className={`cursor-pointer hover:opacity-80 transition-opacity ${getAvatarBadgeClass(msg.sender?.titleBadge)}`}
+                                  style={{ '--avatar-radius': '20px',
                                     width: "32px", height: "32px", borderRadius: "50%", background: "#374151", overflow: "hidden", flexShrink: 0,
-                                    ...(isMsgOwner ? { border: "2px solid #FFD700", boxShadow: "0 0 12px 2px rgba(255,215,0,0.8)" } :
+                                    ...(msg.sender?.titleBadge ? {} : isMsgOwner ? { border: "2px solid #FFD700", boxShadow: "0 0 12px 2px rgba(255,215,0,0.8)" } :
                                       localCollaborators.find((c: any) => c.userId === msg.senderId)?.role === "ADMIN" ? { border: "2px solid #10B981" } :
                                         { border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" })
                                   }}
@@ -1198,8 +1209,8 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                               <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
                                 <div
                                   onClick={(e) => { e.stopPropagation(), setMentionDetail({ type: 'user', data: sector.station.user }) }}
-                                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                                  style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden", border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)" }}
+                                  className={`cursor-pointer hover:opacity-80 transition-opacity ${getAvatarBadgeClass(sector.station.user.titleBadge)}`}
+                                  style={{ '--avatar-radius': '20px', width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden", ...(sector.station.user.titleBadge ? {} : { border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)" }) } as React.CSSProperties}
                                 >
                                   {sector.station.user.image
                                     ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -1237,11 +1248,11 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                 <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
                                   <div
                                     onClick={(e) => { e.stopPropagation(); setMentionDetail({ type: 'user', data: c.user }) }}
-                                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                                    className={`cursor-pointer hover:opacity-80 transition-opacity ${getAvatarBadgeClass(c.user.titleBadge)}`}
                                     style={{
-                                      width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden",
-                                      ...(c.role === "ADMIN" ? { border: "2px solid #10B981" } : { border: "1px solid rgba(255,255,255,0.1)" })
-                                    }}
+                                      '--avatar-radius': '20px', width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden",
+                                      ...(c.user.titleBadge ? {} : c.role === "ADMIN" ? { border: "2px solid #10B981" } : { border: "1px solid rgba(255,255,255,0.1)" })
+                                    } as React.CSSProperties}
                                   >
                                     {c.user.image
                                       ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -1302,11 +1313,19 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                   const isSpecial = badge?.rarity === "ekslusif";
                   const isExclusive = badge?.rarity === "super-ekslusif";
 
+                  const avatarBadgeClass = badge 
+                    ? isExclusive 
+                      ? `avatar-badge avatar-exclusive-${badge.id} public-badge-sweep`
+                      : isSpecial 
+                        ? `avatar-badge avatar-badge-special-${badge.color} public-badge-sweep`
+                        : `avatar-badge avatar-badge-common-${badge.color}`
+                    : '';
+
                   return (
                     <motion.div
                       onClick={(e) => e.stopPropagation()}
                       initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                      className={`absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-violet-500/30 flex flex-col gap-4 min-w-[300px] badge-card ${badge ? badge.effectClass : ''} ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`}
+                      className={`!absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-violet-500/30 flex flex-col gap-4 min-w-[300px] ${badge ? badge.effectClass : ''} ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`}
                       style={{ padding: "1.5rem", background: badge ? "rgba(20,20,30,0.85)" : "rgba(20,20,30,0.95)", backdropFilter: "blur(20px)" }}
                     >
                       {(isExclusive || isSpecial) && <div className="badge-content" />}
@@ -1315,9 +1334,11 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                       </button>
 
                       <div className="flex items-center gap-5 relative z-10">
-                        <div className={`p-1 rounded-full bg-white/5 shrink-0 flex items-center justify-center badge-card ${badge ? badge.effectClass : ''} ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`} style={{ border: '2px solid transparent' }}>
+                        <div 
+                          className={`p-1 rounded-full bg-white/5 shrink-0 flex items-center justify-center ${avatarBadgeClass}`} 
+                          style={{ '--avatar-radius': '34px' } as React.CSSProperties}
+                        >
                           <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-16 h-16 rounded-full object-cover relative z-10" />
-                          {(isExclusive || isSpecial) && <div className="badge-content" />}
                         </div>
                         <div className="flex flex-col pr-6">
                           <h4 className="text-white font-bold text-lg m-0">{mentionDetail.data.name || mentionDetail.data.title}</h4>

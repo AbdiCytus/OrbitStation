@@ -239,15 +239,25 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                   const isSpecial = badge?.rarity === "ekslusif";
                   const isExclusive = badge?.rarity === "super-ekslusif";
 
+                  const avatarBadgeClass = badge 
+                    ? isExclusive 
+                      ? `avatar-badge avatar-exclusive-${badge.id} public-badge-sweep`
+                      : isSpecial 
+                        ? `avatar-badge avatar-badge-special-${badge.color} public-badge-sweep`
+                        : `avatar-badge avatar-badge-common-${badge.color}`
+                    : '';
+
                   return (
                     <div className="zzz-banner-left">
-                      <div className={`zzz-avatar badge-card ${badge ? badge.effectClass : ''} ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`} style={{ border: badge ? '3px solid transparent' : undefined }}>
+                      <div 
+                        className={`zzz-avatar ${avatarBadgeClass}`} 
+                        style={{ '--avatar-radius': '46px' } as React.CSSProperties}
+                      >
                         {user.image ? (
                           <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 10 }} />
                         ) : (
                           <span style={{ position: 'relative', zIndex: 10 }}>{user.name?.[0]?.toUpperCase() ?? "?"}</span>
                         )}
-                        {(isExclusive || isSpecial) && <div className="badge-content" />}
                       </div>
                       <div className="zzz-user-info">
                         <h1 className="zzz-user-name">{profileTitle || "Pilot"}</h1>
