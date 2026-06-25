@@ -1378,7 +1378,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                         backdropFilter: "blur(20px)" 
                       }}
                     >
-                      {(isExclusive || isSpecial) && <div className="badge-content" />}
+                      {(isExclusive) && <div className="modal-exclusive-sparkles" />}
                       <button onClick={() => setMentionDetail(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-transparent border-none cursor-pointer z-50">
                         <XMarkIcon width={20} height={20} />
                       </button>

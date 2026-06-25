@@ -38,25 +38,13 @@
 
 /* Viral */
 .badge-viral {
-  background: linear-gradient(45deg, rgba(225, 29, 72, 0.1), rgba(244, 63, 94, 0.25), rgba(225, 29, 72, 0.1));
-  background-size: 200% 200%;
+  background: linear-gradient(145deg, rgba(225, 29, 72, 0.1), rgba(244, 63, 94, 0.05));
   border-color: rgba(244, 63, 94, 0.4);
-  animation: viral-bg-pan 3s ease infinite;
-}
-.badge-viral::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(251, 113, 133, 0.8) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.3;
-  animation: floating-embers 4s linear infinite;
-  pointer-events: none;
 }
 .badge-viral .badge-icon { 
   background: linear-gradient(135deg, #e11d48, #fb7185); 
   color: #fff; 
-  animation: pulse-fire 2s infinite alternate; 
+  box-shadow: 0 0 15px rgba(225, 29, 72, 0.4); 
 }
 
 /* Social */
@@ -73,8 +61,10 @@
 
 /* Collab */
 .badge-collab {
-  background: rgba(6, 182, 212, 0.05);
+  background: linear-gradient(45deg, rgba(6, 182, 212, 0.1), rgba(34, 211, 238, 0.25), rgba(6, 182, 212, 0.1));
+  background-size: 200% 200%;
   border-color: rgba(6, 182, 212, 0.4);
+  animation: viral-bg-pan 3s ease infinite;
 }
 .badge-collab::before {
   background: linear-gradient(to bottom, transparent, rgba(6, 182, 212, 0.15) 50%, transparent);
@@ -171,16 +161,17 @@
 }
 
 /* Exclusive Badge Sparkles (Twinkling around the chat mention modal) */
-.chat-mention-modal .badge-content {
-  position: static !important; /* Allow pseudo-element to size relative to badge-card */
+.modal-exclusive-sparkles {
+  position: absolute;
+  inset: -24px;
+  pointer-events: none;
+  z-index: 10;
 }
 
-.chat-mention-modal .badge-content::before {
+.modal-exclusive-sparkles::before {
   content: '';
   position: absolute;
-  inset: -24px; /* Expands bounds by 24px to completely prevent any clipping */
-  pointer-events: none;
-  z-index: 10; /* Draw over the border, but under shine sweep */
+  inset: 0;
   background-image: 
     /* 1. Top-Left */
     radial-gradient(ellipse 6px 1px at 20px 30px, rgba(255,255,255,0.9) 0%, transparent 100%),
@@ -714,3 +705,7 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+/ *   H e i r e s s   * / 
+ . b a d g e - h e i r e s s   {   b a c k g r o u n d :   l i n e a r - g r a d i e n t ( 4 5 d e g ,   r g b a ( 2 2 5 ,   2 9 ,   7 2 ,   0 . 1 ) ,   r g b a ( 2 4 4 ,   6 3 ,   9 4 ,   0 . 2 5 ) ,   r g b a ( 2 2 5 ,   2 9 ,   7 2 ,   0 . 1 ) ) ;   b a c k g r o u n d - s i z e :   2 0 0 %   2 0 0 % ;   b o r d e r - c o l o r :   r g b a ( 2 4 4 ,   6 3 ,   9 4 ,   0 . 4 ) ;   a n i m a t i o n :   v i r a l - b g - p a n   3 s   e a s e   i n f i n i t e ;   } 
+ . b a d g e - h e i r e s s   . b a d g e - i c o n   {   b a c k g r o u n d :   t r a n s p a r e n t ;   c o l o r :   # f b 7 1 8 5 ;   b o r d e r :   1 p x   s o l i d   # f b 7 1 8 5 ;   b o x - s h a d o w :   i n s e t   0   0   1 0 p x   r g b a ( 2 4 4 ,   6 3 ,   9 4 ,   0 . 5 ) ;   }  
+ 

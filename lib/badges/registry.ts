@@ -27,7 +27,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     color: "amber",
     icon: "BuildingLibraryIcon",
     effectClass: "badge-magnate",
-    rarity: "biasa"
+    rarity: "ekslusif"
   },
   {
     id: "viral-voyager",
@@ -36,7 +36,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     color: "rose",
     icon: "FireIcon",
     effectClass: "badge-viral",
-    rarity: "ekslusif"
+    rarity: "biasa"
   },
   {
     id: "social-butterfly",
