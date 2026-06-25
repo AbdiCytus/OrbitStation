@@ -630,7 +630,7 @@
 /* Exclusive Avatar Badges */
 .avatar-exclusive-galactic-center {
   border-color: transparent !important;
-  animation: pulse-galactic-avatar 3s infinite alternate ease-in-out;
+  animation: pulse-galactic-avatar 4s infinite linear;
 }
 .avatar-exclusive-galactic-center::before {
   content: '';
@@ -649,26 +649,32 @@
   border-radius: 50%;
 }
 @keyframes pulse-galactic-avatar {
-  0% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.3); }
-  100% { box-shadow: 0 0 35px rgba(253, 224, 71, 0.8), inset 0 0 20px rgba(253, 224, 71, 0.6); }
+  0% { box-shadow: 0 0 15px rgba(217, 119, 6, 0.5), inset 0 0 10px rgba(217, 119, 6, 0.4); }
+  33% { box-shadow: 0 0 35px rgba(251, 191, 36, 0.8), inset 0 0 20px rgba(251, 191, 36, 0.6); }
+  66% { box-shadow: 0 0 25px rgba(253, 224, 71, 0.7), inset 0 0 15px rgba(253, 224, 71, 0.5); }
+  100% { box-shadow: 0 0 15px rgba(217, 119, 6, 0.5), inset 0 0 10px rgba(217, 119, 6, 0.4); }
 }
 
 .avatar-exclusive-the-creator { 
   border-color: transparent !important; 
-  animation: pulse-creator-avatar 3s infinite alternate ease-in-out; 
+  animation: pulse-creator-avatar 4s infinite linear; 
 }
 @keyframes pulse-creator-avatar {
-  0% { box-shadow: 0 0 15px rgba(147, 51, 234, 0.4), inset 0 0 10px rgba(147, 51, 234, 0.3); }
-  100% { box-shadow: 0 0 35px rgba(216, 180, 254, 0.8), inset 0 0 20px rgba(216, 180, 254, 0.6); }
+  0% { box-shadow: 0 0 15px rgba(126, 34, 206, 0.5), inset 0 0 10px rgba(126, 34, 206, 0.4); }
+  33% { box-shadow: 0 0 35px rgba(168, 85, 247, 0.8), inset 0 0 20px rgba(168, 85, 247, 0.6); }
+  66% { box-shadow: 0 0 25px rgba(216, 180, 254, 0.7), inset 0 0 15px rgba(216, 180, 254, 0.5); }
+  100% { box-shadow: 0 0 15px rgba(126, 34, 206, 0.5), inset 0 0 10px rgba(126, 34, 206, 0.4); }
 }
 
 .avatar-exclusive-the-creator-assistant { 
   border-color: transparent !important; 
-  animation: pulse-assistant-avatar 3s infinite alternate ease-in-out; 
+  animation: pulse-assistant-avatar 4s infinite linear; 
 }
 @keyframes pulse-assistant-avatar {
-  0% { box-shadow: 0 0 15px rgba(37, 99, 235, 0.4), inset 0 0 10px rgba(37, 99, 235, 0.3); }
-  100% { box-shadow: 0 0 35px rgba(191, 219, 254, 0.8), inset 0 0 20px rgba(191, 219, 254, 0.6); }
+  0% { box-shadow: 0 0 15px rgba(29, 78, 216, 0.5), inset 0 0 10px rgba(29, 78, 216, 0.4); }
+  33% { box-shadow: 0 0 35px rgba(59, 130, 246, 0.8), inset 0 0 20px rgba(59, 130, 246, 0.6); }
+  66% { box-shadow: 0 0 25px rgba(147, 197, 253, 0.7), inset 0 0 15px rgba(147, 197, 253, 0.5); }
+  100% { box-shadow: 0 0 15px rgba(29, 78, 216, 0.5), inset 0 0 10px rgba(29, 78, 216, 0.4); }
 }
 
 .avatar-exclusive-the-creator::after, 
