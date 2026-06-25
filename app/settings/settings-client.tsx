@@ -491,7 +491,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                         let globalIndex = 0;
                         return [
                           { id: 'biasa', label: 'Common Badges', icon: 'CheckBadgeIcon', color: 'text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]' },
-                          { id: 'ekslusif', label: 'Super Badges', icon: 'StarIcon', color: 'text-fuchsia-400 drop-shadow-[0_0_8px_rgba(232,121,249,0.5)]' },
+                          { id: 'ekslusif', label: 'Special Badges', icon: 'StarIcon', color: 'text-fuchsia-400 drop-shadow-[0_0_8px_rgba(232,121,249,0.5)]' },
                           { id: 'super-ekslusif', label: 'Exclusive Badges', icon: 'SparklesIcon', color: 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' }
                         ].map(group => {
                           const colorOrder: Record<string, number> = {
@@ -513,7 +513,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
 
                           return (
                             <div key={group.id} className={isGroupHiddenMobile ? 'hidden md:block' : ''}>
-                              <h4 className={`text-sm font-bold mb-3 uppercase tracking-wider flex items-center gap-2 ${group.color}`}>
+                              <h4 className={`text-sm font-bold mb-3 uppercase tracking-wider flex items-center gap-2 ${group.color}`} style={{marginBottom: "0.75rem"}}>
                                 <DynamicIcon name={group.icon} className="w-5 h-5" />
                                 {group.label}
                               </h4>
