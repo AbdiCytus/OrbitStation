@@ -235,7 +235,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
         {!hideProfile ? (
           user ? (
             <>
-              <div className="hidden md:flex items-center gap-3 mr-8">
+              <div className="hidden md:flex items-center" style={{ gap: "1rem", marginRight: "2.5rem" }}>
                 {user.station?.isPublic && user.username && (
                   <Link href={`/station/${user.username}`} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
                     <GlobeAltIcon width={20} height={20} />

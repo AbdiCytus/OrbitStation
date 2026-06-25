@@ -231,7 +231,7 @@ export default function SettingsClient({ profile }: Props) {
         <div style={{ width: "100%", maxWidth: "900px", background: "#0f0f16", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
           
           {/* Header */}
-          <div className="settings-page-header md:p-6 md:border-b md:border-white/10 md:bg-black/20">
+          <div className="settings-page-header" style={{ padding: "2rem", borderBottom: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)" }}>
             <div>
               <h1 className="settings-page-title hidden md:block">
                 {activeTab === "profile" && "Profile"}
@@ -259,29 +259,29 @@ export default function SettingsClient({ profile }: Props) {
             </div>
           </div>
 
-          <div className="md:flex md:h-[65vh] md:overflow-hidden">
+          <div style={{ display: "flex", flex: 1, minHeight: "65vh", overflow: "hidden" }} className="md:flex-row flex-col">
             {/* Left Sidebar (Desktop Only) */}
-            <div className="hidden md:flex md:flex-col md:w-64 md:border-r md:border-white/10 md:bg-black/20 md:p-4 md:gap-2">
-              <button type="button" onClick={() => setActiveTab("profile")} className={`text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors ${activeTab === "profile" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
+            <div className="hidden md:flex md:flex-col md:w-64" style={{ padding: "1.5rem", gap: "0.5rem", borderRight: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)" }}>
+              <button type="button" onClick={() => setActiveTab("profile")} className={`text-left rounded-lg flex items-center transition-colors ${activeTab === "profile" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`} style={{ padding: "0.75rem 1rem", gap: "0.75rem" }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 Profile
               </button>
-              <button type="button" onClick={() => setActiveTab("public")} className={`text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors ${activeTab === "public" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
+              <button type="button" onClick={() => setActiveTab("public")} className={`text-left rounded-lg flex items-center transition-colors ${activeTab === "public" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`} style={{ padding: "0.75rem 1rem", gap: "0.75rem" }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
                 Public Station
               </button>
-              <button type="button" onClick={() => setActiveTab("preferences")} className={`text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors ${activeTab === "preferences" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
+              <button type="button" onClick={() => setActiveTab("preferences")} className={`text-left rounded-lg flex items-center transition-colors ${activeTab === "preferences" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`} style={{ padding: "0.75rem 1rem", gap: "0.75rem" }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 Preferences
               </button>
-              <button type="button" onClick={() => setActiveTab("shortcuts")} className={`text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors ${activeTab === "shortcuts" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
+              <button type="button" onClick={() => setActiveTab("shortcuts")} className={`text-left rounded-lg flex items-center transition-colors ${activeTab === "shortcuts" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`} style={{ padding: "0.75rem 1rem", gap: "0.75rem" }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 Shortcuts
               </button>
             </div>
 
             {/* Content Area */}
-            <div className="md:flex-1 md:overflow-y-auto md:p-8 flex flex-col gap-8 w-full" style={{ padding: "2rem" }}>
+            <div className="flex-1 overflow-y-auto w-full" style={{ padding: "2.5rem 3rem", display: "flex", flexDirection: "column", gap: "2rem" }}>
               
               {/* Profile Section */}
               <section className="settings-section" style={{ display: activeTab === "profile" ? "flex" : "none", border: "none", padding: 0 }}>
