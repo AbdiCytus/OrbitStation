@@ -497,13 +497,11 @@
   background: linear-gradient(135deg, #7e22ce, #e9d5ff);
   color: #4c1d95;
   box-shadow: 0 0 25px rgba(168, 85, 247, 0.8);
-  z-index: 20;
 }
 .badge-assistant .badge-icon {
   background: linear-gradient(135deg, #1d4ed8, #dbeafe);
   color: #1e3a8a;
   box-shadow: 0 0 25px rgba(96, 165, 250, 0.8);
-  z-index: 20;
 }
 @keyframes creator-fx {
   0% { background-position: -20% 30%, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
@@ -529,7 +527,7 @@
   mask-composite: exclude;
   pointer-events: none;
   animation: creator-spin 3s linear infinite;
-  z-index: 10;
+  z-index: 5;
   filter: drop-shadow(0 0 4px #a855f7) drop-shadow(0 0 10px #c084fc);
 }
 .badge-assistant::before {
@@ -544,7 +542,7 @@
   mask-composite: exclude;
   pointer-events: none;
   animation: creator-spin 3s linear infinite reverse;
-  z-index: 10;
+  z-index: 5;
   filter: drop-shadow(0 0 4px #3b82f6) drop-shadow(0 0 10px #60a5fa);
 }
 
@@ -559,7 +557,7 @@
   border-radius: 50%;
   transform: rotateZ(-25deg) rotateX(75deg);
   pointer-events: none;
-  z-index: 20;
+  z-index: 8;
 }
 .badge-assistant .badge-icon::before {
   border-color: rgba(59, 130, 246, 0.5);
@@ -596,11 +594,11 @@
   }
   50% { 
     transform: rotateZ(-25deg) rotateX(75deg) rotate(180deg) translateX(80px) rotate(-180deg) rotateX(-75deg) rotateZ(25deg) scale(0.8); 
-    z-index: 20; filter: brightness(0.6);
+    z-index: 8; filter: brightness(0.6);
   }
   75% { 
     transform: rotateZ(-25deg) rotateX(75deg) rotate(270deg) translateX(80px) rotate(-270deg) rotateX(-75deg) rotateZ(25deg) scale(0.6); 
-    z-index: 20; filter: brightness(0.4);
+    z-index: 8; filter: brightness(0.4);
   }
   100% { 
     transform: rotateZ(-25deg) rotateX(75deg) rotate(360deg) translateX(80px) rotate(-360deg) rotateX(-75deg) rotateZ(25deg) scale(1); 
