@@ -4,6 +4,7 @@ export interface BadgeDef {
   hint: string;
   color: string;
   icon: string;
+  effectClass: string;
 }
 
 export const BADGE_REGISTRY: BadgeDef[] = [
@@ -13,6 +14,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Given to all new pilots joining the station.",
     color: "gray",
     icon: "RocketLaunchIcon",
+    effectClass: "badge-rookie"
   },
   {
     id: "sector-magnate",
@@ -20,6 +22,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by establishing at least 7 sectors and 35 beacons.",
     color: "amber",
     icon: "BuildingLibraryIcon",
+    effectClass: "badge-magnate"
   },
   {
     id: "viral-voyager",
@@ -27,6 +30,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by creating at least 5 beacons that each have 1,000+ visits.",
     color: "rose",
     icon: "FireIcon",
+    effectClass: "badge-viral"
   },
   {
     id: "social-butterfly",
@@ -34,6 +38,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by having at least 20 friends.",
     color: "pink",
     icon: "UserGroupIcon",
+    effectClass: "badge-social"
   },
   {
     id: "collaborative-spirit",
@@ -41,6 +46,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by joining 10 different collaborative sectors.",
     color: "cyan",
     icon: "HandRaisedIcon",
+    effectClass: "badge-collab"
   },
   {
     id: "guild-master",
@@ -48,6 +54,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by having 20+ members in a sector you created.",
     color: "emerald",
     icon: "ShieldCheckIcon",
+    effectClass: "badge-guild"
   },
   {
     id: "early-adopter",
@@ -55,6 +62,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by keeping your account active for more than 30 days.",
     color: "purple",
     icon: "StarIcon",
+    effectClass: "badge-early"
   },
   {
     id: "data-hoarder",
@@ -62,6 +70,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     hint: "Unlock by creating 100+ beacons across any sectors.",
     color: "blue",
     icon: "ServerStackIcon",
+    effectClass: "badge-hoarder"
   }
 ];
 

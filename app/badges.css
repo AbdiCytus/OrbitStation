@@ -1,0 +1,141 @@
+/* Custom High-End Badge Styles */
+
+.badge-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.badge-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.badge-card .badge-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Rookie */
+.badge-rookie { background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.3); }
+.badge-rookie .badge-icon { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; }
+
+/* Magnate */
+.badge-magnate {
+  background: linear-gradient(145deg, rgba(217, 119, 6, 0.15), rgba(251, 191, 36, 0.05));
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: inset 0 0 30px rgba(251, 191, 36, 0.05);
+}
+.badge-magnate .badge-icon { 
+  background: linear-gradient(135deg, #d97706, #fcd34d); 
+  color: #fff; 
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); 
+}
+
+/* Viral */
+.badge-viral {
+  background: linear-gradient(145deg, rgba(225, 29, 72, 0.15), rgba(244, 63, 94, 0.05));
+  border-color: rgba(244, 63, 94, 0.4);
+}
+.badge-viral .badge-icon { 
+  background: linear-gradient(135deg, #e11d48, #fb7185); 
+  color: #fff; 
+  animation: pulse-fire 2s infinite alternate; 
+}
+
+/* Social */
+.badge-social {
+  background: linear-gradient(145deg, rgba(219, 39, 119, 0.1), rgba(244, 114, 182, 0.05));
+  border-color: rgba(244, 114, 182, 0.3);
+  backdrop-filter: blur(10px);
+}
+.badge-social .badge-icon { 
+  background: rgba(244, 114, 182, 0.15); 
+  color: #f472b6; 
+  border: 1px solid rgba(244, 114, 182, 0.5); 
+}
+
+/* Collab */
+.badge-collab {
+  background: rgba(6, 182, 212, 0.05);
+  border-color: rgba(6, 182, 212, 0.4);
+}
+.badge-collab::before {
+  background: linear-gradient(to bottom, transparent, rgba(6, 182, 212, 0.15) 50%, transparent);
+  background-size: 100% 200%;
+  animation: scanline 3s linear infinite;
+}
+.badge-collab .badge-icon { 
+  background: transparent; 
+  color: #22d3ee; 
+  border: 1px solid #22d3ee; 
+  box-shadow: inset 0 0 10px rgba(34, 211, 238, 0.5); 
+}
+
+/* Guild */
+.badge-guild {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+.badge-guild .badge-icon { 
+  background: linear-gradient(135deg, #059669, #34d399); 
+  color: #fff; 
+}
+.badge-guild .badge-icon::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 1px dashed rgba(52, 211, 153, 0.6);
+  border-radius: 50%;
+  animation: spin-slow 10s linear infinite;
+}
+
+/* Early */
+.badge-early {
+  background: linear-gradient(145deg, rgba(147, 51, 234, 0.15), rgba(192, 132, 252, 0.05));
+  border-color: rgba(168, 85, 247, 0.4);
+}
+.badge-early .badge-icon { 
+  background: #9333ea; 
+  color: #fff; 
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6); 
+}
+
+/* Hoarder */
+.badge-hoarder {
+  background: rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.badge-hoarder .badge-icon { 
+  background: rgba(59, 130, 246, 0.2); 
+  color: #60a5fa; 
+  border: 1px solid rgba(96, 165, 250, 0.5); 
+}
+
+@keyframes pulse-fire { 
+  0% { box-shadow: 0 0 5px rgba(225, 29, 72, 0.5); } 
+  100% { box-shadow: 0 0 15px rgba(251, 113, 133, 0.8), 0 0 30px rgba(225, 29, 72, 0.4); } 
+}
+@keyframes scanline { 
+  0% { background-position: 0 -100%; } 
+  100% { background-position: 0 200%; } 
+}
+@keyframes spin-slow { 
+  100% { transform: rotate(360deg); } 
+}
+
+/* -------------------------------------
+   Badge Tags (Public Profile)
+------------------------------------- */
+.badge-label-rookie { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border-color: rgba(100, 116, 139, 0.4); }
+.badge-label-magnate { background: linear-gradient(90deg, rgba(217, 119, 6, 0.9), rgba(251, 191, 36, 0.9)); color: #fff; border-color: #f59e0b; box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+.badge-label-viral { background: linear-gradient(90deg, #e11d48, #fb7185); color: #fff; border-color: transparent; box-shadow: 0 0 15px rgba(225, 29, 72, 0.5); }
+.badge-label-social { background: rgba(244, 114, 182, 0.2); color: #f472b6; border-color: rgba(244, 114, 182, 0.4); backdrop-filter: blur(5px); }
+.badge-label-collab { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(34, 211, 238, 0.5); box-shadow: inset 0 0 8px rgba(6, 182, 212, 0.3); }
+.badge-label-guild { background: linear-gradient(90deg, #059669, #34d399); color: #fff; border-color: transparent; }
+.badge-label-early { background: #9333ea; color: #fff; border-color: #c084fc; box-shadow: 0 0 10px rgba(168, 85, 247, 0.6); }
+.badge-label-hoarder { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border-color: rgba(96, 165, 250, 0.4); }

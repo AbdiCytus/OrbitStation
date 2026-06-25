@@ -473,34 +473,37 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                               if (isUnlocked) setTitleBadge(badge.id);
                               else toast.error("You haven't unlocked this badge yet!");
                             }}
-                            className={`relative p-3 rounded-xl border flex gap-3 items-center transition-all cursor-pointer ${
+                            className={`badge-card relative p-3 rounded-xl border flex gap-3 items-center cursor-pointer ${
                               isSelected 
-                                ? 'bg-purple-500/10 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.15)]' 
+                                ? `ring-2 ring-purple-500 ring-offset-2 ring-offset-[#0f0f16]` 
                                 : isUnlocked 
-                                  ? 'bg-white/5 border-white/10 hover:border-white/20' 
+                                  ? 'hover:scale-[1.02] hover:shadow-lg' 
                                   : 'bg-black/40 border-white/5 opacity-60 grayscale'
-                            }`}
+                            } ${isUnlocked ? badge.effectClass : ''}`}
                           >
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border ${
-                              isUnlocked ? (BADGE_COLORS[badge.color] || "bg-gray-500/20 text-gray-400 border-gray-500/30") : 'bg-gray-800 text-gray-500 border-gray-700'
-                            }`}>
-                              <DynamicIcon name={badge.icon} className="w-5 h-5" />
+                            <div className={`badge-content flex-1 min-w-0 flex items-center gap-3 pr-10`}>
+                              <div className={`badge-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                isUnlocked ? '' : 'bg-gray-800 text-gray-500 border border-gray-700'
+                              }`}>
+                                <DynamicIcon name={badge.icon} className="w-5 h-5 relative z-10" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className={`text-sm font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-400'}`}>
+                                  {badge.name}
+                                </h4>
+                                <p className="text-xs text-gray-400 leading-snug mt-0.5 max-h-[2.5rem] overflow-y-auto hide-scrollbar">
+                                  {badge.hint}
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex-1 min-w-0 pr-10">
-                              <h4 className={`text-sm font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-400'}`}>
-                                {badge.name}
-                              </h4>
-                              <p className="text-xs text-gray-500 leading-snug mt-0.5 max-h-[2.5rem] overflow-y-auto hide-scrollbar">
-                                {badge.hint}
-                              </p>
-                            </div>
+                            
                             {isSelected && (
-                              <div className="absolute top-3 right-3 text-purple-400">
+                              <div className="absolute top-1/2 -translate-y-1/2 right-3 text-white bg-purple-500 rounded-full shadow-[0_0_10px_#a855f7] z-10">
                                 <SolidIcons.CheckCircleIcon className="w-5 h-5" />
                               </div>
                             )}
                             {!isUnlocked && (
-                              <div className="absolute top-3 right-3 text-gray-600">
+                              <div className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-500 z-10">
                                 <SolidIcons.LockClosedIcon className="w-4 h-4" />
                               </div>
                             )}
