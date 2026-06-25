@@ -629,8 +629,8 @@
 
 /* Exclusive Avatar Badges */
 .avatar-exclusive-galactic-center {
-  border-color: #fbbf24 !important;
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.5) !important;
+  border-color: rgba(251, 191, 36, 0.3) !important;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3) !important;
   animation: pulse-galactic-avatar 3s infinite alternate;
 }
 .avatar-exclusive-galactic-center::before {
@@ -650,17 +650,17 @@
   border-radius: 50%;
 }
 @keyframes pulse-galactic-avatar {
-  0% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.6) !important; }
-  100% { box-shadow: 0 0 25px rgba(251, 191, 36, 1) !important; }
+  0% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4) !important; }
+  100% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.8) !important; }
 }
 
 .avatar-exclusive-the-creator { 
-  border-color: #a855f7 !important; 
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5) !important; 
+  border-color: rgba(168, 85, 247, 0.3) !important; 
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4) !important; 
 }
 .avatar-exclusive-the-creator-assistant { 
-  border-color: #3b82f6 !important; 
-  box-shadow: 0 0 20px rgba(96, 165, 250, 0.5) !important; 
+  border-color: rgba(59, 130, 246, 0.3) !important; 
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4) !important; 
 }
 
 .avatar-exclusive-the-creator::before, 
@@ -678,48 +678,23 @@
   z-index: 10;
 }
 .avatar-exclusive-the-creator::before {
-  background: conic-gradient(from var(--creator-angle, 0deg), transparent 0deg, #a855f7 40deg, transparent 80deg, transparent 180deg, #a855f7 220deg, transparent 260deg);
+  background: conic-gradient(from 0deg, transparent 0deg, #a855f7 40deg, transparent 80deg, transparent 180deg, #a855f7 220deg, transparent 260deg);
   animation: creator-spin 4s linear infinite;
   filter: drop-shadow(0 0 8px #a855f7) drop-shadow(0 0 15px #c084fc);
 }
 .avatar-exclusive-the-creator-assistant::before {
-  background: conic-gradient(from var(--creator-angle, 0deg), transparent 0deg, #3b82f6 40deg, transparent 80deg, transparent 180deg, #3b82f6 220deg, transparent 260deg);
+  background: conic-gradient(from 0deg, transparent 0deg, #3b82f6 40deg, transparent 80deg, transparent 180deg, #3b82f6 220deg, transparent 260deg);
   animation: creator-spin 4s linear infinite reverse;
   filter: drop-shadow(0 0 8px #3b82f6) drop-shadow(0 0 15px #60a5fa);
 }
 .avatar-exclusive-galactic-center::after {
-  background: conic-gradient(from var(--creator-angle, 0deg), transparent 0deg, #fbbf24 40deg, transparent 80deg, transparent 180deg, #fbbf24 220deg, transparent 260deg);
+  background: conic-gradient(from 0deg, transparent 0deg, #fbbf24 40deg, transparent 80deg, transparent 180deg, #fbbf24 220deg, transparent 260deg);
   animation: creator-spin 5s linear infinite;
   filter: drop-shadow(0 0 8px #fbbf24) drop-shadow(0 0 15px #f59e0b);
 }
 
-
-.avatar-exclusive-the-creator::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 6px; height: 6px;
-  margin-top: -3px; margin-left: -3px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 10px 2px #c084fc, 0 0 20px 4px #a855f7;
-  animation: edge-orbit-2d-avatar 5s linear infinite;
-  z-index: 20;
-}
-.avatar-exclusive-the-creator-assistant::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 6px; height: 6px;
-  margin-top: -3px; margin-left: -3px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 10px 2px #60a5fa, 0 0 20px 4px #3b82f6;
-  animation: edge-orbit-2d-avatar 6s linear infinite;
-  z-index: 20;
+@keyframes creator-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@keyframes edge-orbit-2d-avatar {
-  0% { transform: rotate(0deg) translateY(calc(-1 * var(--avatar-radius, 30px) - 2px)) rotate(0deg); }
-  100% { transform: rotate(360deg) translateY(calc(-1 * var(--avatar-radius, 30px) - 2px)) rotate(-360deg); }
-}
