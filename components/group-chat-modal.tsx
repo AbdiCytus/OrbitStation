@@ -928,15 +928,15 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     const targetUser = localCollaborators?.find((c: any) => c.user.id === msg.senderId)?.user || (sector.station?.userId === msg.senderId ? sector.station.user : msg.sender);
                                     if (targetUser) setMentionDetail({ type: 'user', data: targetUser });
                                   }}
-                                  className={`cursor-pointer hover:opacity-80 transition-opacity ${getAvatarBadgeClass(msg.sender?.titleBadge)}`}
-                                  style={{ '--avatar-radius': '20px',
-                                    width: "32px", height: "32px", borderRadius: "50%", background: "#374151", overflow: "visible", flexShrink: 0,
-                                    ...(msg.sender?.titleBadge ? {} : isMsgOwner ? { border: "2px solid #FFD700", boxShadow: "0 0 12px 2px rgba(255,215,0,0.8)" } :
+                                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                                  style={{
+                                    width: "32px", height: "32px", borderRadius: "50%", background: "#374151", overflow: "hidden", flexShrink: 0,
+                                    ...(isMsgOwner ? { border: "2px solid #FFD700", boxShadow: "0 0 12px 2px rgba(255,215,0,0.8)" } :
                                       localCollaborators.find((c: any) => c.userId === msg.senderId)?.role === "ADMIN" ? { border: "2px solid #10B981" } :
                                         { border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" })
                                   } as any}
                                 >
-                                  <div className={`w-full h-full rounded-full overflow-hidden relative ${getAvatarSweepClass(msg.sender?.titleBadge)}`}>
+                                  <div className="w-full h-full rounded-full overflow-hidden relative">
                                   {msg.sender?.image ? (
                                     <img src={msg.sender.image} alt={msg.sender.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                   ) : (
@@ -1247,10 +1247,10 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                               <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
                                 <div
                                   onClick={(e) => { e.stopPropagation(), setMentionDetail({ type: 'user', data: sector.station.user }) }}
-                                  className={`cursor-pointer hover:opacity-80 transition-opacity ${getAvatarBadgeClass(sector.station.user.titleBadge)}`}
-                                  style={{ '--avatar-radius': '20px', overflow: 'visible', width: "100%", height: "100%", borderRadius: "50%", background: "#374151", ...(sector.station.user.titleBadge ? {} : { border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)" }) } as any}
+                                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                                  style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#374151", border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)", overflow: "hidden" }}
                                 >
-                                  <div className={`w-full h-full rounded-full overflow-hidden relative ${getAvatarSweepClass(sector.station.user.titleBadge)}`}>
+                                  <div className="w-full h-full rounded-full overflow-hidden relative">
                                     {sector.station.user.image
                                       ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                       : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
@@ -1288,13 +1288,13 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                 <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
                                   <div
                                     onClick={(e) => { e.stopPropagation(); setMentionDetail({ type: 'user', data: c.user }) }}
-                                    className={`cursor-pointer hover:opacity-80 transition-opacity ${getAvatarBadgeClass(c.user.titleBadge)}`}
+                                    className="cursor-pointer hover:opacity-80 transition-opacity"
                                     style={{
-                                      '--avatar-radius': '20px', overflow: 'visible', width: "100%", height: "100%", borderRadius: "50%", background: "#374151",
-                                      ...(c.user.titleBadge ? {} : c.role === "ADMIN" ? { border: "2px solid #10B981" } : { border: "1px solid rgba(255,255,255,0.1)" })
+                                      width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden",
+                                      ...(c.role === "ADMIN" ? { border: "2px solid #10B981" } : { border: "1px solid rgba(255,255,255,0.1)" })
                                     } as any}
                                   >
-                                    <div className={`w-full h-full rounded-full overflow-hidden relative ${getAvatarSweepClass(c.user.titleBadge)}`}>
+                                    <div className="w-full h-full rounded-full overflow-hidden relative">
                                       {c.user.image
                                         ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                         : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{c.user.username?.[0]?.toUpperCase()}</div>
