@@ -97,7 +97,7 @@ export default function SettingsClient({ profile }: Props) {
   const [image, setImage] = useState(profile.image ?? "");
 
   const defaultShortcuts = { publicStation: "F1", friends: "F2", analytics: "F3", settings: "F4" };
-  const [shortcuts, setShortcuts] = useState(profile.shortcuts ? { ...defaultShortcuts, ...JSON.parse(profile.shortcuts) } : defaultShortcuts);
+  const [shortcuts, setShortcuts] = useState<typeof defaultShortcuts>(profile.shortcuts ? { ...defaultShortcuts, ...JSON.parse(profile.shortcuts) } : defaultShortcuts);
   const [activeTab, setActiveTab] = useState<"profile" | "public" | "preferences" | "shortcuts">("profile");
 
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -227,8 +227,8 @@ export default function SettingsClient({ profile }: Props) {
 
   return (
     <>
-      <form onSubmit={handleSave} className="settings-content md:fixed md:inset-0 md:flex md:flex-col md:items-center md:justify-center md:z-50 md:p-8 md:bg-black/60 md:backdrop-blur-sm overflow-y-auto">
-        <div className="md:w-full md:max-w-5xl md:bg-[#0f0f16] md:border md:border-white/10 md:rounded-2xl md:shadow-2xl md:flex md:flex-col md:overflow-hidden relative">
+      <form onSubmit={handleSave} className="settings-content" style={{ padding: "2rem 1rem", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 80px)", width: "100%", gap: "1rem" }}>
+        <div style={{ width: "100%", maxWidth: "900px", background: "#0f0f16", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
           
           {/* Header */}
           <div className="settings-page-header md:p-6 md:border-b md:border-white/10 md:bg-black/20">
@@ -281,10 +281,10 @@ export default function SettingsClient({ profile }: Props) {
             </div>
 
             {/* Content Area */}
-            <div className="md:flex-1 md:overflow-y-auto md:p-8 flex flex-col gap-8 w-full">
+            <div className="md:flex-1 md:overflow-y-auto md:p-8 flex flex-col gap-8 w-full" style={{ padding: "2rem" }}>
               
               {/* Profile Section */}
-              <section className={`settings-section ${activeTab === "profile" ? "md:block" : "hidden md:hidden"}`}>
+              <section className="settings-section" style={{ display: activeTab === "profile" ? "flex" : "none", border: "none", padding: 0 }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Profile</h2>
                 
                 {/* Avatar row */}
@@ -390,7 +390,7 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Public Station Section */}
-              <section className={`settings-section ${activeTab === "public" ? "md:block" : "hidden md:hidden"}`}>
+              <section className="settings-section" style={{ display: activeTab === "public" ? "flex" : "none", border: "none", padding: 0 }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Public Station</h2>
                 
                 <div className="flex flex-col gap-6">
@@ -453,7 +453,7 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Preferences Section */}
-              <section className={`settings-section ${activeTab === "preferences" ? "md:block" : "hidden md:hidden"}`}>
+              <section className="settings-section" style={{ display: activeTab === "preferences" ? "flex" : "none", border: "none", padding: 0 }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Preferences</h2>
                 
                 <div className="flex flex-col gap-4">
@@ -632,7 +632,7 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Shortcuts Section */}
-              <section className={`settings-section ${activeTab === "shortcuts" ? "md:block" : "hidden md:hidden"}`}>
+              <section className="settings-section" style={{ display: activeTab === "shortcuts" ? "flex" : "none", border: "none", padding: 0 }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Shortcuts</h2>
                 <p className="text-gray-400 text-sm mb-6">Configure keyboard shortcuts for quick navigation on desktop.</p>
                 
@@ -684,9 +684,9 @@ export default function SettingsClient({ profile }: Props) {
           )}
         </div>
 
-        {/* Danger Zone - Outside Modal on Desktop, stacked on Mobile */}
-        <div className="md:w-full md:max-w-5xl md:mt-4 md:flex md:justify-end mt-12 w-full px-4 md:px-0">
-          <section className="settings-section w-full md:w-auto md:bg-[#111] md:border md:border-red-500/20 md:rounded-xl md:p-4 border border-red-500/20 rounded-xl p-4 bg-red-500/5 md:mb-0 mb-12">
+        {/* Danger Zone */}
+        <div style={{ width: "100%", maxWidth: "900px", marginTop: "1rem" }}>
+          <section className="settings-section w-full md:bg-[#111] md:border md:border-red-500/20 md:rounded-xl md:p-4 border border-red-500/20 rounded-xl p-4 bg-red-500/5 md:mb-0 mb-12">
             <div className="flex md:items-center justify-between flex-col md:flex-row gap-4">
               <div>
                 <h2 className="settings-section-title text-red-500 m-0">Danger Zone</h2>

@@ -61,6 +61,7 @@ type Props = {
     animationEnabled: boolean;
     hologramEnabled?: boolean;
     staticBackgroundEnabled?: boolean;
+    shortcuts?: string | null;
     station?: { isPublic: boolean };
   };
 };

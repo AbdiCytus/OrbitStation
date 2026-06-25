@@ -235,25 +235,37 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
         {!hideProfile ? (
           user ? (
             <>
-              <div className="hidden md:flex items-center gap-2 mr-4">
+              <div className="hidden md:flex items-center gap-3 mr-8">
                 {user.station?.isPublic && user.username && (
-                  <Link href={`/station/${user.username}`} className="navbar-icon-btn" title={`Public Station (${parsedShortcuts.publicStation})`} style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <Link href={`/station/${user.username}`} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
                     <GlobeAltIcon width={20} height={20} />
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#141423] border border-white/10 rounded text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                      Public Station <span className="text-gray-400 ml-1">({parsedShortcuts.publicStation})</span>
+                    </div>
                   </Link>
                 )}
-                <button onClick={onOpenFriends} className="navbar-icon-btn" title={`Friends (${parsedShortcuts.friends})`} style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s", position: "relative" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                <button onClick={onOpenFriends} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
                   <UsersIcon width={20} height={20} />
                   {stats?.hasNotifications && (
                     <span style={{ position: "absolute", top: "2px", right: "2px", width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423" }}></span>
                   )}
+                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#141423] border border-white/10 rounded text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                    Friends <span className="text-gray-400 ml-1">({parsedShortcuts.friends})</span>
+                  </div>
                 </button>
                 {user.station?.isPublic && (
-                  <Link href="/analytics" className="navbar-icon-btn" title={`Analytics (${parsedShortcuts.analytics})`} style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <Link href="/analytics" className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
                     <ChartBarIcon width={20} height={20} />
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#141423] border border-white/10 rounded text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                      Analytics <span className="text-gray-400 ml-1">({parsedShortcuts.analytics})</span>
+                    </div>
                   </Link>
                 )}
-                <Link href="/settings" className="navbar-icon-btn" title={`Settings (${parsedShortcuts.settings})`} style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                <Link href="/settings" className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
                   <Cog8ToothIcon width={20} height={20} />
+                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#141423] border border-white/10 rounded text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                    Settings <span className="text-gray-400 ml-1">({parsedShortcuts.settings})</span>
+                  </div>
                 </Link>
               </div>
 
