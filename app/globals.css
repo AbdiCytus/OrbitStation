@@ -3124,6 +3124,9 @@ code, kbd, pre {
   .settings-inner-section {
     display: flex !important;
   }
+  .settings-inner-section.desktop-only-section {
+    display: none !important;
+  }
 }
 /* Desktop Overrides */
 @media (min-width: 768px) {

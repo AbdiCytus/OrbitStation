@@ -654,7 +654,7 @@ export default function SettingsClient({ profile }: Props) {
               </section>
 
               {/* Shortcuts Section */}
-              <section className="settings-section settings-inner-section" style={{ display: activeTab === "shortcuts" ? "flex" : "none" }}>
+              <section className="settings-section settings-inner-section desktop-only-section" style={{ display: activeTab === "shortcuts" ? "flex" : "none" }}>
                 <h2 className="settings-section-title md:text-2xl mb-6">Shortcuts</h2>
                 <p className="text-gray-400 text-sm mb-6">Configure keyboard shortcuts for quick navigation on desktop.</p>
 
