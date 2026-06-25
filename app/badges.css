@@ -583,6 +583,18 @@
   animation: diagonal-orbit-3d 6s linear infinite;
 }
 
+/* Small Variant for Public Profiles */
+.public-badge-sweep.badge-creator .badge-icon::before, .public-badge-sweep.badge-assistant .badge-icon::before {
+  width: 110px; height: 110px;
+  margin-top: -55px; margin-left: -55px;
+}
+.public-badge-sweep.badge-creator .badge-icon::after {
+  animation: diagonal-orbit-3d-small 5s linear infinite;
+}
+.public-badge-sweep.badge-assistant .badge-icon::after {
+  animation: diagonal-orbit-3d-small 6s linear infinite;
+}
+
 @keyframes diagonal-orbit-3d {
   0% { 
     transform: rotateZ(-25deg) rotateX(55deg) rotate(0deg) translateX(80px) rotate(0deg) rotateX(-55deg) rotateZ(25deg) scale(1) translateZ(50px); 
@@ -602,6 +614,29 @@
   }
   100% { 
     transform: rotateZ(-25deg) rotateX(55deg) rotate(360deg) translateX(80px) rotate(-360deg) rotateX(-55deg) rotateZ(25deg) scale(1) translateZ(50px); 
+    z-index: 9999; filter: brightness(1);
+  }
+}
+
+@keyframes diagonal-orbit-3d-small {
+  0% { 
+    transform: rotateZ(-25deg) rotateX(55deg) rotate(0deg) translateX(55px) rotate(0deg) rotateX(-55deg) rotateZ(25deg) scale(1) translateZ(50px); 
+    z-index: 9999; filter: brightness(1);
+  }
+  25% { 
+    transform: rotateZ(-25deg) rotateX(55deg) rotate(90deg) translateX(55px) rotate(-90deg) rotateX(-55deg) rotateZ(25deg) scale(1.2) translateZ(50px); 
+    z-index: 9999; filter: brightness(1.2);
+  }
+  50% { 
+    transform: rotateZ(-25deg) rotateX(55deg) rotate(180deg) translateX(55px) rotate(-180deg) rotateX(-55deg) rotateZ(25deg) scale(0.8) translateZ(-50px); 
+    z-index: -9999; filter: brightness(0.6);
+  }
+  75% { 
+    transform: rotateZ(-25deg) rotateX(55deg) rotate(270deg) translateX(55px) rotate(-270deg) rotateX(-55deg) rotateZ(25deg) scale(0.6) translateZ(-50px); 
+    z-index: -9999; filter: brightness(0.4);
+  }
+  100% { 
+    transform: rotateZ(-25deg) rotateX(55deg) rotate(360deg) translateX(55px) rotate(-360deg) rotateX(-55deg) rotateZ(25deg) scale(1) translateZ(50px); 
     z-index: 9999; filter: brightness(1);
   }
 }
