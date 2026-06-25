@@ -118,9 +118,7 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
     if (!user?.email) return false;
     
     const allowedEmails = (process.env.CREATOR_EMAILS || "").split(",").map(e => e.trim());
-    const allowedKeywords = (process.env.CREATOR_EMAIL_KEYWORDS || "").split(",").map(e => e.trim());
-    
-    return allowedEmails.includes(user.email) || allowedKeywords.some(keyword => keyword && user.email?.includes(keyword));
+    return allowedEmails.includes(user.email);
   },
   "the-creator-assistant": async (userId: string) => {
     const user = await db.user.findUnique({ where: { id: userId }, select: { username: true } });
