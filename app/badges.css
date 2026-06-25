@@ -201,6 +201,8 @@
   background: linear-gradient(135deg, #4338ca, #818cf8); 
   color: #fff; 
   box-shadow: 0 0 20px rgba(79, 70, 229, 0.5); 
+}
+
 /* Heiress */
 .badge-heiress {
   background: rgba(225, 29, 72, 0.05);
