@@ -172,6 +172,24 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     icon: "BoltIcon",
     effectClass: "badge-creator-ally",
     rarity: "super-ekslusif"
+  },
+  {
+    id: "time-tested-bond",
+    name: "Time-Tested Bond",
+    hint: "Have been friends with someone for 150+ days.",
+    color: "cyan",
+    icon: "ClockIcon",
+    effectClass: "badge-time-tested",
+    rarity: "biasa"
+  },
+  {
+    id: "the-completionist",
+    name: "The Completionist",
+    hint: "Collect all common and special badges.",
+    color: "rose",
+    icon: "TrophyIcon",
+    effectClass: "badge-completionist",
+    rarity: "ekslusif"
   }
 ];
 

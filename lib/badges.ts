@@ -126,6 +126,37 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
     
     const allowedUsernames = (process.env.ASSISTANT_USERNAMES || "").split(",").map(u => u.trim());
     return allowedUsernames.includes(user.username);
+  },
+  "time-tested-bond": async (userId: string) => {
+    const friendships = await db.friendship.findMany({
+      where: {
+        OR: [{ requesterId: userId }, { receiverId: userId }],
+        status: "ACCEPTED"
+      },
+      select: { createdAt: true }
+    });
+    const hundredFiftyDaysAgo = new Date();
+    hundredFiftyDaysAgo.setDate(hundredFiftyDaysAgo.getDate() - 150);
+    return friendships.some((f: any) => f.createdAt <= hundredFiftyDaysAgo);
+  },
+  "the-completionist": async (userId: string) => {
+    // Determine required badges
+    const requiredBadges = BADGE_REGISTRY.filter(b => 
+      (b.rarity === "biasa" || b.rarity === "ekslusif") && 
+      b.id !== "the-completionist" && 
+      BADGE_CHECKS[b.id]
+    );
+    
+    // Check all required badges
+    for (const badge of requiredBadges) {
+      try {
+        const isEligible = await BADGE_CHECKS[badge.id](userId);
+        if (!isEligible) return false; // Fail early if any badge is missing
+      } catch (e) {
+        return false;
+      }
+    }
+    return true;
   }
 };
 
