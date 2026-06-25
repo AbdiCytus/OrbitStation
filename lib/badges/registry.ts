@@ -75,7 +75,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
   {
     id: "chatterbox",
     name: "Chatterbox",
-    hint: "Unlock by sending at least 100 private messages to friends.",
+    hint: "Unlock by sending at least 100 private messages across 15+ different friends.",
     color: "pink",
     icon: "ChatBubbleLeftRightIcon",
     effectClass: "badge-chatterbox"
@@ -83,10 +83,58 @@ export const BADGE_REGISTRY: BadgeDef[] = [
   {
     id: "cosmic-explorer",
     name: "Cosmic Explorer",
-    hint: "Unlock by visiting 10 different public stations.",
+    hint: "Unlock by visiting 100 different public stations.",
     color: "indigo",
     icon: "GlobeAsiaAustraliaIcon",
     effectClass: "badge-explorer"
+  },
+  {
+    id: "sector-heiress",
+    name: "Sector Heiress",
+    hint: "Receive ownership transfers for 50 different sectors.",
+    color: "rose",
+    icon: "KeyIcon",
+    effectClass: "badge-heiress"
+  },
+  {
+    id: "prominent-admin",
+    name: "Prominent Admin",
+    hint: "Get promoted to Admin in 8 different collaborative sectors.",
+    color: "cyan",
+    icon: "BriefcaseIcon",
+    effectClass: "badge-admin"
+  },
+  {
+    id: "galactic-center",
+    name: "Galactic Center",
+    hint: "Your Public Station has been visited 100,000+ times.",
+    color: "amber",
+    icon: "SparklesIcon",
+    effectClass: "badge-galactic"
+  },
+  {
+    id: "reliable-contributor",
+    name: "Reliable Contributor",
+    hint: "Add 10+ beacons across 5 different collaborative sectors.",
+    color: "emerald",
+    icon: "WrenchScrewdriverIcon",
+    effectClass: "badge-contributor"
+  },
+  {
+    id: "the-creator",
+    name: "The Creator",
+    hint: "The mastermind behind Orbit Station.",
+    color: "purple",
+    icon: "CpuChipIcon",
+    effectClass: "badge-creator"
+  },
+  {
+    id: "the-creator-assistant",
+    name: "The Creator's Assistant",
+    hint: "The AI agent that helped build Orbit Station.",
+    color: "blue",
+    icon: "CommandLineIcon",
+    effectClass: "badge-assistant"
   }
 ];
 

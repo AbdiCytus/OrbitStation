@@ -250,7 +250,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                     {user.titleBadge && (() => {
                       const badge = getBadgeById(user.titleBadge);
                       if (!badge) return null;
-                      const isExclusive = ["viral-voyager", "collaborative-spirit", "guild-master"].includes(badge.id);
+                      const isExclusive = ["viral-voyager", "collaborative-spirit", "guild-master", "sector-heiress", "galactic-center", "the-creator", "the-creator-assistant"].includes(badge.id);
                       return (
                         <div className={`badge-card ${isExclusive ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg overflow-hidden`} style={{ width: 'fit-content', marginTop: '4px' }}>
                           <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
