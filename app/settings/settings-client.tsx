@@ -249,10 +249,10 @@ export default function SettingsClient({ profile }: Props) {
   return (
     <>
       <form onSubmit={handleSave} className="settings-content" style={{ padding: "2rem 1rem", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 80px)", width: "100%", gap: "1rem" }}>
-        <div style={{ width: "100%", maxWidth: "900px", height: "75vh", minHeight: "500px", maxHeight: "800px", background: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+        <div style={{ width: "100%", maxWidth: "900px", height: "75vh", minHeight: "500px", maxHeight: "800px", background: "rgba(255, 255, 255, 0.03)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
 
           {/* Header */}
-          <div className="settings-page-header" style={{ padding: "2rem", borderBottom: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)" }}>
+          <div className="settings-page-header" style={{ padding: "2rem", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", background: "transparent" }}>
             <div>
               <h1 className="settings-page-title hidden md:block">
                 {activeTab === "profile" && "Profile"}
@@ -282,7 +282,7 @@ export default function SettingsClient({ profile }: Props) {
 
           <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }} className="md:flex-row flex-col">
             {/* Left Sidebar (Desktop Only) */}
-            <div className="hidden md:flex md:flex-col md:w-64" style={{ padding: "1.5rem", gap: "0.5rem", borderRight: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)" }}>
+            <div className="hidden md:flex md:flex-col md:w-64" style={{ padding: "1.5rem", gap: "0.5rem", borderRight: "1px solid rgba(255, 255, 255, 0.1)", background: "transparent" }}>
               <button type="button" onClick={() => setActiveTab("profile")} className={`text-left rounded-lg flex items-center transition-colors ${activeTab === "profile" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`} style={{ padding: "0.75rem 1rem", gap: "0.75rem" }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 Profile
