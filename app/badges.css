@@ -668,52 +668,41 @@
 .avatar-exclusive-galactic-center::after {
   content: '';
   position: absolute;
-  top: 50%; left: 50%;
-  width: 80px; height: 40px;
-  margin-top: -20px; margin-left: -40px;
-  background-repeat: no-repeat;
+  inset: -6px;
+  border-radius: inherit;
+  padding: 8px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
   z-index: 20;
   pointer-events: none;
-  mix-blend-mode: screen;
 }
 
 .avatar-exclusive-the-creator::before {
-  background-image: 
-    radial-gradient(ellipse 15px 4px at 70% 50%, #fff 0%, transparent 100%),
-    radial-gradient(ellipse 25px 10px at 65% 50%, #c084fc 0%, transparent 100%),
-    radial-gradient(ellipse 40px 20px at 50% 50%, rgba(168, 85, 247, 0.6) 0%, transparent 100%),
-    radial-gradient(circle at 40% 30%, #fff 0%, transparent 1.5px),
-    radial-gradient(circle at 35% 65%, #c084fc 0%, transparent 2px),
-    radial-gradient(circle at 25% 45%, #fff 0%, transparent 1px),
-    radial-gradient(circle at 15% 55%, rgba(255,255,255,0.8) 0%, transparent 2px);
-  animation: edge-orbit-flare 4s linear infinite;
+  background: 
+    radial-gradient(circle at 50% 4px, #fff 0%, transparent 6px),
+    conic-gradient(from 0deg, transparent 0%, transparent 60%, rgba(168, 85, 247, 0.3) 75%, rgba(168, 85, 247, 0.8) 95%, #c084fc 100%);
+  filter: drop-shadow(0 0 4px #a855f7) drop-shadow(0 0 10px #c084fc);
+  animation: creator-spin 3s linear infinite;
 }
 
 .avatar-exclusive-the-creator-assistant::before {
-  background-image: 
-    radial-gradient(ellipse 15px 4px at 70% 50%, #fff 0%, transparent 100%),
-    radial-gradient(ellipse 25px 10px at 65% 50%, #60a5fa 0%, transparent 100%),
-    radial-gradient(ellipse 40px 20px at 50% 50%, rgba(59, 130, 246, 0.6) 0%, transparent 100%),
-    radial-gradient(circle at 40% 30%, #fff 0%, transparent 1.5px),
-    radial-gradient(circle at 35% 65%, #60a5fa 0%, transparent 2px),
-    radial-gradient(circle at 25% 45%, #fff 0%, transparent 1px),
-    radial-gradient(circle at 15% 55%, rgba(255,255,255,0.8) 0%, transparent 2px);
-  animation: edge-orbit-flare 4.5s linear infinite;
+  background: 
+    radial-gradient(circle at 50% 4px, #fff 0%, transparent 6px),
+    conic-gradient(from 0deg, transparent 0%, transparent 60%, rgba(59, 130, 246, 0.3) 75%, rgba(59, 130, 246, 0.8) 95%, #60a5fa 100%);
+  filter: drop-shadow(0 0 4px #3b82f6) drop-shadow(0 0 10px #60a5fa);
+  animation: creator-spin 3s linear infinite reverse;
 }
 
 .avatar-exclusive-galactic-center::after {
-  background-image: 
-    radial-gradient(ellipse 15px 4px at 70% 50%, #fff 0%, transparent 100%),
-    radial-gradient(ellipse 25px 10px at 65% 50%, #fcd34d 0%, transparent 100%),
-    radial-gradient(ellipse 40px 20px at 50% 50%, rgba(251, 191, 36, 0.6) 0%, transparent 100%),
-    radial-gradient(circle at 40% 30%, #fff 0%, transparent 1.5px),
-    radial-gradient(circle at 35% 65%, #fcd34d 0%, transparent 2px),
-    radial-gradient(circle at 25% 45%, #fff 0%, transparent 1px),
-    radial-gradient(circle at 15% 55%, rgba(255,255,255,0.8) 0%, transparent 2px);
-  animation: edge-orbit-flare 3.5s linear infinite;
+  background: 
+    radial-gradient(circle at 50% 4px, #fff 0%, transparent 6px),
+    conic-gradient(from 0deg, transparent 0%, transparent 60%, rgba(251, 191, 36, 0.3) 75%, rgba(251, 191, 36, 0.8) 95%, #fcd34d 100%);
+  filter: drop-shadow(0 0 4px #fbbf24) drop-shadow(0 0 10px #fcd34d);
+  animation: creator-spin 4s linear infinite;
 }
 
-@keyframes edge-orbit-flare {
-  0% { transform: rotate(0deg) translateY(calc(-1 * var(--avatar-radius, 30px) - 2px)); }
-  100% { transform: rotate(360deg) translateY(calc(-1 * var(--avatar-radius, 30px) - 2px)); }
+@keyframes creator-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
