@@ -1296,20 +1296,26 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                   const isAlreadyFriend = isUserType && myFriends.some(f => f.id === mentionDetail.data.id);
                   const isPending = isUserType && pendingRequests.has(mentionDetail.data.id);
 
+                  const badge = isUserType && mentionDetail.data.titleBadge ? BADGE_REGISTRY.find(b => b.id === mentionDetail.data.titleBadge) : null;
+                  const isSpecial = badge?.rarity === "ekslusif";
+                  const isExclusive = badge?.rarity === "super-ekslusif";
+
                   return (
                     <motion.div
                       onClick={(e) => e.stopPropagation()}
                       initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                      className="absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[rgba(20,20,30,0.95)] backdrop-blur-xl rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-violet-500/30 flex flex-col gap-4 min-w-[300px]"
-                      style={{ padding: "1.5rem" }}
+                      className={`absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-violet-500/30 flex flex-col gap-4 min-w-[300px] badge-card ${badge ? badge.effectClass : ''} ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`}
+                      style={{ padding: "1.5rem", background: badge ? "rgba(20,20,30,0.85)" : "rgba(20,20,30,0.95)", backdropFilter: "blur(20px)" }}
                     >
-                      <button onClick={() => setMentionDetail(null)} className="absolute top-3 right-3 text-gray-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer p-1">
+                      {(isExclusive || isSpecial) && <div className="badge-content" />}
+                      <button onClick={() => setMentionDetail(null)} className="absolute top-3 right-3 text-gray-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer p-1 z-20 relative">
                         <XMarkIcon width={20} height={20} />
                       </button>
 
-                      <div className="flex items-center gap-5">
-                        <div className="p-1 rounded-full bg-white/5 border border-white/10 shrink-0">
-                          <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-16 h-16 rounded-full object-cover" />
+                      <div className="flex items-center gap-5 relative z-10">
+                        <div className={`p-1 rounded-full bg-white/5 shrink-0 flex items-center justify-center badge-card ${badge ? badge.effectClass : ''} ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`} style={{ border: '2px solid transparent' }}>
+                          <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-16 h-16 rounded-full object-cover relative z-10" />
+                          {(isExclusive || isSpecial) && <div className="badge-content" />}
                         </div>
                         <div className="flex flex-col pr-6">
                           <h4 className="text-white font-bold text-lg m-0">{mentionDetail.data.name || mentionDetail.data.title}</h4>

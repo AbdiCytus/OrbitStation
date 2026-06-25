@@ -234,36 +234,40 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                 className="zzz-banner-img"
               />
               <div className="zzz-banner-overlay">
-                <div className="zzz-banner-left">
-                  <div className="zzz-avatar">
-                    {user.image ? (
-                      <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                    ) : (
-                      user.name?.[0]?.toUpperCase() ?? "?"
-                    )}
-                  </div>
-                  <div className="zzz-user-info">
-                    <h1 className="zzz-user-name">{profileTitle || "Pilot"}</h1>
-                    {user.username && (
-                      <div className="zzz-user-username">@{user.username}</div>
-                    )}
-                    {user.titleBadge && (() => {
-                      const badge = getBadgeById(user.titleBadge);
-                      if (!badge) return null;
-                      const isExclusive = ["viral-voyager", "collaborative-spirit", "guild-master", "sector-heiress", "galactic-center", "the-creator", "the-creator-assistant"].includes(badge.id);
-                      return (
-                        <div className={`badge-card ${isExclusive ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg overflow-hidden`} style={{ width: 'fit-content', marginTop: '4px' }}>
-                          <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
-                            <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
+                {(() => {
+                  const badge = user.titleBadge ? getBadgeById(user.titleBadge) : null;
+                  const isSpecial = badge?.rarity === "ekslusif";
+                  const isExclusive = badge?.rarity === "super-ekslusif";
+
+                  return (
+                    <div className="zzz-banner-left">
+                      <div className={`zzz-avatar badge-card ${badge ? badge.effectClass : ''} ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`} style={{ border: badge ? '3px solid transparent' : undefined }}>
+                        {user.image ? (
+                          <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 10 }} />
+                        ) : (
+                          <span style={{ position: 'relative', zIndex: 10 }}>{user.name?.[0]?.toUpperCase() ?? "?"}</span>
+                        )}
+                        {(isExclusive || isSpecial) && <div className="badge-content" />}
+                      </div>
+                      <div className="zzz-user-info">
+                        <h1 className="zzz-user-name">{profileTitle || "Pilot"}</h1>
+                        {user.username && (
+                          <div className="zzz-user-username">@{user.username}</div>
+                        )}
+                        {badge && (
+                          <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg overflow-hidden`} style={{ width: 'fit-content', marginTop: '4px' }}>
+                            <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
+                              <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
+                            </div>
+                            <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[13px] drop-shadow-md" style={{marginRight: "1rem"}}>
+                              {badge.name}
+                            </span>
                           </div>
-                          <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[13px] drop-shadow-md" style={{marginRight: "1rem"}}>
-                            {badge.name}
-                          </span>
-                        </div>
-                      )
-                    })()}
-                  </div>
-                </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <div className="zzz-banner-right">
                   <div className="zzz-stats-row">
