@@ -270,6 +270,7 @@
 }
 .badge-galactic {
   position: relative;
+  overflow: visible !important;
   background-image: 
     radial-gradient(ellipse at 0% 0%, rgba(251, 191, 36, 0.4) 0%, transparent 60%),
     radial-gradient(ellipse at 100% 100%, rgba(245, 158, 11, 0.4) 0%, transparent 60%),
@@ -325,6 +326,36 @@
 }
 @keyframes galactic-spin {
   to { --galactic-angle: 360deg; }
+}
+
+/* Smoke Effect outside Galactic Center */
+.badge-galactic .badge-icon::before, .badge-galactic .badge-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 130%; height: 160%;
+  transform: translate(-50%, -50%);
+  background-image: 
+    radial-gradient(ellipse at 50% 100%, rgba(251, 191, 36, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 100%, rgba(245, 158, 11, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(254, 243, 199, 0.15) 0%, transparent 50%);
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: -1;
+  animation: galactic-smoke 6s infinite ease-in-out;
+  border-radius: 50px;
+}
+.badge-galactic .badge-icon::after {
+  background-image: 
+    radial-gradient(ellipse at 30% 100%, rgba(251, 191, 36, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 100%, rgba(245, 158, 11, 0.2) 0%, transparent 50%);
+  animation-duration: 8s;
+  animation-direction: reverse;
+}
+@keyframes galactic-smoke {
+  0% { transform: translate(-50%, -40%) scaleY(1) scaleX(1); opacity: 0.5; }
+  50% { transform: translate(-50%, -35%) scaleY(1.2) scaleX(1.05); opacity: 0.8; }
+  100% { transform: translate(-50%, -40%) scaleY(1) scaleX(1); opacity: 0.5; }
 }
 @keyframes galactic-stars {
   0% { background-position: 0px 0px; }
@@ -389,11 +420,11 @@
   box-shadow: 0 0 25px rgba(96, 165, 250, 0.8);
 }
 @keyframes creator-fx {
-  0% { background-position: -100px -100px, -150px -150px, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
-  15% { background-position: 400px 400px, -150px -150px, 0 -6px, 0 -9px, 0 -7px, 0 0, 6px 0, 0 6px; }
-  45% { background-position: 400px 400px, -150px -150px, 0 -18px, 0 -27px, 0 -21px, 0 0, 18px 0, 0 18px; }
-  60% { background-position: 400px 400px, 400px 400px, 0 -24px, 0 -36px, 0 -28px, 0 0, 24px 0, 0 24px; }
-  100% { background-position: 400px 400px, 400px 400px, 0 -40px, 0 -60px, 0 -50px, 0 0, 40px 0, 0 40px; }
+  0% { background-position: 400px -100px, 450px -150px, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  15% { background-position: -100px 400px, 450px -150px, 0 -6px, 0 -9px, 0 -7px, 0 0, 6px 0, 0 6px; }
+  45% { background-position: -100px 400px, 450px -150px, 0 -18px, 0 -27px, 0 -21px, 0 0, 18px 0, 0 18px; }
+  60% { background-position: -100px 400px, -150px 450px, 0 -24px, 0 -36px, 0 -28px, 0 0, 24px 0, 0 24px; }
+  100% { background-position: -100px 400px, -150px 450px, 0 -40px, 0 -60px, 0 -50px, 0 0, 40px 0, 0 40px; }
 }
 @keyframes creator-spin {
   to { --creator-angle: 360deg; }
