@@ -43,11 +43,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   const rafRef = useRef<number>(0);
   const [isCapturing, setIsCapturing] = useState(false);
 
-  const getProxyUrl = (url?: string | null) => {
-    if (!url) return undefined;
-    if (url.startsWith('/')) return url;
-    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
-  };
+  // Proxy URL logic moved to html-to-image fetchRequest
 
   const captureScreenshot = async () => {
     if (!panelRef.current) return;
@@ -62,6 +58,20 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
         backgroundColor: "#0f0f16",
         pixelRatio: 2,
         imagePlaceholder: emptyPixel,
+        fetchRequest: async (url, options) => {
+          try {
+            // First try fetching directly
+            const res = await fetch(url, options);
+            if (!res.ok) throw new Error("Status " + res.status);
+            return res;
+          } catch (e) {
+            // If it fails (e.g. CORS), proxy it!
+            if (url && !url.startsWith('data:') && !url.startsWith('/')) {
+              return fetch(`/api/proxy-image?url=${encodeURIComponent(url)}`, options);
+            }
+            throw e;
+          }
+        },
         style: {
           transform: 'scale(1)', // Reset any transforms that might mess up coordinates
         },
@@ -306,18 +316,17 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                 {beacon.imageUrl ? (
                   <>
                     <img
-                      src={getProxyUrl(beacon.imageUrl)}
+                      src={beacon.imageUrl}
                       alt={beacon.title}
                       className="hsr-card-img"
                       draggable={false}
-                      crossOrigin="anonymous"
                     />
                     <div className="hsr-prism" />
                   </>
                 ) : (
                   <div className="hsr-card-placeholder">
                     {beacon.faviconUrl ? (
-                      <img src={getProxyUrl(beacon.faviconUrl)} alt="" width={64} height={64} className="hsr-card-favicon-lg" crossOrigin="anonymous" />
+                      <img src={beacon.faviconUrl} alt="" width={64} height={64} className="hsr-card-favicon-lg" />
                     ) : (
                       <span className="hsr-card-initial">{domain.charAt(0).toUpperCase()}</span>
                     )}
@@ -392,7 +401,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               {beacon._creator && sector?.collaborators && sector.collaborators.length > 0 && (
                 <div className="hsr-stat-row">
                   <span className="hsr-stat-icon" style={{ borderRadius: "50%", overflow: "hidden", width: 16, height: 16, background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyItems: "center" }}>
-                    {beacon._creator.image ? <img src={getProxyUrl(beacon._creator.image)} alt="" style={{ width: 16, height: 16, objectFit: "cover" }} crossOrigin="anonymous" /> : <span style={{ fontSize: "10px", width: "100%", textAlign: "center" }}>{(beacon._creator.name || "?")[0].toUpperCase()}</span>}
+                    {beacon._creator.image ? <img src={beacon._creator.image} alt="" style={{ width: 16, height: 16, objectFit: "cover" }} /> : <span style={{ fontSize: "10px", width: "100%", textAlign: "center" }}>{(beacon._creator.name || "?")[0].toUpperCase()}</span>}
                   </span>
                   <span className="hsr-stat-key">Added by</span>
                   <span className="hsr-stat-val">{beacon._creator.name}</span>
