@@ -97,18 +97,21 @@
 .badge-guild {
   background: rgba(16, 185, 129, 0.05);
   border-color: rgba(16, 185, 129, 0.4);
+  overflow: hidden;
+}
+.badge-guild::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border: 1px dashed rgba(52, 211, 153, 0.6);
+  border-radius: 50%;
+  animation: spin-slow 10s linear infinite;
+  pointer-events: none;
+  z-index: 0;
 }
 .badge-guild .badge-icon { 
   background: linear-gradient(135deg, #059669, #34d399); 
   color: #fff; 
-}
-.badge-guild .badge-icon::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border: 1px dashed rgba(52, 211, 153, 0.6);
-  border-radius: 50%;
-  animation: spin-slow 10s linear infinite;
 }
 
 /* Early */
