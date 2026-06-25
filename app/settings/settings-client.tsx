@@ -35,7 +35,7 @@ type Profile = {
   station: { isPublic: boolean } | null;
 };
 
-type Props = { 
+type Props = {
   profile: Profile;
   unlockedBadges: string[];
 };
@@ -465,38 +465,36 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                       {BADGE_REGISTRY.map((badge) => {
                         const isUnlocked = unlockedBadges.includes(badge.id);
                         const isSelected = titleBadge === badge.id;
-                        
+
                         return (
-                          <div 
+                          <div
                             key={badge.id}
                             onClick={() => {
                               if (isUnlocked) setTitleBadge(badge.id);
                               else toast.error("You haven't unlocked this badge yet!");
                             }}
-                            className={`badge-card relative p-4 rounded-xl border flex gap-3 items-center cursor-pointer ${
-                              isSelected 
-                                ? `ring-2 ring-purple-500 ring-offset-2 ring-offset-[#0f0f16]` 
-                                : isUnlocked 
-                                  ? 'hover:scale-[1.02] hover:shadow-lg' 
+                            className={`badge-card relative p-4 rounded-xl border flex gap-3 items-center cursor-pointer ${isSelected
+                                ? `ring-2 ring-purple-500 ring-offset-2 ring-offset-[#0f0f16]`
+                                : isUnlocked
+                                  ? 'hover:scale-[1.02] hover:shadow-lg'
                                   : 'bg-black/40 border-white/5 opacity-60 grayscale'
-                            } ${isUnlocked ? badge.effectClass : ''}`}
+                              } ${isUnlocked ? badge.effectClass : ''}`}
                           >
-                            <div className={`badge-content flex-1 min-w-0 flex items-center gap-3 pr-10`}>
-                              <div className={`badge-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                isUnlocked ? '' : 'bg-gray-800 text-gray-500 border border-gray-700'
-                              }`}>
+                            <div className={`badge-content flex-1 min-w-0 flex items-center gap-2 pr-10`}>
+                              <div className={`badge-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isUnlocked ? '' : 'bg-gray-800 text-gray-500 border border-gray-700'
+                                }`} style={{ marginLeft: "0.5rem" }}>
                                 <DynamicIcon name={badge.icon} className="w-5 h-5 relative z-10" />
                               </div>
-                              <div className="flex-1 min-w-0">
+                              <div className="flex-1 min-w-0" style={{ margin: "0.4rem 0", padding: "0 0.3rem" }}>
                                 <h4 className={`text-sm font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-400'}`}>
                                   {badge.name}
                                 </h4>
-                                <p className="text-xs text-gray-400 leading-snug mt-0.5 max-h-[2.5rem] overflow-y-auto hide-scrollbar">
+                                <p className="text-xs text-gray-400 leading-snug mt-0.5 max-h-[2rem] overflow-y-auto hide-scrollbar">
                                   {badge.hint}
                                 </p>
                               </div>
                             </div>
-                            
+
                             {isSelected && (
                               <div className="absolute top-1/2 -translate-y-1/2 right-3 text-white bg-purple-500 rounded-full shadow-[0_0_10px_#a855f7] z-10">
                                 <SolidIcons.CheckCircleIcon className="w-5 h-5" />
@@ -699,7 +697,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                                 audio.play().catch(e => toast.error("Could not play sound. Format might be unsupported."));
                               }}
                               className={`text-xs px-4 py-2 rounded-sm font-semibold transition-all ${(!notifSoundUrl || notifSoundUrl === "/sounds/notif-default.mp3") ? "bg-white/5 text-gray-500 cursor-not-allowed" : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_10px_rgba(109,40,217,0.4)]"}`}
-                              style={{ padding: "0.5rem"}}
+                              style={{ padding: "0.5rem" }}
                             >
                               Play Test
                             </button>

@@ -62,6 +62,18 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
       where: { creatorId: userId }
     });
     return count >= 100;
+  },
+  "chatterbox": async (userId: string) => {
+    const count = await db.chatMessage.count({
+      where: { senderId: userId }
+    });
+    return count >= 100;
+  },
+  "cosmic-explorer": async (userId: string) => {
+    const count = await db.stationVisit.count({
+      where: { visitorId: userId }
+    });
+    return count >= 10;
   }
 };
 

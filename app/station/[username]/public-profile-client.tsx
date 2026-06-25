@@ -49,14 +49,14 @@ function CosmicBackground({ enabled, isMobile }: { enabled: boolean; isMobile: b
 
 export default function PublicProfileClient({ data, sessionUser, isFriendOrPending }: Props) {
   const { user, station } = data;
-  
+
   // Exclude "All", and filter active sectors to those that have beacons
   const sectors = station.sectors.filter(s => s.beacons.length > 0);
-  
+
   const [activeSectorId, setActiveSectorId] = useState<string>(
     sectors[0]?.id ?? ""
   );
-  
+
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
   const [stationSearch, setStationSearch] = useState("");
   const [isAddingFriend, setIsAddingFriend] = useState(false);
@@ -108,16 +108,16 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
   const isOwnProfile = sessionUser?.id === user.id;
   const profileTitle = isOwnProfile ? user.name : `${user.name}'s Station`;
 
-  const isAnimationEnabled = sessionUser && 'animationEnabled' in sessionUser 
-    ? sessionUser.animationEnabled 
+  const isAnimationEnabled = sessionUser && 'animationEnabled' in sessionUser
+    ? sessionUser.animationEnabled
     : false;
 
   return (
     <>
       {/* Station Navbar */}
-      <StationNavbar 
-        user={sessionUser} 
-        displayName={sessionUser?.name || "Pilot"} 
+      <StationNavbar
+        user={sessionUser}
+        displayName={sessionUser?.name || "Pilot"}
         hideSearch={false}
         searchQuery={stationSearch}
         onSearchChange={setStationSearch}
@@ -144,7 +144,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
 
       <div className="zzz-wrapper" style={{ top: "60px", pointerEvents: "none" }}>
         {/* Modal Container */}
-        <motion.div 
+        <motion.div
           className={`zzz-modal ${isAnimationEnabled ? "floating" : ""}`}
           drag={isMobile ? "y" : false}
           dragControls={dragControls}
@@ -179,23 +179,23 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
             currentYRef.current = targetSnap;
             controls.start({ y: targetSnap, transition: { type: "spring", stiffness: 300, damping: 30 } });
           }}
-          style={{ 
-            pointerEvents: "auto", 
+          style={{
+            pointerEvents: "auto",
             touchAction: "auto",
             animation: isMobile ? "none" : undefined
           }}
         >
-          
+
           {/* Draggable handle for mobile */}
           {isMobile && (
-            <div 
+            <div
               onPointerDown={(e) => dragControls.start(e)}
               style={{ width: "100%", height: "30px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "grab", flexShrink: 0, paddingTop: "8px", touchAction: "none" }}
             >
               <div style={{ width: "50px", height: "5px", backgroundColor: "rgba(255,255,255,0.4)", borderRadius: "3px" }} />
             </div>
           )}
-          
+
           {/* Modal Background Sparkles */}
           {isAnimationEnabled && (
             <div className="zzz-modal-bg" aria-hidden="true">
@@ -228,10 +228,10 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
           <div className="zzz-content">
             {/* Banner Section */}
             <div className="zzz-banner-container">
-              <img 
-                src={user.bannerUrl || "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=2000&auto=format&fit=crop"} 
-                alt="Banner" 
-                className="zzz-banner-img" 
+              <img
+                src={user.bannerUrl || "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=2000&auto=format&fit=crop"}
+                alt="Banner"
+                className="zzz-banner-img"
               />
               <div className="zzz-banner-overlay">
                 <div className="zzz-banner-left">
@@ -250,20 +250,21 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                     {user.titleBadge && (() => {
                       const badge = getBadgeById(user.titleBadge);
                       if (!badge) return null;
+                      const isExclusive = ["viral-voyager", "collaborative-spirit", "guild-master"].includes(badge.id);
                       return (
-                        <div className={`badge-card public-badge-sweep ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg overflow-hidden`} style={{ width: 'fit-content', marginTop: '4px' }}>
-                           <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
-                             <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
-                           </div>
-                           <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[13px] drop-shadow-md">
-                             {badge.name}
-                           </span>
+                        <div className={`badge-card ${isExclusive ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg overflow-hidden`} style={{ width: 'fit-content', marginTop: '4px' }}>
+                          <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
+                            <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
+                          </div>
+                          <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[13px] drop-shadow-md" style={{marginRight: "1rem"}}>
+                            {badge.name}
+                          </span>
                         </div>
                       )
                     })()}
                   </div>
                 </div>
-                
+
                 <div className="zzz-banner-right">
                   <div className="zzz-stats-row">
                     <div className="zzz-stat">
@@ -285,30 +286,30 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
               {isMobile && (
                 <div style={{ display: "flex", gap: "0.5rem", width: "100%" }}>
                   {sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
-                    <button 
-                      className="btn btn-primary" 
+                    <button
+                      className="btn btn-primary"
                       style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flex: "1" }}
                       disabled={isAddingFriend}
                       onClick={async () => {
-                         setIsAddingFriend(true);
-                         const res = await sendFriendRequest(user.id);
-                         if (res?.error) {
-                            toast.error(res.error);
-                         } else {
-                            toast.success("Friend request sent!");
-                         }
-                         setIsAddingFriend(false);
+                        setIsAddingFriend(true);
+                        const res = await sendFriendRequest(user.id);
+                        if (res?.error) {
+                          toast.error(res.error);
+                        } else {
+                          toast.success("Friend request sent!");
+                        }
+                        setIsAddingFriend(false);
                       }}
                     >
                       <UserPlusIcon width={16} height={16} />
                       {isAddingFriend ? "Sending..." : "Add Friend"}
                     </button>
                   )}
-                  <button 
-                    className="btn btn-secondary hover:bg-white/10" 
+                  <button
+                    className="btn btn-secondary hover:bg-white/10"
                     style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flex: "1", background: "rgba(255,255,255,0.05)" }}
                     onClick={() => {
-                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => {});
+                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => { });
                       else { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
                     }}
                   >
@@ -316,24 +317,24 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                   </button>
                 </div>
               )}
-              
+
               <div className="zzz-bio-text" style={{ flex: 1, textAlign: "center", padding: "0 1rem" }}>"{user.bio || "Exploring the internet galaxy."}"</div>
-              
+
               <div style={{ display: "flex", gap: "0.5rem", flexDirection: isMobile ? "column" : "row", width: isMobile ? "100%" : "auto", justifyContent: "flex-end" }}>
                 {!isMobile && sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
-                  <button 
-                    className="btn btn-primary" 
+                  <button
+                    className="btn btn-primary"
                     style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem" }}
                     disabled={isAddingFriend}
                     onClick={async () => {
-                       setIsAddingFriend(true);
-                       const res = await sendFriendRequest(user.id);
-                       if (res?.error) {
-                          toast.error(res.error);
-                       } else {
-                          toast.success("Friend request sent!");
-                       }
-                       setIsAddingFriend(false);
+                      setIsAddingFriend(true);
+                      const res = await sendFriendRequest(user.id);
+                      if (res?.error) {
+                        toast.error(res.error);
+                      } else {
+                        toast.success("Friend request sent!");
+                      }
+                      setIsAddingFriend(false);
                     }}
                   >
                     <UserPlusIcon width={16} height={16} />
@@ -341,11 +342,11 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                   </button>
                 )}
                 {!isMobile && (
-                  <button 
-                    className="btn btn-secondary hover:bg-white/10" 
+                  <button
+                    className="btn btn-secondary hover:bg-white/10"
                     style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)" }}
                     onClick={() => {
-                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => {});
+                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => { });
                       else { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
                     }}
                   >
@@ -383,8 +384,8 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
             {sectors.length > 0 && (
               <div className="zzz-beacon-grid">
                 {visibleBeacons.map((beacon, idx) => (
-                  <div 
-                    key={beacon.id} 
+                  <div
+                    key={beacon.id}
                     className={`zzz-beacon-card ${isAnimationEnabled ? "floating" : ""}`}
                     style={{ "--enter-delay": `${idx * 0.1}s`, animationDelay: isAnimationEnabled ? `${(idx * 0.1)}s, ${(idx * 0.2)}s` : "0s" } as any}
                     onClick={() => handleBeaconClick(beacon)}
@@ -420,10 +421,10 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
         />
       )}
 
-      <FriendsModal 
-        isOpen={showFriendsModal} 
-        onClose={() => setShowFriendsModal(false)} 
-        user={sessionUser} 
+      <FriendsModal
+        isOpen={showFriendsModal}
+        onClose={() => setShowFriendsModal(false)}
+        user={sessionUser}
         stats={stats}
         refetchStats={refetchNotifications}
       />

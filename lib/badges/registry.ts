@@ -71,6 +71,22 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     color: "blue",
     icon: "ServerStackIcon",
     effectClass: "badge-hoarder"
+  },
+  {
+    id: "chatterbox",
+    name: "Chatterbox",
+    hint: "Unlock by sending at least 100 private messages to friends.",
+    color: "pink",
+    icon: "ChatBubbleLeftRightIcon",
+    effectClass: "badge-chatterbox"
+  },
+  {
+    id: "cosmic-explorer",
+    name: "Cosmic Explorer",
+    hint: "Unlock by visiting 10 different public stations.",
+    color: "indigo",
+    icon: "GlobeAsiaAustraliaIcon",
+    effectClass: "badge-explorer"
   }
 ];
 
