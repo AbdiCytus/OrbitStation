@@ -277,10 +277,10 @@
     radial-gradient(ellipse at 0% 0%, rgba(251, 191, 36, 0.4) 0%, transparent 60%),
     radial-gradient(ellipse at 100% 100%, rgba(245, 158, 11, 0.4) 0%, transparent 60%),
     radial-gradient(ellipse at 50% 120%, rgba(254, 243, 199, 0.3) 0%, transparent 60%),
-    radial-gradient(1px 1px at 10% 20%, #fcd34d, transparent),
-    radial-gradient(1.5px 1.5px at 40% 70%, rgba(255,255,255,0.8), transparent),
-    radial-gradient(2px 2px at 80% 30%, #f59e0b, transparent),
-    radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(circle at 10% 20%, #fcd34d 0%, transparent 2px),
+    radial-gradient(circle at 40% 70%, rgba(255,255,255,0.8) 0%, transparent 3px),
+    radial-gradient(circle at 80% 30%, #f59e0b 0%, transparent 4px),
+    radial-gradient(circle at 60% 80%, rgba(255,255,255,0.8) 0%, transparent 2px),
     linear-gradient(45deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.1));
   background-size: 
     150% 150%, 150% 150%, 150% 150%,
@@ -375,7 +375,6 @@
   initial-value: 0deg;
 }
 .badge-creator, .badge-assistant {
-  container-type: inline-size;
   transform-style: preserve-3d;
   perspective: 1000px;
   overflow: visible !important;
@@ -385,15 +384,15 @@
   border-color: transparent !important;
   box-shadow: 0 0 30px rgba(168, 85, 247, 0.2), inset 0 0 20px rgba(168, 85, 247, 0.2);
   background-image: 
-    radial-gradient(circle at center, #fff 0%, rgba(216, 180, 254, 0.8) 2px, transparent 8px),
-    radial-gradient(circle at center, #fff 0%, rgba(216, 180, 254, 0.8) 2px, transparent 8px),
-    radial-gradient(1.5px 1.5px at 20% 80%, rgba(216, 180, 254, 0.8), transparent),
-    radial-gradient(2px 2px at 70% 90%, rgba(216, 180, 254, 0.6), transparent),
-    radial-gradient(1px 1px at 40% 60%, rgba(216, 180, 254, 0.9), transparent),
+    linear-gradient(135deg, transparent 48%, rgba(255,255,255,1) 50%, transparent 52%),
+    linear-gradient(135deg, transparent 48%, rgba(255,255,255,0.7) 50%, transparent 52%),
+    radial-gradient(circle at 20% 80%, rgba(216, 180, 254, 0.8) 0%, transparent 3px),
+    radial-gradient(circle at 70% 90%, rgba(216, 180, 254, 0.6) 0%, transparent 4px),
+    radial-gradient(circle at 40% 60%, rgba(216, 180, 254, 0.9) 0%, transparent 2px),
     linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(168, 85, 247, 0.05)),
     linear-gradient(90deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px),
     linear-gradient(0deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px);
-  background-size: 20px 20px, 20px 20px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
+  background-size: 60px 60px, 80px 80px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
   background-repeat: no-repeat, no-repeat, repeat, repeat, repeat, no-repeat, repeat, repeat;
   animation: creator-fx 8s linear infinite;
 }
@@ -401,15 +400,15 @@
   border-color: transparent !important;
   box-shadow: 0 0 30px rgba(96, 165, 250, 0.2), inset 0 0 20px rgba(96, 165, 250, 0.2);
   background-image: 
-    radial-gradient(circle at center, #fff 0%, rgba(147, 197, 253, 0.8) 2px, transparent 8px),
-    radial-gradient(circle at center, #fff 0%, rgba(147, 197, 253, 0.8) 2px, transparent 8px),
-    radial-gradient(1.5px 1.5px at 20% 80%, rgba(147, 197, 253, 0.8), transparent),
-    radial-gradient(2px 2px at 70% 90%, rgba(147, 197, 253, 0.6), transparent),
-    radial-gradient(1px 1px at 40% 60%, rgba(147, 197, 253, 0.9), transparent),
+    linear-gradient(135deg, transparent 48%, rgba(255,255,255,1) 50%, transparent 52%),
+    linear-gradient(135deg, transparent 48%, rgba(255,255,255,0.7) 50%, transparent 52%),
+    radial-gradient(circle at 20% 80%, rgba(147, 197, 253, 0.8) 0%, transparent 3px),
+    radial-gradient(circle at 70% 90%, rgba(147, 197, 253, 0.6) 0%, transparent 4px),
+    radial-gradient(circle at 40% 60%, rgba(147, 197, 253, 0.9) 0%, transparent 2px),
     linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.05)),
     linear-gradient(90deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px),
     linear-gradient(0deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px);
-  background-size: 20px 20px, 20px 20px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
+  background-size: 60px 60px, 80px 80px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
   background-repeat: no-repeat, no-repeat, repeat, repeat, repeat, no-repeat, repeat, repeat;
   animation: creator-fx 8s linear infinite reverse;
 }
@@ -424,11 +423,11 @@
   box-shadow: 0 0 25px rgba(96, 165, 250, 0.8);
 }
 @keyframes creator-fx {
-  0% { background-position: 120% -20%, 150% -50%, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
-  15% { background-position: -20% 120%, 150% -50%, 0 -6px, 0 -9px, 0 -7px, 0 0, 6px 0, 0 6px; }
-  45% { background-position: -20% 120%, 150% -50%, 0 -18px, 0 -27px, 0 -21px, 0 0, 18px 0, 0 18px; }
-  60% { background-position: -20% 120%, -50% 150%, 0 -24px, 0 -36px, 0 -28px, 0 0, 24px 0, 0 24px; }
-  100% { background-position: -20% 120%, -50% 150%, 0 -40px, 0 -60px, 0 -50px, 0 0, 40px 0, 0 40px; }
+  0% { background-position: 150px -50px, 200px -100px, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  15% { background-position: -50px 150px, 200px -100px, 0 -6px, 0 -9px, 0 -7px, 0 0, 6px 0, 0 6px; }
+  45% { background-position: -50px 150px, 200px -100px, 0 -18px, 0 -27px, 0 -21px, 0 0, 18px 0, 0 18px; }
+  60% { background-position: -50px 150px, -100px 200px, 0 -24px, 0 -36px, 0 -28px, 0 0, 24px 0, 0 24px; }
+  100% { background-position: -50px 150px, -100px 200px, 0 -40px, 0 -60px, 0 -50px, 0 0, 40px 0, 0 40px; }
 }
 @keyframes creator-spin {
   to { --creator-angle: 360deg; }
@@ -471,8 +470,8 @@
   content: '';
   position: absolute;
   top: 50%; left: 50%;
-  width: 100cqw; height: 100cqw;
-  margin-top: -50cqw; margin-left: -50cqw;
+  width: 130px; height: 130px;
+  margin-top: -65px; margin-left: -65px;
   border: 1px dashed rgba(168, 85, 247, 0.5);
   border-radius: 50%;
   transform: rotateZ(-25deg) rotateX(75deg);
@@ -505,29 +504,29 @@
 
 @keyframes diagonal-orbit-3d {
   0% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(0deg) translateX(50cqw) rotate(0deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(0deg) translateX(65px) rotate(0deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: 10; filter: brightness(1);
   }
   25% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(90deg) translateX(50cqw) rotate(-90deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(90deg) translateX(65px) rotate(-90deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: 10; filter: brightness(1.2);
   }
   49.9% { 
     z-index: 10; 
   }
   50% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(180deg) translateX(50cqw) rotate(-180deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(180deg) translateX(65px) rotate(-180deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: -1; filter: brightness(0.8);
   }
   75% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(270deg) translateX(50cqw) rotate(-270deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(270deg) translateX(65px) rotate(-270deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: -1; filter: brightness(0.3);
   }
   99.9% { 
     z-index: -1; 
   }
   100% { 
-    transform: rotateZ(-25deg) rotateX(75deg) rotate(360deg) translateX(50cqw) rotate(-360deg) rotateX(-75deg) rotateZ(25deg); 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(360deg) translateX(65px) rotate(-360deg) rotateX(-75deg) rotateZ(25deg); 
     z-index: 10; filter: brightness(1);
   }
 }
