@@ -162,7 +162,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     color: "pink",
     icon: "HeartIcon",
     effectClass: "badge-confidant",
-    rarity: "super-ekslusif"
+    rarity: "ekslusif"
   },
   {
     id: "creator-ally",

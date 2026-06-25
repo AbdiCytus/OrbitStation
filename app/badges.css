@@ -19,6 +19,10 @@
   z-index: 1;
 }
 
+.badge-icon {
+  position: relative;
+}
+
 /* Rookie */
 .badge-rookie { background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.3); }
 .badge-rookie .badge-icon { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; }
@@ -630,7 +634,7 @@
 .avatar-badge-special-gray { border-color: #9ca3af !important; box-shadow: 0 0 15px rgba(156, 163, 175, 0.5) !important; }
 .avatar-badge-special-amber { border-color: #fbbf24 !important; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5) !important; }
 .avatar-badge-special-rose { border-color: #fb7185 !important; box-shadow: 0 0 15px rgba(251, 113, 133, 0.5) !important; }
-.avatar-badge-special-pink { border-color: #f472b6 !important; box-shadow: 0 0 15px rgba(244, 114, 182, 0.5) !important; }
+.avatar-badge-special-pink { border-color: #d946ef !important; box-shadow: -2px -2px 15px rgba(217, 70, 239, 0.5), 2px 2px 15px rgba(139, 92, 246, 0.5), inset 0 0 10px rgba(236, 72, 153, 0.4) !important; }
 .avatar-badge-special-cyan { border-color: #22d3ee !important; box-shadow: 0 0 15px rgba(34, 211, 238, 0.5) !important; }
 .avatar-badge-special-emerald { border-color: #34d399 !important; box-shadow: 0 0 15px rgba(52, 211, 153, 0.5) !important; }
 .avatar-badge-special-purple { border-color: #c084fc !important; box-shadow: 0 0 15px rgba(192, 132, 252, 0.5) !important; }
