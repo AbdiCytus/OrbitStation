@@ -541,12 +541,12 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                                             : 'bg-black/40 border-white/5 opacity-60 grayscale'
                                         } ${isUnlocked ? badge.effectClass : ''}`}
                                     >
-                                      <div className={`badge-content flex-1 min-w-0 flex items-center gap-2 pr-10`}>
+                                      <div className={`flex-1 min-w-0 flex items-center gap-2 pr-10`}>
                                         <div className={`badge-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isUnlocked ? '' : 'bg-gray-800 text-gray-500 border border-gray-700'
                                           }`} style={{ marginLeft: "0.5rem" }}>
                                           <DynamicIcon name={badge.icon} className="w-5 h-5 relative z-10" />
                                         </div>
-                                        <div className="flex-1 min-w-0" style={{ margin: "0.4rem 0", padding: "0 0.3rem" }}>
+                                        <div className="badge-content flex-1 min-w-0" style={{ margin: "0.4rem 0", padding: "0 0.3rem" }}>
                                           <h4 className={`text-sm font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-400'}`}>
                                             {badge.name}
                                           </h4>
