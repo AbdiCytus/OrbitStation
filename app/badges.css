@@ -384,33 +384,31 @@
   border-color: transparent !important;
   box-shadow: 0 0 30px rgba(168, 85, 247, 0.2), inset 0 0 20px rgba(168, 85, 247, 0.2);
   background-image: 
-    linear-gradient(135deg, transparent 48%, rgba(255,255,255,1) 50%, transparent 52%),
-    linear-gradient(135deg, transparent 48%, rgba(255,255,255,0.7) 50%, transparent 52%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23d8b4fe' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 7 9 3 5 7l4 4'/%3E%3Cpath d='m17 11 4 4-4 4-4-4'/%3E%3Cpath d='m8 12 4 4 6-6-4-4Z'/%3E%3Cpath d='m16 8 3-3'/%3E%3Cpath d='M9 21a6 6 0 0 0-6-6'/%3E%3C/svg%3E"),
     radial-gradient(circle at 20% 80%, rgba(216, 180, 254, 0.8) 0%, transparent 3px),
     radial-gradient(circle at 70% 90%, rgba(216, 180, 254, 0.6) 0%, transparent 4px),
     radial-gradient(circle at 40% 60%, rgba(216, 180, 254, 0.9) 0%, transparent 2px),
     linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(168, 85, 247, 0.05)),
     linear-gradient(90deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px),
     linear-gradient(0deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px);
-  background-size: 60px 60px, 80px 80px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
-  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat, no-repeat, repeat, repeat;
-  animation: creator-fx 8s linear infinite;
+  background-size: 18px 18px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
+  background-repeat: no-repeat, repeat, repeat, repeat, no-repeat, repeat, repeat;
+  animation: creator-fx 20s linear infinite;
 }
 .badge-assistant {
   border-color: transparent !important;
   box-shadow: 0 0 30px rgba(96, 165, 250, 0.2), inset 0 0 20px rgba(96, 165, 250, 0.2);
   background-image: 
-    linear-gradient(135deg, transparent 48%, rgba(255,255,255,1) 50%, transparent 52%),
-    linear-gradient(135deg, transparent 48%, rgba(255,255,255,0.7) 50%, transparent 52%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2393c5fd' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 7 9 3 5 7l4 4'/%3E%3Cpath d='m17 11 4 4-4 4-4-4'/%3E%3Cpath d='m8 12 4 4 6-6-4-4Z'/%3E%3Cpath d='m16 8 3-3'/%3E%3Cpath d='M9 21a6 6 0 0 0-6-6'/%3E%3C/svg%3E"),
     radial-gradient(circle at 20% 80%, rgba(147, 197, 253, 0.8) 0%, transparent 3px),
     radial-gradient(circle at 70% 90%, rgba(147, 197, 253, 0.6) 0%, transparent 4px),
     radial-gradient(circle at 40% 60%, rgba(147, 197, 253, 0.9) 0%, transparent 2px),
     linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.05)),
     linear-gradient(90deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px),
     linear-gradient(0deg, rgba(96, 165, 250, 0.15) 1px, transparent 1px);
-  background-size: 60px 60px, 80px 80px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
-  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat, no-repeat, repeat, repeat;
-  animation: creator-fx 8s linear infinite;
+  background-size: 18px 18px, 40px 40px, 60px 60px, 50px 50px, 100% 100%, 20px 20px, 20px 20px;
+  background-repeat: no-repeat, repeat, repeat, repeat, no-repeat, repeat, repeat;
+  animation: creator-fx 20s linear infinite;
 }
 .badge-creator .badge-icon {
   background: linear-gradient(135deg, #7e22ce, #e9d5ff);
@@ -423,11 +421,11 @@
   box-shadow: 0 0 25px rgba(96, 165, 250, 0.8);
 }
 @keyframes creator-fx {
-  0% { background-position: 120% -20%, 150% -50%, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
-  15% { background-position: -20% 120%, 150% -50%, 0 -6px, 0 -9px, 0 -7px, 0 0, 6px 0, 0 6px; }
-  45% { background-position: -20% 120%, 150% -50%, 0 -18px, 0 -27px, 0 -21px, 0 0, 18px 0, 0 18px; }
-  60% { background-position: -20% 120%, -50% 150%, 0 -24px, 0 -36px, 0 -28px, 0 0, 24px 0, 0 24px; }
-  100% { background-position: -20% 120%, -50% 150%, 0 -40px, 0 -60px, 0 -50px, 0 0, 40px 0, 0 40px; }
+  0% { background-position: -20% 30%, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  25% { background-position: 50% 10%, 0 -10px, 0 -15px, 0 -12px, 0 0, 10px 0, 0 10px; }
+  50% { background-position: 120% 40%, 0 -20px, 0 -30px, 0 -24px, 0 0, 20px 0, 0 20px; }
+  75% { background-position: 50% 70%, 0 -30px, 0 -45px, 0 -36px, 0 0, 30px 0, 0 30px; }
+  100% { background-position: -20% 30%, 0 -40px, 0 -60px, 0 -50px, 0 0, 40px 0, 0 40px; }
 }
 @keyframes creator-spin {
   to { --creator-angle: 360deg; }
