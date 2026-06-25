@@ -533,7 +533,71 @@
   filter: drop-shadow(0 0 4px #3b82f6) drop-shadow(0 0 10px #60a5fa);
 }
 
-/* Diagonal Orbiting Planets removed per user request */
+/* Diagonal Orbiting Planets (Anchored via .badge-icon) */
+.badge-creator .badge-icon::before, .badge-assistant .badge-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 160px; height: 160px;
+  margin-top: -80px; margin-left: -80px;
+  border: 1px dashed rgba(168, 85, 247, 0.5);
+  border-radius: 50%;
+  transform: rotateZ(-25deg) rotateX(75deg);
+  pointer-events: none;
+  z-index: 0;
+}
+.badge-assistant .badge-icon::before {
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.badge-creator .badge-icon::after, .badge-assistant .badge-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 16px; height: 16px;
+  margin-top: -8px; margin-left: -8px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.badge-creator .badge-icon::after {
+  background: radial-gradient(circle at 30% 30%, #fff, #a855f7 50%, #4c1d95 90%);
+  box-shadow: inset -3px -3px 5px rgba(0,0,0,0.6), 0 0 15px #c084fc;
+  animation: diagonal-orbit-3d 5s linear infinite;
+}
+.badge-assistant .badge-icon::after {
+  background: radial-gradient(circle at 30% 30%, #fff, #3b82f6 50%, #1e3a8a 90%);
+  box-shadow: inset -3px -3px 5px rgba(0,0,0,0.6), 0 0 15px #60a5fa;
+  animation: diagonal-orbit-3d 6s linear infinite;
+}
+
+@keyframes diagonal-orbit-3d {
+  0% { 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(0deg) translateX(80px) rotate(0deg) rotateX(-75deg) rotateZ(25deg); 
+    z-index: 10; filter: brightness(1);
+  }
+  25% { 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(90deg) translateX(80px) rotate(-90deg) rotateX(-75deg) rotateZ(25deg); 
+    z-index: 10; filter: brightness(1.2);
+  }
+  49.9% { 
+    z-index: 10; 
+  }
+  50% { 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(180deg) translateX(80px) rotate(-180deg) rotateX(-75deg) rotateZ(25deg); 
+    z-index: -1; filter: brightness(0.8);
+  }
+  75% { 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(270deg) translateX(80px) rotate(-270deg) rotateX(-75deg) rotateZ(25deg); 
+    z-index: -1; filter: brightness(0.3);
+  }
+  99.9% { 
+    z-index: -1; 
+  }
+  100% { 
+    transform: rotateZ(-25deg) rotateX(75deg) rotate(360deg) translateX(80px) rotate(-360deg) rotateX(-75deg) rotateZ(25deg); 
+    z-index: 10; filter: brightness(1);
+  }
+}
 
 /* Avatar Badge System */
 .avatar-badge {
