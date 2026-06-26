@@ -542,6 +542,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                                         } ${isUnlocked ? badge.effectClass : ''}`}
                                     >
                                       {isUnlocked && badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
+                                      {isUnlocked && badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
                                       <div className={`flex-1 min-w-0 flex items-center gap-2 pr-10`}>
                                         <div className={`badge-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isUnlocked ? '' : 'bg-gray-800 text-gray-500 border border-gray-700'
                                           }`} style={{ marginLeft: "0.5rem" }}>

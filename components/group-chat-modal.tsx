@@ -1403,7 +1403,8 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                               <p className="text-gray-400 text-sm m-0">@{mentionDetail.data.username} {mentionDetail.data.callsign ? `• ${mentionDetail.data.callsign}` : ''}</p>
                               {badge && (
                                 <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg mt-1.5`} style={{ width: 'fit-content' }}>
-                                  {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
+                                {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
+                                  {badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
                                   <div className="badge-icon w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
                                     <DynamicIcon name={badge.icon as any} className="w-3.5 h-3.5 relative z-10" />
                                   </div>
