@@ -1115,7 +1115,7 @@
 
 .avatar-badge-special-gray {
   border-color: transparent !important;
-  box-shadow: none !important;
+  box-shadow: 0 0 20px rgba(0,0,0,0.9), inset 0 0 10px rgba(0,0,0,0.9) !important;
 }
 
 .avatar-badge-special-gray::after {
@@ -1131,4 +1131,14 @@
   pointer-events: none;
   background: repeating-conic-gradient(from 0deg, #111827 0deg, #374151 10deg, #ef4444 15deg, #111827 30deg);
   animation: avatar-spin-rotate 10s linear infinite;
+}
+
+/* Modal Background for Shattered Badge */
+.modal-shattered {
+  background-image: 
+    url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20200%20100%27%3E%3Cdefs%3E%3CradialGradient%20id=%27hole%27%20cx=%2780%25%27%20cy=%2750%25%27%20r=%2730%25%27%3E%3Cstop%20offset=%270%25%27%20stop-color=%27rgba(255,255,255,0.2)%27%20/%3E%3Cstop%20offset=%2715%25%27%20stop-color=%27rgba(255,255,255,0.05)%27%20/%3E%3Cstop%20offset=%27100%25%27%20stop-color=%27transparent%27%20/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%27160%27%20cy=%2750%27%20r=%2740%27%20fill=%27url(%23hole)%27%20/%3E%3Cpolygon%20points=%27158,45%20163,47%20165,52%20161,56%20156,53%27%20fill=%27%23000%27%20stroke=%27rgba(255,255,255,0.4)%27%20stroke-width=%270.5%27/%3E%3Cg%20fill=%27rgba(255,255,255,0.08)%27%20stroke=%27rgba(255,255,255,0.3)%27%20stroke-width=%270.5%27%3E%3Cpolygon%20points=%27158,45%20152,38%20160,42%27%20/%3E%3Cpolygon%20points=%27163,47%20172,42%20168,48%27%20/%3E%3Cpolygon%20points=%27165,52%20175,55%20168,54%27%20/%3E%3Cpolygon%20points=%27161,56%20160,65%20158,58%27%20/%3E%3Cpolygon%20points=%27156,53%20145,55%20152,50%27%20/%3E%3Cpolygon%20points=%27154,48%20140,42%20150,45%27%20/%3E%3C/g%3E%3Cg%20stroke=%27rgba(255,255,255,0.15)%27%20stroke-width=%271%27%20fill=%27none%27%3E%3Cpath%20d=%27M152,38%20L130,10%20L120,0%27%20/%3E%3Cpath%20d=%27M160,42%20L170,10%20L175,0%27%20/%3E%3Cpath%20d=%27M172,42%20L190,20%20L200,10%27%20/%3E%3Cpath%20d=%27M175,55%20L200,60%27%20/%3E%3Cpath%20d=%27M160,65%20L170,90%20L175,100%27%20/%3E%3Cpath%20d=%27M158,58%20L140,80%20L130,100%27%20/%3E%3Cpath%20d=%27M145,55%20L100,70%20L80,80%20L50,95%27%20/%3E%3Cpath%20d=%27M140,42%20L90,35%20L60,20%20L30,5%27%20/%3E%3C/g%3E%3Cg%20stroke=%27rgba(255,255,255,0.08)%27%20stroke-width=%270.5%27%20fill=%27none%27%3E%3Cpath%20d=%27M140,25%20L165,26%20L180,30%27%20/%3E%3Cpath%20d=%27M130,10%20L150,15%20L170,10%27%20/%3E%3Cpath%20d=%27M180,30%20L185,45%20L188,58%27%20/%3E%3Cpath%20d=%27M188,58%20L180,75%20L165,78%27%20/%3E%3Cpath%20d=%27M165,78%20L150,70%20L130,85%27%20/%3E%3Cpath%20d=%27M130,85%20L120,65%20L90,55%27%20/%3E%3Cpath%20d=%27M90,55%20L105,40%20L125,32%27%20/%3E%3Cpath%20d=%27M125,32%20L110,20%27%20/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(circle at top right, rgba(156, 163, 175, 0.15), transparent) !important;
+  background-size: contain, 100% 100% !important;
+  background-repeat: no-repeat !important;
+  background-position: right center, 0 0 !important;
 }
