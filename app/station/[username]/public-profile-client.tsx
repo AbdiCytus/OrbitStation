@@ -237,7 +237,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                 {(() => {
                   const badge = user.titleBadge ? getBadgeById(user.titleBadge) : null;
                   const isSpecial = badge?.rarity === "ekslusif";
-                  const isExclusive = badge?.rarity === "super-ekslusif";
+                  const isExclusive = badge?.rarity === "super-ekslusif" || badge?.rarity === "developer";
 
                   const avatarBadgeClass = badge 
                     ? isExclusive 
@@ -249,23 +249,31 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
 
                   return (
                     <div className="zzz-banner-left">
-                      <div 
-                        className={`zzz-avatar ${avatarBadgeClass}`} 
-                        style={{ '--avatar-radius': '46px', overflow: 'visible' } as any}
-                      >
+                      <div style={{ position: 'relative', flexShrink: 0 }}>
                         {badge?.id === 'zodiac-horizon' && (
-                          <>
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-1" />
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-2" />
-                          </>
+                          <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-back" />
                         )}
-                        <div className={`w-full h-full rounded-full overflow-hidden relative ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`}>
-                          {user.image ? (
-                            <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 10 }} />
-                          ) : (
-                            <span style={{ position: 'relative', zIndex: 10 }}>{user.name?.[0]?.toUpperCase() ?? "?"}</span>
-                          )}
+                        {badge?.id === 'zodiac-horizon' && (
+                          <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-back" />
+                        )}
+                        <div 
+                          className={`zzz-avatar ${avatarBadgeClass}`} 
+                          style={{ '--avatar-radius': '46px', overflow: 'visible', position: 'relative', zIndex: 1 } as any}
+                        >
+                          <div className={`w-full h-full rounded-full overflow-hidden relative ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`}>
+                            {user.image ? (
+                              <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 10 }} />
+                            ) : (
+                              <span style={{ position: 'relative', zIndex: 10 }}>{user.name?.[0]?.toUpperCase() ?? "?"}</span>
+                            )}
+                          </div>
                         </div>
+                        {badge?.id === 'zodiac-horizon' && (
+                          <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-front" />
+                        )}
+                        {badge?.id === 'zodiac-horizon' && (
+                          <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-front" />
+                        )}
                       </div>
                       <div className="zzz-user-info">
                         <h1 className="zzz-user-name">{profileTitle || "Pilot"}</h1>
@@ -273,15 +281,29 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                           <div className="zzz-user-username">@{user.username}</div>
                         )}
                         {badge && (
-                          <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg`} style={{ width: 'fit-content', marginTop: '4px' }}>
-                            {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
-                            {badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
-                            <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
-                              <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
+                          <div className="zodiac-orbit-wrapper" style={{ position: 'relative', width: 'fit-content', marginTop: '4px' }}>
+                            {badge.id === 'zodiac-horizon' && (
+                              <>
+                                <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-back" />
+                                <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-back" />
+                              </>
+                            )}
+                            <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg`} style={{ position: 'relative', zIndex: 1 }}>
+                              {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
+                              {badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
+                              <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
+                                <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
+                              </div>
+                              <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[13px] drop-shadow-md" style={{marginRight: "1rem"}}>
+                                {badge.name}
+                              </span>
                             </div>
-                            <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[13px] drop-shadow-md" style={{marginRight: "1rem"}}>
-                              {badge.name}
-                            </span>
+                            {badge.id === 'zodiac-horizon' && (
+                              <>
+                                <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-front" />
+                                <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-front" />
+                              </>
+                            )}
                           </div>
                         )}
                       </div>

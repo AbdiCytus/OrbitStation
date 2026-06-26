@@ -1,4 +1,4 @@
-export type BadgeRarity = "biasa" | "ekslusif" | "super-ekslusif";
+export type BadgeRarity = "biasa" | "ekslusif" | "super-ekslusif" | "developer";
 
 export interface BadgeDef {
   id: string;
@@ -144,7 +144,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     color: "purple",
     icon: "CpuChipIcon",
     effectClass: "badge-creator",
-    rarity: "super-ekslusif"
+    rarity: "developer"
   },
   {
     id: "the-creator-assistant",
@@ -153,7 +153,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     color: "blue",
     icon: "CommandLineIcon",
     effectClass: "badge-assistant",
-    rarity: "super-ekslusif"
+    rarity: "developer"
   },
   {
     id: "cosmic-charmer",

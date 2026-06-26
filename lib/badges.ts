@@ -167,10 +167,10 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
       }
     }
     const sectors = await db.sector.findMany({
-      where: { ownerId: userId },
-      include: { _count: { select: { members: true } } }
+      where: { station: { userId } },
+      include: { _count: { select: { collaborators: true } } }
     });
-    return sectors.some((s: any) => s._count.members >= 10000);
+    return sectors.some((s: any) => s._count.collaborators >= 10000);
   }
 };
 
