@@ -157,6 +157,20 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
       }
     }
     return true;
+  },
+  "stellar-icon": async (userId: string) => {
+    const required = ["early-adopter", "viral-voyager", "guild-master", "galactic-center"];
+    for (const badgeId of required) {
+      if (BADGE_CHECKS[badgeId]) {
+         const has = await BADGE_CHECKS[badgeId](userId);
+         if (!has) return false;
+      }
+    }
+    const sectors = await db.sector.findMany({
+      where: { ownerId: userId },
+      include: { _count: { select: { members: true } } }
+    });
+    return sectors.some((s: any) => s._count.members >= 10000);
   }
 };
 

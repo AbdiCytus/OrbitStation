@@ -190,6 +190,15 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     icon: "CheckBadgeIcon",
     effectClass: "badge-completionist",
     rarity: "super-ekslusif"
+  },
+  {
+    id: "stellar-icon",
+    name: "Stellar Icon",
+    hint: "Obtained by true influencers (Early Adopter, Viral Voyager, Guild Master, Galactic Center, and a sector with 10,000+ members).",
+    color: "pink",
+    icon: "CameraIcon",
+    effectClass: "badge-stellar-icon",
+    rarity: "ekslusif"
   }
 ];
 

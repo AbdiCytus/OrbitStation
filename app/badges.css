@@ -1017,3 +1017,66 @@
   background: conic-gradient(#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
   animation: avatar-spin-rotate 6s linear infinite;
 }
+
+/* Stellar Icon Badge */
+.badge-stellar-icon {
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4V20h20v2H20v2h20v2H20v2h20v2H20v2h20v2H20v2h20v2H20v2h20v2H20v-2z' fill='%23ffffff' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E"),
+    linear-gradient(45deg, rgba(240, 148, 51, 0.2), rgba(220, 39, 67, 0.2), rgba(188, 24, 136, 0.2), rgba(138, 58, 185, 0.2), rgba(76, 104, 215, 0.2));
+  background-size: 40px 40px, 200% 200%;
+  animation: stellar-bg-pan 8s ease infinite;
+  border-color: transparent !important;
+}
+
+@keyframes stellar-bg-pan {
+  0% { background-position: 0px 0px, 0% 50%; }
+  50% { background-position: 20px 20px, 100% 50%; }
+  100% { background-position: 40px 40px, 0% 50%; }
+}
+
+.badge-stellar-icon::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--rgb-angle), #f09433, #dc2743, #bc1888, #8a3ab9, #4c68d7, #f09433);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rgb-spin 4s linear infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.badge-stellar-icon .badge-icon {
+  color: #fff;
+  background: linear-gradient(135deg, #f09433, #dc2743, #bc1888, #8a3ab9);
+  box-shadow: 0 0 10px rgba(188, 24, 136, 0.5);
+}
+
+.avatar-exclusive-stellar-icon { 
+  border-color: transparent !important; 
+  animation: pulse-stellar-avatar 4s infinite linear; 
+}
+@keyframes pulse-stellar-avatar {
+  0% { box-shadow: 0 0 15px rgba(220, 39, 67, 0.5), inset 0 0 10px rgba(220, 39, 67, 0.4); }
+  33% { box-shadow: 0 0 35px rgba(188, 24, 136, 0.8), inset 0 0 20px rgba(188, 24, 136, 0.6); }
+  66% { box-shadow: 0 0 25px rgba(138, 58, 185, 0.7), inset 0 0 15px rgba(138, 58, 185, 0.5); }
+  100% { box-shadow: 0 0 15px rgba(220, 39, 67, 0.5), inset 0 0 10px rgba(220, 39, 67, 0.4); }
+}
+
+.avatar-exclusive-stellar-icon::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 4px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 20;
+  pointer-events: none;
+  background: conic-gradient(#f09433, #dc2743, #bc1888, #8a3ab9, #4c68d7, #f09433);
+  animation: avatar-spin-rotate 4s linear infinite;
+}
