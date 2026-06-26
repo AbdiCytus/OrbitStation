@@ -1026,22 +1026,23 @@
     url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20200%20100%27%20preserveAspectRatio=%27none%27%3E%3Cg%20fill=%27none%27%20stroke=%27rgba(255,200,100,0.4)%27%20stroke-width=%271%27%3E%3Cpath%20d=%27M0,50%20Q20,10%20100,50%20T200,50%27/%3E%3Cpath%20d=%27M0,50%20Q50,40%20100,50%20T200,50%27/%3E%3Cpath%20d=%27M0,60%20Q30,10%20100,60%20T200,60%27/%3E%3Cpath%20d=%27M0,55%20Q50,20%20100,55%20T200,55%27/%3E%3C/g%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20200%20100%27%20preserveAspectRatio=%27none%27%3E%3Cg%20fill=%27none%27%20stroke=%27rgba(255,150,200,0.3)%27%20stroke-width=%271%27%3E%3Cpath%20d=%27M0,50%20Q80,20%20100,50%20T200,50%27/%3E%3Cpath%20d=%27M0,50%20Q80,110%20100,50%20T200,50%27/%3E%3Cpath%20d=%27M0,40%20Q70,80%20100,40%20T200,40%27/%3E%3Cpath%20d=%27M0,35%20Q40,0%20100,35%20T200,35%27/%3E%3C/g%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20200%20100%27%20preserveAspectRatio=%27none%27%3E%3Cg%20fill=%27none%27%20stroke=%27rgba(200,150,255,0.25)%27%20stroke-width=%271%27%3E%3Cpath%20d=%27M0,50%20Q40,90%20100,50%20T200,50%27/%3E%3Cpath%20d=%27M0,50%20Q20,-20%20100,50%20T200,50%27/%3E%3Cpath%20d=%27M0,45%20Q10,100%20100,45%20T200,45%27/%3E%3Cpath%20d=%27M0,65%20Q60,100%20100,65%20T200,65%27/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20100%20100%27%3E%3Ccircle%20cx=%2710%27%20cy=%2720%27%20r=%271.5%27%20fill=%27%23fff%27%20opacity=%270.8%27/%3E%3Ccircle%20cx=%2740%27%20cy=%2770%27%20r=%272%27%20fill=%27%23fff%27%20opacity=%270.9%27/%3E%3Ccircle%20cx=%2780%27%20cy=%2730%27%20r=%271%27%20fill=%27%23fff%27%20opacity=%270.7%27/%3E%3Ccircle%20cx=%2760%27%20cy=%2780%27%20r=%271.5%27%20fill=%27%23fff%27%20opacity=%271%27/%3E%3Ccircle%20cx=%2730%27%20cy=%2740%27%20r=%270.5%27%20fill=%27%23fff%27%20opacity=%270.5%27/%3E%3Ccircle%20cx=%2790%27%20cy=%2760%27%20r=%271%27%20fill=%27%23fff%27%20opacity=%270.6%27/%3E%3Ccircle%20cx=%2720%27%20cy=%2790%27%20r=%270.8%27%20fill=%27%23fff%27%20opacity=%270.4%27/%3E%3Ccircle%20cx=%2770%27%20cy=%2710%27%20r=%271%27%20fill=%27%23fff%27%20opacity=%270.5%27/%3E%3C/svg%3E"),
     linear-gradient(45deg, rgba(240, 148, 51, 0.25), rgba(220, 39, 67, 0.25), rgba(188, 24, 136, 0.25), rgba(138, 58, 185, 0.25), rgba(76, 104, 215, 0.25));
-  background-size: 200px 100%, 200px 100%, 200px 100%, 200px 100%, 200px 100%, 200% 200%;
+  background-size: 200px 100%, 200px 100%, 200px 100%, 200px 100%, 200px 100%, 150px 150px, 200% 200%;
   animation: stellar-combined-pan 18s linear infinite;
   border-color: transparent !important;
 }
 
 @keyframes stellar-combined-pan {
-  0%    { background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0% 50%; }
-  12.5% { background-position: 25px 0px, -25px 0px, 25px 0px, 50px 0px, 75px 0px,  15% 50%; }
-  25%   { background-position: 50px 0px, -50px 0px, 50px 0px, 100px 0px, 150px 0px,  50% 50%; }
-  37.5% { background-position: 75px 0px, -75px 0px, 75px 0px, 150px 0px, 225px 0px,  85% 50%; }
-  50%   { background-position: 100px 0px, -100px 0px, 100px 0px, 200px 0px, 300px 0px,  100% 50%; }
-  62.5% { background-position: 125px 0px, -125px 0px, 125px 0px, 250px 0px, 375px 0px,  85% 50%; }
-  75%   { background-position: 150px 0px, -150px 0px, 150px 0px, 300px 0px, 450px 0px,  50% 50%; }
-  87.5% { background-position: 175px 0px, -175px 0px, 175px 0px, 350px 0px, 525px 0px, 15% 50%; }
-  100%  { background-position: 200px 0px, -200px 0px, 200px 0px, 400px 0px, 600px 0px, 0% 50%; }
+  0%    { background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0% 50%; }
+  12.5% { background-position: 25px 0px, -25px 0px, 25px 0px, 50px 0px, 75px 0px, 18.75px 18.75px, 15% 50%; }
+  25%   { background-position: 50px 0px, -50px 0px, 50px 0px, 100px 0px, 150px 0px, 37.5px 37.5px,  50% 50%; }
+  37.5% { background-position: 75px 0px, -75px 0px, 75px 0px, 150px 0px, 225px 0px, 56.25px 56.25px, 85% 50%; }
+  50%   { background-position: 100px 0px, -100px 0px, 100px 0px, 200px 0px, 300px 0px, 75px 75px,    100% 50%; }
+  62.5% { background-position: 125px 0px, -125px 0px, 125px 0px, 250px 0px, 375px 0px, 93.75px 93.75px, 85% 50%; }
+  75%   { background-position: 150px 0px, -150px 0px, 150px 0px, 300px 0px, 450px 0px, 112.5px 112.5px, 50% 50%; }
+  87.5% { background-position: 175px 0px, -175px 0px, 175px 0px, 350px 0px, 525px 0px, 131.25px 131.25px, 15% 50%; }
+  100%  { background-position: 200px 0px, -200px 0px, 200px 0px, 400px 0px, 600px 0px, 150px 150px,   0% 50%; }
 }
 
 
