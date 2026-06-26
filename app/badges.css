@@ -903,7 +903,7 @@
 .badge-completionist {
   background: linear-gradient(90deg, rgba(255,0,0,0.1), rgba(0,255,0,0.1), rgba(0,0,255,0.1), rgba(255,0,0,0.1));
   background-size: 300% 300%;
-  animation: rgb-shift 3s linear infinite;
+  animation: rgb-shift 8s linear infinite;
   border-color: transparent !important;
 }
 
@@ -917,15 +917,27 @@
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  animation: rgb-spin 2s linear infinite;
+  animation: rgb-spin 6s linear infinite;
   pointer-events: none;
   z-index: 5;
 }
 
+/* Thin RGB Wave Effect */
+.badge-completionist::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent 40%, rgba(255,0,0,0.8) 45%, rgba(0,255,0,0.8) 50%, rgba(0,0,255,0.8) 55%, transparent 60%);
+  background-size: 300% 100%;
+  animation: shine-sweep-bg 6s infinite linear;
+  pointer-events: none;
+  z-index: 20;
+}
+
 .badge-completionist .badge-icon {
-  background: linear-gradient(90deg, #ff0000, #00ff00, #0000ff, #ff0000);
-  background-size: 300% 300%;
-  animation: rgb-shift 3s linear infinite;
+  background: conic-gradient(from var(--rgb-angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+  animation: rgb-spin 6s linear infinite;
   color: #fff;
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }

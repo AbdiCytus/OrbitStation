@@ -189,7 +189,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     color: "rose",
     icon: "TrophyIcon",
     effectClass: "badge-completionist",
-    rarity: "ekslusif"
+    rarity: "super-ekslusif"
   }
 ];
 
