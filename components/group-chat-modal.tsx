@@ -29,7 +29,7 @@ export const getAvatarBadgeClass = (titleBadge?: string | null) => {
   const badge = BADGE_REGISTRY.find(b => b.id === titleBadge);
   if (!badge) return '';
   const isSpecial = badge.rarity === "ekslusif";
-  const isExclusive = badge.rarity === "super-ekslusif";
+  const isExclusive = badge.rarity === "super-ekslusif" || badge.rarity === "developer";
   if (isExclusive) return `avatar-badge avatar-exclusive-${badge.id}`;
   if (isSpecial) return `avatar-badge avatar-badge-special-${badge.color}`;
   return `avatar-badge avatar-badge-common-${badge.color}`;
@@ -38,7 +38,7 @@ export const getAvatarBadgeClass = (titleBadge?: string | null) => {
 export const getAvatarSweepClass = (titleBadge?: string | null) => {
   if (!titleBadge) return '';
   const badge = BADGE_REGISTRY.find(b => b.id === titleBadge);
-  return badge && (badge.rarity === "ekslusif" || badge.rarity === "super-ekslusif") ? 'public-badge-sweep' : '';
+  return badge && (badge.rarity === "ekslusif" || badge.rarity === "super-ekslusif" || badge.rarity === "developer") ? 'public-badge-sweep' : '';
 };
 
 export const getModalTint = (color?: string) => {
@@ -1353,7 +1353,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                   const dataAsUser = mentionDetail.data as any;
                   const badge = isUserType && dataAsUser.titleBadge ? BADGE_REGISTRY.find(b => b.id === dataAsUser.titleBadge) : null;
                   const isSpecial = badge?.rarity === "ekslusif";
-                  const isExclusive = badge?.rarity === "super-ekslusif";
+                  const isExclusive = badge?.rarity === "super-ekslusif" || badge?.rarity === "developer";
 
                   const avatarBadgeClass = badge 
                     ? isExclusive 
@@ -1375,33 +1375,44 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                         backgroundColor: "rgba(15,15,25,0.95)",
                         backgroundImage: badge && isSpecial ? `radial-gradient(circle at top right, ${getModalTint(badge.color)}, transparent)` : undefined,
                         borderColor: getModalBorder(badge?.color),
-                        backdropFilter: "blur(20px)" 
+                        backdropFilter: "blur(20px)"
                       }}
                     >
                       {(isExclusive) && <div className="modal-exclusive-sparkles" />}
-                      {badge?.id === 'the-completionist' && <div className="modal-completionist-wave" />}
-                      {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-wave-layer" />}
+                      <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none", zIndex: 0 }}>
+                        {badge?.id === 'the-completionist' && <div className="modal-completionist-wave" />}
+                        {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-wave-layer" />}
+                        {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-blackhole" />}
+                      </div>
                       <button onClick={() => setMentionDetail(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-transparent border-none cursor-pointer z-50">
                         <XMarkIcon width={20} height={20} />
                       </button>
 
                       <div className="flex items-center gap-5 relative z-10">
-                        <div 
-                          className={`shrink-0 flex items-center justify-center rounded-full bg-[#1a1a2e] ${avatarBadgeClass}`} 
-                          style={{ 
-                            width: '74px', height: '74px', '--avatar-radius': '37px', overflow: 'visible',
-                            ...( !badge ? { border: '3px solid #a78bfa', boxShadow: '0 0 20px rgba(167, 139, 250, 0.4)' } : {} )
-                          } as React.CSSProperties}
-                        >
+                        <div style={{ position: 'relative', flexShrink: 0 }}>
                           {badge?.id === 'zodiac-horizon' && (
-                            <>
-                              <div className="avatar-exclusive-zodiac-horizon-orbit-1" />
-                              <div className="avatar-exclusive-zodiac-horizon-orbit-2" />
-                            </>
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-back" />
                           )}
-                          <div className={`w-full h-full rounded-full overflow-hidden relative ${avatarSweepClass}`}>
-                            <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-full h-full object-cover relative z-10" />
+                          {badge?.id === 'zodiac-horizon' && (
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-back" />
+                          )}
+                          <div 
+                            className={`shrink-0 flex items-center justify-center rounded-full bg-[#1a1a2e] ${avatarBadgeClass}`} 
+                            style={{ 
+                              width: '74px', height: '74px', '--avatar-radius': '37px', overflow: 'visible', position: 'relative', zIndex: 1,
+                              ...( !badge ? { border: '3px solid #a78bfa', boxShadow: '0 0 20px rgba(167, 139, 250, 0.4)' } : {} )
+                            } as React.CSSProperties}
+                          >
+                            <div className={`w-full h-full rounded-full overflow-hidden relative ${avatarSweepClass}`}>
+                              <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-full h-full object-cover relative z-10" />
+                            </div>
                           </div>
+                          {badge?.id === 'zodiac-horizon' && (
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-front" />
+                          )}
+                          {badge?.id === 'zodiac-horizon' && (
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-front" />
+                          )}
                         </div>
                         <div className="flex flex-col pr-6">
                           <h4 className="text-white font-bold text-lg m-0">{mentionDetail.data.name || mentionDetail.data.title}</h4>
@@ -1409,15 +1420,29 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                             <>
                               <p className="text-gray-400 text-sm m-0">@{mentionDetail.data.username} {mentionDetail.data.callsign ? `• ${mentionDetail.data.callsign}` : ''}</p>
                               {badge && (
-                                <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg mt-1.5`} style={{ width: 'fit-content' }}>
-                                {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
-                                  {badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
-                                  <div className="badge-icon w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <DynamicIcon name={badge.icon as any} className="w-3.5 h-3.5 relative z-10" />
+                                <div className="zodiac-orbit-wrapper" style={{ position: 'relative', width: 'fit-content' }}>
+                                  {badge.id === 'zodiac-horizon' && (
+                                    <>
+                                      <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-back" />
+                                      <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-back" />
+                                    </>
+                                  )}
+                                  <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg mt-1.5`} style={{ width: 'fit-content', position: 'relative', zIndex: 1 }}>
+                                    {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
+                                    {badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
+                                    <div className="badge-icon w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                                      <DynamicIcon name={badge.icon as any} className="w-3.5 h-3.5 relative z-10" />
+                                    </div>
+                                    <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[12px] drop-shadow-md" style={{marginRight: "0.5rem"}}>
+                                      {badge.name}
+                                    </span>
                                   </div>
-                                  <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[12px] drop-shadow-md" style={{marginRight: "0.5rem"}}>
-                                    {badge.name}
-                                  </span>
+                                  {badge.id === 'zodiac-horizon' && (
+                                    <>
+                                      <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-front" />
+                                      <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-front" />
+                                    </>
+                                  )}
                                 </div>
                               )}
                             </>

@@ -467,7 +467,7 @@
   border-color: transparent !important;
   box-shadow: 0 0 30px rgba(168, 85, 247, 0.2), inset 0 0 20px rgba(168, 85, 247, 0.2);
   background-image: 
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23d8b4fe' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 7 9 3 5 7l4 4'/%3E%3Cpath d='m17 11 4 4-4 4-4-4'/%3E%3Cpath d='m8 12 4 4 6-6-4-4Z'/%3E%3Cpath d='m16 8 3-3'/%3E%3Cpath d='M9 21a6 6 0 0 0-6-6'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvgxmlns='http://www.w3.org/2000/svg'width='24'height='24'viewBox='002424'fill='none'stroke='%23d8b4fe'stroke-width='1.5'stroke-linecap='round'stroke-linejoin='round'%3E%3Cpathd='M1379357l44'/%3E%3Cpathd='m171144-44-4-4'/%3E%3Cpathd='m812446-6-4-4Z'/%3E%3Cpathd='m1683-3'/%3E%3Cpathd='M921a66000-6-6'/%3E%3C/svg%3E"),
     radial-gradient(circle at 20% 80%, rgba(216, 180, 254, 0.8) 0%, transparent 3px),
     radial-gradient(circle at 70% 90%, rgba(216, 180, 254, 0.6) 0%, transparent 4px),
     radial-gradient(circle at 40% 60%, rgba(216, 180, 254, 0.9) 0%, transparent 2px),
@@ -518,9 +518,9 @@
 .badge-creator::before {
   content: '';
   position: absolute;
-  inset: -3px;
+  inset: -2px;
   border-radius: inherit;
-  padding: 4px;
+  padding: 3px;
   background: conic-gradient(from var(--creator-angle), transparent 0deg, transparent 180deg, rgba(168, 85, 247, 0.4) 300deg, #fff 360deg);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -533,9 +533,9 @@
 .badge-assistant::before {
   content: '';
   position: absolute;
-  inset: -3px;
+  inset: -2px;
   border-radius: inherit;
-  padding: 4px;
+  padding: 3px;
   background: conic-gradient(from var(--creator-angle), transparent 0deg, transparent 180deg, rgba(59, 130, 246, 0.4) 300deg, #fff 360deg);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -828,6 +828,7 @@
 }
 
 .badge-creator-ally {
+    overflow: visible !important;
   background-color: rgba(16, 185, 129, 0.05);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0,20 L30,20 L35,10 L45,35 L55,5 L65,25 L70,20 L100,20' fill='none' stroke='%2334d399' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.4'/%3E%3C/svg%3E");
   background-size: 100px 100%;
@@ -901,6 +902,7 @@
 }
 
 .badge-completionist {
+    overflow: visible !important;
   background: linear-gradient(90deg, rgba(255,0,0,0.1), rgba(0,255,0,0.1), rgba(0,0,255,0.1), rgba(255,0,0,0.1));
   background-size: 300% 300%;
   animation: rgb-shift 8s linear infinite;
@@ -1020,6 +1022,7 @@
 
 /* Stellar Icon Badge */
 .badge-stellar-icon {
+    overflow: visible !important;
   background-image: 
     url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20200%20100%27%3E%3Cdefs%3E%3CradialGradient%20id=%27o%27%3E%3Cstop%20offset=%270%25%27%20stop-color=%27rgba(240,148,51,0.5)%27/%3E%3Cstop%20offset=%27100%25%27%20stop-color=%27rgba(240,148,51,0)%27/%3E%3C/radialGradient%3E%3CradialGradient%20id=%27p%27%3E%3Cstop%20offset=%270%25%27%20stop-color=%27rgba(220,39,67,0.4)%27/%3E%3Cstop%20offset=%27100%25%27%20stop-color=%27rgba(220,39,67,0)%27/%3E%3C/radialGradient%3E%3CradialGradient%20id=%27pu%27%3E%3Cstop%20offset=%270%25%27%20stop-color=%27rgba(188,24,136,0.5)%27/%3E%3Cstop%20offset=%27100%25%27%20stop-color=%27rgba(188,24,136,0)%27/%3E%3C/radialGradient%3E%3CradialGradient%20id=%27s1%27%3E%3Cstop%20offset=%270%25%27%20stop-color=%27rgba(255,255,255,0.15)%27/%3E%3Cstop%20offset=%27100%25%27%20stop-color=%27rgba(255,255,255,0)%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%27100%27%20cy=%2760%27%20r=%2780%27%20fill=%27url(%23s1)%27%3E%3Canimate%20attributeName=%27opacity%27%20values=%270.2;0.9;0.2%27%20dur=%273s%27%20repeatCount=%27indefinite%27/%3E%3C/circle%3E%3Ccircle%20cx=%2750%27%20cy=%2740%27%20r=%2735%27%20fill=%27url(%23o)%27/%3E%3Ccircle%20cx=%27150%27%20cy=%2780%27%20r=%2740%27%20fill=%27url(%23p)%27/%3E%3Ccircle%20cx=%27100%27%20cy=%2720%27%20r=%2730%27%20fill=%27url(%23pu)%27/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20200%20100%27%3E%3Cdefs%3E%3CradialGradient%20id=%27w%27%3E%3Cstop%20offset=%270%25%27%20stop-color=%27rgba(255,255,255,0.4)%27/%3E%3Cstop%20offset=%27100%25%27%20stop-color=%27rgba(255,255,255,0)%27/%3E%3C/radialGradient%3E%3CradialGradient%20id=%27b%27%3E%3Cstop%20offset=%270%25%27%20stop-color=%27rgba(76,104,215,0.4)%27/%3E%3Cstop%20offset=%27100%25%27%20stop-color=%27rgba(76,104,215,0)%27/%3E%3C/radialGradient%3E%3CradialGradient%20id=%27s2%27%3E%3Cstop%20offset=%270%25%27%20stop-color=%27rgba(255,255,255,0.1)%27/%3E%3Cstop%20offset=%27100%25%27%20stop-color=%27rgba(255,255,255,0)%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%27100%27%20cy=%2740%27%20r=%2770%27%20fill=%27url(%23s2)%27%3E%3Canimate%20attributeName=%27opacity%27%20values=%270.1;0.7;0.1%27%20dur=%274s%27%20repeatCount=%27indefinite%27/%3E%3C/circle%3E%3Ccircle%20cx=%2770%27%20cy=%2770%27%20r=%2725%27%20fill=%27url(%23w)%27/%3E%3Ccircle%20cx=%27160%27%20cy=%2730%27%20r=%2730%27%20fill=%27url(%23b)%27/%3E%3Ccircle%20cx=%2730%27%20cy=%2790%27%20r=%2720%27%20fill=%27url(%23w)%27/%3E%3C/svg%3E"),
@@ -1145,11 +1148,15 @@
 
 /* Zodiac Horizon Badge (Exclusive) */
 .badge-zodiac {
-  background-image: 
-    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20100%27%20preserveAspectRatio%3D%27xMaxYMid%20slice%27%3E%20%20%3C%21--%20Orbit%20Lines%20%28Bottom%20Left%29%20--%3E%20%20%3Cg%20stroke%3D%27rgba%280%2C%20229%2C%20255%2C%200.3%29%27%20stroke-width%3D%270.5%27%20fill%3D%27none%27%3E%20%20%20%20%3Cellipse%20cx%3D%275%27%20cy%3D%2795%27%20rx%3D%2740%27%20ry%3D%2720%27%20transform%3D%27rotate%28-15%205%2095%29%27%20%2F%3E%20%20%20%20%3Cellipse%20cx%3D%275%27%20cy%3D%2795%27%20rx%3D%2760%27%20ry%3D%2730%27%20transform%3D%27rotate%28-15%205%2095%29%27%20stroke%3D%27rgba%28192%2C%2038%2C%20211%2C%200.3%29%27%20%2F%3E%20%20%20%20%3Cellipse%20cx%3D%275%27%20cy%3D%2795%27%20rx%3D%2780%27%20ry%3D%2740%27%20transform%3D%27rotate%28-15%205%2095%29%27%20stroke%3D%27rgba%28255%2C%20204%2C%200%2C%200.2%29%27%20%2F%3E%20%20%3C%2Fg%3E%20%20%3C%21--%20Constellations%20%285%20total%29%20--%3E%20%20%3Cg%20stroke%3D%27rgba%28255%2C255%2C255%2C0.6%29%27%20stroke-width%3D%270.4%27%20fill%3D%27rgba%28255%2C255%2C255%2C0.9%29%27%3E%20%20%20%20%3C%21--%201%20--%3E%20%20%20%20%3Cg%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B0%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2740%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2750%27%20cy%3D%2730%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2770%27%20cy%3D%2750%27%20r%3D%271.8%27%20fill%3D%27rgba%280%2C%20229%2C%20255%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M30%2C40%20L50%2C30%20L70%2C50%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%20%20%3C%21--%202%20--%3E%20%20%20%20%3Cg%20opacity%3D%270%27%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B0%3B0%3B1%3B1%3B0%3B0%3B0%3B0%3B0%3B0%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2740%27%20cy%3D%2760%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2760%27%20cy%3D%2750%27%20r%3D%271%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%2765%27%20r%3D%271.8%27%20fill%3D%27rgba%28192%2C%2038%2C%20211%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%27100%27%20cy%3D%2740%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M40%2C60%20L60%2C50%20L80%2C65%20L100%2C40%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%20%20%3C%21--%203%20--%3E%20%20%20%20%3Cg%20opacity%3D%270%27%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B0%3B0%3B0%3B0%3B1%3B1%3B0%3B0%3B0%3B0%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2750%27%20cy%3D%2720%27%20r%3D%271.8%27%20fill%3D%27rgba%28255%2C%20204%2C%200%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2765%27%20cy%3D%2735%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2785%27%20cy%3D%2730%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2795%27%20cy%3D%2715%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M50%2C20%20L65%2C35%20L85%2C30%20L95%2C15%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%20%20%3C%21--%204%20--%3E%20%20%20%20%3Cg%20opacity%3D%270%27%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B0%3B0%3B0%3B0%3B0%3B0%3B1%3B1%3B0%3B0%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%2740%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%27110%27%20cy%3D%2760%27%20r%3D%271.5%27%20fill%3D%27rgba%280%2C%20229%2C%20255%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%27130%27%20cy%3D%2735%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M80%2C40%20L110%2C60%20L130%2C35%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%20%20%3C%21--%205%20--%3E%20%20%20%20%3Cg%20opacity%3D%270%27%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B1%3B1%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2735%27%20cy%3D%2770%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2755%27%20cy%3D%2785%27%20r%3D%271.8%27%20fill%3D%27rgba%28192%2C%2038%2C%20211%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2780%27%20r%3D%271%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2795%27%20cy%3D%2790%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M35%2C70%20L55%2C85%20L75%2C80%20L95%2C90%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%3C%2Fg%3E%20%20%3C%21--%20Particles%20sucking%20into%20Blackhole%20--%3E%20%20%3Cg%20fill%3D%27rgba%28255%2C255%2C255%2C0.9%29%27%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%271.5%27%20fill%3D%27rgba%280%2C%20229%2C%20255%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M50%2C80%20Q120%2C70%20170%2C25%27%20dur%3D%271.5s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%271.5s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%272%27%20fill%3D%27rgba%28192%2C%2038%2C%20211%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M20%2C50%20Q100%2C40%20170%2C25%27%20dur%3D%272s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%272s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%271.5%27%20fill%3D%27rgba%28255%2C%20204%2C%200%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M80%2C90%20Q140%2C80%20170%2C25%27%20dur%3D%271.8s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%271.8s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%271.2%27%20fill%3D%27rgba%280%2C%20229%2C%20255%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M10%2C20%20Q80%2C10%20170%2C25%27%20dur%3D%272.2s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%272.2s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%272%27%20fill%3D%27rgba%28192%2C%2038%2C%20211%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M100%2C60%20Q150%2C50%20170%2C25%27%20dur%3D%271.3s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%271.3s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%3C%2Fg%3E%20%20%3C!-- Blackhole --%3E%20%20%3Cdefs%3E%20%20%20%20%3CradialGradient%20id%3D%27bh-glow%27%20cx%3D%2750%25%27%20cy%3D%2750%25%27%20r%3D%2750%25%27%3E%20%20%20%20%20%20%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23000%27%20%2F%3E%20%20%20%20%20%20%3Cstop%20offset%3D%2720%25%27%20stop-color%3D%27%23000%27%20%2F%3E%20%20%20%20%20%20%3Cstop%20offset%3D%2750%25%27%20stop-color%3D%27rgba%28192%2C%2038%2C%20211%2C%200.7%29%27%20%2F%3E%20%20%20%20%20%20%3Cstop%20offset%3D%2775%25%27%20stop-color%3D%27rgba%280%2C%20229%2C%20255%2C%200.5%29%27%20%2F%3E%20%20%20%20%20%20%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27transparent%27%20%2F%3E%20%20%20%20%3C%2FradialGradient%3E%20%20%3C%2Fdefs%3E%20%20%3Cg%20transform%3D%27translate%28170%2C%2025%29%27%3E%20%20%20%20%3C!-- Glow --%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%2740%27%20fill%3D%27url%28%23bh-glow%29%27%3E%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D%27transform%27%20type%3D%27scale%27%20values%3D%271%3B1.15%3B1%27%20dur%3D%273s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3C!-- Accretion Disk Rings --%3E%20%20%20%20%3Cellipse%20cx%3D%270%27%20cy%3D%270%27%20rx%3D%2745%27%20ry%3D%2712%27%20fill%3D%27none%27%20stroke%3D%27rgba%280%2C%20229%2C%20255%2C%200.7%29%27%20stroke-width%3D%271.5%27%20transform%3D%27rotate%28-20%29%27%3E%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D%27transform%27%20type%3D%27rotate%27%20values%3D%27-20%3B%20340%27%20dur%3D%273s%27%20repeatCount%3D%27indefinite%27%20additive%3D%27sum%27%2F%3E%20%20%20%20%3C%2Fellipse%3E%20%20%20%20%3Cellipse%20cx%3D%270%27%20cy%3D%270%27%20rx%3D%2750%27%20ry%3D%2710%27%20fill%3D%27none%27%20stroke%3D%27rgba%28192%2C%2038%2C%20211%2C%200.5%29%27%20stroke-width%3D%271%27%20transform%3D%27rotate%2840%29%27%3E%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D%27transform%27%20type%3D%27rotate%27%20values%3D%2740%3B%20400%27%20dur%3D%274s%27%20repeatCount%3D%27indefinite%27%20additive%3D%27sum%27%2F%3E%20%20%20%20%3C%2Fellipse%3E%20%20%20%20%3Cellipse%20cx%3D%270%27%20cy%3D%270%27%20rx%3D%2740%27%20ry%3D%2714%27%20fill%3D%27none%27%20stroke%3D%27rgba%28255%2C%20204%2C%200%2C%200.4%29%27%20stroke-width%3D%271.2%27%20transform%3D%27rotate%2810%29%27%3E%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D%27transform%27%20type%3D%27rotate%27%20values%3D%2710%3B%20370%27%20dur%3D%275s%27%20repeatCount%3D%27indefinite%27%20additive%3D%27sum%27%2F%3E%20%20%20%20%3C%2Fellipse%3E%20%20%20%20%3C!-- Core --%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%2710%27%20fill%3D%27%23000%27%20%2F%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%2712%27%20fill%3D%27none%27%20stroke%3D%27rgba%28255%2C%20255%2C%20255%2C%200.3%29%27%20stroke-width%3D%270.5%27%20%2F%3E%20%20%3C%2Fg%3E%3C%2Fsvg%3E"),
+  --creator-angle: 0deg;
+  overflow: visible !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20200%20100'%20preserveAspectRatio%3D'xMaxYMid%20slice'%3E%0A%20%20%3C!--%20Orbit%20Lines%20(Bottom%20Left)%20--%3E%0A%20%20%3Cg%20stroke%3D'rgba(0%2C%20229%2C%20255%2C%200.3)'%20stroke-width%3D'0.5'%20fill%3D'none'%3E%0A%20%20%20%20%3Cellipse%20cx%3D'5'%20cy%3D'95'%20rx%3D'40'%20ry%3D'20'%20transform%3D'rotate(-15%205%2095)'%20%2F%3E%0A%20%20%20%20%3Cellipse%20cx%3D'5'%20cy%3D'95'%20rx%3D'60'%20ry%3D'30'%20transform%3D'rotate(-15%205%2095)'%20stroke%3D'rgba(192%2C%2038%2C%20211%2C%200.3)'%20%2F%3E%0A%20%20%20%20%3Cellipse%20cx%3D'5'%20cy%3D'95'%20rx%3D'80'%20ry%3D'40'%20transform%3D'rotate(-15%205%2095)'%20stroke%3D'rgba(255%2C%20204%2C%200%2C%200.2)'%20%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3C!--%20Constellations%20(5%20total)%20--%3E%0A%20%20%3Cg%20stroke%3D'rgba(255%2C255%2C255%2C0.6)'%20stroke-width%3D'0.4'%20fill%3D'rgba(255%2C255%2C255%2C0.9)'%3E%0A%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'30'%20cy%3D'40'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'50'%20cy%3D'30'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'70'%20cy%3D'50'%20r%3D'1.8'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M30%2C40%20L50%2C30%20L70%2C50'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cg%20opacity%3D'0'%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B0%3B0%3B1%3B1%3B0%3B0%3B0%3B0%3B0%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'40'%20cy%3D'60'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'60'%20cy%3D'50'%20r%3D'1'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'80'%20cy%3D'65'%20r%3D'1.8'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'100'%20cy%3D'40'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M40%2C60%20L60%2C50%20L80%2C65%20L100%2C40'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cg%20opacity%3D'0'%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B0%3B0%3B0%3B0%3B1%3B1%3B0%3B0%3B0%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'50'%20cy%3D'20'%20r%3D'1.8'%20fill%3D'rgba(255%2C%20204%2C%200%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'65'%20cy%3D'35'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'85'%20cy%3D'30'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'95'%20cy%3D'15'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M50%2C20%20L65%2C35%20L85%2C30%20L95%2C15'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cg%20opacity%3D'0'%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B0%3B0%3B0%3B0%3B0%3B0%3B1%3B1%3B0%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'80'%20cy%3D'40'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'110'%20cy%3D'60'%20r%3D'1.5'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'130'%20cy%3D'35'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M80%2C40%20L110%2C60%20L130%2C35'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cg%20opacity%3D'0'%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B1%3B1'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'35'%20cy%3D'70'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'55'%20cy%3D'85'%20r%3D'1.8'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'75'%20cy%3D'80'%20r%3D'1'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'95'%20cy%3D'90'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M35%2C70%20L55%2C85%20L75%2C80%20L95%2C90'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%3C%2Fg%3E%0A%20%20%0A%20%20%3C!--%20Particles%20sucking%20into%20Blackhole%20--%3E%0A%20%20%3Cg%20fill%3D'rgba(255%2C255%2C255%2C0.9)'%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'1.5'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M50%2C80%20Q120%2C70%20170%2C25'%20dur%3D'1.5s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'1.5s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'2'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M20%2C50%20Q100%2C40%20170%2C25'%20dur%3D'2s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'2s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'1.5'%20fill%3D'rgba(255%2C%20204%2C%200%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M80%2C90%20Q140%2C80%20170%2C25'%20dur%3D'1.8s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'1.8s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'1.2'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M10%2C20%20Q80%2C10%20170%2C25'%20dur%3D'2.2s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'2.2s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'2'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M100%2C60%20Q150%2C50%20170%2C25'%20dur%3D'1.3s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'1.3s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%3C%2Fg%3E%0A%20%20%0A%20%20%3C!--%20Floating%20Space%20Dust%20(Not%20sucked%20in)%20--%3E%0A%20%20%3Cg%20fill%3D'rgba(255%2C%20255%2C255%2C0.6)'%3E%0A%20%20%20%20%3Ccircle%20r%3D'1'%20fill%3D'white'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M10%2C90%20Q40%2C60%2080%2C80%20T150%2C90'%20dur%3D'10s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'10s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20r%3D'1.2'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%200.8)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M30%2C20%20Q60%2C10%2090%2C30%20T160%2C10'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20r%3D'1.5'%20fill%3D'rgba(255%2C%20204%2C%200%2C%200.8)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M150%2C80%20Q100%2C90%2050%2C70%20T0%2C50'%20dur%3D'12s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'12s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20r%3D'0.8'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%200.8)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M80%2C10%20Q100%2C50%20120%2C20%20T180%2C60'%20dur%3D'14s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'14s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20r%3D'2'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%200.5)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M190%2C90%20Q150%2C60%20100%2C80%20T20%2C70'%20dur%3D'18s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'18s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%3C%2Fg%3E%0A%0A%20%20%3C!--%20Blackhole%20--%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D'bh-glow'%20cx%3D'50%25'%20cy%3D'50%25'%20r%3D'50%25'%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D'0%25'%20stop-color%3D'%23000'%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D'20%25'%20stop-color%3D'%23000'%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D'50%25'%20stop-color%3D'rgba(192%2C%2038%2C%20211%2C%200.7)'%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D'75%25'%20stop-color%3D'rgba(0%2C%20229%2C%20255%2C%200.5)'%20%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D'100%25'%20stop-color%3D'transparent'%20%2F%3E%0A%20%20%20%20%3C%2FradialGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cg%20transform%3D'translate(170%2C%2025)'%3E%0A%20%20%20%20%3C!--%20Glow%20--%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'40'%20fill%3D'url(%23bh-glow)'%3E%0A%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D'transform'%20type%3D'scale'%20values%3D'1%3B1.15%3B1'%20dur%3D'3s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3C!--%20Accretion%20Disk%20Rings%20--%3E%0A%20%20%20%20%3Cellipse%20cx%3D'0'%20cy%3D'0'%20rx%3D'45'%20ry%3D'12'%20fill%3D'none'%20stroke%3D'rgba(0%2C%20229%2C%20255%2C%200.7)'%20stroke-width%3D'1.5'%20transform%3D'rotate(-20)'%3E%0A%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D'transform'%20type%3D'rotate'%20values%3D'-20%3B%20340'%20dur%3D'3s'%20repeatCount%3D'indefinite'%20additive%3D'sum'%2F%3E%0A%20%20%20%20%3C%2Fellipse%3E%0A%20%20%20%20%3Cellipse%20cx%3D'0'%20cy%3D'0'%20rx%3D'50'%20ry%3D'10'%20fill%3D'none'%20stroke%3D'rgba(192%2C%2038%2C%20211%2C%200.5)'%20stroke-width%3D'1'%20transform%3D'rotate(40)'%3E%0A%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D'transform'%20type%3D'rotate'%20values%3D'40%3B%20400'%20dur%3D'4s'%20repeatCount%3D'indefinite'%20additive%3D'sum'%2F%3E%0A%20%20%20%20%3C%2Fellipse%3E%0A%20%20%20%20%3Cellipse%20cx%3D'0'%20cy%3D'0'%20rx%3D'40'%20ry%3D'14'%20fill%3D'none'%20stroke%3D'rgba(255%2C%20204%2C%200%2C%200.4)'%20stroke-width%3D'1.2'%20transform%3D'rotate(10)'%3E%0A%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D'transform'%20type%3D'rotate'%20values%3D'10%3B%20370'%20dur%3D'5s'%20repeatCount%3D'indefinite'%20additive%3D'sum'%2F%3E%0A%20%20%20%20%3C%2Fellipse%3E%0A%20%20%20%20%3C!--%20Core%20--%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'10'%20fill%3D'%23000'%20%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'12'%20fill%3D'none'%20stroke%3D'rgba(255%2C%20255%2C%20255%2C%200.3)'%20stroke-width%3D'0.5'%20%2F%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E"),
     linear-gradient(135deg, #0a1128 0%, #101b3d 40%, #1b263b 80%, #0d1b2a 100%) !important;
   background-size: 100% 100%, 100% 100% !important;
-  border-color: transparent !important;
+  border-color: rgba(255, 204, 0, 0.7) !important;
   color: #e0f7fa;
   box-shadow: 
     0 0 15px rgba(0, 229, 255, 0.5),
@@ -1157,16 +1164,30 @@
     inset 0 0 15px rgba(255, 204, 0, 0.2) !important;
   animation: zodiac-shadow-spin 4s linear infinite;
   position: relative;
+  z-index: auto !important;
+}
+
+/* Override for the modal so it uses the SVG WITHOUT the black hole to avoid double blackholes */
+.chat-mention-modal.badge-zodiac {
   overflow: visible !important;
-  z-index: 1;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20200%20100'%20preserveAspectRatio%3D'xMaxYMid%20slice'%3E%0A%20%20%3C!--%20Orbit%20Lines%20(Bottom%20Left)%20--%3E%0A%20%20%3Cg%20stroke%3D'rgba(0%2C%20229%2C%20255%2C%200.3)'%20stroke-width%3D'0.5'%20fill%3D'none'%3E%0A%20%20%20%20%3Cellipse%20cx%3D'5'%20cy%3D'95'%20rx%3D'40'%20ry%3D'20'%20transform%3D'rotate(-15%205%2095)'%20%2F%3E%0A%20%20%20%20%3Cellipse%20cx%3D'5'%20cy%3D'95'%20rx%3D'60'%20ry%3D'30'%20transform%3D'rotate(-15%205%2095)'%20stroke%3D'rgba(192%2C%2038%2C%20211%2C%200.3)'%20%2F%3E%0A%20%20%20%20%3Cellipse%20cx%3D'5'%20cy%3D'95'%20rx%3D'80'%20ry%3D'40'%20transform%3D'rotate(-15%205%2095)'%20stroke%3D'rgba(255%2C%20204%2C%200%2C%200.2)'%20%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3C!--%20Constellations%20(5%20total)%20--%3E%0A%20%20%3Cg%20stroke%3D'rgba(255%2C255%2C255%2C0.6)'%20stroke-width%3D'0.4'%20fill%3D'rgba(255%2C255%2C255%2C0.9)'%3E%0A%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'30'%20cy%3D'40'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'50'%20cy%3D'30'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'70'%20cy%3D'50'%20r%3D'1.8'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M30%2C40%20L50%2C30%20L70%2C50'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cg%20opacity%3D'0'%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B0%3B0%3B1%3B1%3B0%3B0%3B0%3B0%3B0%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'40'%20cy%3D'60'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'60'%20cy%3D'50'%20r%3D'1'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'80'%20cy%3D'65'%20r%3D'1.8'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'100'%20cy%3D'40'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M40%2C60%20L60%2C50%20L80%2C65%20L100%2C40'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cg%20opacity%3D'0'%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B0%3B0%3B0%3B0%3B1%3B1%3B0%3B0%3B0%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'50'%20cy%3D'20'%20r%3D'1.8'%20fill%3D'rgba(255%2C%20204%2C%200%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'65'%20cy%3D'35'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'85'%20cy%3D'30'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'95'%20cy%3D'15'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M50%2C20%20L65%2C35%20L85%2C30%20L95%2C15'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cg%20opacity%3D'0'%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B0%3B0%3B0%3B0%3B0%3B0%3B1%3B1%3B0%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'80'%20cy%3D'40'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'110'%20cy%3D'60'%20r%3D'1.5'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'130'%20cy%3D'35'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M80%2C40%20L110%2C60%20L130%2C35'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cg%20opacity%3D'0'%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B1%3B1'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'35'%20cy%3D'70'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'55'%20cy%3D'85'%20r%3D'1.8'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%201)'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'75'%20cy%3D'80'%20r%3D'1'%20%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D'95'%20cy%3D'90'%20r%3D'1.2'%20%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D'M35%2C70%20L55%2C85%20L75%2C80%20L95%2C90'%20fill%3D'none'%20%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%3C%2Fg%3E%0A%20%20%0A%20%20%3C!--%20Particles%20sucking%20into%20Blackhole%20--%3E%0A%20%20%3Cg%20fill%3D'rgba(255%2C255%2C255%2C0.9)'%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'1.5'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M50%2C80%20Q120%2C70%20170%2C25'%20dur%3D'1.5s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'1.5s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'2'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M20%2C50%20Q100%2C40%20170%2C25'%20dur%3D'2s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'2s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'1.5'%20fill%3D'rgba(255%2C%20204%2C%200%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M80%2C90%20Q140%2C80%20170%2C25'%20dur%3D'1.8s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'1.8s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'1.2'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M10%2C20%20Q80%2C10%20170%2C25'%20dur%3D'2.2s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'2.2s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20cx%3D'0'%20cy%3D'0'%20r%3D'2'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%201)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M100%2C60%20Q150%2C50%20170%2C25'%20dur%3D'1.3s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B1%3B0'%20dur%3D'1.3s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%3C%2Fg%3E%0A%20%20%0A%20%20%3C!--%20Floating%20Space%20Dust%20(Not%20sucked%20in)%20--%3E%0A%20%20%3Cg%20fill%3D'rgba(255%2C%20255%2C255%2C%200.6)'%3E%0A%20%20%20%20%3Ccircle%20r%3D'1'%20fill%3D'white'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M10%2C90%20Q40%2C60%2080%2C80%20T150%2C90'%20dur%3D'10s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'10s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20r%3D'1.2'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%200.8)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M30%2C20%20Q60%2C10%2090%2C30%20T160%2C10'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'15s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20r%3D'1.5'%20fill%3D'rgba(255%2C%20204%2C%200%2C%200.8)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M150%2C80%20Q100%2C90%2050%2C70%20T0%2C50'%20dur%3D'12s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'12s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20r%3D'0.8'%20fill%3D'rgba(192%2C%2038%2C%20211%2C%200.8)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M80%2C10%20Q100%2C50%20120%2C20%20T180%2C60'%20dur%3D'14s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'14s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%20%20%3Ccircle%20r%3D'2'%20fill%3D'rgba(0%2C%20229%2C%20255%2C%200.5)'%3E%0A%20%20%20%20%20%20%3CanimateMotion%20path%3D'M190%2C90%20Q150%2C60%20100%2C80%20T20%2C70'%20dur%3D'18s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%20%20%3Canimate%20attributeName%3D'opacity'%20values%3D'0%3B1%3B0'%20dur%3D'18s'%20repeatCount%3D'indefinite'%20%2F%3E%0A%20%20%20%20%3C%2Fcircle%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E"),
+    linear-gradient(135deg, #0a1128 0%, #101b3d 40%, #1b263b 80%, #0d1b2a 100%) !important;
+}
+
+/* Thicker running border for the modal popup */
+.chat-mention-modal.badge-zodiac::before {
+  padding: 5px !important;
+  inset: -4px !important;
+  filter: drop-shadow(0 0 8px #00e5ff) drop-shadow(0 0 16px #c026d3) !important;
 }
 
 .badge-zodiac::before {
   content: '';
   position: absolute;
-  inset: -3px;
+  inset: -4px;
   border-radius: inherit;
-  padding: 4px;
+  padding: 6px;
   background: conic-gradient(from var(--creator-angle), transparent 0deg, transparent 180deg, rgba(0, 229, 255, 0.6) 270deg, rgba(192, 38, 211, 1) 360deg);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -1190,50 +1211,15 @@
 }
 
 .badge-zodiac .badge-icon {
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  color: #00e5ff;
-  animation: pulse-zodiac 2s infinite alternate;
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
-  position: relative;
-}
-
-.badge-zodiac .badge-icon {
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9J3pncmFkMScgeDE9JzAlJyB5MT0nMCUnIHgyPScxMDAlJyB5Mj0nMTAwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nIzAwZTVmZicgLz48c3RvcCBvZmZzZXQ9JzUwJScgc3RvcC1jb2xvcj0nI2MwMjZkMycgLz48c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyNmZmNjMDAnIC8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9J3pncmFkMicgeDE9JzEwMCUnIHkxPScxMDAlJyB4Mj0nMCUnIHkyPScwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nIzAwZTVmZicgLz48c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyNjMDI2ZDMnIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHBhdGggZD0nTSAyNSA1MCBBIDI1IDI1IDAgMCAxIDc1IDUwJyBmaWxsPSdub25lJyBzdHJva2U9J3VybCgjemdyYWQxKScgc3Ryb2tlLXdpZHRoPSczJyAvPjxjaXJjbGUgY3g9JzUwJyBjeT0nNTAnIHI9JzE2JyBmaWxsPSdibGFjaycgc3Ryb2tlPSd1cmwoI3pncmFkMiknIHN0cm9rZS13aWR0aD0nMicgLz48cGF0aCBkPSdNIDUgNjUgQyAyMCA0MCwgNDUgMzUsIDk1IDM1IEMgNjAgNTUsIDQ1IDc1LCA1IDY1IFonIGZpbGw9J3VybCgjemdyYWQxKScgLz48cGF0aCBkPSdNIDMyIDY1IEEgMjIgMjIgMCAwIDAgNjggNjInIGZpbGw9J25vbmUnIHN0cm9rZT0ndXJsKCN6Z3JhZDIpJyBzdHJva2Utd2lkdGg9JzgnIHN0cm9rZS1saW5lY2FwPSdyb3VuZCcgLz48L3N2Zz4=");
+  background-color: rgba(10, 17, 40, 0.8) !important;
+    animation: pulse-zodiac 2s infinite alternate;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48cGF0aCBkPSdNIDI1IDUwIEEgMjUgMjUgMCAwIDEgNzUgNTAnIGZpbGw9J25vbmUnIHN0cm9rZT0nd2hpdGUnIHN0cm9rZS13aWR0aD0nMycgLz48Y2lyY2xlIGN4PSc1MCcgY3k9JzUwJyByPScxNicgZmlsbD0nbm9uZScgc3Ryb2tlPSd3aGl0ZScgc3Ryb2tlLXdpZHRoPScyJyAvPjxwYXRoIGQ9J00gNSA2NSBDIDIwIDQwLCA0NSAzNSwgOTUgMzUgQyA2MCA1NSwgNDUgNzUsIDUgNjUgWicgZmlsbD0nd2hpdGUnIC8+PHBhdGggZD0nTSAzMiA2NSBBIDIyIDIyIDAgMCAwIDY4IDYyJyBmaWxsPSdub25lJyBzdHJva2U9J3doaXRlJyBzdHJva2Utd2lkdGg9JzgnIHN0cm9rZS1saW5lY2FwPSdyb3VuZCcgLz48L3N2Zz4=");
   background-size: 65% 65%;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: transparent !important;
-  filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.8));
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
   position: relative;
   z-index: 10;
-}
-
-.badge-zodiac .badge-icon svg {
-  display: none !important;
-}
-
-.badge-zodiac .badge-icon::before,
-.badge-zodiac .badge-icon::after {
-  content: "";
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 140%; height: 140%;
-  margin-top: -70%; margin-left: -70%;
-  border-radius: 50%;
-  border: 1.5px solid transparent;
-  pointer-events: none;
-}
-.badge-zodiac .badge-icon::before {
-  border-right-color: rgba(0, 229, 255, 0.9);
-  border-bottom-color: rgba(0, 229, 255, 0.9);
-  animation: zodiac-spin-cw 3s linear infinite;
-}
-.badge-zodiac .badge-icon::after {
-  border-left-color: rgba(192, 38, 211, 0.9);
-  border-top-color: rgba(192, 38, 211, 0.9);
-  animation: zodiac-spin-ccw 3s linear infinite;
 }
 
 .badge-zodiac-wave-layer,
@@ -1268,7 +1254,15 @@
 .avatar-exclusive-zodiac-horizon {
   position: relative;
   overflow: visible !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   box-shadow: 0 0 10px rgba(0, 229, 255, 0.4), 0 0 20px rgba(192, 38, 211, 0.4);
+  z-index: auto !important;
+}
+
+/* When inside orbit wrapper, needs z-index:1 to stack correctly */
+div > .avatar-exclusive-zodiac-horizon {
+  z-index: 1 !important;
 }
 
 
@@ -1286,3 +1280,156 @@
   background: conic-gradient(#00e5ff, #c026d3, #ffcc00, #17113e, #00e5ff);
   animation: avatar-spin-rotate 5s linear infinite;
 }
+
+.badge-zodiac-orbit-1, .badge-zodiac-orbit-2 {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 82%; height: 280%;
+  pointer-events: none;
+}
+
+.badge-zodiac-orbit-1::before, .badge-zodiac-orbit-1::after,
+.badge-zodiac-orbit-2::before, .badge-zodiac-orbit-2::after,
+.avatar-exclusive-zodiac-horizon-orbit-1::before, .avatar-exclusive-zodiac-horizon-orbit-1::after,
+.avatar-exclusive-zodiac-horizon-orbit-2::before, .avatar-exclusive-zodiac-horizon-orbit-2::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  box-sizing: border-box;
+}
+
+.badge-zodiac-orbit-1::before, .badge-zodiac-orbit-1::after {
+  transform: translate(-50%, -50%) rotateZ(20deg) rotateX(65deg);
+}
+
+.badge-zodiac-orbit-2::before, .badge-zodiac-orbit-2::after {
+  transform: translate(-50%, -50%) rotateZ(-20deg) rotateX(65deg);
+}
+
+/* Back orbit: high z-index but clipped to top arc only ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â creates "behind" illusion */
+.badge-zodiac-orbit-back {
+  position: absolute !important;
+  z-index: 0 !important;
+}
+.badge-zodiac-orbit-back::before {
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+}
+.badge-zodiac-orbit-back::after {
+  display: none;
+}
+
+/* Front orbit: rendered after badge-card in DOM, high z-index ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â bottom arc visible in front */
+.badge-zodiac-orbit-front {
+  position: absolute !important;
+  z-index: 10 !important;
+}
+.badge-zodiac-orbit-front::before {
+  display: none;
+}
+.badge-zodiac-orbit-front::after {
+  clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+}
+
+
+/* Avatar orbit positioning and transforms */
+.avatar-exclusive-zodiac-horizon-orbit-1, .avatar-exclusive-zodiac-horizon-orbit-2 {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 120px; height: 90px;
+  pointer-events: none;
+}
+
+.avatar-exclusive-zodiac-horizon-orbit-1::before, .avatar-exclusive-zodiac-horizon-orbit-1::after,
+.avatar-exclusive-zodiac-horizon-orbit-2::before, .avatar-exclusive-zodiac-horizon-orbit-2::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-sizing: border-box;
+}
+
+.avatar-exclusive-zodiac-horizon-orbit-1::before, .avatar-exclusive-zodiac-horizon-orbit-1::after {
+  transform: translate(-50%, -50%) rotateZ(40deg) rotateX(70deg);
+}
+
+.avatar-exclusive-zodiac-horizon-orbit-2::before, .avatar-exclusive-zodiac-horizon-orbit-2::after {
+  transform: translate(-50%, -50%) rotateZ(-40deg) rotateX(70deg);
+}
+
+/* Avatar orbit BACK: z:0, behind avatar (z:1). Shows top arc of 3D ellipse only. */
+.avatar-exclusive-zodiac-horizon-orbit-back {
+  position: absolute !important;
+  z-index: 0 !important;
+}
+.avatar-exclusive-zodiac-horizon-orbit-back::before {
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+}
+.avatar-exclusive-zodiac-horizon-orbit-back::after {
+  display: none;
+}
+
+/* Avatar orbit FRONT: z:10, in front of avatar (z:1). Shows bottom arc of 3D ellipse only. */
+.avatar-exclusive-zodiac-horizon-orbit-front {
+  position: absolute !important;
+  z-index: 10 !important;
+}
+.avatar-exclusive-zodiac-horizon-orbit-front::before {
+  display: none;
+}
+.avatar-exclusive-zodiac-horizon-orbit-front::after {
+  clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+}
+
+
+
+/* Zodiac Horizon popup blackhole - pushed halfway out of top-right corner */
+.modal-zodiac-blackhole {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  transform: translate(45%, -45%);
+  background: radial-gradient(circle, #000 0%, #000 28%, rgba(192, 38, 211, 0.8) 55%, rgba(0, 229, 255, 0.5) 80%, transparent 100%);
+  box-shadow: 0 0 30px 10px rgba(192, 38, 211, 0.6), 0 0 60px 20px rgba(0, 229, 255, 0.3);
+  pointer-events: none;
+  z-index: 0;
+  animation: bh-pulse 4s ease-in-out infinite alternate;
+}
+
+.modal-zodiac-blackhole::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(0, 229, 255, 0.8);
+  border-right-color: rgba(192, 38, 211, 0.6);
+  animation: bh-ring-spin 3s linear infinite;
+}
+
+.modal-zodiac-blackhole::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  border-bottom-color: rgba(255, 204, 0, 0.5);
+  border-left-color: rgba(0, 229, 255, 0.4);
+  animation: bh-ring-spin 5s linear infinite reverse;
+}
+
+@keyframes bh-pulse {
+  0% { box-shadow: 0 0 30px 10px rgba(192, 38, 211, 0.5), 0 0 60px 20px rgba(0, 229, 255, 0.2); }
+  100% { box-shadow: 0 0 40px 15px rgba(192, 38, 211, 0.8), 0 0 80px 30px rgba(0, 229, 255, 0.4); }
+}
+
+@keyframes bh-ring-spin {
+  to { transform: rotate(360deg); }
+}
+
+
