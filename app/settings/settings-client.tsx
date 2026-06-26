@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef, useCallback } from "react";
+import { useState, useEffect, useTransition, useRef, useCallback } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -109,6 +109,15 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
   const defaultShortcuts = { publicStation: "F1", friends: "F2", analytics: "F3", settings: "F4" };
   const [shortcuts, setShortcuts] = useState<typeof defaultShortcuts>(profile.shortcuts ? { ...defaultShortcuts, ...JSON.parse(profile.shortcuts) } : defaultShortcuts);
   const [activeTab, setActiveTab] = useState<"profile" | "public" | "preferences" | "shortcuts">("profile");
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleShortcutKeyDown = (keyName: keyof typeof defaultShortcuts) => (e: React.KeyboardEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -149,7 +158,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Badge Display State
-  const [showAllBadges, setShowAllBadges] = useState(false);
+  const [openBadgeCategory, setOpenBadgeCategory] = useState<string>("biasa");
   const [previewBadge, setPreviewBadge] = useState<any>(null);
 
   const getModalTint = (color?: string) => {
@@ -287,34 +296,56 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
     <>
       <form onSubmit={handleSave} className="settings-content" style={{ padding: "2rem 1rem", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 80px)", width: "100%", gap: "1rem" }}>
 
-        <div className="settings-modal-wrapper" style={{ width: "100%", maxWidth: "900px", background: "rgba(0, 0, 0, 0.2)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+        <div className="settings-modal-wrapper" style={{ width: "100%", maxWidth: "900px", background: "rgba(0, 0, 0, 0.2)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "16px", display: "flex", flexDirection: "column", overflow: "visible", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
 
-          {/* Header */}
-          <div className="settings-page-header" style={{ padding: "2rem", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", background: "transparent" }}>
-            <div>
-              <h1 className="settings-page-title hidden md:block">
-                {activeTab === "profile" && "Profile"}
-                {activeTab === "public" && "Public Station"}
-                {activeTab === "preferences" && "Preferences"}
-                {activeTab === "shortcuts" && "Shortcuts"}
-              </h1>
-              <h1 className="settings-page-title md:hidden">Settings</h1>
-              <p className="settings-page-sub hidden md:block">
-                {activeTab === "profile" && "Manage your personal profile details."}
-                {activeTab === "public" && "Customize how others see your station."}
-                {activeTab === "preferences" && "Adjust your station experience."}
-                {activeTab === "shortcuts" && "Configure quick navigation keys."}
-              </p>
-              <p className="settings-page-sub md:hidden">Manage your Orbit Station profile and preferences.</p>
+          {/* DESKTOP UNIFIED HEADER */}
+          <div className="hidden md:block">
+            <div className="settings-page-header" style={{ padding: "1.5rem 2rem", borderBottom: "1px solid var(--glass-border)", background: "var(--glass-bg)", backdropFilter: "var(--glass-blur)", position: "sticky", top: "60px", zIndex: 40, borderTopLeftRadius: "16px", borderTopRightRadius: "16px", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <h1 className="settings-page-title m-0">
+                  {activeTab === "profile" && "Profile"}
+                  {activeTab === "public" && "Public Station"}
+                  {activeTab === "preferences" && "Preferences"}
+                  {activeTab === "shortcuts" && "Shortcuts"}
+                </h1>
+                <p className="settings-page-sub m-0 mt-1">
+                  {activeTab === "profile" && "Manage your personal profile details."}
+                  {activeTab === "public" && "Customize how others see your station."}
+                  {activeTab === "preferences" && "Adjust your station experience."}
+                  {activeTab === "shortcuts" && "Configure quick navigation keys."}
+                </p>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                {status === "saved" && <span style={{ color: "#4ade80", fontSize: "0.875rem", marginRight: "0.5rem" }}>✓ Saved</span>}
+                <button type="button" className="btn btn-secondary shadow-lg shadow-black/50" onClick={() => window.location.href = "/station"} style={{ background: "rgba(15, 15, 20, 0.9)", backdropFilter: "blur(12px)" }}>
+                  Back
+                </button>
+                <button type="submit" className="btn btn-primary shadow-lg shadow-purple-500/30" disabled={status === "saving"}>
+                  {status === "saving" ? <span className="spinner" /> : "Save Changes"}
+                </button>
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <button type="button" className="btn btn-secondary" onClick={() => window.location.href = "/station"}>
+          </div>
+
+          {/* MOBILE HEADERS */}
+          {/* Split Title */}
+          <div className="md:hidden">
+            <div className="settings-page-header" style={{ padding: "2rem 2rem 0.5rem 2rem", background: "var(--glass-bg)", backdropFilter: "var(--glass-blur)", borderTopLeftRadius: "16px", borderTopRightRadius: "16px" }}>
+              <h1 className="settings-page-title m-0">Settings</h1>
+              <p className="settings-page-sub m-0 mt-1">Manage your Orbit Station profile and preferences.</p>
+            </div>
+          </div>
+
+          {/* Sticky Action Bar */}
+          <div className="flex md:hidden" style={{ padding: "0.5rem 2rem 1rem 2rem", position: "sticky", top: "60px", zIndex: 40, justifyContent: "flex-end", alignItems: "center", gap: "0.5rem", pointerEvents: "none", background: "var(--glass-bg)", backdropFilter: "var(--glass-blur)", borderBottom: "1px solid var(--glass-border)", borderTop: isScrolled ? "1px solid var(--glass-border)" : "1px solid transparent", borderLeft: isScrolled ? "1px solid var(--glass-border)" : "1px solid transparent", borderRight: isScrolled ? "1px solid var(--glass-border)" : "1px solid transparent", borderTopLeftRadius: isScrolled ? "16px" : "0", borderTopRightRadius: isScrolled ? "16px" : "0", borderBottomLeftRadius: isScrolled ? "16px" : "0", borderBottomRightRadius: isScrolled ? "16px" : "0", transition: "all 0.3s ease" }}>
+            <div style={{ pointerEvents: "auto", display: "flex", gap: "0.5rem", alignItems: "center", width: "100%", justifyContent: "flex-end" }}>
+              {status === "saved" && <span style={{ color: "#4ade80", fontSize: "0.875rem", marginRight: "auto", background: "rgba(0,0,0,0.6)", padding: "4px 12px", borderRadius: "999px", backdropFilter: "blur(8px)" }}>✓ Saved</span>}
+              <button type="button" className="btn btn-secondary shadow-lg shadow-black/50" onClick={() => window.location.href = "/station"} style={{ background: "rgba(15, 15, 20, 0.9)", backdropFilter: "blur(12px)" }}>
                 Back
               </button>
-              <button type="submit" className="btn btn-primary" disabled={status === "saving"}>
+              <button type="submit" className="btn btn-primary shadow-lg shadow-purple-500/30" disabled={status === "saving"}>
                 {status === "saving" ? <span className="spinner" /> : "Save Changes"}
               </button>
-              {status === "saved" && <span style={{ color: "#4ade80", fontSize: "0.875rem" }}>✓</span>}
             </div>
           </div>
 
@@ -529,102 +560,104 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                           const groupStartIndex = globalIndex;
                           globalIndex += sortedBadges.length;
 
-                          const isGroupHiddenMobile = !showAllBadges && groupStartIndex >= 3;
-
                           return (
-                            <div key={group.id} className={isGroupHiddenMobile ? 'hidden md:block' : ''}>
-                              <h4 className={`text-sm font-bold mb-3 uppercase tracking-wider flex items-center gap-2 ${group.color}`} style={{marginBottom: "0.75rem"}}>
-                                <DynamicIcon name={group.icon} className="w-5 h-5" />
-                                {group.label}
-                              </h4>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {sortedBadges.map((badge, idx) => {
-                                  const badgeGlobalIndex = groupStartIndex + idx;
-                                  const isBadgeHiddenMobile = !showAllBadges && badgeGlobalIndex >= 3;
-                                  
-                                  const isUnlocked = unlockedBadges.includes(badge.id);
-                                  const isSelected = titleBadge === badge.id;
+                            <div key={group.id} className="mb-2">
+                              <div
+                                className="flex justify-between items-center cursor-pointer md:cursor-default mb-3"
+                                onClick={() => {
+                                  if (window.innerWidth < 768) {
+                                    setOpenBadgeCategory(openBadgeCategory === group.id ? "" : group.id);
+                                  }
+                                }}
+                              >
+                                <h4 className={`text-sm font-bold uppercase tracking-wider flex items-center gap-2 m-0 ${group.color}`} style={{ marginBottom: "0.5rem" }}>
+                                  <DynamicIcon name={group.icon} className="w-5 h-5" />
+                                  {group.label}
+                                </h4>
+                                <SolidIcons.ChevronDownIcon
+                                  className={`w-5 h-5 text-gray-400 md:hidden transition-transform duration-300 ${openBadgeCategory === group.id ? 'rotate-180' : ''}`}
+                                />
+                              </div>
+                              <motion.div
+                                initial={false}
+                                animate={{ height: openBadgeCategory === group.id ? "auto" : 0, opacity: openBadgeCategory === group.id ? 1 : 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="overflow-hidden md:!overflow-visible md:!h-auto md:!opacity-100"
+                                style={{ paddingLeft: "1rem", paddingRight: "1rem", marginLeft: "-1rem", marginRight: "-1rem" }}
+                              >
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                                  {sortedBadges.map((badge, idx) => {
 
-                                  return (
-                                    <div className="zodiac-orbit-wrapper" style={{ position: 'relative' }}>
-                                      {isUnlocked && badge.id === 'zodiac-horizon' && (
-                                        <>
-                                          <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-back" />
-                                          <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-back" />
-                                        </>
-                                      )}
-                                      <div
-                                        key={badge.id}
-                                        onClick={() => {
-                                          if (isUnlocked) setTitleBadge(badge.id);
-                                          else setPreviewBadge(badge);
-                                        }}
-                                        className={`badge-card relative group p-4 rounded-xl border flex gap-3 items-center cursor-pointer ${
-                                          isBadgeHiddenMobile ? 'hidden md:flex' : ''
-                                        } ${isSelected
+                                    const isUnlocked = unlockedBadges.includes(badge.id);
+                                    const isSelected = titleBadge === badge.id;
+
+                                    return (
+                                      <div className="zodiac-orbit-wrapper" style={{ position: 'relative' }} key={badge.id}>
+                                        {isUnlocked && badge.id === 'zodiac-horizon' && (
+                                          <>
+                                            <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-back" />
+                                            <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-back" />
+                                          </>
+                                        )}
+                                        <div
+                                          onClick={() => {
+                                            if (isUnlocked) setTitleBadge(badge.id);
+                                            else setPreviewBadge(badge);
+                                          }}
+                                          className={`badge-card relative group p-4 rounded-xl border flex gap-3 items-center cursor-pointer ${isSelected
                                             ? `ring-2 ring-purple-500 ring-offset-2 ring-offset-[#0f0f16]`
                                             : isUnlocked
                                               ? 'hover:scale-[1.02] hover:shadow-lg'
                                               : 'bg-black/40 border-white/5 opacity-60 grayscale'
-                                          } ${isUnlocked ? badge.effectClass : ''}`}
-                                        style={{ position: 'relative', zIndex: 1 }}
-                                      >
-                                        {isUnlocked && badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
-                                        {isUnlocked && badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
-                                        <div className={`flex-1 min-w-0 flex items-center gap-2 pr-10`}>
-                                          <div className={`badge-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${isUnlocked ? '' : 'bg-gray-800 text-gray-500 border border-gray-700 group-hover:bg-purple-500/20 group-hover:text-purple-400 group-hover:border-purple-500/50'
-                                            }`} style={{ marginLeft: "0.5rem" }}>
-                                            {isUnlocked ? (
-                                              <DynamicIcon name={badge.icon} className="w-5 h-5 relative z-10" />
-                                            ) : (
-                                              <>
-                                                <SolidIcons.LockClosedIcon className="w-5 h-5 relative z-10 block group-hover:hidden" />
-                                                <SolidIcons.EyeIcon className="w-5 h-5 relative z-10 hidden group-hover:block" />
-                                              </>
-                                            )}
+                                            } ${isUnlocked ? badge.effectClass : ''}`}
+                                          style={{ position: 'relative', zIndex: 1 }}
+                                        >
+                                          {isUnlocked && badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
+                                          {isUnlocked && badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
+                                          <div className={`flex-1 min-w-0 flex items-center gap-2 pr-10`}>
+                                            <div className={`badge-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${isUnlocked ? '' : 'bg-gray-800 text-gray-500 border border-gray-700 group-hover:bg-purple-500/20 group-hover:text-purple-400 group-hover:border-purple-500/50'
+                                              }`} style={{ marginLeft: "0.5rem" }}>
+                                              {isUnlocked ? (
+                                                <DynamicIcon name={badge.icon} className="w-5 h-5 relative z-10" />
+                                              ) : (
+                                                <>
+                                                  <SolidIcons.LockClosedIcon className="w-5 h-5 relative z-10 block group-hover:hidden" />
+                                                  <SolidIcons.EyeIcon className="w-5 h-5 relative z-10 hidden group-hover:block" />
+                                                </>
+                                              )}
+                                            </div>
+                                            <div className="badge-content flex-1 min-w-0" style={{ margin: "0.4rem 0", padding: "0 0.3rem" }}>
+                                              <h4 className={`text-sm font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-400'}`}>
+                                                {badge.name}
+                                              </h4>
+                                              <p className="text-xs text-gray-400 leading-snug mt-0.5 max-h-[2rem] overflow-y-auto hide-scrollbar">
+                                                {badge.hint}
+                                              </p>
+                                            </div>
                                           </div>
-                                          <div className="badge-content flex-1 min-w-0" style={{ margin: "0.4rem 0", padding: "0 0.3rem" }}>
-                                            <h4 className={`text-sm font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-400'}`}>
-                                              {badge.name}
-                                            </h4>
-                                            <p className="text-xs text-gray-400 leading-snug mt-0.5 max-h-[2rem] overflow-y-auto hide-scrollbar">
-                                              {badge.hint}
-                                            </p>
-                                          </div>
+
+                                          {isSelected && (
+                                            <div className="absolute top-1/2 -translate-y-1/2 right-3 text-white bg-purple-500 rounded-full shadow-[0_0_10px_#a855f7] z-10">
+                                              <SolidIcons.CheckCircleIcon className="w-5 h-5" />
+                                            </div>
+                                          )}
+
                                         </div>
-
-                                        {isSelected && (
-                                          <div className="absolute top-1/2 -translate-y-1/2 right-3 text-white bg-purple-500 rounded-full shadow-[0_0_10px_#a855f7] z-10">
-                                            <SolidIcons.CheckCircleIcon className="w-5 h-5" />
-                                          </div>
+                                        {isUnlocked && badge.id === 'zodiac-horizon' && (
+                                          <>
+                                            <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-front" />
+                                            <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-front" />
+                                          </>
                                         )}
-
                                       </div>
-                                      {isUnlocked && badge.id === 'zodiac-horizon' && (
-                                        <>
-                                          <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-front" />
-                                          <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-front" />
-                                        </>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
+                                    );
+                                  })}
+                                </div>
+                              </motion.div>
                             </div>
                           );
                         });
                       })()}
-                      
-                      <div className="flex justify-center mt-2 md:hidden">
-                        <button 
-                          type="button" 
-                          onClick={() => setShowAllBadges(!showAllBadges)}
-                          className="px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-sm font-medium border border-white/10 hover:border-white/20 transition-all duration-300"
-                          style={{padding: "0.5rem 1rem"}}
-                        >
-                          {showAllBadges ? 'Show Less Badges' : 'Explore All Badges'}
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -971,7 +1004,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
             style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center" }}
             onClick={() => setPreviewBadge(null)}
           >
-            <div 
+            <div
               style={{ background: "#03000a", backgroundImage: "radial-gradient(circle at 50% 0%, #1a0b2e 0%, #03000a 80%)", border: "1px solid rgba(139, 92, 246, 0.3)", boxShadow: "0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(139, 92, 246, 0.1)", borderRadius: "20px", padding: "24px", width: "100%", maxWidth: "550px", display: "flex", flexDirection: "column", gap: "24px", maxHeight: "90vh", overflowY: "auto" }}
               onClick={e => e.stopPropagation()}
             >
@@ -984,22 +1017,22 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
 
               {/* Preview Content */}
               <div style={{ display: "flex", flexDirection: "column", gap: "32px", alignItems: "center", width: "100%" }}>
-                
+
                 {/* Top Row: Avatar & Badge Card */}
                 <div style={{ display: "flex", width: "100%", gap: "24px", alignItems: "flex-start" }}>
-                  
+
                   {/* Avatar Preview (Left) */}
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
                     <p style={{ fontSize: "11px", color: "#9ca3af", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "bold", textAlign: "center", margin: "0 0 12px 0" }}>Avatar Ring</p>
-                    
-                    <div style={{ position: "relative", width: "80px", height: "80px", borderRadius: "50%", padding: "4px" }} 
-                         className={
-                           previewBadge.rarity === "super-ekslusif" || previewBadge.rarity === "developer" 
-                             ? `avatar-badge avatar-exclusive-${previewBadge.id}` 
-                             : previewBadge.rarity === "ekslusif" 
-                               ? `avatar-badge avatar-badge-special-${previewBadge.color}` 
-                               : `avatar-badge avatar-badge-common-${previewBadge.color}`
-                         }>
+
+                    <div style={{ position: "relative", width: "80px", height: "80px", borderRadius: "50%", padding: "4px" }}
+                      className={
+                        previewBadge.rarity === "super-ekslusif" || previewBadge.rarity === "developer"
+                          ? `avatar-badge avatar-exclusive-${previewBadge.id}`
+                          : previewBadge.rarity === "ekslusif"
+                            ? `avatar-badge avatar-badge-special-${previewBadge.color}`
+                            : `avatar-badge avatar-badge-common-${previewBadge.color}`
+                      }>
                       {previewBadge.id === 'zodiac-horizon' && (
                         <>
                           <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-back" />
@@ -1027,7 +1060,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                   {/* Badge Card Preview (Right) */}
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
                     <p style={{ fontSize: "11px", color: "#9ca3af", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "bold", textAlign: "left", margin: "0 0 12px 0" }}>Badge Card</p>
-                    
+
                     <div className="zodiac-orbit-wrapper" style={{ position: "relative", width: "100%" }}>
                       {previewBadge.id === 'zodiac-horizon' && (
                         <>
@@ -1061,29 +1094,29 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                 {/* 3. Popup Profile Preview */}
                 <div style={{ width: "100%" }}>
                   <p style={{ fontSize: "12px", color: "gray", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "bold", margin: "0 0 8px 0" }}>Popup Profile View</p>
-                  
+
                   {(() => {
                     const isExclusive = previewBadge.rarity === "super-ekslusif" || previewBadge.rarity === "developer";
                     const isSpecial = previewBadge.rarity === "ekslusif";
                     return (
-                      <div className={`chat-mention-modal ${isExclusive ? previewBadge.effectClass : ''} ${previewBadge.id === 'shattered' ? 'modal-shattered' : ''}`} 
-                           style={{ 
-                             position: "relative",
-                             padding: "24px", 
-                             backgroundColor: "rgba(15,15,25,0.95)",
-                             backgroundImage: isSpecial 
-                                ? `radial-gradient(circle at top right, ${getModalTint(previewBadge.color)}, transparent)` 
-                                : undefined,
-                             borderColor: getModalBorder(previewBadge.color),
-                             borderWidth: "1px",
-                             borderStyle: "solid",
-                             backdropFilter: "blur(20px)",
-                             borderRadius: "16px",
-                             display: "flex",
-                             flexDirection: "column",
-                             gap: "16px"
-                           }}>
-                        
+                      <div className={`chat-mention-modal ${isExclusive ? previewBadge.effectClass : ''} ${previewBadge.id === 'shattered' ? 'modal-shattered' : ''}`}
+                        style={{
+                          position: "relative",
+                          padding: "24px",
+                          backgroundColor: "rgba(15,15,25,0.95)",
+                          backgroundImage: isSpecial
+                            ? `radial-gradient(circle at top right, ${getModalTint(previewBadge.color)}, transparent)`
+                            : undefined,
+                          borderColor: getModalBorder(previewBadge.color),
+                          borderWidth: "1px",
+                          borderStyle: "solid",
+                          backdropFilter: "blur(20px)",
+                          borderRadius: "16px",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "16px"
+                        }}>
+
                         {isExclusive && <div className="modal-exclusive-sparkles" />}
                         <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none", zIndex: 0 }}>
                           {previewBadge.id === "the-completionist" && <div className="modal-completionist-wave" />}
@@ -1091,54 +1124,54 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                           {previewBadge.id === "zodiac-horizon" && <div className="modal-zodiac-blackhole" />}
                         </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "16px", position: "relative", zIndex: 10 }}>
-                      <div style={{ position: "relative", flexShrink: 0, width: "64px", height: "64px", borderRadius: "50%", padding: "3px" }} 
-                           className={
-                             previewBadge.rarity === "super-ekslusif" || previewBadge.rarity === "developer" 
-                               ? `avatar-badge avatar-exclusive-${previewBadge.id}` 
-                               : previewBadge.rarity === "ekslusif" 
-                                 ? `avatar-badge avatar-badge-special-${previewBadge.color}` 
-                                 : `avatar-badge avatar-badge-common-${previewBadge.color}`
-                           }>
-                        {previewBadge.id === 'zodiac-horizon' && (
-                          <>
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-back" />
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-back" />
-                          </>
-                        )}
-                        <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden", position: "relative", zIndex: 1 }} className={(previewBadge.rarity === "super-ekslusif" || previewBadge.rarity === "developer" || previewBadge.rarity === "ekslusif") ? 'public-badge-sweep' : ''}>
-                          {image ? (
-                            <img src={image} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          ) : (
-                            <div style={{ background: "linear-gradient(135deg,#5b3fde,#22d3ee)", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", fontWeight: 800, color: "#fff" }}>
-                              {(profile.name ?? "?").charAt(0).toUpperCase()}
+                        <div style={{ display: "flex", alignItems: "center", gap: "16px", position: "relative", zIndex: 10 }}>
+                          <div style={{ position: "relative", flexShrink: 0, width: "64px", height: "64px", borderRadius: "50%", padding: "3px" }}
+                            className={
+                              previewBadge.rarity === "super-ekslusif" || previewBadge.rarity === "developer"
+                                ? `avatar-badge avatar-exclusive-${previewBadge.id}`
+                                : previewBadge.rarity === "ekslusif"
+                                  ? `avatar-badge avatar-badge-special-${previewBadge.color}`
+                                  : `avatar-badge avatar-badge-common-${previewBadge.color}`
+                            }>
+                            {previewBadge.id === 'zodiac-horizon' && (
+                              <>
+                                <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-back" />
+                                <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-back" />
+                              </>
+                            )}
+                            <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden", position: "relative", zIndex: 1 }} className={(previewBadge.rarity === "super-ekslusif" || previewBadge.rarity === "developer" || previewBadge.rarity === "ekslusif") ? 'public-badge-sweep' : ''}>
+                              {image ? (
+                                <img src={image} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              ) : (
+                                <div style={{ background: "linear-gradient(135deg,#5b3fde,#22d3ee)", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", fontWeight: 800, color: "#fff" }}>
+                                  {(profile.name ?? "?").charAt(0).toUpperCase()}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                        {previewBadge.id === 'zodiac-horizon' && (
-                          <>
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-front" />
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-front" />
-                          </>
-                        )}
-                      </div>
-
-                      <div style={{ flex: 1, minWidth: 0, zIndex: 10, position: "relative" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
-                          <h4 style={{ margin: 0, fontSize: "18px", fontWeight: "bold", color: "white", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>{name || profile.name || "Pilot"}</h4>
-                        </div>
-                        <p style={{ margin: "2px 0 0 0", fontSize: "14px", color: "gray" }}>@{username || profile.username || "pilot"}</p>
-                        
-                        <div className={`badge-card ${(previewBadge.rarity === "super-ekslusif" || previewBadge.rarity === "developer" || previewBadge.rarity === "ekslusif") ? 'public-badge-sweep' : ''} ${previewBadge.effectClass}`} 
-                             style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "4px 20px 4px 4px", borderRadius: "9999px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", marginTop: "6px", position: "relative", zIndex: 1 }}>
-                          <div className="badge-icon" style={{ width: "24px", height: "24px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <DynamicIcon name={previewBadge.icon} className="w-[14px] h-[14px] relative z-10" />
+                            {previewBadge.id === 'zodiac-horizon' && (
+                              <>
+                                <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-front" />
+                                <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-front" />
+                              </>
+                            )}
                           </div>
-                          <span style={{ fontSize: "12px", fontWeight: "bold", color: "white" }}>{previewBadge.name}</span>
+
+                          <div style={{ flex: 1, minWidth: 0, zIndex: 10, position: "relative" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
+                              <h4 style={{ margin: 0, fontSize: "18px", fontWeight: "bold", color: "white", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>{name || profile.name || "Pilot"}</h4>
+                            </div>
+                            <p style={{ margin: "2px 0 0 0", fontSize: "14px", color: "gray" }}>@{username || profile.username || "pilot"}</p>
+
+                            <div className={`badge-card ${(previewBadge.rarity === "super-ekslusif" || previewBadge.rarity === "developer" || previewBadge.rarity === "ekslusif") ? 'public-badge-sweep' : ''} ${previewBadge.effectClass}`}
+                              style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "4px 20px 4px 4px", borderRadius: "9999px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", marginTop: "6px", position: "relative", zIndex: 1 }}>
+                              <div className="badge-icon" style={{ width: "24px", height: "24px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                <DynamicIcon name={previewBadge.icon} className="w-[14px] h-[14px] relative z-10" />
+                              </div>
+                              <span style={{ fontSize: "12px", fontWeight: "bold", color: "white" }}>{previewBadge.name}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
                     );
                   })()}
                 </div>

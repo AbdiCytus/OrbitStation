@@ -149,7 +149,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
   {
     id: "the-creator-assistant",
     name: "The Creator's Assistant",
-    hint: "The AI agent that helped build Orbit Station.",
+    hint: "The character that helped explain Orbit Station to users.",
     color: "blue",
     icon: "CommandLineIcon",
     effectClass: "badge-assistant",
