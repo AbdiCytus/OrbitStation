@@ -208,6 +208,15 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     icon: "FaceFrownIcon",
     effectClass: "badge-shattered",
     rarity: "ekslusif"
+  },
+  {
+    id: "zodiac-horizon",
+    name: "Zodiac Horizon",
+    hint: "Visit 999 different public stations. Requires The Completionist and Galactic Center badges.",
+    color: "purple",
+    icon: "GlobeAltIcon",
+    effectClass: "badge-zodiac",
+    rarity: "super-ekslusif"
   }
 ];
 
