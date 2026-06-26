@@ -187,7 +187,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     name: "The Completionist",
     hint: "Collect all common and special badges.",
     color: "rose",
-    icon: "TrophyIcon",
+    icon: "CheckBadgeIcon",
     effectClass: "badge-completionist",
     rarity: "super-ekslusif"
   }

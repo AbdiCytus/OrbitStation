@@ -922,23 +922,42 @@
   z-index: 5;
 }
 
-/* Thin RGB Wave Effect */
+/* Thin RGB Wave Effect (Water-like) */
+@keyframes wave-flow {
+  0% { -webkit-mask-position: 0 0; }
+  100% { -webkit-mask-position: 100px 0; }
+}
+
 .badge-completionist::after {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(110deg, transparent 40%, rgba(255,0,0,0.8) 45%, rgba(0,255,0,0.8) 50%, rgba(0,0,255,0.8) 55%, transparent 60%);
+  background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
   background-size: 300% 100%;
-  animation: shine-sweep-bg 6s infinite linear;
+  animation: rgb-shift 8s linear infinite, wave-flow 2s linear infinite;
+  
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0,50 Q25,20 50,50 T100,50' fill='none' stroke='black' stroke-width='6'/%3E%3C/svg%3E");
+  -webkit-mask-size: 50px 100%;
+  -webkit-mask-repeat: repeat-x;
+  
   pointer-events: none;
   z-index: 20;
 }
 
+@keyframes rgb-fade {
+  0%, 100% { background-color: #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.6); }
+  14% { background-color: #ff7f00; box-shadow: 0 0 20px rgba(255,127,0,0.6); }
+  28% { background-color: #ffff00; box-shadow: 0 0 20px rgba(255,255,0,0.6); }
+  42% { background-color: #00ff00; box-shadow: 0 0 20px rgba(0,255,0,0.6); }
+  57% { background-color: #0000ff; box-shadow: 0 0 20px rgba(0,0,255,0.6); }
+  71% { background-color: #4b0082; box-shadow: 0 0 20px rgba(75,0,130,0.6); }
+  85% { background-color: #9400d3; box-shadow: 0 0 20px rgba(148,0,211,0.6); }
+}
+
 .badge-completionist .badge-icon {
-  background: conic-gradient(from var(--rgb-angle), #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-  animation: rgb-spin 6s linear infinite;
+  background: none;
+  animation: rgb-fade 8s linear infinite;
   color: #fff;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
