@@ -199,6 +199,15 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     icon: "CameraIcon",
     effectClass: "badge-stellar-icon",
     rarity: "super-ekslusif"
+  },
+  {
+    id: "shattered",
+    name: "Shattered",
+    hint: "Experience rejection: friend request denied (4x), ownership transfer denied (4x), collab invite denied (4x), demoted (4x), kicked (4x), muted (4x), and blinded (4x).",
+    color: "gray",
+    icon: "FaceFrownIcon",
+    effectClass: "badge-shattered",
+    rarity: "spesial"
   }
 ];
 

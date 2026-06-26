@@ -1092,3 +1092,36 @@
   background: conic-gradient(#f09433, #dc2743, #bc1888, #8a3ab9, #4c68d7, #f09433);
   animation: avatar-spin-rotate 4s linear infinite;
 }
+
+/* Shattered Badge (Special) */
+.badge-shattered {
+  background-color: #050505 !important;
+  border-color: #27272a !important;
+  color: #9ca3af;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20200%20100%27%3E%3C!--%20Static%20Cracks%20--%3E%3Cpath%20d=%27M0,20%20L30,40%20L80,30%20L110,60%20L160,50%20L200,80%27%20stroke=%27rgba(255,255,255,0.15)%27%20stroke-width=%271%27%20fill=%27none%27/%3E%3Cpath%20d=%27M30,40%20L40,80%20M80,30%20L90,0%20M110,60%20L120,100%20M160,50%20L180,0%27%20stroke=%27rgba(255,255,255,0.08)%27%20stroke-width=%271%27%20fill=%27none%27/%3E%3Cpath%20d=%27M60,35%20L50,60%20L20,70%20M130,55%20L150,80%20L180,90%27%20stroke=%27rgba(255,255,255,0.05)%27%20stroke-width=%270.5%27%20fill=%27none%27/%3E%3Ccircle%20cx=%2780%27%20cy=%2730%27%20r=%271%27%20fill=%27rgba(255,255,255,0.3)%27/%3E%3Ccircle%20cx=%27110%27%20cy=%2760%27%20r=%271%27%20fill=%27rgba(255,255,255,0.3)%27/%3E%3Ccircle%20cx=%2730%27%20cy=%2740%27%20r=%271%27%20fill=%27rgba(255,255,255,0.3)%27/%3E%3Cpath%20d=%27M110,60%20L95,75%20L85,65%20L80,30%27%20stroke=%27rgba(255,255,255,0.15)%27%20stroke-width=%270.5%27%20fill=%27none%27/%3E%3Cpath%20d=%27M95,75%20L100,90%20M85,65%20L60,70%27%20stroke=%27rgba(255,255,255,0.05)%27%20stroke-width=%270.5%27%20fill=%27none%27/%3E%3C!--%20Animated%20Shards%20--%3E%3Cg%20fill=%27rgba(255,255,255,0.08)%27%20stroke=%27rgba(255,255,255,0.2)%27%20stroke-width=%270.5%27%3E%3Cpolygon%20points=%270,0%2015,5%2010,20%202,15%27%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27translate%27%20values=%270,0;%2015,-10;%200,0%27%20dur=%275s%27%20repeatCount=%27indefinite%27/%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27rotate%27%20values=%270%207.5%2010;%2045%207.5%2010;%200%207.5%2010%27%20dur=%277s%27%20repeatCount=%27indefinite%27%20additive=%27sum%27/%3E%3C/polygon%3E%3Cpolygon%20points=%2740,40%2050,30%2065,45%2045,55%27%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27translate%27%20values=%270,0;%20-10,15;%200,0%27%20dur=%276s%27%20repeatCount=%27indefinite%27/%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27rotate%27%20values=%270%2050%2045;%20-30%2050%2045;%200%2050%2045%27%20dur=%278s%27%20repeatCount=%27indefinite%27%20additive=%27sum%27/%3E%3C/polygon%3E%3Cpolygon%20points=%27120,20%20135,10%20140,25%27%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27translate%27%20values=%270,0;%2010,15;%200,0%27%20dur=%274s%27%20repeatCount=%27indefinite%27/%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27rotate%27%20values=%270%20130%2015;%2060%20130%2015;%200%20130%2015%27%20dur=%276s%27%20repeatCount=%27indefinite%27%20additive=%27sum%27/%3E%3C/polygon%3E%3Cpolygon%20points=%27160,70%20170,50%20190,60%20180,80%27%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27translate%27%20values=%270,0;%20-10,-15;%200,0%27%20dur=%277s%27%20repeatCount=%27indefinite%27/%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27rotate%27%20values=%270%20175%2065;%20-45%20175%2065;%200%20175%2065%27%20dur=%279s%27%20repeatCount=%27indefinite%27%20additive=%27sum%27/%3E%3C/polygon%3E%3Cpolygon%20points=%2780,80%2090,75%20100,90%2085,95%27%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27translate%27%20values=%270,0;%2020,-10;%200,0%27%20dur=%275.5s%27%20repeatCount=%27indefinite%27/%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27rotate%27%20values=%270%2090%2085;%2030%2090%2085;%200%2090%2085%27%20dur=%277.5s%27%20repeatCount=%27indefinite%27%20additive=%27sum%27/%3E%3C/polygon%3E%3Cpolygon%20points=%2720,80%2030,70%2035,90%27%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27translate%27%20values=%270,0;%205,-15;%200,0%27%20dur=%276.5s%27%20repeatCount=%27indefinite%27/%3E%3CanimateTransform%20attributeName=%27transform%27%20type=%27rotate%27%20values=%270%2025%2080;%20-60%2025%2080;%200%2025%2080%27%20dur=%275s%27%20repeatCount=%27indefinite%27%20additive=%27sum%27/%3E%3C/polygon%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%, rgba(255,255,255,0.02) 100%);
+  background-size: 200px 100%, 100% 100%;
+}
+.badge-shattered .badge-icon {
+  background: linear-gradient(135deg, #1f2937, #111827);
+  color: #ef4444; /* red-500 */
+  border: 1px solid #374151;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.avatar-special-shattered::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 3px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 20;
+  pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, #111827 0deg, #374151 10deg, #ef4444 15deg, #111827 30deg);
+  animation: avatar-spin-rotate 10s linear infinite;
+}
