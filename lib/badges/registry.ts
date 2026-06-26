@@ -198,7 +198,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     color: "pink",
     icon: "CameraIcon",
     effectClass: "badge-stellar-icon",
-    rarity: "ekslusif"
+    rarity: "super-ekslusif"
   }
 ];
 

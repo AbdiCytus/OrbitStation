@@ -1021,17 +1021,23 @@
 /* Stellar Icon Badge */
 .badge-stellar-icon {
   background-image: 
-    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4V20h20v2H20v2h20v2H20v2h20v2H20v2h20v2H20v2h20v2H20v2h20v2H20v-2z' fill='%23ffffff' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E"),
-    linear-gradient(45deg, rgba(240, 148, 51, 0.2), rgba(220, 39, 67, 0.2), rgba(188, 24, 136, 0.2), rgba(138, 58, 185, 0.2), rgba(76, 104, 215, 0.2));
-  background-size: 40px 40px, 200% 200%;
-  animation: stellar-bg-pan 8s ease infinite;
+    url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20100%20100%27%20preserveAspectRatio=%27none%27%3E%3Cg%20fill=%27none%27%20stroke=%27rgba(255,255,255,0.4)%27%20stroke-width=%270.8%27%3E%3Cpath%20d=%27M0,10%20C25,10%2025,40%2050,40%20C75,40%2075,10%20100,10%27/%3E%3Cpath%20d=%27M0,20%20C25,20%2025,43%2050,43%20C75,43%2075,20%20100,20%27/%3E%3Cpath%20d=%27M0,30%20C25,30%2025,46%2050,46%20C75,46%2075,30%20100,30%27/%3E%3Cpath%20d=%27M0,40%20C25,40%2025,49%2050,49%20C75,49%2075,40%20100,40%27/%3E%3Cpath%20d=%27M0,50%20C25,50%2025,51%2050,51%20C75,51%2075,50%20100,50%27/%3E%3Cpath%20d=%27M0,60%20C25,60%2025,53%2050,53%20C75,53%2075,60%20100,60%27/%3E%3Cpath%20d=%27M0,70%20C25,70%2025,56%2050,56%20C75,56%2075,70%20100,70%27/%3E%3Cpath%20d=%27M0,80%20C25,80%2025,59%2050,59%20C75,59%2075,80%20100,80%27/%3E%3Cpath%20d=%27M0,90%20C25,90%2025,62%2050,62%20C75,62%2075,90%20100,90%27/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(45deg, rgba(240, 148, 51, 0.25), rgba(220, 39, 67, 0.25), rgba(188, 24, 136, 0.25), rgba(138, 58, 185, 0.25), rgba(76, 104, 215, 0.25));
+  background-size: 100px 100%, 200% 200%;
+  animation: stellar-combined-pan 6s linear infinite;
   border-color: transparent !important;
 }
 
-@keyframes stellar-bg-pan {
-  0% { background-position: 0px 0px, 0% 50%; }
-  50% { background-position: 20px 20px, 100% 50%; }
-  100% { background-position: 40px 40px, 0% 50%; }
+@keyframes stellar-combined-pan {
+  0%     { background-position: 0px 0px, 0% 50%; }
+  12.5%  { background-position: 25px 0px, 15% 50%; }
+  25%    { background-position: 50px 0px, 50% 50%; }
+  37.5%  { background-position: 75px 0px, 85% 50%; }
+  50%    { background-position: 100px 0px, 100% 50%; }
+  62.5%  { background-position: 125px 0px, 85% 50%; }
+  75%    { background-position: 150px 0px, 50% 50%; }
+  87.5%  { background-position: 175px 0px, 15% 50%; }
+  100%   { background-position: 200px 0px, 0% 50%; }
 }
 
 .badge-stellar-icon::before {
