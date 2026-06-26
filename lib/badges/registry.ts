@@ -207,7 +207,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
     color: "gray",
     icon: "FaceFrownIcon",
     effectClass: "badge-shattered",
-    rarity: "spesial"
+    rarity: "ekslusif"
   }
 ];
 
