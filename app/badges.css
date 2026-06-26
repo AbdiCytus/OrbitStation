@@ -1171,23 +1171,22 @@
 .badge-zodiac::before {
   content: "";
   position: absolute;
-  inset: -12px;
+  inset: -10px;
   background: 
-    radial-gradient(circle at 20% 50%, rgba(0, 229, 255, 0.5), transparent 40%),
-    radial-gradient(circle at 80% 50%, rgba(192, 38, 211, 0.5), transparent 40%),
-    radial-gradient(circle at 50% 20%, rgba(255, 204, 0, 0.3), transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(0, 229, 255, 0.4), transparent 40%);
+    radial-gradient(ellipse at 10% 50%, rgba(0, 229, 255, 0.4), transparent 50%),
+    radial-gradient(ellipse at 90% 50%, rgba(192, 38, 211, 0.4), transparent 50%),
+    radial-gradient(ellipse at 50% -20%, rgba(0, 229, 255, 0.3), transparent 50%),
+    radial-gradient(ellipse at 50% 120%, rgba(192, 38, 211, 0.3), transparent 50%);
   z-index: -1;
-  border-radius: 40px;
-  animation: zodiac-smoke-spin 8s linear infinite;
+  border-radius: inherit;
+  animation: zodiac-smoke-pulse 4s ease-in-out infinite alternate;
   filter: blur(8px);
   pointer-events: none;
 }
 
-@keyframes zodiac-smoke-spin {
-  0% { transform: rotate(0deg) scale(1); opacity: 0.7; }
-  50% { transform: rotate(180deg) scale(1.1); opacity: 1; }
-  100% { transform: rotate(360deg) scale(1); opacity: 0.7; }
+@keyframes zodiac-smoke-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.05); opacity: 1; }
 }
 
 /* Avatar border for Exclusive Zodiac Horizon */
