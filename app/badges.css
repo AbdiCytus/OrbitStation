@@ -972,3 +972,32 @@
   z-index: 1;
 }
 
+
+.avatar-exclusive-the-completionist { 
+  border-color: transparent !important; 
+  animation: pulse-completionist-avatar 8s infinite linear; 
+}
+@keyframes pulse-completionist-avatar {
+  0%, 100% { box-shadow: 0 0 15px rgba(255,0,0,0.5), inset 0 0 10px rgba(255,0,0,0.4); }
+  14% { box-shadow: 0 0 15px rgba(255,127,0,0.5), inset 0 0 10px rgba(255,127,0,0.4); }
+  28% { box-shadow: 0 0 15px rgba(255,255,0,0.5), inset 0 0 10px rgba(255,255,0,0.4); }
+  42% { box-shadow: 0 0 15px rgba(0,255,0,0.5), inset 0 0 10px rgba(0,255,0,0.4); }
+  57% { box-shadow: 0 0 15px rgba(0,0,255,0.5), inset 0 0 10px rgba(0,0,255,0.4); }
+  71% { box-shadow: 0 0 15px rgba(75,0,130,0.5), inset 0 0 10px rgba(75,0,130,0.4); }
+  85% { box-shadow: 0 0 15px rgba(148,0,211,0.5), inset 0 0 10px rgba(148,0,211,0.4); }
+}
+
+.avatar-exclusive-the-completionist::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 4px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 20;
+  pointer-events: none;
+  background: conic-gradient(#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+  animation: avatar-spin-rotate 6s linear infinite;
+}
