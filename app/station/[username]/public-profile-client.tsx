@@ -253,6 +253,12 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                         className={`zzz-avatar ${avatarBadgeClass}`} 
                         style={{ '--avatar-radius': '46px', overflow: 'visible' } as any}
                       >
+                        {badge?.id === 'zodiac-horizon' && (
+                          <>
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-1" />
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-2" />
+                          </>
+                        )}
                         <div className={`w-full h-full rounded-full overflow-hidden relative ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`}>
                           {user.image ? (
                             <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 10 }} />

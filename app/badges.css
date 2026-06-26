@@ -1149,7 +1149,7 @@
     url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20100%27%20preserveAspectRatio%3D%27xMaxYMid%20slice%27%3E%20%20%3C%21--%20Orbit%20Lines%20%28Bottom%20Left%29%20--%3E%20%20%3Cg%20stroke%3D%27rgba%280%2C%20229%2C%20255%2C%200.3%29%27%20stroke-width%3D%270.5%27%20fill%3D%27none%27%3E%20%20%20%20%3Cellipse%20cx%3D%275%27%20cy%3D%2795%27%20rx%3D%2740%27%20ry%3D%2720%27%20transform%3D%27rotate%28-15%205%2095%29%27%20%2F%3E%20%20%20%20%3Cellipse%20cx%3D%275%27%20cy%3D%2795%27%20rx%3D%2760%27%20ry%3D%2730%27%20transform%3D%27rotate%28-15%205%2095%29%27%20stroke%3D%27rgba%28192%2C%2038%2C%20211%2C%200.3%29%27%20%2F%3E%20%20%20%20%3Cellipse%20cx%3D%275%27%20cy%3D%2795%27%20rx%3D%2780%27%20ry%3D%2740%27%20transform%3D%27rotate%28-15%205%2095%29%27%20stroke%3D%27rgba%28255%2C%20204%2C%200%2C%200.2%29%27%20%2F%3E%20%20%3C%2Fg%3E%20%20%3C%21--%20Constellations%20%285%20total%29%20--%3E%20%20%3Cg%20stroke%3D%27rgba%28255%2C255%2C255%2C0.6%29%27%20stroke-width%3D%270.4%27%20fill%3D%27rgba%28255%2C255%2C255%2C0.9%29%27%3E%20%20%20%20%3C%21--%201%20--%3E%20%20%20%20%3Cg%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B0%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2740%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2750%27%20cy%3D%2730%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2770%27%20cy%3D%2750%27%20r%3D%271.8%27%20fill%3D%27rgba%280%2C%20229%2C%20255%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M30%2C40%20L50%2C30%20L70%2C50%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%20%20%3C%21--%202%20--%3E%20%20%20%20%3Cg%20opacity%3D%270%27%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B0%3B0%3B1%3B1%3B0%3B0%3B0%3B0%3B0%3B0%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2740%27%20cy%3D%2760%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2760%27%20cy%3D%2750%27%20r%3D%271%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%2765%27%20r%3D%271.8%27%20fill%3D%27rgba%28192%2C%2038%2C%20211%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%27100%27%20cy%3D%2740%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M40%2C60%20L60%2C50%20L80%2C65%20L100%2C40%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%20%20%3C%21--%203%20--%3E%20%20%20%20%3Cg%20opacity%3D%270%27%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B0%3B0%3B0%3B0%3B1%3B1%3B0%3B0%3B0%3B0%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2750%27%20cy%3D%2720%27%20r%3D%271.8%27%20fill%3D%27rgba%28255%2C%20204%2C%200%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2765%27%20cy%3D%2735%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2785%27%20cy%3D%2730%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2795%27%20cy%3D%2715%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M50%2C20%20L65%2C35%20L85%2C30%20L95%2C15%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%20%20%3C%21--%204%20--%3E%20%20%20%20%3Cg%20opacity%3D%270%27%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B0%3B0%3B0%3B0%3B0%3B0%3B1%3B1%3B0%3B0%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2780%27%20cy%3D%2740%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%27110%27%20cy%3D%2760%27%20r%3D%271.5%27%20fill%3D%27rgba%280%2C%20229%2C%20255%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%27130%27%20cy%3D%2735%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M80%2C40%20L110%2C60%20L130%2C35%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%20%20%3C%21--%205%20--%3E%20%20%20%20%3Cg%20opacity%3D%270%27%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B0%3B1%3B1%27%20dur%3D%2715s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2735%27%20cy%3D%2770%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2755%27%20cy%3D%2785%27%20r%3D%271.8%27%20fill%3D%27rgba%28192%2C%2038%2C%20211%2C%201%29%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2780%27%20r%3D%271%27%20%2F%3E%20%20%20%20%20%20%3Ccircle%20cx%3D%2795%27%20cy%3D%2790%27%20r%3D%271.2%27%20%2F%3E%20%20%20%20%20%20%3Cpath%20d%3D%27M35%2C70%20L55%2C85%20L75%2C80%20L95%2C90%27%20fill%3D%27none%27%20%2F%3E%20%20%20%20%3C%2Fg%3E%20%20%3C%2Fg%3E%20%20%3C%21--%20Particles%20sucking%20into%20Blackhole%20--%3E%20%20%3Cg%20fill%3D%27rgba%28255%2C255%2C255%2C0.9%29%27%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%271.5%27%20fill%3D%27rgba%280%2C%20229%2C%20255%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M50%2C80%20Q120%2C70%20170%2C25%27%20dur%3D%271.5s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%271.5s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%272%27%20fill%3D%27rgba%28192%2C%2038%2C%20211%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M20%2C50%20Q100%2C40%20170%2C25%27%20dur%3D%272s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%272s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%271.5%27%20fill%3D%27rgba%28255%2C%20204%2C%200%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M80%2C90%20Q140%2C80%20170%2C25%27%20dur%3D%271.8s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%271.8s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%271.2%27%20fill%3D%27rgba%280%2C%20229%2C%20255%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M10%2C20%20Q80%2C10%20170%2C25%27%20dur%3D%272.2s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%272.2s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%272%27%20fill%3D%27rgba%28192%2C%2038%2C%20211%2C%201%29%27%3E%20%20%20%20%20%20%3CanimateMotion%20path%3D%27M100%2C60%20Q150%2C50%20170%2C25%27%20dur%3D%271.3s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%20%20%3Canimate%20attributeName%3D%27opacity%27%20values%3D%270%3B1%3B1%3B0%27%20dur%3D%271.3s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%3C%2Fg%3E%20%20%3C!-- Blackhole --%3E%20%20%3Cdefs%3E%20%20%20%20%3CradialGradient%20id%3D%27bh-glow%27%20cx%3D%2750%25%27%20cy%3D%2750%25%27%20r%3D%2750%25%27%3E%20%20%20%20%20%20%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23000%27%20%2F%3E%20%20%20%20%20%20%3Cstop%20offset%3D%2720%25%27%20stop-color%3D%27%23000%27%20%2F%3E%20%20%20%20%20%20%3Cstop%20offset%3D%2750%25%27%20stop-color%3D%27rgba%28192%2C%2038%2C%20211%2C%200.7%29%27%20%2F%3E%20%20%20%20%20%20%3Cstop%20offset%3D%2775%25%27%20stop-color%3D%27rgba%280%2C%20229%2C%20255%2C%200.5%29%27%20%2F%3E%20%20%20%20%20%20%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27transparent%27%20%2F%3E%20%20%20%20%3C%2FradialGradient%3E%20%20%3C%2Fdefs%3E%20%20%3Cg%20transform%3D%27translate%28170%2C%2025%29%27%3E%20%20%20%20%3C!-- Glow --%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%2740%27%20fill%3D%27url%28%23bh-glow%29%27%3E%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D%27transform%27%20type%3D%27scale%27%20values%3D%271%3B1.15%3B1%27%20dur%3D%273s%27%20repeatCount%3D%27indefinite%27%20%2F%3E%20%20%20%20%3C%2Fcircle%3E%20%20%20%20%3C!-- Accretion Disk Rings --%3E%20%20%20%20%3Cellipse%20cx%3D%270%27%20cy%3D%270%27%20rx%3D%2745%27%20ry%3D%2712%27%20fill%3D%27none%27%20stroke%3D%27rgba%280%2C%20229%2C%20255%2C%200.7%29%27%20stroke-width%3D%271.5%27%20transform%3D%27rotate%28-20%29%27%3E%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D%27transform%27%20type%3D%27rotate%27%20values%3D%27-20%3B%20340%27%20dur%3D%273s%27%20repeatCount%3D%27indefinite%27%20additive%3D%27sum%27%2F%3E%20%20%20%20%3C%2Fellipse%3E%20%20%20%20%3Cellipse%20cx%3D%270%27%20cy%3D%270%27%20rx%3D%2750%27%20ry%3D%2710%27%20fill%3D%27none%27%20stroke%3D%27rgba%28192%2C%2038%2C%20211%2C%200.5%29%27%20stroke-width%3D%271%27%20transform%3D%27rotate%2840%29%27%3E%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D%27transform%27%20type%3D%27rotate%27%20values%3D%2740%3B%20400%27%20dur%3D%274s%27%20repeatCount%3D%27indefinite%27%20additive%3D%27sum%27%2F%3E%20%20%20%20%3C%2Fellipse%3E%20%20%20%20%3Cellipse%20cx%3D%270%27%20cy%3D%270%27%20rx%3D%2740%27%20ry%3D%2714%27%20fill%3D%27none%27%20stroke%3D%27rgba%28255%2C%20204%2C%200%2C%200.4%29%27%20stroke-width%3D%271.2%27%20transform%3D%27rotate%2810%29%27%3E%20%20%20%20%20%20%3CanimateTransform%20attributeName%3D%27transform%27%20type%3D%27rotate%27%20values%3D%2710%3B%20370%27%20dur%3D%275s%27%20repeatCount%3D%27indefinite%27%20additive%3D%27sum%27%2F%3E%20%20%20%20%3C%2Fellipse%3E%20%20%20%20%3C!-- Core --%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%2710%27%20fill%3D%27%23000%27%20%2F%3E%20%20%20%20%3Ccircle%20cx%3D%270%27%20cy%3D%270%27%20r%3D%2712%27%20fill%3D%27none%27%20stroke%3D%27rgba%28255%2C%20255%2C%20255%2C%200.3%29%27%20stroke-width%3D%270.5%27%20%2F%3E%20%20%3C%2Fg%3E%3C%2Fsvg%3E"),
     linear-gradient(135deg, #0a1128 0%, #101b3d 40%, #1b263b 80%, #0d1b2a 100%) !important;
   background-size: 100% 100%, 100% 100% !important;
-  border-color: rgba(0, 229, 255, 0.4) !important;
+  border-color: transparent !important;
   color: #e0f7fa;
   box-shadow: 
     0 0 15px rgba(0, 229, 255, 0.5),
@@ -1174,7 +1174,7 @@
   pointer-events: none;
   animation: creator-spin 3s linear infinite;
   z-index: 5;
-  filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 12px rgba(192, 38, 211, 0.8));
+  filter: drop-shadow(0 0 4px #00e5ff) drop-shadow(0 0 10px #c026d3);
 }
 
 @keyframes zodiac-shadow-spin {
@@ -1199,26 +1199,52 @@
   position: relative;
 }
 
+.badge-zodiac .badge-icon {
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9J3pncmFkMScgeDE9JzAlJyB5MT0nMCUnIHgyPScxMDAlJyB5Mj0nMTAwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nIzAwZTVmZicgLz48c3RvcCBvZmZzZXQ9JzUwJScgc3RvcC1jb2xvcj0nI2MwMjZkMycgLz48c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyNmZmNjMDAnIC8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9J3pncmFkMicgeDE9JzEwMCUnIHkxPScxMDAlJyB4Mj0nMCUnIHkyPScwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nIzAwZTVmZicgLz48c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyNjMDI2ZDMnIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHBhdGggZD0nTSAyNSA1MCBBIDI1IDI1IDAgMCAxIDc1IDUwJyBmaWxsPSdub25lJyBzdHJva2U9J3VybCgjemdyYWQxKScgc3Ryb2tlLXdpZHRoPSczJyAvPjxjaXJjbGUgY3g9JzUwJyBjeT0nNTAnIHI9JzE2JyBmaWxsPSdibGFjaycgc3Ryb2tlPSd1cmwoI3pncmFkMiknIHN0cm9rZS13aWR0aD0nMicgLz48cGF0aCBkPSdNIDUgNjUgQyAyMCA0MCwgNDUgMzUsIDk1IDM1IEMgNjAgNTUsIDQ1IDc1LCA1IDY1IFonIGZpbGw9J3VybCgjemdyYWQxKScgLz48cGF0aCBkPSdNIDMyIDY1IEEgMjIgMjIgMCAwIDAgNjggNjInIGZpbGw9J25vbmUnIHN0cm9rZT0ndXJsKCN6Z3JhZDIpJyBzdHJva2Utd2lkdGg9JzgnIHN0cm9rZS1saW5lY2FwPSdyb3VuZCcgLz48L3N2Zz4=");
+  background-size: 65% 65%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent !important;
+  filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.8));
+  position: relative;
+  z-index: 10;
+}
+
+.badge-zodiac .badge-icon svg {
+  display: none !important;
+}
+
+.badge-zodiac .badge-icon::before,
 .badge-zodiac .badge-icon::after {
   content: "";
   position: absolute;
   top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 65%; height: 65%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M 25 50 A 25 25 0 0 1 75 50' fill='none' stroke='white' stroke-width='3' /%3E%3Ccircle cx='50' cy='50' r='16' fill='black' stroke='white' stroke-width='2' /%3E%3Cpath d='M 5 65 C 20 40, 45 35, 95 35 C 60 55, 45 75, 5 65 Z' fill='white' /%3E%3Cpath d='M 32 65 A 22 22 0 0 0 68 62' fill='none' stroke='white' stroke-width='8' stroke-linecap='round' /%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.8));
+  width: 140%; height: 140%;
+  margin-top: -70%; margin-left: -70%;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  pointer-events: none;
+}
+.badge-zodiac .badge-icon::before {
+  border-right-color: rgba(0, 229, 255, 0.9);
+  border-bottom-color: rgba(0, 229, 255, 0.9);
+  animation: zodiac-spin-cw 3s linear infinite;
+}
+.badge-zodiac .badge-icon::after {
+  border-left-color: rgba(192, 38, 211, 0.9);
+  border-top-color: rgba(192, 38, 211, 0.9);
+  animation: zodiac-spin-ccw 3s linear infinite;
 }
 
-.badge-zodiac-wave-layer {
+.badge-zodiac-wave-layer,
+.modal-zodiac-wave-layer {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(0,229,255,0.3), rgba(192,38,211,0.3), rgba(0,229,255,0.3));
+  background: linear-gradient(90deg, rgba(0,229,255,0.1), rgba(192,38,211,0.1), rgba(0,229,255,0.1));
   background-size: 200% 100%;
   animation: zodiac-wave-flow 6s ease-in-out infinite;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20100%20100%27%20preserveAspectRatio=%27none%27%3E%3Cpath%20d=%27M0,75%20Q25,65%2050,75%20T100,75%20L100,100%20L0,100%20Z%27%20fill=%27black%27/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20100%20100%27%20preserveAspectRatio=%27none%27%3E%3Cpath%20d=%27M0,50%20Q25,40%2050,50%20T100,50%20L100,100%20L0,100%20Z%27%20fill=%27black%27/%3E%3C/svg%3E");
   -webkit-mask-repeat: repeat-x;
   pointer-events: none;
   z-index: 1;
@@ -1231,21 +1257,7 @@
 }
 
 /* Ice Smoke / Glow around badge */
-.badge-zodiac::before {
-  content: "";
-  position: absolute;
-  inset: -10px;
-  background: 
-    radial-gradient(ellipse at 10% 50%, rgba(0, 229, 255, 0.4), transparent 50%),
-    radial-gradient(ellipse at 90% 50%, rgba(192, 38, 211, 0.4), transparent 50%),
-    radial-gradient(ellipse at 50% -20%, rgba(0, 229, 255, 0.3), transparent 50%),
-    radial-gradient(ellipse at 50% 120%, rgba(192, 38, 211, 0.3), transparent 50%);
-  z-index: -1;
-  border-radius: inherit;
-  animation: zodiac-smoke-pulse 4s ease-in-out infinite alternate;
-  filter: blur(8px);
-  pointer-events: none;
-}
+
 
 @keyframes zodiac-smoke-pulse {
   0% { transform: scale(1); opacity: 0.5; }
@@ -1253,6 +1265,13 @@
 }
 
 /* Avatar border for Exclusive Zodiac Horizon */
+.avatar-exclusive-zodiac-horizon {
+  position: relative;
+  overflow: visible !important;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4), 0 0 20px rgba(192, 38, 211, 0.4);
+}
+
+
 .avatar-exclusive-zodiac-horizon::after {
   content: "";
   position: absolute;

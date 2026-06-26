@@ -1380,6 +1380,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                     >
                       {(isExclusive) && <div className="modal-exclusive-sparkles" />}
                       {badge?.id === 'the-completionist' && <div className="modal-completionist-wave" />}
+                      {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-wave-layer" />}
                       <button onClick={() => setMentionDetail(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-transparent border-none cursor-pointer z-50">
                         <XMarkIcon width={20} height={20} />
                       </button>
@@ -1390,8 +1391,14 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                           style={{ 
                             width: '74px', height: '74px', '--avatar-radius': '37px', overflow: 'visible',
                             ...( !badge ? { border: '3px solid #a78bfa', boxShadow: '0 0 20px rgba(167, 139, 250, 0.4)' } : {} )
-                          } as any}
+                          } as React.CSSProperties}
                         >
+                          {badge?.id === 'zodiac-horizon' && (
+                            <>
+                              <div className="avatar-exclusive-zodiac-horizon-orbit-1" />
+                              <div className="avatar-exclusive-zodiac-horizon-orbit-2" />
+                            </>
+                          )}
                           <div className={`w-full h-full rounded-full overflow-hidden relative ${avatarSweepClass}`}>
                             <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-full h-full object-cover relative z-10" />
                           </div>
