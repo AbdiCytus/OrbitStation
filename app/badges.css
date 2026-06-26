@@ -926,15 +926,15 @@
 @keyframes wave-flow {
   0% { 
     -webkit-mask-position: 0px 100%; 
-    -webkit-mask-size: 100px 180%; 
+    -webkit-mask-size: 200px 120%; 
   }
   50% { 
     -webkit-mask-position: 100px 100%; 
-    -webkit-mask-size: 100px 220%; 
+    -webkit-mask-size: 200px 140%; 
   }
   100% { 
     -webkit-mask-position: 200px 100%; 
-    -webkit-mask-size: 100px 180%; 
+    -webkit-mask-size: 200px 120%; 
   }
 }
 
@@ -949,9 +949,25 @@
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20100%20100%27%20preserveAspectRatio=%27none%27%3E%3Cpath%20d=%27M0,75%20Q25,65%2050,75%20T100,75%20L100,100%20L0,100%20Z%27%20fill=%27black%27/%3E%3C/svg%3E");
   -webkit-mask-repeat: repeat-x;
   
-  opacity: 0.6;
+  opacity: 0.15;
   pointer-events: none;
   z-index: 1;
+}
+
+.modal-completionist-wave {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+  background-size: 300% 100%;
+  animation: rgb-shift 5s linear infinite, wave-flow 6s ease-in-out infinite;
+  
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20100%20100%27%20preserveAspectRatio=%27none%27%3E%3Cpath%20d=%27M0,75%20Q25,65%2050,75%20T100,75%20L100,100%20L0,100%20Z%27%20fill=%27black%27/%3E%3C/svg%3E");
+  -webkit-mask-repeat: repeat-x;
+  
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
 }
 
 @keyframes rgb-fade {
