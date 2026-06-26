@@ -48,7 +48,7 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
       where: { station: { userId } },
       include: { _count: { select: { collaborators: true } } }
     });
-    return sectors.some((s: any) => s._count.collaborators >= 100);
+    return sectors.some((s: any) => s._count.collaborators >= 20);
   },
   "early-adopter": async (userId: string) => {
     const user = await db.user.findUnique({ where: { id: userId }, select: { createdAt: true } });
@@ -72,10 +72,11 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
     return messages.length >= 100 && uniqueFriends >= 15;
   },
   "cosmic-explorer": async (userId: string) => {
-    const count = await db.stationVisit.count({
+    const visits = await db.stationVisit.groupBy({
+      by: ['stationId'],
       where: { visitorId: userId }
     });
-    return count >= 100;
+    return visits.length >= 100;
   },
   "sector-heiress": async (userId: string) => {
     const transfers = await db.chatMessage.findMany({
@@ -171,6 +172,62 @@ export const BADGE_CHECKS: Record<string, (userId: string) => Promise<boolean>> 
       include: { _count: { select: { collaborators: true } } }
     });
     return sectors.some((s: any) => s._count.collaborators >= 10000);
+  },
+  "cosmic-charmer": async (userId: string) => {
+    const messages = await db.chatMessage.groupBy({
+      by: ['receiverId'],
+      where: { senderId: userId },
+      _count: true
+    });
+    return messages.some(m => m._count >= 1000);
+  },
+  "creator-ally": async (userId: string) => {
+    const creatorEmails = (process.env.CREATOR_EMAILS || "").split(",").map(e => e.trim());
+    if (creatorEmails.length === 0) return false;
+    
+    const creators = await db.user.findMany({
+      where: { email: { in: creatorEmails } },
+      select: { id: true }
+    });
+    const creatorIds = creators.map((c: any) => c.id);
+    if (creatorIds.length === 0) return false;
+
+    const friendship = await db.friendship.findFirst({
+      where: {
+        OR: [
+          { requesterId: userId, receiverId: { in: creatorIds } },
+          { requesterId: { in: creatorIds }, receiverId: userId }
+        ],
+        status: "ACCEPTED"
+      }
+    });
+    return !!friendship;
+  },
+  "shattered": async (userId: string) => {
+    const rejectedFriends = await db.friendship.count({
+      where: { requesterId: userId, status: "REJECTED" }
+    });
+    const rejectedTransfers = await db.chatMessage.count({
+      where: { senderId: userId, type: "OWNERSHIP_TRANSFER_REJECTED" }
+    });
+    const rejectedCollabs = await db.chatMessage.count({
+      where: { senderId: userId, type: "COLLAB_REJECTED" }
+    });
+    
+    return rejectedFriends >= 10 && rejectedTransfers >= 10 && rejectedCollabs >= 10;
+  },
+  "zodiac-horizon": async (userId: string) => {
+    const visits = await db.stationVisit.groupBy({
+      by: ['stationId'],
+      where: { visitorId: userId }
+    });
+    if (visits.length < 999) return false;
+
+    const isCompletionist = await BADGE_CHECKS["the-completionist"](userId);
+    if (!isCompletionist) return false;
+    
+    const isGalactic = await BADGE_CHECKS["galactic-center"](userId);
+    return isGalactic;
   }
 };
 

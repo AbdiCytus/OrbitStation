@@ -158,7 +158,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
   {
     id: "cosmic-charmer",
     name: "Cosmic Charmer",
-    hint: "Have a 100+ day chat streak with a friend.",
+    hint: "Exchange 1,000+ messages with a single friend.",
     color: "pink",
     icon: "HeartIcon",
     effectClass: "badge-confidant",
@@ -203,7 +203,7 @@ export const BADGE_REGISTRY: BadgeDef[] = [
   {
     id: "shattered",
     name: "Shattered",
-    hint: "Experience rejection: friend request denied (4x), ownership transfer denied (4x), collab invite denied (4x), demoted (4x), kicked (4x), muted (4x), and blinded (4x).",
+    hint: "Experience true rejection: Have 10 friend requests denied, 10 ownership transfers rejected, and 10 collab invites ignored.",
     color: "gray",
     icon: "FaceFrownIcon",
     effectClass: "badge-shattered",
