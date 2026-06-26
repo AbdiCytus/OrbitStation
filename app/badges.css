@@ -924,11 +924,8 @@
 
 /* Thin RGB Wave Effect (Water-like) */
 @keyframes wave-flow {
-  0% { -webkit-mask-position: 0px 0px; }
-  25% { -webkit-mask-position: 50px -8px; }
-  50% { -webkit-mask-position: 100px 8px; }
-  75% { -webkit-mask-position: 150px -8px; }
-  100% { -webkit-mask-position: 200px 0px; }
+  0% { -webkit-mask-position: 0px 0px, 0px 0px; }
+  100% { -webkit-mask-position: 300px 0px, -300px 0px; }
 }
 
 .badge-completionist::after {
@@ -938,13 +935,15 @@
   border-radius: inherit;
   background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
   background-size: 300% 100%;
-  animation: rgb-shift 8s linear infinite, wave-flow 6s ease-in-out infinite;
+  animation: rgb-shift 8s linear infinite, wave-flow 12s linear infinite;
   
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0,25 Q25,10 50,25 T100,25 L100,100 L0,100 Z' fill='black'/%3E%3C/svg%3E");
-  -webkit-mask-size: 100px 200%;
-  -webkit-mask-repeat: repeat-x;
+  -webkit-mask-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0,35 Q25,20 50,35 T100,35 L100,100 L0,100 Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0,45 Q25,30 50,45 T100,45 L100,100 L0,100 Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100px 200%, 150px 200%;
+  -webkit-mask-repeat: repeat-x, repeat-x;
   
-  opacity: 0.3;
+  opacity: 0.15;
   pointer-events: none;
   z-index: 0;
 }
