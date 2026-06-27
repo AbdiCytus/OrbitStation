@@ -98,6 +98,7 @@ model User {
   shortcuts        String?        @default("{\"publicStation\":\"F1\",\"friends\":\"F2\",\"analytics\":\"F3\",\"settings\":\"F4\"}")
   typingIndicators TypingIndicator[]
   blindedInSectors BlindedMember[] @relation("BlindedUsers")
+  ownedOAuthApps   OAuthApp[]      @relation("OwnedApps")
 }
 
 /// Dasbor utama milik Pilot, disebut "Station"
@@ -287,4 +288,31 @@ model BlindedMember {
   user     User     @relation("BlindedUsers", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([sectorId, userId])
+}
+
+// ============================================================
+// OAUTH PROVIDER MODELS (SSO Orbit Station)
+// ============================================================
+
+/// Aplikasi pihak ketiga yang terdaftar untuk menggunakan SSO Orbit Station
+model OAuthApp {
+  id           String   @id @default(cuid())
+  name         String
+  clientId     String   @unique
+  clientSecret String
+  redirectUris String[] // Array URL callback yang sah
+  ownerId      String
+  createdAt    DateTime @default(now())
+
+  owner        User     @relation("OwnedApps", fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+/// Tiket sementara (Authorization Code) untuk proses pertukaran token
+model OAuthCode {
+  code        String   @id // Tiket/kode unik
+  clientId    String
+  userId      String
+  redirectUri String
+  expiresAt   DateTime // Hanya berlaku beberapa menit
+  createdAt   DateTime @default(now())
 }
