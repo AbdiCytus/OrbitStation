@@ -158,14 +158,23 @@ export default function DeveloperTab() {
             Register apps that can use Orbit Station as a login provider.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => setShowCreateModal(true)}
-          style={{ flexShrink: 0 }}
-        >
-          + New App
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => window.open("/docs", "_blank")}
+            style={{ fontSize: "0.8125rem" }}
+          >
+            📖 View Documentation
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            + New App
+          </button>
+        </div>
       </div>
 
       {/* App List */}
