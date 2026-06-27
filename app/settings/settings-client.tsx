@@ -111,8 +111,15 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
   const [shortcuts, setShortcuts] = useState<typeof defaultShortcuts>(profile.shortcuts ? { ...defaultShortcuts, ...JSON.parse(profile.shortcuts) } : defaultShortcuts);
   const [activeTab, setActiveTab] = useState<"profile" | "public" | "preferences" | "shortcuts" | "developer">("profile");
   const [isScrolled, setIsScrolled] = useState(false);
+  
+  const [autoHttps, setAutoHttps] = useState(true);
+  const [autoFetchMeta, setAutoFetchMeta] = useState(true);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      setAutoHttps(localStorage.getItem("os_auto_https") !== "false");
+      setAutoFetchMeta(localStorage.getItem("os_auto_fetch_meta") !== "false");
+    }
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
     };
@@ -276,6 +283,8 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
         setErrorMsg(data.error ?? "Something went wrong");
         toast.error(data.error ?? "Failed to save settings");
       } else {
+        localStorage.setItem("os_auto_https", String(autoHttps));
+        localStorage.setItem("os_auto_fetch_meta", String(autoFetchMeta));
         setStatus("saved");
         toast.success("Settings saved successfully");
         if (animationEnabled) {
@@ -753,6 +762,44 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                         type="checkbox"
                         checked={allowFriendRequests}
                         onChange={(e) => setAllowFriendRequests(e.target.checked)}
+                      />
+                      <span className="toggle-thumb" />
+                    </label>
+                  </div>
+
+                  {/* Auto-prefix HTTPS toggle */}
+                  <div className="settings-toggle-row p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-label text-white font-medium">Auto Prefix HTTPS</span>
+                      <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
+                        Automatically fill 'https://' when adding a new beacon URL.
+                      </span>
+                    </div>
+                    <label className="toggle-switch" htmlFor="toggle-auto-https">
+                      <input
+                        id="toggle-auto-https"
+                        type="checkbox"
+                        checked={autoHttps}
+                        onChange={(e) => setAutoHttps(e.target.checked)}
+                      />
+                      <span className="toggle-thumb" />
+                    </label>
+                  </div>
+
+                  {/* Auto Fetch Metadata toggle */}
+                  <div className="settings-toggle-row p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-label text-white font-medium">Auto Fetch Metadata</span>
+                      <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
+                        Automatically fetch website title, description, and image when entering a URL.
+                      </span>
+                    </div>
+                    <label className="toggle-switch" htmlFor="toggle-auto-fetch">
+                      <input
+                        id="toggle-auto-fetch"
+                        type="checkbox"
+                        checked={autoFetchMeta}
+                        onChange={(e) => setAutoFetchMeta(e.target.checked)}
                       />
                       <span className="toggle-thumb" />
                     </label>

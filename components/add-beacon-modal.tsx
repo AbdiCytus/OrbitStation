@@ -103,23 +103,37 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
   };
 
   async function handleUrlBlur() {
-    const normalized = normalizeUrl(urlRaw);
-    if (normalized !== urlRaw) setUrlRaw(normalized);
-    if (normalized.length > 8 && normalized.includes(".")) {
+    let normalized = urlRaw;
+    const autoHttps = localStorage.getItem("os_auto_https") !== "false";
+    
+    if (autoHttps) {
+      normalized = normalizeUrl(urlRaw);
+      if (normalized !== urlRaw) setUrlRaw(normalized);
+    }
+    
+    const autoFetchMeta = localStorage.getItem("os_auto_fetch_meta") !== "false";
+    if (autoFetchMeta && normalized.length > 8 && normalized.includes(".")) {
       await fetchMeta(normalized);
     }
   }
 
   function handleUrlChange(value: string) {
-    const cleaned = value.replace(/^(https?:\/\/)+/, "");
-    setUrlRaw(cleaned);
+    const autoHttps = localStorage.getItem("os_auto_https") !== "false";
+    if (autoHttps) {
+      const cleaned = value.replace(/^(https?:\/\/)+/, "");
+      setUrlRaw(cleaned);
+    } else {
+      setUrlRaw(value);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const finalUrl = normalizeUrl(urlRaw);
+    const autoHttps = localStorage.getItem("os_auto_https") !== "false";
+    const finalUrl = autoHttps ? normalizeUrl(urlRaw) : (urlRaw.trim() || urlRaw);
+    
     const errors: { url?: string, title?: string, sector?: string } = {};
-    if (!finalUrl || finalUrl === "https://") errors.url = "URL is required.";
+    if (!finalUrl || (autoHttps && finalUrl === "https://")) errors.url = "URL is required.";
     if (!title.trim()) errors.title = "Title is required.";
     if (!sectorId) errors.sector = "Sector is required.";
 
@@ -223,7 +237,10 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                 {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
               </label>
               <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
-                <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>
+                {(() => {
+                  const autoHttps = typeof window !== "undefined" && localStorage.getItem("os_auto_https") !== "false";
+                  return autoHttps ? <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span> : null;
+                })()}
                 <input
                   ref={inputRef}
                   id="beacon-url"

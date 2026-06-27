@@ -51,7 +51,7 @@ function highlight(raw: string, lang: string): string {
   return restore(s);
 }
 
-const ORBIT_URL = "https://your-orbit-domain.com";
+const ORBIT_URL = "https://orbit-station-domain.com";
 
 const DOCS: TechDoc[] = [
   {
@@ -142,7 +142,7 @@ export default function DocsPage() {
       
       <div style={{ position: "relative", zIndex: 1, flex: 1 }}>
       {/* Top Nav */}
-      <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "1rem 2rem", display: "flex", alignItems: "center", gap: "1rem", position: "sticky", top: 0, zIndex: 50, background: "rgba(3,7,18,0.85)", backdropFilter: "blur(16px)" }}>
+      <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "1rem 2rem", display: "flex", alignItems: "center", gap: "1rem", position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(3,7,18,0.85)", backdropFilter: "blur(16px)" }}>
         <a href="/settings" style={{ color: "#6b7db3", fontSize: "0.8rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.375rem" }}>
           ← Back to Settings
         </a>
@@ -153,7 +153,7 @@ export default function DocsPage() {
         <span style={{ color: "#f0f4ff", fontWeight: 700, fontSize: "0.875rem" }}>Developer Documentation</span>
       </div>
 
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "2rem 1.5rem" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "6rem 1.5rem 2rem" }}>
         {/* Hero */}
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
           <h1 style={{ fontSize: "2.25rem", fontWeight: 800, margin: "0 0 0.75rem", background: "linear-gradient(135deg, #a78bfa, #22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
