@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { getMyOAuthApps, createOAuthApp, deleteOAuthApp, updateOAuthApp } from "@/lib/actions";
+import { PlayIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 type OAuthApp = {
   id: string;
@@ -201,26 +202,29 @@ export default function DeveloperTab() {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  style={{ padding: "0.375rem 0.75rem", fontSize: "0.8rem", background: "rgba(34, 211, 238, 0.1)", color: "#22d3ee", borderColor: "rgba(34, 211, 238, 0.3)" }}
+                  style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(34, 211, 238, 0.1)", color: "#22d3ee", borderColor: "rgba(34, 211, 238, 0.3)" }}
                   onClick={() => window.open(`/oauth-test?client_id=${app.clientId}`, "_blank")}
+                  title="Test App"
                 >
-                  Test App
+                  <PlayIcon style={{ width: "16px", height: "16px" }} />
                 </button>
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  style={{ padding: "0.375rem 0.75rem", fontSize: "0.8rem" }}
+                  style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
                   onClick={() => { setEditTarget(app); setEditName(app.name); setEditRedirectUris(app.redirectUris.join("\n")); }}
+                  title="Edit"
                 >
-                  Edit
+                  <PencilIcon style={{ width: "16px", height: "16px" }} />
                 </button>
                 <button
                   type="button"
                   className="btn btn-danger-outline"
-                  style={{ padding: "0.375rem 0.75rem", fontSize: "0.8rem" }}
+                  style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
                   onClick={() => setDeleteTarget(app)}
+                  title="Delete"
                 >
-                  Delete
+                  <TrashIcon style={{ width: "16px", height: "16px" }} />
                 </button>
               </div>
             </div>
