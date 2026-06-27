@@ -44,7 +44,34 @@ export async function GET(req: Request) {
     // Belum login: simpan params dan arahkan ke halaman login dulu
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", req.url);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(loginUrl, 302);
+  }
+
+  // --- Cek apakah app ini milik user sendiri, ATAU user sudah pernah consent ---
+  const isOwner = oauthApp.ownerId === session.user.id;
+  const existingConsent = await db.oAuthConsent.findUnique({
+    where: {
+      userId_clientId: {
+        userId: session.user.id,
+        clientId: client_id,
+      }
+    }
+  });
+
+  if (isOwner || existingConsent) {
+    // Auto-approve: Langsung buat kode dan redirect tanpa menampilkan HTML consent
+    const code = `code_${generateCode(40)}`;
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 menit
+
+    await db.oAuthCode.create({
+      data: { code, clientId: client_id, userId: session.user.id, redirectUri: redirect_uri, expiresAt },
+    });
+
+    const callbackUrl = new URL(redirect_uri);
+    callbackUrl.searchParams.set("code", code);
+    if (state) callbackUrl.searchParams.set("state", state);
+
+    return NextResponse.redirect(callbackUrl.toString(), 302);
   }
 
   // --- Tampilkan Consent Screen (HTML inline) ---
@@ -237,7 +264,7 @@ export async function POST(req: Request) {
     denyUrl.searchParams.set("error", "access_denied");
     denyUrl.searchParams.set("error_description", "The user denied access.");
     if (state) denyUrl.searchParams.set("state", state);
-    return NextResponse.redirect(denyUrl.toString());
+    return NextResponse.redirect(denyUrl.toString(), 302);
   }
 
   // Validasi client sekali lagi
@@ -245,6 +272,21 @@ export async function POST(req: Request) {
   if (!oauthApp || !oauthApp.redirectUris.includes(redirect_uri)) {
     return NextResponse.json({ error: "invalid_client" }, { status: 400 });
   }
+
+  // Simpan consent agar ke depannya bisa bypass
+  await db.oAuthConsent.upsert({
+    where: {
+      userId_clientId: {
+        userId: session.user.id,
+        clientId: client_id,
+      }
+    },
+    update: {},
+    create: {
+      userId: session.user.id,
+      clientId: client_id,
+    }
+  });
 
   // Generate authorization code (kode sekali pakai, expired 5 menit)
   const code = `code_${generateCode(40)}`;
@@ -265,7 +307,7 @@ export async function POST(req: Request) {
   callbackUrl.searchParams.set("code", code);
   if (state) callbackUrl.searchParams.set("state", state);
 
-  return NextResponse.redirect(callbackUrl.toString());
+  return NextResponse.redirect(callbackUrl.toString(), 302);
 }
 
 function generateCode(length: number): string {

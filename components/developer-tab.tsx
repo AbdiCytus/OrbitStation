@@ -201,6 +201,14 @@ export default function DeveloperTab() {
                 <button
                   type="button"
                   className="btn btn-secondary"
+                  style={{ padding: "0.375rem 0.75rem", fontSize: "0.8rem", background: "rgba(34, 211, 238, 0.1)", color: "#22d3ee", borderColor: "rgba(34, 211, 238, 0.3)" }}
+                  onClick={() => window.open(`/oauth-test?client_id=${app.clientId}`, "_blank")}
+                >
+                  Test App
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   style={{ padding: "0.375rem 0.75rem", fontSize: "0.8rem" }}
                   onClick={() => { setEditTarget(app); setEditName(app.name); setEditRedirectUris(app.redirectUris.join("\n")); }}
                 >

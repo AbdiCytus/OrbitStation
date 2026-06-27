@@ -316,3 +316,13 @@ model OAuthCode {
   expiresAt   DateTime // Hanya berlaku beberapa menit
   createdAt   DateTime @default(now())
 }
+
+/// Menyimpan data "Remember Consent" agar user tidak perlu klik Allow terus menerus
+model OAuthConsent {
+  id        String   @id @default(cuid())
+  userId    String
+  clientId  String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, clientId])
+}
