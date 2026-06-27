@@ -9,6 +9,7 @@ import { deleteAccount } from "@/lib/actions";
 import { toast } from "sonner";
 import { BADGE_REGISTRY, BADGE_COLORS } from "@/lib/badges/registry";
 import * as SolidIcons from "@heroicons/react/24/solid";
+import DeveloperTab from "@/components/developer-tab";
 
 const DynamicIcon = ({ name, className }: { name: string, className?: string }) => {
   const Icon = (SolidIcons as any)[name];
@@ -108,7 +109,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
 
   const defaultShortcuts = { publicStation: "F1", friends: "F2", analytics: "F3", settings: "F4" };
   const [shortcuts, setShortcuts] = useState<typeof defaultShortcuts>(profile.shortcuts ? { ...defaultShortcuts, ...JSON.parse(profile.shortcuts) } : defaultShortcuts);
-  const [activeTab, setActiveTab] = useState<"profile" | "public" | "preferences" | "shortcuts">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "public" | "preferences" | "shortcuts" | "developer">("profile");
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -307,12 +308,14 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                   {activeTab === "public" && "Public Station"}
                   {activeTab === "preferences" && "Preferences"}
                   {activeTab === "shortcuts" && "Shortcuts"}
+                  {activeTab === "developer" && "Developer"}
                 </h1>
                 <p className="settings-page-sub m-0 mt-1">
                   {activeTab === "profile" && "Manage your personal profile details."}
                   {activeTab === "public" && "Customize how others see your station."}
                   {activeTab === "preferences" && "Adjust your station experience."}
                   {activeTab === "shortcuts" && "Configure quick navigation keys."}
+                  {activeTab === "developer" && "Register apps to use Orbit Station as a login provider."}
                 </p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -367,6 +370,10 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
               <button type="button" onClick={() => setActiveTab("shortcuts")} className={`text-left rounded-lg flex items-center transition-colors ${activeTab === "shortcuts" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`} style={{ padding: "0.75rem 1rem", gap: "0.75rem" }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 Shortcuts
+              </button>
+              <button type="button" onClick={() => setActiveTab("developer")} className={`text-left rounded-lg flex items-center transition-colors ${activeTab === "developer" ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`} style={{ padding: "0.75rem 1rem", gap: "0.75rem" }}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                Developer
               </button>
             </div>
 
@@ -890,6 +897,11 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                     />
                   </div>
                 </div>
+              </section>
+
+              {/* Developer Section */}
+              <section className="settings-section settings-inner-section desktop-only-section" style={{ display: activeTab === "developer" ? "flex" : "none" }}>
+                <DeveloperTab />
               </section>
 
             </div>

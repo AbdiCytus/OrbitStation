@@ -1690,3 +1690,118 @@ export async function unpinGroupMessageAction(sectorId: string) {
 
   return { success: true };
 }
+
+// ============================================================
+// OAUTH APP ACTIONS (SSO Identity Provider)
+// ============================================================
+
+/** Generate URL-safe random string */
+function generateSecret(length: number = 32): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+/** Ambil semua OAuth App milik user yang sedang login */
+export async function getMyOAuthApps() {
+  const user = await requireAuth();
+  const apps = await db.oAuthApp.findMany({
+    where: { ownerId: user.id },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      clientId: true,
+      redirectUris: true,
+      createdAt: true,
+      // clientSecret TIDAK dikembalikan di sini karena ini adalah daftar (list)
+    }
+  });
+  return apps;
+}
+
+/** Buat OAuth App baru, kembalikan clientSecret HANYA di response ini */
+export async function createOAuthApp(name: string, redirectUris: string[]) {
+  const user = await requireAuth();
+
+  if (!name.trim()) return { error: "App name is required." };
+  if (!redirectUris.length || !redirectUris[0].trim()) return { error: "At least one redirect URI is required." };
+
+  // Validasi format URL setiap redirect URI
+  for (const uri of redirectUris) {
+    try {
+      const parsed = new URL(uri.trim());
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return { error: `Redirect URI must use http or https: ${uri}` };
+      }
+    } catch {
+      return { error: `Invalid redirect URI format: ${uri}` };
+    }
+  }
+
+  const clientId = `orbit_${generateSecret(16)}`;
+  const clientSecret = `secret_${generateSecret(40)}`;
+
+  const app = await db.oAuthApp.create({
+    data: {
+      name: name.trim(),
+      clientId,
+      clientSecret,
+      redirectUris: redirectUris.map(u => u.trim()).filter(Boolean),
+      ownerId: user.id,
+    }
+  });
+
+  revalidatePath("/settings");
+  // Kembalikan secret HANYA satu kali saat baru dibuat
+  return { data: { ...app, clientSecret } };
+}
+
+/** Hapus OAuth App */
+export async function deleteOAuthApp(appId: string) {
+  const user = await requireAuth();
+
+  const app = await db.oAuthApp.findFirst({ where: { id: appId, ownerId: user.id } });
+  if (!app) return { error: "App not found or access denied." };
+
+  await db.oAuthApp.delete({ where: { id: appId } });
+
+  revalidatePath("/settings");
+  return { success: true };
+}
+
+/** Update nama dan redirect URIs sebuah app */
+export async function updateOAuthApp(appId: string, name: string, redirectUris: string[]) {
+  const user = await requireAuth();
+
+  const app = await db.oAuthApp.findFirst({ where: { id: appId, ownerId: user.id } });
+  if (!app) return { error: "App not found or access denied." };
+
+  if (!name.trim()) return { error: "App name is required." };
+
+  for (const uri of redirectUris) {
+    try {
+      const parsed = new URL(uri.trim());
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return { error: `Redirect URI must use http or https: ${uri}` };
+      }
+    } catch {
+      return { error: `Invalid redirect URI format: ${uri}` };
+    }
+  }
+
+  const updated = await db.oAuthApp.update({
+    where: { id: appId },
+    data: {
+      name: name.trim(),
+      redirectUris: redirectUris.map(u => u.trim()).filter(Boolean),
+    }
+  });
+
+  revalidatePath("/settings");
+  return { data: updated };
+}
+
