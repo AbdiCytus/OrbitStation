@@ -125,12 +125,13 @@ export default function DeveloperTab() {
   const glassCard = {
     background: "var(--glass-bg)",
     border: "1px solid var(--glass-border)",
-    borderRadius: "12px",
     backdropFilter: "var(--glass-blur)",
+    borderRadius: "var(--radius-lg)"
   };
-
+  
   const overlayStyle: React.CSSProperties = {
     position: "fixed", inset: 0,
+    borderRadius: "var(--radius-lg)",
     background: "rgba(0,0,0,0.7)",
     backdropFilter: "blur(8px)",
     display: "flex", alignItems: "center", justifyContent: "center",
@@ -145,6 +146,7 @@ export default function DeveloperTab() {
     display: "flex",
     flexDirection: "column",
     gap: "1.25rem",
+    borderRadius: "var(--radius-lg)",
     boxShadow: "0 25px 50px rgba(0,0,0,0.6)",
   };
 
