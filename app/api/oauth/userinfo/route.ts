@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { jwtVerify } from "jose";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Authorization",
+};
+
+// Preflight handler
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 // ============================================================
 // GET /api/oauth/userinfo
 // Kembalikan profil user berdasarkan Bearer JWT yang valid
@@ -80,5 +91,5 @@ export async function GET(req: Request) {
     // Extended Orbit Station fields
     callsign: user.callsign,
     title_badge: user.titleBadge,
-  });
+  }, { headers: CORS_HEADERS });
 }

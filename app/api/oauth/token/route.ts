@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { SignJWT } from "jose";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+// Preflight handler
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 // ============================================================
 // POST /api/oauth/token
 // Server-to-server: Tukarkan authorization_code dengan JWT access_token
@@ -101,5 +112,5 @@ export async function POST(req: Request) {
     token_type: "Bearer",
     expires_in: expiresInSeconds,
     scope: "profile email",
-  });
+  }, { headers: CORS_HEADERS });
 }
