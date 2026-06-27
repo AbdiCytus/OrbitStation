@@ -2,38 +2,99 @@
 import { useState } from "react";
 
 type TechId = "nextjs" | "express" | "laravel" | "django" | "fastapi" | "go";
-
 type Step = { title: string; code?: string; lang?: string; note?: string };
-type TechDoc = { id: TechId; name: string; color: string; icon: string; steps: Step[] };
+type TechDoc = { id: TechId; name: string; color: string; Logo: () => React.ReactElement; steps: Step[] };
 
-function highlight(code: string, lang: string): string {
+
+// ── Placeholder-based syntax highlighter (avoids re-highlighting spans) ──
+function highlight(raw: string, lang: string): string {
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  let s = esc(code);
+  const ph: string[] = [];
+  const save = (html: string) => { const k = `\x00${ph.length}\x00`; ph.push(html); return k; };
+  const restore = (s: string) => s.replace(/\x00(\d+)\x00/g, (_, i) => ph[Number(i)]);
+
+  let s = esc(raw);
+
   if (lang === "bash") {
-    s = s.replace(/(#[^\n]*)/g, '<span style="color:#6b7db3">$1</span>');
-    s = s.replace(/\b(curl|node|php|python|go|npm|composer|pip|export|echo)\b/g, '<span style="color:#22d3ee">$1</span>');
-    s = s.replace(/"([^"]*)"/g, '<span style="color:#a3e635">"$1"</span>');
-    return s;
+    s = s.replace(/("([^"]*)")/g, (_, m) => save(`<span style="color:#a3e635">${esc(m)}</span>`));
+    s = s.replace(/(#[^\n]+)/g, (m) => save(`<span style="color:#4b5675">${m}</span>`));
+    s = s.replace(/\b(curl|node|php|python3?|go|npm|composer|pip3?|export|echo|git)\b/g,
+      (m) => save(`<span style="color:#22d3ee">${m}</span>`));
+    s = s.replace(/\b([A-Z_][A-Z0-9_]{2,})\b/g,
+      (m) => save(`<span style="color:#fb923c">${m}</span>`));
+    return restore(s);
   }
-  // strings
-  s = s.replace(/(&quot;|&#39;|`)(.*?)\1/g, '<span style="color:#a3e635">$1$2$1</span>');
-  // keywords
-  const kws = /\b(import|from|export|default|const|let|var|function|return|async|await|if|else|new|class|extends|require|use|namespace|public|protected|private|def|router|app|package|fmt|func|type|struct|interface|for|range)\b/g;
-  s = s.replace(kws, '<span style="color:#c084fc">$1</span>');
-  // types/components
-  s = s.replace(/\b([A-Z][A-Za-z0-9_]*)\b/g, '<span style="color:#38bdf8">$1</span>');
-  // comments
-  s = s.replace(/(\/\/[^\n]*|#[^\n]*)/g, '<span style="color:#4b5675">$1</span>');
-  // numbers
-  s = s.replace(/\b(\d+)\b/g, '<span style="color:#fb923c">$1</span>');
-  return s;
+
+  // 1. strings first
+  s = s.replace(/(`[^`]*`|&quot;[^&]*&quot;|&#39;[^&]*&#39;)/g,
+    (m) => save(`<span style="color:#a3e635">${m}</span>`));
+  // 2. comments
+  s = s.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/|#[^\n]*)/g,
+    (m) => save(`<span style="color:#4b5675">${m}</span>`));
+  // 3. decorators / annotations
+  s = s.replace(/(@\w+)/g, (m) => save(`<span style="color:#f97316">${m}</span>`));
+  // 4. keywords
+  const KW = /\b(import|from|export|default|const|let|var|function|return|async|await|if|else|new|class|extends|require|use|namespace|public|protected|private|def|self|router|app|package|fmt|func|type|struct|interface|for|range|in|and|or|not|True|False|None|null|undefined|true|false|echo|void|static)\b/g;
+  s = s.replace(KW, (m) => save(`<span style="color:#c084fc">${m}</span>`));
+  // 5. PascalCase types
+  s = s.replace(/\b([A-Z][A-Za-z0-9_]*)\b/g, (m) => save(`<span style="color:#38bdf8">${m}</span>`));
+  // 6. numbers
+  s = s.replace(/\b(\d+)\b/g, (m) => save(`<span style="color:#fb923c">${m}</span>`));
+
+  return restore(s);
 }
+
+// ── SVG Logos ──
+const Logos: Record<TechId, () => React.ReactElement> = {
+  nextjs: () => (
+    <svg width="20" height="20" viewBox="0 0 180 180" fill="none">
+      <mask id="nj" style={{maskType:"alpha"}} maskUnits="userSpaceOnUse" x="0" y="0" width="180" height="180">
+        <circle cx="90" cy="90" r="90" fill="black"/>
+      </mask>
+      <g mask="url(#nj)">
+        <circle cx="90" cy="90" r="90" fill="black"/>
+        <path d="M149.508 157.52L69.142 54H54V125.97H66.1758V69.3059L139.366 164.985C142.774 162.575 146.064 160.032 149.508 157.52Z" fill="white"/>
+        <rect x="115" y="54" width="12" height="72" fill="white"/>
+      </g>
+    </svg>
+  ),
+  express: () => (
+    <svg width="20" height="20" viewBox="0 0 256 256" fill="none">
+      <rect width="256" height="256" rx="32" fill="#000"/>
+      <text x="20" y="165" fontSize="130" fontWeight="900" fill="white" fontFamily="Arial">e</text>
+    </svg>
+  ),
+  laravel: () => (
+    <svg width="20" height="20" viewBox="0 0 50 52" fill="none">
+      <path d="M49.626 11.564a.809.809 0 0 1 .028.209v10.972a.8.8 0 0 1-.402.694l-9.209 5.302V39.25c0 .286-.152.55-.4.694L20.42 51.01c-.044.025-.092.041-.14.058-.018.006-.035.017-.054.022a.805.805 0 0 1-.41 0c-.022-.006-.042-.018-.063-.026-.044-.016-.09-.03-.132-.054L.402 39.944A.801.801 0 0 1 0 39.25V6.334c0-.072.01-.143.028-.209.006-.022.02-.041.028-.063.014-.039.026-.079.046-.116.01-.02.028-.037.042-.056.024-.033.046-.067.076-.097.023-.02.05-.039.076-.058.026-.02.049-.044.078-.06h.001L10.21.143a.802.802 0 0 1 .8 0l9.626 5.556h.001c.029.017.051.04.078.06.026.018.053.038.076.058.03.03.052.064.076.097.014.019.032.036.042.056.02.037.032.077.046.116.008.022.022.041.028.063.018.066.029.137.029.209v20.559l8.008-4.618V11.773c0-.072.011-.143.029-.209.006-.022.02-.041.028-.063.014-.039.026-.079.046-.116.01-.02.028-.037.042-.056.024-.033.046-.067.076-.097.023-.02.05-.039.076-.058.026-.02.049-.044.078-.06h.001l9.626-5.555a.801.801 0 0 1 .8 0l9.626 5.555c.03.016.053.04.079.06.025.019.052.038.076.058.03.03.051.064.075.097.014.019.032.036.042.056.021.037.033.077.046.116.008.022.022.041.028.063zm-1.574 10.718V13.87l-3.363 1.94-4.646 2.678v8.412l8.01-4.618zm-9.61 16.505V30.37l-4.57 2.612-13.05 7.458v8.489l17.62-10.102zM1.6 7.679v31.175L19.22 48.956v-8.49l-9.204-5.256-.003-.002-.004-.002c-.025-.015-.05-.035-.074-.053-.02-.017-.042-.03-.061-.048-.024-.02-.043-.045-.065-.068-.016-.02-.035-.038-.049-.059-.018-.027-.03-.057-.044-.086-.012-.026-.025-.051-.032-.079-.012-.037-.016-.075-.02-.113-.003-.02-.01-.038-.01-.058V14.537L4.965 11.86 1.6 7.679z" fill="#FF2D20"/>
+    </svg>
+  ),
+  django: () => (
+    <svg width="20" height="20" viewBox="0 0 256 256" fill="none">
+      <rect width="256" height="256" rx="32" fill="#092E20"/>
+      <path d="M135.6 10h34.8v177.4c-17.8 3.4-30.9 4.8-45.1 4.8-42.5 0-64.6-19.2-64.6-56 0-35.5 23.5-58.5 59.9-58.5 5.7 0 10 .5 15 1.9V10zm0 96.5c-4-1.4-7.3-1.9-11.5-1.9-17.6 0-27.8 10.8-27.8 29.7 0 18.4 9.7 28.5 27.5 28.5 3.8 0 6.9-.3 11.8-1.1v-55.2z" fill="white"/>
+    </svg>
+  ),
+  fastapi: () => (
+    <svg width="20" height="20" viewBox="0 0 256 256" fill="none">
+      <rect width="256" height="256" rx="128" fill="#009688"/>
+      <path d="M140 28L68 144h60l-12 84 84-116h-60z" fill="white"/>
+    </svg>
+  ),
+  go: () => (
+    <svg width="32" height="20" viewBox="0 0 206 78" fill="none">
+      <path d="M16.2 24.1c-.4 0-.5-.2-.3-.5l2.1-2.7c.2-.3.7-.5 1.1-.5h35.7c.4 0 .5.3.3.6l-1.7 2.6c-.2.3-.7.6-1 .6l-36.2-.1zM1 33.3c-.4 0-.5-.2-.3-.5l2.1-2.7c.2-.3.7-.5 1.1-.5h45.6c.4 0 .6.3.5.6l-.8 2.4c-.1.4-.5.6-.9.6L1 33.3zM25.3 42.5c-.4 0-.5-.3-.3-.6l1.4-2.5c.2-.3.6-.6 1-.6h20c.4 0 .6.3.6.7l-.2 2.4c0 .4-.4.7-.7.7l-21.8-.1z" fill="#00ACD7"/>
+      <path d="M153.1 22.1c-6.3 1.6-10.6 2.8-16.8 4.4-1.5.4-1.6.5-2.9-1-1.5-1.7-2.6-2.8-4.7-3.8-6.3-3.1-12.4-2.2-18.1 1.5-6.8 4.4-10.3 10.9-10.2 19 .1 8 5.6 14.6 13.5 15.7 6.8.9 12.5-1.5 17-6.6.9-1.1 1.7-2.3 2.7-3.7h-19.3c-2.1 0-2.6-1.3-1.9-3 1.3-3.1 3.7-8.3 5.1-10.9.3-.6 1-1.6 2.5-1.6h36.4c-.2 2.7-.2 5.4-.6 8.1-1.1 7.2-3.8 13.8-8.2 19.6-7.2 9.5-16.6 15.4-28.5 17-9.8 1.3-18.9-.6-26.9-6.6-7.4-5.6-11.6-13-12.7-22.2-1.3-10.9 1.9-20.7 8.5-29.3C94.1 9.7 103.4 4 114.3 2.1c8.8-1.5 17.2-.4 24.8 4.7 5 3.1 8.6 7.5 11 13.1.6.9.2 1.4-1 1.7v.5z" fill="#00ACD7"/>
+      <path d="M186.2 64.6c-9.1-.2-17.4-2.8-24.4-8.8-5.9-5.1-9.6-11.6-10.8-19.3-1.8-11.3 1.3-21.3 8.1-30.2 7.3-9.6 16.1-14.6 28-16.7 10.2-1.8 19.8-.8 28.5 5.1 7.9 5.4 12.8 12.7 14.1 22.3 1.7 13.5-2.2 24.5-11.5 33.9-6.6 6.7-14.7 10.9-24 12.8-2.7.5-5.4.6-8 .9zm23.8-40.4c-.1-1.3-.1-2.3-.3-3.3-1.8-9.9-10.9-15.5-20.4-13.3-9.3 2.1-15.3 8-17.5 17.4-1.8 7.8 2 15.7 9.2 19 5.9 2.6 11.8 2.2 17.4-.8 7.9-4.4 11.3-11.1 11.6-19z" fill="#00ACD7"/>
+    </svg>
+  ),
+};
 
 const ORBIT_URL = "https://your-orbit-domain.com";
 
 const DOCS: TechDoc[] = [
   {
-    id: "nextjs", name: "Next.js", color: "#fff", icon: "▲",
+    id: "nextjs", name: "Next.js", color: "#fff", Logo: Logos.nextjs,
     steps: [
       { title: "Install NextAuth.js", code: `npm install next-auth`, lang: "bash" },
       { title: "Add Environment Variables", code: `NEXTAUTH_URL=https://your-app.com\nNEXTAUTH_SECRET=your_secret_here\nORBIT_CLIENT_ID=orbit_xxxxxxxxxx\nORBIT_CLIENT_SECRET=secret_xxxxxxxxxx`, lang: "bash" },
@@ -43,7 +104,7 @@ const DOCS: TechDoc[] = [
     ],
   },
   {
-    id: "express", name: "Express.js", color: "#68d391", icon: "⬡",
+    id: "express", name: "Express.js", color: "#68d391", Logo: Logos.express,
     steps: [
       { title: "Install Dependencies", code: `npm install express express-session node-fetch dotenv`, lang: "bash" },
       { title: "Add Environment Variables (.env)", code: `PORT=3001\nAPP_URL=http://localhost:3001\nORBIT_URL=${ORBIT_URL}\nORBIT_CLIENT_ID=orbit_xxxxxxxxxx\nORBIT_CLIENT_SECRET=secret_xxxxxxxxxx\nSESSION_SECRET=your_session_secret`, lang: "bash" },
@@ -53,7 +114,7 @@ const DOCS: TechDoc[] = [
     ],
   },
   {
-    id: "laravel", name: "Laravel", color: "#fb923c", icon: "🅻",
+    id: "laravel", name: "Laravel", color: "#fb923c", Logo: Logos.laravel,
     steps: [
       { title: "Install Socialite", code: `composer require laravel/socialite`, lang: "bash" },
       { title: "Add to config/services.php", code: `'orbit' => [\n  'client_id'     => env('ORBIT_CLIENT_ID'),\n  'client_secret' => env('ORBIT_CLIENT_SECRET'),\n  'redirect'      => env('ORBIT_REDIRECT_URI'),\n  'base_uri'      => env('ORBIT_URL'),\n],`, lang: "php" },
@@ -64,7 +125,7 @@ const DOCS: TechDoc[] = [
     ],
   },
   {
-    id: "django", name: "Django", color: "#4ade80", icon: "🐍",
+    id: "django", name: "Django", color: "#4ade80", Logo: Logos.django,
     steps: [
       { title: "Install Dependencies", code: `pip install requests django`, lang: "bash" },
       { title: "Add Environment Variables", code: `export ORBIT_URL="${ORBIT_URL}"\nexport ORBIT_CLIENT_ID="orbit_xxxxxxxxxx"\nexport ORBIT_CLIENT_SECRET="secret_xxxxxxxxxx"\nexport ORBIT_REDIRECT_URI="https://your-app.com/auth/orbit/callback"`, lang: "bash" },
@@ -75,7 +136,7 @@ const DOCS: TechDoc[] = [
     ],
   },
   {
-    id: "fastapi", name: "FastAPI", color: "#06b6d4", icon: "⚡",
+    id: "fastapi", name: "FastAPI", color: "#06b6d4", Logo: Logos.fastapi,
     steps: [
       { title: "Install Dependencies", code: `pip install fastapi uvicorn httpx python-dotenv itsdangerous`, lang: "bash" },
       { title: "Add Environment Variables (.env)", code: `ORBIT_URL=${ORBIT_URL}\nORBIT_CLIENT_ID=orbit_xxxxxxxxxx\nORBIT_CLIENT_SECRET=secret_xxxxxxxxxx\nORBIT_REDIRECT_URI=https://your-app.com/auth/callback`, lang: "bash" },
@@ -84,7 +145,7 @@ const DOCS: TechDoc[] = [
     ],
   },
   {
-    id: "go", name: "Golang", color: "#38bdf8", icon: "Go",
+    id: "go", name: "Golang", color: "#38bdf8", Logo: Logos.go,
     steps: [
       { title: "Install Dependencies", code: `go mod init myapp\ngo get golang.org/x/oauth2`, lang: "bash" },
       { title: "Configure OAuth (main.go)", code: `package main\n\nimport (\n  "os"\n  "golang.org/x/oauth2"\n)\n\nvar orbitOAuthConfig = &oauth2.Config{\n  ClientID:     os.Getenv("ORBIT_CLIENT_ID"),\n  ClientSecret: os.Getenv("ORBIT_CLIENT_SECRET"),\n  RedirectURL:  os.Getenv("ORBIT_REDIRECT_URI"),\n  Endpoint: oauth2.Endpoint{\n    AuthURL:  os.Getenv("ORBIT_URL") + "/api/oauth/authorize",\n    TokenURL: os.Getenv("ORBIT_URL") + "/api/oauth/token",\n  },\n}`, lang: "go" },
@@ -111,11 +172,19 @@ export default function DocsPage() {
   return (
     <div style={{
       minHeight: "100dvh",
-      background: "#030712",
-      backgroundImage: "radial-gradient(ellipse at 20% 50%, rgba(124,92,252,0.07) 0%, transparent 60%), radial-gradient(ellipse at 80% 10%, rgba(34,211,238,0.05) 0%, transparent 50%)",
+      background: "linear-gradient(160deg, #0a0514 0%, #030712 40%, #050d1a 70%, #030d14 100%)",
+      backgroundAttachment: "fixed",
       fontFamily: "'Space Grotesk', system-ui, sans-serif",
       color: "#f0f4ff",
+      position: "relative",
     }}>
+      {/* Floating orbs */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: "-20%", left: "-10%", width: "60vw", height: "60vw", borderRadius: "50%", background: "radial-gradient(circle, rgba(124,92,252,0.12) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", top: "30%", right: "-15%", width: "50vw", height: "50vw", borderRadius: "50%", background: "radial-gradient(circle, rgba(34,211,238,0.07) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", bottom: "-10%", left: "20%", width: "40vw", height: "40vw", borderRadius: "50%", background: "radial-gradient(circle, rgba(91,63,222,0.09) 0%, transparent 70%)" }} />
+      </div>
+      <div style={{ position: "relative", zIndex: 1 }}>
       {/* Top Nav */}
       <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "1rem 2rem", display: "flex", alignItems: "center", gap: "1rem", position: "sticky", top: 0, zIndex: 50, background: "rgba(3,7,18,0.85)", backdropFilter: "blur(16px)" }}>
         <a href="/settings" style={{ color: "#6b7db3", fontSize: "0.8rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.375rem" }}>
@@ -166,16 +235,18 @@ export default function DocsPage() {
               type="button"
               onClick={() => setActiveTech(tech.id)}
               style={{
-                display: "flex", alignItems: "center", gap: "0.5rem",
-                padding: "0.625rem 1.25rem", borderRadius: "10px", cursor: "pointer",
+                display: "flex", alignItems: "center", gap: "0.625rem",
+                padding: "0.625rem 1.25rem", borderRadius: "12px", cursor: "pointer",
                 fontFamily: "inherit", fontSize: "0.875rem", fontWeight: 700,
                 border: activeTech === tech.id ? `1.5px solid ${tech.color}` : "1.5px solid rgba(255,255,255,0.08)",
-                background: activeTech === tech.id ? `rgba(${tech.color === "#fff" ? "255,255,255" : "34,211,238"}, 0.08)` : "rgba(255,255,255,0.03)",
+                background: activeTech === tech.id ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
                 color: activeTech === tech.id ? tech.color : "#6b7db3",
                 transition: "all 0.2s",
+                backdropFilter: "blur(8px)",
+                opacity: activeTech === tech.id ? 1 : 0.7,
               }}
             >
-              <span style={{ fontSize: "1rem" }}>{tech.icon}</span>
+              <tech.Logo />
               {tech.name}
             </button>
           ))}
@@ -233,6 +304,7 @@ export default function DocsPage() {
         <p style={{ textAlign: "center", color: "#1e2d45", fontSize: "0.75rem", marginTop: "3rem" }}>
           Orbit Station OAuth 2.0 · Standard Authorization Code Flow
         </p>
+      </div>
       </div>
     </div>
   );
