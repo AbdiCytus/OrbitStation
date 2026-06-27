@@ -10,8 +10,15 @@ type TechDoc = { id: TechId; name: string; color: string; Logo: () => React.Reac
 function highlight(raw: string, lang: string): string {
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const ph: string[] = [];
-  const save = (html: string) => { const k = `__PH${ph.length}__`; ph.push(html); return k; };
-  const restore = (s: string) => s.replace(/__PH(\d+)__/g, (_, i) => ph[Number(i)]);
+  const save = (html: string) => { const k = `__ph${ph.length}__`; ph.push(html); return k; };
+  const restore = (s: string) => {
+    let prev = "";
+    while (s !== prev) {
+      prev = s;
+      s = s.replace(/__ph(\d+)__/g, (_, i) => ph[Number(i)]);
+    }
+    return s;
+  };
 
   let s = esc(raw);
 
