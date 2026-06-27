@@ -162,9 +162,13 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
     }
   }
 
+  const autoHttps = typeof window !== "undefined" ? localStorage.getItem("os_auto_https") !== "false" : true;
+  const autoFetchMeta = typeof window !== "undefined" ? localStorage.getItem("os_auto_fetch_meta") !== "false" : true;
+
   const displayImageUrl = customImageUrl;
   const displayFaviconUrl = customFaviconUrl;
   const hasMetadata = !!(meta || title);
+  const showMetaPreview = hasMetadata || !autoFetchMeta;
 
   return (
     <div className={`modal-overlay ${isClosing ? "closing" : ""}`} onClick={handleClose} role="dialog" aria-modal="true" aria-label="Add Beacon">
@@ -237,10 +241,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                 {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
               </label>
               <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
-                {(() => {
-                  const autoHttps = typeof window !== "undefined" && localStorage.getItem("os_auto_https") !== "false";
-                  return autoHttps ? <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span> : null;
-                })()}
+                {autoHttps && <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>}
                 <input
                   ref={inputRef}
                   id="beacon-url"
@@ -249,7 +250,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   value={urlRaw}
                   onChange={(e) => { handleUrlChange(e.target.value); setFormErrors(p => ({ ...p, url: undefined })); }}
                   onBlur={handleUrlBlur}
-                  style={{ border: "none", borderRadius: 0, flex: 1, outline: "none", boxShadow: "none", background: "transparent", color: "var(--color-starlight)", fontFamily: "var(--font-sans)", fontSize: "0.9rem", padding: "0.625rem 1rem 0.625rem 0" }}
+                  style={{ border: "none", borderRadius: 0, flex: 1, outline: "none", boxShadow: "none", background: "transparent", color: "var(--color-starlight)", fontFamily: "var(--font-sans)", fontSize: "0.9rem", padding: autoHttps ? "0.625rem 1rem 0.625rem 0" : "0.625rem 1rem" }}
                 />
               </div>
               {formErrors.url && <span className="text-red-500 text-xs mt-1 block">{formErrors.url}</span>}
@@ -289,7 +290,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
 
           <div className="modal-col">
             {/* Metadata preview */}
-            {hasMetadata && (
+            {showMetaPreview && (
               <div className="beacon-meta-preview">
                 <div className="favicon-preview-wrap">
                   <div className="favicon-preview-label">Icon</div>
@@ -331,13 +332,15 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                 <div className="og-preview-wrap">
                   <div className="og-preview-label-row">
                     <span className="favicon-preview-label">Banner Image</span>
-                    <button
-                      type="button"
-                      className="btn-text"
-                      onClick={() => setShowImageEdit((v) => !v)}
-                    >
-                      {showImageEdit ? "Hide" : "Edit URL"}
-                    </button>
+                    {autoFetchMeta && (
+                      <button
+                        type="button"
+                        className="btn-text"
+                        onClick={() => setShowImageEdit((v) => !v)}
+                      >
+                        {showImageEdit ? "Hide" : "Edit URL"}
+                      </button>
+                    )}
                   </div>
                   {displayImageUrl ? (
                     <div className="beacon-preview-image">
@@ -350,7 +353,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   ) : (
                     <div className="beacon-preview-empty">No banner image found</div>
                   )}
-                  {showImageEdit && (
+                  {(!autoFetchMeta || showImageEdit) && (
                     <div style={{ display: "flex", gap: "0.25rem", marginTop: "0.25rem" }}>
                       <input
                         className="input input-sm"
