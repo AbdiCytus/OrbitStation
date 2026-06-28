@@ -285,7 +285,7 @@ export default function DeveloperTab() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              <label style={{ color: "#9aafcf", fontSize: "0.8125rem", fontWeight: 600 }}>Homepage URL</label>
+              <label style={{ color: "#9aafcf", fontSize: "0.8125rem", fontWeight: 600 }}>Base/Homepage URL</label>
               <input
                 className="input"
                 value={homepageUrl}
