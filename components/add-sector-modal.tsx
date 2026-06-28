@@ -208,6 +208,20 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
             </div>
           </div>
 
+          {/* Preview */}
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Preview</label>
+            <div className="sector-preview" style={{ borderColor: color, color }}>
+              <DynamicIcon name={icon} style={{ color }} />
+              <span>{name || "Sector Name"}</span>
+              {!isPublic && (
+                <span style={{ marginLeft: "auto", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}>
+                  <DynamicIcon name="LockClosedIcon" width={12} height={12} /> Private
+                </span>
+              )}
+            </div>
+          </div>
+
           </div>
 
           {/* Right Section */}
@@ -255,19 +269,6 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
               )}
             </div>
 
-            {/* Preview */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Preview</label>
-              <div className="sector-preview" style={{ borderColor: color, color }}>
-                <DynamicIcon name={icon} style={{ color }} />
-                <span>{name || "Sector Name"}</span>
-                {!isPublic && (
-                  <span style={{ marginLeft: "auto", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}>
-                    <DynamicIcon name="LockClosedIcon" width={12} height={12} /> Private
-                  </span>
-                )}
-              </div>
-            </div>
           </div>
 
           {/* Mobile Expanded Invite Panel (Rendered inline on mobile) */}

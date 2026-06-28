@@ -244,6 +244,25 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                     <CustomColorPicker color={color} setColor={setColor} isSelected={color !== "" && !COLORS.includes(color)} />
                   </div>
                 </div>
+
+
+                {/* Preview */}
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Preview</label>
+                  <div
+                    className="sector-preview"
+                    style={{ borderColor: color, color }}
+                  >
+                    <DynamicIcon name={icon} style={{ color }} />
+                    <span>{name || "Sector Name"}</span>
+                    {!isPublic && (
+                      <span style={{ marginLeft: "auto", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <DynamicIcon name="LockClosedIcon" width={12} height={12} /> Private
+                      </span>
+                    )}
+                  </div>
+                </div>
+
               </div>
 
               {/* RIGHT SECTION */}
@@ -286,32 +305,32 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
 
                   {/* Invite friends toggle */}
                   {(!isPublic || isCollabSector || hasPendingInvites || inviteEnabled) && (
-                    <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <div style={{ marginTop: "1rem", display: "flex", flexDirection: isMobile ? "column" : "row", gap: "0.5rem", background: isMobile ? "transparent" : "rgba(255,255,255,0.03)", padding: isMobile ? "0" : "0.25rem", borderRadius: "10px" }}>
                       {(isCollabSector || pendingMembers.length > 0) && (
                         <button
                           type="button"
                           className="btn btn-secondary"
-                          style={{ width: "100%", justifyContent: "center", borderStyle: "dashed" }}
+                          style={{ flex: 1, justifyContent: "center", borderStyle: isMobile ? "dashed" : "none", background: !isMobile && rightPanelMode === "members" ? "rgba(139, 92, 246, 0.2)" : "transparent", color: !isMobile && rightPanelMode === "members" ? "white" : undefined }}
                           onClick={() => {
                             const newMode = rightPanelMode === "members" ? null : "members";
                             setRightPanelMode(newMode);
                             if (newMode && isMobile) setMobilePage(2);
                           }}
                         >
-                          <DynamicIcon name="UsersIcon" width={18} height={18} /> {rightPanelMode === "members" ? "Hide Members" : "View Members"}
+                          <DynamicIcon name="UsersIcon" width={18} height={18} /> {!isMobile ? "Members" : rightPanelMode === "members" ? "Hide Members" : "View Members"}
                         </button>
                       )}
                       <button
                         type="button"
                         className="btn btn-secondary"
-                        style={{ width: "100%", justifyContent: "center", borderStyle: "dashed" }}
+                        style={{ flex: 1, justifyContent: "center", borderStyle: isMobile ? "dashed" : "none", background: !isMobile && rightPanelMode === "invite" ? "rgba(139, 92, 246, 0.2)" : "transparent", color: !isMobile && rightPanelMode === "invite" ? "white" : undefined }}
                         onClick={() => {
                           const newMode = rightPanelMode === "invite" ? null : "invite";
                           setRightPanelMode(newMode);
                           if (newMode && isMobile) setMobilePage(2);
                         }}
                       >
-                        <DynamicIcon name="UserPlusIcon" width={18} height={18} /> {rightPanelMode === "invite" ? "Hide Invite Friends" : "Invite Friends to Collaborate"}
+                        <DynamicIcon name="UserPlusIcon" width={18} height={18} /> {!isMobile ? "Invite" : rightPanelMode === "invite" ? "Hide Invite Friends" : "Invite Friends to Collaborate"}
                       </button>
                     </div>
                   )}
@@ -327,23 +346,6 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                       </button>
                     </div>
                   )}
-                </div>
-
-                {/* Preview */}
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Preview</label>
-                  <div
-                    className="sector-preview"
-                    style={{ borderColor: color, color }}
-                  >
-                    <DynamicIcon name={icon} style={{ color }} />
-                    <span>{name || "Sector Name"}</span>
-                    {!isPublic && (
-                      <span style={{ marginLeft: "auto", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}>
-                        <DynamicIcon name="LockClosedIcon" width={12} height={12} /> Private
-                      </span>
-                    )}
-                  </div>
                 </div>
 
                 {/* Delete Sector Section */}
