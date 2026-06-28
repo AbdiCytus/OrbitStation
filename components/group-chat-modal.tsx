@@ -23,6 +23,8 @@ import type { SectorWithBeacons } from "@/types";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { pusherClient } from "@/lib/pusher-client";
 import { BADGE_REGISTRY } from "@/lib/badges/registry";
+import SectorQRModal from "./sector-qr-modal";
+import { QrCodeIcon } from "@heroicons/react/24/outline";
 
 export const getAvatarBadgeClass = (titleBadge?: string | null) => {
   if (!titleBadge) return '';
@@ -94,6 +96,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   const [blindedMembers, setBlindedMembers] = useState<string[]>([]);
   const [isMuteAll, setIsMuteAll] = useState(sector?.isMuteAll || false);
   const [showMembers, setShowMembers] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [typingUsers, setTypingUsers] = useState<any[]>([]);
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -836,6 +839,11 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  {(isOwner || amIAdmin) && (
+                    <button onClick={() => setShowQRModal(true)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showQRModal ? "rgba(139,92,246,0.2)" : "transparent", color: showQRModal ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }} title="Share Invite QR">
+                      <QrCodeIcon width={22} height={22} />
+                    </button>
+                  )}
                   <button onClick={() => setShowMembers(!showMembers)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showMembers ? "rgba(139,92,246,0.2)" : "transparent", color: showMembers ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
                     <UserGroupIcon width={22} height={22} />
                   </button>
@@ -1582,6 +1590,12 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
           </motion.div>
         )}
       </AnimatePresence>
+      <SectorQRModal
+        isOpen={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        sectorId={sector?.id}
+        sectorName={sector?.name}
+      />
     </>
   );
 }

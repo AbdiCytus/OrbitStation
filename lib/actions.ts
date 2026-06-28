@@ -428,6 +428,119 @@ export async function reorderSectors(
 }
 
 // ============================================================
+// SECTOR INVITE ACTIONS (QR CODE / LINK)
+// ============================================================
+
+/** Generate or retrieve an invite token for a sector */
+export async function generateSectorInvite(sectorId: string) {
+  const user = await requireAuth();
+
+  // Validate ownership or admin role
+  const sector = await db.sector.findFirst({
+    where: {
+      id: sectorId,
+      OR: [
+        { station: { userId: user.id } },
+        { collaborators: { some: { userId: user.id, role: "ADMIN" } } }
+      ]
+    }
+  });
+
+  if (!sector) {
+    return { error: "Access denied or sector not found" };
+  }
+
+  // Check if an active invite already exists
+  const existingInvite = await db.sectorInvite.findFirst({
+    where: { sectorId }
+  });
+
+  if (existingInvite) {
+    return { data: existingInvite };
+  }
+
+  // Create a new invite token
+  // Use a secure random string for the token
+  const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  
+  const newInvite = await db.sectorInvite.create({
+    data: {
+      sectorId,
+      token,
+      // Optional: Add expiration or max uses if needed in the future
+    }
+  });
+
+  return { data: newInvite };
+}
+
+/** Join a sector using an invite token */
+export async function joinSectorByInviteToken(token: string) {
+  const user = await requireAuth();
+
+  const invite = await db.sectorInvite.findUnique({
+    where: { token },
+    include: { sector: true }
+  });
+
+  if (!invite) {
+    return { error: "Invalid or expired invite token" };
+  }
+
+  // Check if user is already a collaborator or the owner
+  const isOwner = await db.station.findFirst({
+    where: { userId: user.id, sectors: { some: { id: invite.sectorId } } }
+  });
+
+  if (isOwner) {
+    return { success: true, sectorId: invite.sectorId, message: "You are the owner of this sector." };
+  }
+
+  const existingCollab = await db.sectorCollaborator.findUnique({
+    where: { sectorId_userId: { sectorId: invite.sectorId, userId: user.id } }
+  });
+
+  if (existingCollab) {
+    return { success: true, sectorId: invite.sectorId, message: "You are already in this sector." };
+  }
+
+  // Add the user to the sector collaborators bypassing friendship checks
+  await db.sectorCollaborator.create({
+    data: {
+      sectorId: invite.sectorId,
+      userId: user.id,
+      role: "MEMBER"
+    }
+  });
+
+  // Increment invite usage
+  await db.sectorInvite.update({
+    where: { id: invite.id },
+    data: { uses: { increment: 1 } }
+  });
+
+  // Notify sector members
+  const sysMsg = await db.groupMessage.create({
+    data: { 
+      sectorId: invite.sectorId, 
+      senderId: user.id, 
+      content: `joined the sector via invite link`, 
+      type: "SYSTEM" 
+    },
+    include: { sender: { select: { id: true, name: true, username: true, image: true, titleBadge: true } } }
+  });
+  
+  const pusherPayload = {
+    ...sysMsg,
+    sender: { ...sysMsg.sender, image: null }
+  };
+  await pusherServer.trigger(`presence-sector-${invite.sectorId}`, 'new-message', pusherPayload);
+
+  revalidatePath("/station");
+  return { success: true, sectorId: invite.sectorId, message: "Successfully joined the sector!" };
+}
+
+// ============================================================
 // BEACON ACTIONS
 // ============================================================
 
