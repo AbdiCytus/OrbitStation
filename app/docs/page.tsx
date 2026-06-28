@@ -145,41 +145,35 @@ export default function DocsPage() {
   }
 
   return (
-    <div className="login-page relative min-h-[100dvh] flex flex-col font-['Space_Grotesk',system-ui,sans-serif] text-[#f0f4ff]">
-      {/* Premium Cosmic Background from Login */}
-      <div className="cosmic-bg fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
+    <main style={{ minHeight: "100vh", position: "relative", overflowX: "hidden", color: "#f8fafc", fontFamily: "'Space Grotesk', system-ui, sans-serif" }}>
+      {/* Cosmic Background */}
+      <div className="cosmic-bg" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} aria-hidden="true">
         <div className="cosmic-stars"></div>
-        <div className="cosmic-aurora" style={{ opacity: 0.6, transform: "scale(1.2)" }}></div>
+        <div className="cosmic-aurora" style={{ opacity: 0.5 }}></div>
         <div className="cosmic-comet"></div>
-        <div className="cosmic-dust"></div>
       </div>
 
-      <div style={{ position: "relative", zIndex: 1, flex: 1 }}>
-        {/* Top Nav */}
-        <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "1rem 2rem", display: "flex", alignItems: "center", gap: "1rem", position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(3,7,18,0.85)", backdropFilter: "blur(16px)" }}>
-          <a href="/settings" style={{ color: "#6b7db3", fontSize: "0.8rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.375rem" }}>
-            ← Back to Settings
-          </a>
-          <span style={{ color: "rgba(255,255,255,0.1)" }}>|</span>
-          <span style={{ color: "#a78bfa", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            🔌 Orbit Station SSO
-          </span>
-          <span style={{ color: "#f0f4ff", fontWeight: 700, fontSize: "0.875rem" }}>Developer Documentation</span>
-        </div>
+      <div style={{ position: "relative", zIndex: 10 }}>
 
-        <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "6rem 1.5rem 2rem" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto", padding: "3rem 2rem 5rem" }}>
+          {/* Back link */}
+          <div style={{ marginBottom: "2.5rem" }}>
+            <a href="/settings" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", color: "#a78bfa", textDecoration: "none", fontWeight: 600, fontSize: "0.9rem" }}>
+              ← Back to Settings
+            </a>
+          </div>
           {/* Hero */}
-          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-            <h1 style={{ fontSize: "2.25rem", fontWeight: 800, margin: "0 0 0.75rem", background: "linear-gradient(135deg, #a78bfa, #22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <div style={{ marginBottom: "3.5rem" }}>
+            <h1 style={{ fontSize: "clamp(2.25rem, 5vw, 3.25rem)", fontWeight: 800, letterSpacing: "-0.03em", margin: "0 0 1rem", lineHeight: 1.1, background: "linear-gradient(135deg, #f0f4ff 30%, #a78bfa 70%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
               SSO Integration Guide
             </h1>
-            <p style={{ color: "#6b7db3", fontSize: "1rem", margin: 0 }}>
+            <p style={{ fontSize: "1.1rem", color: "#94a3b8", maxWidth: "560px", margin: 0, lineHeight: 1.7 }}>
               Integrate Orbit Station as a login provider in your app — step by step, from zero to 1-click Beacon login.
             </p>
           </div>
 
-          {/* NEW: Step 0 - App Registration & Redirect URI Info */}
-          <div style={{ background: "linear-gradient(to right, rgba(17,24,39,0.8), rgba(34,211,238,0.05))", border: "1px solid rgba(34,211,238,0.2)", borderRadius: "16px", padding: "1.75rem", marginBottom: "2rem" }}>
+          {/* Step 0 */}
+          <div style={{ background: "rgba(12,12,22,0.7)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)", borderTop: "2px solid #22d3ee", borderRadius: "16px", padding: "2rem", marginBottom: "2rem", boxShadow: "0 20px 40px -12px rgba(0,0,0,0.6)" }}>
             <h3 style={{ margin: "0 0 0.75rem", fontSize: "1.1rem", fontWeight: 700, color: "#22d3ee", display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span>⚙️</span> Step 0: Register App & Setup Redirect URI
             </h3>
@@ -226,8 +220,8 @@ export default function DocsPage() {
             </div>
           </div>
 
-          {/* Prerequisites strip */}
-          <div style={{ background: "rgba(124,92,252,0.08)", border: "1px solid rgba(124,92,252,0.2)", borderRadius: "14px", padding: "1.25rem 1.5rem", marginBottom: "2.5rem", display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+          {/* OAuth Endpoints strip */}
+          <div style={{ background: "rgba(12,12,22,0.7)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)", borderTop: "2px solid #a78bfa", borderRadius: "16px", padding: "1.5rem 2rem", marginBottom: "2.5rem", display: "flex", gap: "2rem", flexWrap: "wrap", boxShadow: "0 20px 40px -12px rgba(0,0,0,0.6)" }}>
             <div>
               <p style={{ color: "#a78bfa", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 0.375rem" }}>AUTHORIZE</p>
               <code style={{ color: "#f0f4ff", fontSize: "0.8rem", fontFamily: "monospace" }}>/api/oauth/authorize</code>
@@ -273,36 +267,28 @@ export default function DocsPage() {
           {/* Steps */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
             {doc.steps.map((step, idx) => (
-              <div key={idx} style={{ background: "rgba(17,24,39,0.8)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "14px", overflow: "hidden" }}>
-                {/* Step Header */}
-                <div style={{ padding: "0.875rem 1.25rem", borderBottom: step.code ? "1px solid rgba(255,255,255,0.05)" : undefined, display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  <span style={{ background: "rgba(124,92,252,0.2)", border: "1px solid rgba(124,92,252,0.35)", borderRadius: "50%", width: "24px", height: "24px", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 800, color: "#a78bfa", flexShrink: 0 }}>
+              <div key={idx} style={{ background: "rgba(12,12,22,0.7)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)", borderLeft: `3px solid ${doc.color}`, borderRadius: "16px", overflow: "hidden", boxShadow: "0 8px 24px -8px rgba(0,0,0,0.5)" }}>
+                <div style={{ padding: "1rem 1.5rem", borderBottom: step.code ? "1px solid rgba(255,255,255,0.06)" : undefined, display: "flex", alignItems: "center", gap: "0.875rem" }}>
+                  <span style={{ background: `rgba(${doc.color === '#fff' ? '255,255,255' : '124,92,252'},0.15)`, border: `1px solid ${doc.color}40`, borderRadius: "50%", width: "28px", height: "28px", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 800, color: doc.color, flexShrink: 0 }}>
                     {idx + 1}
                   </span>
-                  <span style={{ fontWeight: 600, fontSize: "0.9375rem", color: "#e2e8f0" }}>{step.title}</span>
+                  <span style={{ fontWeight: 600, fontSize: "0.9375rem", color: "#f0f4ff" }}>{step.title}</span>
                 </div>
-
                 {step.note && (
-                  <div style={{ padding: "0.75rem 1.25rem", background: "rgba(34,211,238,0.05)", borderBottom: step.code ? "1px solid rgba(255,255,255,0.05)" : undefined }}>
-                    <p style={{ margin: 0, color: "#22d3ee", fontSize: "0.8rem" }}>💡 {step.note}</p>
+                  <div style={{ padding: "0.75rem 1.5rem", background: "rgba(34,211,238,0.06)", borderBottom: step.code ? "1px solid rgba(255,255,255,0.06)" : undefined, display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                    <span style={{ fontSize: "0.875rem" }}>💡</span>
+                    <p style={{ margin: 0, color: "#67e8f9", fontSize: "0.8125rem", lineHeight: 1.6 }}>{step.note}</p>
                   </div>
                 )}
-
                 {step.code && (
                   <div style={{ position: "relative" }}>
-                    <div style={{ position: "absolute", top: "0.75rem", right: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      {step.lang && (
-                        <span style={{ color: "#4b5675", fontSize: "0.65rem", fontFamily: "monospace", textTransform: "uppercase" }}>{step.lang}</span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => copyCode(step.code!, idx)}
-                        style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", color: copiedIdx === idx ? "#4ade80" : "#6b7db3", fontSize: "0.7rem", padding: "3px 10px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}
-                      >
+                    <div style={{ position: "absolute", top: "0.75rem", right: "0.875rem", display: "flex", alignItems: "center", gap: "0.5rem", zIndex: 1 }}>
+                      {step.lang && <span style={{ color: "#475569", fontSize: "0.65rem", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em" }}>{step.lang}</span>}
+                      <button type="button" onClick={() => copyCode(step.code!, idx)} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "6px", color: copiedIdx === idx ? "#4ade80" : "#94a3b8", fontSize: "0.7rem", padding: "4px 12px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600, transition: "all 0.2s" }}>
                         {copiedIdx === idx ? "✓ Copied!" : "Copy"}
                       </button>
                     </div>
-                    <pre style={{ margin: 0, padding: "1.25rem", overflowX: "auto", fontSize: "0.825rem", lineHeight: 1.7, fontFamily: "'Fira Code', 'Cascadia Code', monospace", background: "rgba(0,0,0,0.35)" }}>
+                    <pre style={{ margin: 0, padding: "1.25rem 1.5rem", overflowX: "auto", fontSize: "0.8125rem", lineHeight: 1.8, fontFamily: "'JetBrains Mono','Fira Code',monospace", background: "rgba(0,0,0,0.45)" }}>
                       <code dangerouslySetInnerHTML={{ __html: highlight(step.code, step.lang ?? "ts") }} />
                     </pre>
                   </div>
@@ -312,18 +298,21 @@ export default function DocsPage() {
           </div>
 
           {/* Beacon callout */}
-          <div style={{ marginTop: "2.5rem", background: "linear-gradient(135deg, rgba(124,92,252,0.12), rgba(34,211,238,0.06))", border: "1px solid rgba(124,92,252,0.3)", borderRadius: "16px", padding: "1.75rem" }}>
-            <h3 style={{ margin: "0 0 0.5rem", fontSize: "1rem", fontWeight: 700 }}>🚀 How Beacon 1-Click Login Works</h3>
-            <p style={{ margin: 0, color: "#6b7db3", fontSize: "0.875rem", lineHeight: 1.7 }}>
+          <div style={{ marginTop: "2.5rem", background: "rgba(12,12,22,0.7)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)", borderTop: "2px solid #7c3aed", borderRadius: "16px", padding: "2rem", boxShadow: "0 20px 40px -12px rgba(0,0,0,0.6)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: "1rem" }}>
+              <div style={{ padding: "0.625rem", borderRadius: "10px", background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", fontSize: "1.25rem", lineHeight: 1 }}>🚀</div>
+              <h3 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#f0f4ff" }}>How Beacon 1-Click Login Works</h3>
+            </div>
+            <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.9375rem", lineHeight: 1.75 }}>
               After your integration is live, any Orbit Station user can add a Beacon pointing to your <strong style={{ color: "#a78bfa" }}>Initiation URL</strong>. On first click they&apos;ll see the consent screen. On all subsequent clicks, <strong style={{ color: "#22d3ee" }}>they&apos;ll be logged in instantly</strong> thanks to the <em>Remember Consent</em> system — no button presses, no waiting.
             </p>
           </div>
 
-          <p style={{ textAlign: "center", color: "#1e2d45", fontSize: "0.75rem", marginTop: "3rem" }}>
+          <p style={{ textAlign: "center", color: "#334155", fontSize: "0.75rem", marginTop: "3rem" }}>
             Orbit Station OAuth 2.0 · Standard Authorization Code Flow
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
