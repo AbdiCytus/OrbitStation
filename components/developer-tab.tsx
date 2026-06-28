@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { getMyOAuthApps, createOAuthApp, deleteOAuthApp, updateOAuthApp, getPersonalToken } from "@/lib/actions";
 import { PlayIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { createPortal } from "react-dom";
 
 type OAuthApp = {
   id: string;
@@ -161,11 +162,10 @@ export default function DeveloperTab() {
 
   const overlayStyle: React.CSSProperties = {
     position: "fixed", inset: 0,
-    borderRadius: "var(--radius-lg)",
     background: "rgba(0,0,0,0.7)",
     backdropFilter: "blur(8px)",
     display: "flex", alignItems: "center", justifyContent: "center",
-    zIndex: 100, padding: "1rem",
+    zIndex: 9999, padding: "1rem",
   };
 
   const modalStyle: React.CSSProperties = {
@@ -386,7 +386,7 @@ export default function DeveloperTab() {
       )}
 
       {/* === MODAL: Create New App === */}
-      {showCreateModal && (
+      {showCreateModal && typeof document !== "undefined" && createPortal(
         <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) setShowCreateModal(false); }}>
           <div style={modalStyle}>
             <h3 style={{ color: "#f0f4ff", fontWeight: 800, margin: 0, fontSize: "1.125rem" }}>Register New OAuth App</h3>
@@ -434,11 +434,12 @@ export default function DeveloperTab() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* === MODAL: Show Credentials (one-time) === */}
-      {credentials && (
+      {credentials && typeof document !== "undefined" && createPortal(
         <div style={overlayStyle}>
           <div style={{ ...modalStyle, borderColor: "rgba(124,92,252,0.4)" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
@@ -486,11 +487,12 @@ export default function DeveloperTab() {
               I've Saved the Credentials
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* === MODAL: Confirm Delete === */}
-      {deleteTarget && (
+      {deleteTarget && typeof document !== "undefined" && createPortal(
         <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) setDeleteTarget(null); }}>
           <div style={{ ...modalStyle, maxWidth: "400px" }}>
             <h3 style={{ color: "#f0f4ff", fontWeight: 800, margin: 0 }}>Delete OAuth App?</h3>
@@ -505,11 +507,12 @@ export default function DeveloperTab() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* === MODAL: Edit App === */}
-      {editTarget && (
+      {editTarget && typeof document !== "undefined" && createPortal(
         <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) setEditTarget(null); }}>
           <div style={modalStyle}>
             <h3 style={{ color: "#f0f4ff", fontWeight: 800, margin: 0, fontSize: "1.125rem" }}>Edit OAuth App</h3>
@@ -547,7 +550,8 @@ export default function DeveloperTab() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
