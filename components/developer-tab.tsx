@@ -172,6 +172,8 @@ export default function DeveloperTab() {
     ...glassCard,
     width: "100%",
     maxWidth: "480px",
+    maxHeight: "90vh",
+    overflowY: "auto",
     padding: "2rem",
     display: "flex",
     flexDirection: "column",
@@ -344,28 +346,28 @@ export default function DeveloperTab() {
           </p>
         </div>
         
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           {personalToken ? (
             <>
-              <code style={{ flex: 1, background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", padding: "0.75rem", color: "#22d3ee", fontSize: "0.8125rem", fontFamily: "var(--font-mono)", wordBreak: "break-all" }}>
+              <code style={{ display: "block", width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", padding: "0.75rem", color: "#22d3ee", fontSize: "0.8125rem", fontFamily: "var(--font-mono)", wordBreak: "break-all", lineHeight: 1.6 }}>
                 {personalToken}
               </code>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => handleCopy(personalToken, "personal")}
-                style={{ flexShrink: 0 }}
-              >
-                {tokenCopied ? "✓ Copied!" : "Copy Token"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleRevealPersonalToken}
-                style={{ flexShrink: 0 }}
-              >
-                Hide Token
-              </button>
+              <div style={{ display: "flex", gap: "0.75rem" }}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => handleCopy(personalToken, "personal")}
+                >
+                  {tokenCopied ? "✓ Copied!" : "Copy Token"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleRevealPersonalToken}
+                >
+                  Hide Token
+                </button>
+              </div>
             </>
           ) : (
             <button
@@ -373,6 +375,7 @@ export default function DeveloperTab() {
               className="btn btn-secondary"
               onClick={handleRevealPersonalToken}
               disabled={loadingToken}
+              style={{ alignSelf: "flex-start" }}
             >
               {loadingToken ? <span className="spinner" /> : "Reveal My Token"}
             </button>
