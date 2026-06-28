@@ -158,6 +158,9 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
         overflowY: isMobile ? "hidden" : "auto",
       }}
     >
+      <style>{`
+        .icon-picker-scroll::-webkit-scrollbar { display: none; }
+      `}</style>
       <div style={{ display: "flex", rowGap: "1rem", flexDirection: "row", alignItems: "stretch", justifyContent: "center", width: "100%", maxWidth: isMobile ? "100%" : "1170px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
         {/* MAIN PANEL */}
         <div
@@ -211,7 +214,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                 {/* Icon picker */}
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Icon</label>
-                  <div className="icon-picker" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(36px, 1fr))", gap: "0.375rem" }}>
+                  <div className="icon-picker icon-picker-scroll" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(36px, 1fr))", gap: "0.375rem", maxHeight: "78px", overflowY: "auto", scrollbarWidth: "none", msOverflowStyle: "none", paddingBottom: "2px" }}>
                     {ICON_OPTIONS.map((ic) => (
                       <button
                         key={ic}
