@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { pusherServer } from "@/lib/pusher";
+import { SignJWT } from "jose";
 
 // ============================================================
 // HELPER — ambil session + pastikan Station user sudah ada
@@ -1956,3 +1957,21 @@ export async function updateOAuthApp(appId: string, name: string, redirectUris: 
   return { data: updated };
 }
 
+/** Generate Personal Access Token for the user */
+export async function getPersonalToken() {
+  const user = await requireAuth();
+  
+  const jwtSecret = process.env.AUTH_SECRET;
+  if (!jwtSecret) return { error: "Server missing AUTH_SECRET" };
+
+  const secret = new TextEncoder().encode(jwtSecret);
+  const token = await new SignJWT({})
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setIssuer(process.env.NEXTAUTH_URL ?? "https://orbitstation.com")
+    .setSubject(user.id!)
+    .setExpirationTime("10y") // Token berlaku 10 tahun
+    .sign(secret);
+
+  return { token };
+}

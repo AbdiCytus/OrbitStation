@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { getMyOAuthApps, createOAuthApp, deleteOAuthApp, updateOAuthApp } from "@/lib/actions";
+import { getMyOAuthApps, createOAuthApp, deleteOAuthApp, updateOAuthApp, getPersonalToken } from "@/lib/actions";
 import { PlayIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 type OAuthApp = {
@@ -45,6 +45,11 @@ export default function DeveloperTab() {
   const [editRedirectUris, setEditRedirectUris] = useState("");
   const [editHomepageUrl, setEditHomepageUrl] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Personal Token
+  const [personalToken, setPersonalToken] = useState<string | null>(null);
+  const [loadingToken, setLoadingToken] = useState(false);
+  const [tokenCopied, setTokenCopied] = useState(false);
 
   useEffect(() => {
     loadApps();
@@ -120,10 +125,26 @@ export default function DeveloperTab() {
     await loadApps();
   }
 
-  function handleCopy(value: string, type: "id" | "secret") {
+  function handleCopy(value: string, type: "id" | "secret" | "personal") {
     navigator.clipboard.writeText(value);
-    setCopied(type);
-    setTimeout(() => setCopied(null), 2000);
+    if (type === "personal") {
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 2000);
+    } else {
+      setCopied(type);
+      setTimeout(() => setCopied(null), 2000);
+    }
+  }
+
+  async function handleRevealPersonalToken() {
+    setLoadingToken(true);
+    const res = await getPersonalToken();
+    setLoadingToken(false);
+    if ("error" in res) {
+      toast.error(res.error);
+    } else {
+      setPersonalToken(res.token!);
+    }
   }
 
   const glassCard = {
@@ -168,7 +189,7 @@ export default function DeveloperTab() {
           <button
             type="button"
             className="btn btn-secondary"
-            onClick={() => window.open("/docs", "_blank")}
+            onClick={() => window.open("/docs/api", "_blank")}
             style={{ fontSize: "0.8125rem" }}
           >
             📖 View Documentation
@@ -247,6 +268,47 @@ export default function DeveloperTab() {
         </div>
       )}
 
+      {/* Info box: Personal Access Token */}
+      <div style={{ ...glassCard, padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem", borderColor: "rgba(34, 211, 238, 0.25)" }}>
+        <div>
+          <h3 style={{ color: "#22d3ee", fontWeight: 700, margin: "0 0 0.5rem", fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            🔑 Personal Access Token (REST API)
+          </h3>
+          <p style={{ color: "var(--color-comet)", fontSize: "0.875rem", margin: 0, lineHeight: 1.5 }}>
+            Use this token to interact with Orbit Station's REST API on your own behalf. 
+            You can build custom clients, mobile apps, or scripts to access your profile and station data. 
+            Keep this token safe as it grants full access to your account data.
+          </p>
+        </div>
+        
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+          {personalToken ? (
+            <>
+              <code style={{ flex: 1, background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", padding: "0.75rem", color: "#22d3ee", fontSize: "0.8125rem", fontFamily: "var(--font-mono)", wordBreak: "break-all" }}>
+                {personalToken}
+              </code>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => handleCopy(personalToken, "personal")}
+                style={{ flexShrink: 0 }}
+              >
+                {tokenCopied ? "✓ Copied!" : "Copy Token"}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleRevealPersonalToken}
+              disabled={loadingToken}
+            >
+              {loadingToken ? <span className="spinner" /> : "Reveal My Token"}
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Info box: How to integrate */}
       <div style={{ ...glassCard, padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem", borderColor: "rgba(124,92,252,0.25)" }}>
         <p style={{ color: "#a78bfa", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>📡 Integration Endpoints</p>
@@ -255,6 +317,7 @@ export default function DeveloperTab() {
             { label: "Authorize", url: `${typeof window !== "undefined" ? window.location.origin : ""}/api/oauth/authorize` },
             { label: "Token Exchange", url: `${typeof window !== "undefined" ? window.location.origin : ""}/api/oauth/token` },
             { label: "User Info", url: `${typeof window !== "undefined" ? window.location.origin : ""}/api/oauth/userinfo` },
+            { label: "REST API Docs", url: `${typeof window !== "undefined" ? window.location.origin : ""}/docs/api` },
           ].map(ep => (
             <div key={ep.label} style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
               <span style={{ color: "var(--color-comet)", fontSize: "0.75rem", minWidth: "90px" }}>{ep.label}</span>
