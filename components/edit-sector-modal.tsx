@@ -65,6 +65,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
   const [icon, setIcon] = useState(sector.icon ?? "FolderIcon");
   const [color, setColor] = useState(sector.color ?? "#7c5cfc");
   const [isPublic, setIsPublic] = useState((sector as SectorWithBeacons & { isPublic?: boolean }).isPublic !== false);
+  const [inviteEnabled, setInviteEnabled] = useState((sector as any).inviteEnabled ?? false);
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
@@ -126,9 +127,11 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
     // Only send invitedFriends if we are in private mode (or locked private)
     const newInvites = !isPublic || isCollabSector || hasPendingInvites ? invitedFriends : undefined;
 
+    const isCollabType = isCollabSector || hasPendingInvites || inviteEnabled;
     const result = await updateSector(sector.id, {
-      name, icon, color, isPublic: (isCollabSector || hasPendingInvites) ? false : isPublic,
-      invitedFriendIds: newInvites
+      name, icon, color, isPublic: isCollabType ? false : isPublic,
+      invitedFriendIds: newInvites,
+      inviteEnabled
     });
     setLoading(false);
     if (result.error) {
@@ -136,7 +139,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
       toast.error(result.error || "Failed to update sector");
     } else if (result.data) {
       toast.success("Sector updated successfully");
-      onUpdated({ ...sector, name, icon, color, isPublic } as SectorWithBeacons & { isPublic: boolean });
+      onUpdated({ ...sector, name, icon, color, isPublic: isCollabType ? false : isPublic, inviteEnabled } as any);
     }
   }
 
@@ -248,7 +251,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                 {/* Visibility toggle */}
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Visibility</label>
-                  {(isCollabSector || hasPendingInvites) ? (
+                  {(isCollabSector || hasPendingInvites || inviteEnabled) ? (
                     <div style={{ padding: "0.75rem", background: "rgba(139, 92, 246, 0.1)", border: "1px solid rgba(139, 92, 246, 0.2)", borderRadius: "8px", display: "flex", gap: "0.5rem", alignItems: "center" }}>
                       <DynamicIcon name="LockClosedIcon" width={20} height={20} style={{ color: "var(--color-violet-glow)" }} />
                       <span style={{ fontSize: "0.85rem", color: "#e2e8f0" }}>Collab sectors are permanently Private</span>
@@ -282,7 +285,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                   )}
 
                   {/* Invite friends toggle */}
-                  {(!isPublic || isCollabSector || hasPendingInvites) && (
+                  {(!isPublic || isCollabSector || hasPendingInvites || inviteEnabled) && (
                     <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                       {(isCollabSector || pendingMembers.length > 0) && (
                         <button
@@ -309,6 +312,18 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         }}
                       >
                         <DynamicIcon name="UserPlusIcon" width={18} height={18} /> {rightPanelMode === "invite" ? "Hide Invite Friends" : "Invite Friends to Collaborate"}
+                      </button>
+                    </div>
+                  )}
+                  {/* QR Link toggle */}
+                  {currentUserId === sectorOwner?.id && (
+                    <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem", background: "rgba(255,255,255,0.02)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                        <span style={{ fontSize: "0.9rem", color: "#e2e8f0", fontWeight: 500 }}>QR & Link Join</span>
+                        <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Allow users to join via invite link or QR code</span>
+                      </div>
+                      <button type="button" onClick={() => setInviteEnabled(!inviteEnabled)} style={{ width: "40px", height: "24px", borderRadius: "12px", background: inviteEnabled ? "var(--color-violet-glow)" : "rgba(255,255,255,0.1)", position: "relative", cursor: "pointer", border: "none", transition: "background 0.2s" }}>
+                        <div style={{ width: "20px", height: "20px", borderRadius: "10px", background: "white", position: "absolute", top: "2px", left: inviteEnabled ? "18px" : "2px", transition: "left 0.2s" }} />
                       </button>
                     </div>
                   )}

@@ -839,7 +839,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  {(isOwner || amIAdmin) && (
+                  {(isOwner || amIAdmin) && sector.inviteEnabled && (
                     <button onClick={() => setShowQRModal(true)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showQRModal ? "rgba(139,92,246,0.2)" : "transparent", color: showQRModal ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }} title="Share Invite QR">
                       <QrCodeIcon width={22} height={22} />
                     </button>

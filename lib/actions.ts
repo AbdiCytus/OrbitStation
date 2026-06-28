@@ -38,6 +38,7 @@ export type SectorFormData = {
   color?: string;
   isPublic?: boolean;
   invitedFriendIds?: string[];
+  inviteEnabled?: boolean;
 };
 
 /** Buat Sektor baru di Station pengguna */
@@ -111,6 +112,7 @@ export async function updateSector(
       ...(data.icon !== undefined && { icon: data.icon.trim() || null }),
       ...(data.color !== undefined && { color: data.color.trim() || null }),
       ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
+      ...(data.inviteEnabled !== undefined && { inviteEnabled: data.inviteEnabled }),
     },
   });
 
@@ -450,6 +452,10 @@ export async function generateSectorInvite(sectorId: string) {
     return { error: "Access denied or sector not found" };
   }
 
+  if (!sector.inviteEnabled) {
+    return { error: "Invite links are disabled for this sector." };
+  }
+
   // Check if an active invite already exists
   const existingInvite = await db.sectorInvite.findFirst({
     where: { sectorId }
@@ -485,6 +491,10 @@ export async function joinSectorByInviteToken(token: string) {
 
   if (!invite) {
     return { error: "Invalid or expired invite token" };
+  }
+
+  if (!invite.sector.inviteEnabled) {
+    return { error: "Invite links are disabled for this sector." };
   }
 
   // Check if user is already a collaborator or the owner

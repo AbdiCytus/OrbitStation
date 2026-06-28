@@ -137,6 +137,7 @@ model Sector {
   order     Int     @default(0)
   isPublic  Boolean @default(true) // false = sektor privat, tidak ditampilkan di profil publik
   isMuteAll Boolean @default(false)
+  inviteEnabled Boolean @default(false)
   pinnedMessageId String?
 
   createdAt DateTime @default(now())
