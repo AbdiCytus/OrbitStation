@@ -21,6 +21,7 @@ type NewAppCredentials = {
 };
 
 export default function DeveloperTab() {
+  const [activeTab, setActiveTab] = useState<"oauth" | "api">("oauth");
   const [apps, setApps] = useState<OAuthApp[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -137,6 +138,10 @@ export default function DeveloperTab() {
   }
 
   async function handleRevealPersonalToken() {
+    if (personalToken) {
+      setPersonalToken(null);
+      return;
+    }
     setLoadingToken(true);
     const res = await getPersonalToken();
     setLoadingToken(false);
@@ -177,96 +182,154 @@ export default function DeveloperTab() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-      {/* Header row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
-        <div>
-          <h2 className="settings-section-title" style={{ marginBottom: "0.25rem" }}>OAuth Applications</h2>
-          <p className="settings-page-sub" style={{ fontSize: "0.8125rem", margin: 0 }}>
-            Register apps that can use Orbit Station as a login provider.
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => window.open("/docs/api", "_blank")}
-            style={{ fontSize: "0.8125rem" }}
-          >
-            📖 View Documentation
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => setShowCreateModal(true)}
-          >
-            + New App
-          </button>
-        </div>
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: "1.5rem", borderBottom: "1px solid var(--glass-border)", paddingBottom: "0.25rem" }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab("oauth")}
+          style={{
+            background: "none", border: "none",
+            color: activeTab === "oauth" ? "#f0f4ff" : "var(--color-comet)",
+            fontWeight: activeTab === "oauth" ? 700 : 500,
+            borderBottom: activeTab === "oauth" ? "2px solid #a78bfa" : "2px solid transparent",
+            padding: "0.5rem 0", cursor: "pointer",
+            transition: "all 0.2s"
+          }}
+        >
+          OAuth Applications
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("api")}
+          style={{
+            background: "none", border: "none",
+            color: activeTab === "api" ? "#f0f4ff" : "var(--color-comet)",
+            fontWeight: activeTab === "api" ? 700 : 500,
+            borderBottom: activeTab === "api" ? "2px solid #22d3ee" : "2px solid transparent",
+            padding: "0.5rem 0", cursor: "pointer",
+            transition: "all 0.2s"
+          }}
+        >
+          REST API
+        </button>
       </div>
 
-      {/* App List */}
-      {loading ? (
-        <div style={{ textAlign: "center", padding: "2rem", color: "var(--color-comet)" }}>
-          Loading...
-        </div>
-      ) : apps.length === 0 ? (
-        <div style={{ ...glassCard, padding: "2.5rem", textAlign: "center", display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
-          <div style={{ fontSize: "2rem" }}>🔌</div>
-          <p style={{ color: "#f0f4ff", fontWeight: 600, margin: 0 }}>No OAuth Apps Yet</p>
-          <p style={{ color: "var(--color-comet)", fontSize: "0.8125rem", margin: 0 }}>
-            Create your first app to enable SSO login via Orbit Station.
-          </p>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {apps.map(app => (
-            <div key={app.id} style={{ ...glassCard, padding: "1.25rem", display: "flex", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ color: "#f0f4ff", fontWeight: 700, margin: "0 0 0.25rem", fontSize: "0.9375rem" }}>{app.name}</p>
-                <p style={{ color: "var(--color-comet)", fontSize: "0.75rem", margin: "0 0 0.5rem", fontFamily: "var(--font-mono)", overflowWrap: "break-word" }}>
-                  Client ID: <span style={{ color: "#a78bfa" }}>{app.clientId}</span>
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
-                  {app.redirectUris.map((uri, i) => (
-                    <span key={i} style={{ background: "rgba(124,92,252,0.12)", border: "1px solid rgba(124,92,252,0.25)", borderRadius: "999px", padding: "2px 10px", fontSize: "0.7rem", color: "#a78bfa", fontFamily: "var(--font-mono)", wordBreak: "break-all" }}>
-                      {uri}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(34, 211, 238, 0.1)", color: "#22d3ee", borderColor: "rgba(34, 211, 238, 0.3)" }}
-                  onClick={() => window.open(`/oauth-test?client_id=${app.clientId}`, "_blank")}
-                  title="Test App"
-                >
-                  <PlayIcon style={{ width: "16px", height: "16px" }} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
-                  onClick={() => { setEditTarget(app); setEditName(app.name); setEditRedirectUris(app.redirectUris.join("\n")); setEditHomepageUrl(app.homepageUrl || "https://"); }}
-                  title="Edit"
-                >
-                  <PencilIcon style={{ width: "16px", height: "16px" }} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger-outline"
-                  style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
-                  onClick={() => setDeleteTarget(app)}
-                  title="Delete"
-                >
-                  <TrashIcon style={{ width: "16px", height: "16px" }} />
-                </button>
-              </div>
+      {activeTab === "oauth" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          {/* Header row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+            <div>
+              <h2 className="settings-section-title" style={{ marginBottom: "0.25rem" }}>OAuth Applications</h2>
+              <p className="settings-page-sub" style={{ fontSize: "0.8125rem", margin: 0 }}>
+                Register apps that can use Orbit Station as a login provider.
+              </p>
             </div>
-          ))}
+            <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => window.open("/docs", "_blank")}
+                style={{ fontSize: "0.8125rem" }}
+              >
+                📖 View Documentation
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setShowCreateModal(true)}
+              >
+                + New App
+              </button>
+            </div>
+          </div>
+
+          {/* App List */}
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "2rem", color: "var(--color-comet)" }}>
+              Loading...
+            </div>
+          ) : apps.length === 0 ? (
+            <div style={{ ...glassCard, padding: "2.5rem", textAlign: "center", display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "center" }}>
+              <div style={{ fontSize: "2rem" }}>🔌</div>
+              <p style={{ color: "#f0f4ff", fontWeight: 600, margin: 0 }}>No OAuth Apps Yet</p>
+              <p style={{ color: "var(--color-comet)", fontSize: "0.8125rem", margin: 0 }}>
+                Create your first app to enable SSO login via Orbit Station.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {apps.map(app => (
+                <div key={app.id} style={{ ...glassCard, padding: "1.25rem", display: "flex", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ color: "#f0f4ff", fontWeight: 700, margin: "0 0 0.25rem", fontSize: "0.9375rem" }}>{app.name}</p>
+                    <p style={{ color: "var(--color-comet)", fontSize: "0.75rem", margin: "0 0 0.5rem", fontFamily: "var(--font-mono)", overflowWrap: "break-word" }}>
+                      Client ID: <span style={{ color: "#a78bfa" }}>{app.clientId}</span>
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
+                      {app.redirectUris.map((uri, i) => (
+                        <span key={i} style={{ background: "rgba(124,92,252,0.12)", border: "1px solid rgba(124,92,252,0.25)", borderRadius: "999px", padding: "2px 10px", fontSize: "0.7rem", color: "#a78bfa", fontFamily: "var(--font-mono)", wordBreak: "break-all" }}>
+                          {uri}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(34, 211, 238, 0.1)", color: "#22d3ee", borderColor: "rgba(34, 211, 238, 0.3)" }}
+                      onClick={() => window.open(`/oauth-test?client_id=${app.clientId}`, "_blank")}
+                      title="Test App"
+                    >
+                      <PlayIcon style={{ width: "16px", height: "16px" }} />
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      onClick={() => { setEditTarget(app); setEditName(app.name); setEditRedirectUris(app.redirectUris.join("\n")); setEditHomepageUrl(app.homepageUrl || "https://"); }}
+                      title="Edit"
+                    >
+                      <PencilIcon style={{ width: "16px", height: "16px" }} />
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger-outline"
+                      style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      onClick={() => setDeleteTarget(app)}
+                      title="Delete"
+                    >
+                      <TrashIcon style={{ width: "16px", height: "16px" }} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
+
+      {activeTab === "api" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          {/* Header row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+            <div>
+              <h2 className="settings-section-title" style={{ marginBottom: "0.25rem" }}>REST API</h2>
+              <p className="settings-page-sub" style={{ fontSize: "0.8125rem", margin: 0 }}>
+                Programmatic access to your digital universe.
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => window.open("/docs/api", "_blank")}
+                style={{ fontSize: "0.8125rem" }}
+              >
+                📖 View Documentation
+              </button>
+            </div>
+          </div>
 
       {/* Info box: Personal Access Token */}
       <div style={{ ...glassCard, padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem", borderColor: "rgba(34, 211, 238, 0.25)" }}>
@@ -295,6 +358,14 @@ export default function DeveloperTab() {
               >
                 {tokenCopied ? "✓ Copied!" : "Copy Token"}
               </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleRevealPersonalToken}
+                style={{ flexShrink: 0 }}
+              >
+                Hide Token
+              </button>
             </>
           ) : (
             <button
@@ -308,26 +379,8 @@ export default function DeveloperTab() {
           )}
         </div>
       </div>
-
-      {/* Info box: How to integrate */}
-      <div style={{ ...glassCard, padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem", borderColor: "rgba(124,92,252,0.25)" }}>
-        <p style={{ color: "#a78bfa", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>📡 Integration Endpoints</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-          {[
-            { label: "Authorize", url: `${typeof window !== "undefined" ? window.location.origin : ""}/api/oauth/authorize` },
-            { label: "Token Exchange", url: `${typeof window !== "undefined" ? window.location.origin : ""}/api/oauth/token` },
-            { label: "User Info", url: `${typeof window !== "undefined" ? window.location.origin : ""}/api/oauth/userinfo` },
-            { label: "REST API Docs", url: `${typeof window !== "undefined" ? window.location.origin : ""}/docs/api` },
-          ].map(ep => (
-            <div key={ep.label} style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-              <span style={{ color: "var(--color-comet)", fontSize: "0.75rem", minWidth: "90px" }}>{ep.label}</span>
-              <code style={{ color: "#f0f4ff", fontSize: "0.75rem", fontFamily: "var(--font-mono)", background: "rgba(0,0,0,0.3)", padding: "2px 8px", borderRadius: "4px", wordBreak: "break-all" }}>
-                {ep.url}
-              </code>
-            </div>
-          ))}
-        </div>
       </div>
+      )}
 
       {/* === MODAL: Create New App === */}
       {showCreateModal && (
