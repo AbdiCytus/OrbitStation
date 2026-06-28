@@ -301,6 +301,7 @@ model OAuthApp {
   clientId     String   @unique
   clientSecret String
   redirectUris String[] // Array URL callback yang sah
+  homepageUrl  String?
   ownerId      String
   createdAt    DateTime @default(now())
 

@@ -1716,6 +1716,7 @@ export async function getMyOAuthApps() {
       name: true,
       clientId: true,
       redirectUris: true,
+      homepageUrl: true,
       createdAt: true,
       // clientSecret TIDAK dikembalikan di sini karena ini adalah daftar (list)
     }
@@ -1724,13 +1725,13 @@ export async function getMyOAuthApps() {
 }
 
 /** Buat OAuth App baru, kembalikan clientSecret HANYA di response ini */
-export async function createOAuthApp(name: string, redirectUris: string[]) {
+export async function createOAuthApp(name: string, redirectUris: string[], homepageUrl: string) {
   const user = await requireAuth();
 
   if (!name.trim()) return { error: "App name is required." };
   if (!redirectUris.length || !redirectUris[0].trim()) return { error: "At least one redirect URI is required." };
 
-  // Validasi format URL setiap redirect URI
+  // 1. Validasi Redirect URIs (Kode asli kamu)
   for (const uri of redirectUris) {
     try {
       const parsed = new URL(uri.trim());
@@ -1739,6 +1740,18 @@ export async function createOAuthApp(name: string, redirectUris: string[]) {
       }
     } catch {
       return { error: `Invalid redirect URI format: ${uri}` };
+    }
+  }
+
+  // 2. Validasi Homepage URL (Ditambahkan dengan pola yang sama)
+  if (homepageUrl.trim()) {
+    try {
+      const parsed = new URL(homepageUrl.trim());
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return { error: `Homepage URL must use http or https: ${homepageUrl}` };
+      }
+    } catch {
+      return { error: `Invalid homepage URL format: ${homepageUrl}` };
     }
   }
 
@@ -1751,12 +1764,12 @@ export async function createOAuthApp(name: string, redirectUris: string[]) {
       clientId,
       clientSecret,
       redirectUris: redirectUris.map(u => u.trim()).filter(Boolean),
+      homepageUrl: homepageUrl.trim(),
       ownerId: user.id,
     }
   });
 
   revalidatePath("/settings");
-  // Kembalikan secret HANYA satu kali saat baru dibuat
   return { data: { ...app, clientSecret } };
 }
 
@@ -1774,14 +1787,16 @@ export async function deleteOAuthApp(appId: string) {
 }
 
 /** Update nama dan redirect URIs sebuah app */
-export async function updateOAuthApp(appId: string, name: string, redirectUris: string[]) {
+export async function updateOAuthApp(appId: string, name: string, redirectUris: string[], homepageUrl: string) {
   const user = await requireAuth();
 
   const app = await db.oAuthApp.findFirst({ where: { id: appId, ownerId: user.id } });
   if (!app) return { error: "App not found or access denied." };
 
   if (!name.trim()) return { error: "App name is required." };
+  if (!redirectUris.length || !redirectUris[0].trim()) return { error: "At least one redirect URI is required." };
 
+  // 1. Validasi Redirect URIs (Kode asli kamu)
   for (const uri of redirectUris) {
     try {
       const parsed = new URL(uri.trim());
@@ -1793,11 +1808,24 @@ export async function updateOAuthApp(appId: string, name: string, redirectUris: 
     }
   }
 
+  // 2. Validasi Homepage URL (Ditambahkan dengan pola yang sama)
+  if (homepageUrl.trim()) {
+    try {
+      const parsed = new URL(homepageUrl.trim());
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return { error: `Homepage URL must use http or https: ${homepageUrl}` };
+      }
+    } catch {
+      return { error: `Invalid homepage URL format: ${homepageUrl}` };
+    }
+  }
+
   const updated = await db.oAuthApp.update({
     where: { id: appId },
     data: {
       name: name.trim(),
       redirectUris: redirectUris.map(u => u.trim()).filter(Boolean),
+      homepageUrl: homepageUrl.trim(),
     }
   });
 

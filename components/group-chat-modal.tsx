@@ -1427,7 +1427,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                       <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-back" />
                                     </>
                                   )}
-                                  <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg mt-1.5`} style={{ width: 'fit-content', position: 'relative', zIndex: 1 }}>
+                                  <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg mt-1.5`} style={{ width: 'fit-content', position: 'relative', zIndex: 1, marginTop: "0.25rem" }}>
                                     {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
                                     {badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
                                     <div className="badge-icon w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">

@@ -7,8 +7,10 @@ export default function OAuthTestPage() {
   const [clientSecret, setClientSecret] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Ambil parameter dari URL saat halaman dimuat
     const searchParams = new URLSearchParams(window.location.search);
     const id = searchParams.get("client_id");
@@ -112,7 +114,7 @@ export default function OAuthTestPage() {
             <p style={{ color: "#4b5675", fontSize: "0.7rem", margin: 0 }}>
               Test callback URL must be registered:<br/>
               <code style={{ color: "#6b7db3", background: "rgba(0,0,0,0.3)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.7rem", display: "inline-block", marginTop: "4px", wordBreak: "break-all" }}>
-                {typeof window !== "undefined" ? `${window.location.origin}/api/oauth/test-callback` : "/api/oauth/test-callback"}
+                {mounted ? `${window.location.origin}/api/oauth/test-callback` : "/api/oauth/test-callback"}
               </code>
             </p>
           </div>

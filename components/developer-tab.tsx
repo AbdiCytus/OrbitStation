@@ -10,6 +10,7 @@ type OAuthApp = {
   name: string;
   clientId: string;
   redirectUris: string[];
+  homepageUrl: string | null;
   createdAt: Date;
 };
 
@@ -27,6 +28,7 @@ export default function DeveloperTab() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newRedirectUris, setNewRedirectUris] = useState("https://");
+  const [homepageUrl, setNewHomepageUrl] = useState("https://");
   const [creating, setCreating] = useState(false);
 
   // Modal: Show Credentials (only once after creation)
@@ -41,6 +43,7 @@ export default function DeveloperTab() {
   const [editTarget, setEditTarget] = useState<OAuthApp | null>(null);
   const [editName, setEditName] = useState("");
   const [editRedirectUris, setEditRedirectUris] = useState("");
+  const [editHomepageUrl, setEditHomepageUrl] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export default function DeveloperTab() {
     if (!uris.length) { toast.error("At least one redirect URI is required."); return; }
 
     setCreating(true);
-    const res = await createOAuthApp(newName, uris);
+    const res = await createOAuthApp(newName, uris, homepageUrl);
     setCreating(false);
 
     if ("error" in res) {
@@ -77,6 +80,7 @@ export default function DeveloperTab() {
     setShowCreateModal(false);
     setNewName("");
     setNewRedirectUris("https://");
+    setNewHomepageUrl("https://");
 
     // Show credentials ONCE
     setCredentials({
@@ -107,7 +111,7 @@ export default function DeveloperTab() {
     if (!uris.length) { toast.error("At least one redirect URI is required."); return; }
 
     setSaving(true);
-    const res = await updateOAuthApp(editTarget.id, editName, uris);
+    const res = await updateOAuthApp(editTarget.id, editName, uris, editHomepageUrl);
     setSaving(false);
 
     if ("error" in res) { toast.error(res.error); return; }
@@ -128,7 +132,7 @@ export default function DeveloperTab() {
     backdropFilter: "var(--glass-blur)",
     borderRadius: "var(--radius-lg)"
   };
-  
+
   const overlayStyle: React.CSSProperties = {
     position: "fixed", inset: 0,
     borderRadius: "var(--radius-lg)",
@@ -223,7 +227,7 @@ export default function DeveloperTab() {
                   type="button"
                   className="btn btn-secondary"
                   style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
-                  onClick={() => { setEditTarget(app); setEditName(app.name); setEditRedirectUris(app.redirectUris.join("\n")); }}
+                  onClick={() => { setEditTarget(app); setEditName(app.name); setEditRedirectUris(app.redirectUris.join("\n")); setEditHomepageUrl(app.homepageUrl || "https://"); }}
                   title="Edit"
                 >
                   <PencilIcon style={{ width: "16px", height: "16px" }} />
@@ -277,6 +281,17 @@ export default function DeveloperTab() {
                 placeholder="e.g. Orbit Mini Game"
                 style={{ width: "100%" }}
                 autoFocus
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <label style={{ color: "#9aafcf", fontSize: "0.8125rem", fontWeight: 600 }}>Homepage URL</label>
+              <input
+                className="input"
+                value={homepageUrl}
+                onChange={e => setNewHomepageUrl(e.target.value)}
+                placeholder="https://your-app.com"
+                style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: "0.8125rem" }}
               />
             </div>
 
@@ -383,6 +398,16 @@ export default function DeveloperTab() {
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               <label style={{ color: "#9aafcf", fontSize: "0.8125rem", fontWeight: 600 }}>App Name</label>
               <input className="input" value={editName} onChange={e => setEditName(e.target.value)} style={{ width: "100%" }} />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <label style={{ color: "#9aafcf", fontSize: "0.8125rem", fontWeight: 600 }}>Homepage URL</label>
+              <input
+                className="input"
+                value={editHomepageUrl}
+                onChange={e => setEditHomepageUrl(e.target.value)}
+                style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: "0.8125rem" }}
+              />
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
