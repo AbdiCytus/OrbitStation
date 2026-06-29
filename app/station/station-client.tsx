@@ -1519,24 +1519,6 @@ export default function StationClient({
               <style
                 dangerouslySetInnerHTML={{
                   __html: `
-                .custom-dropdown-btn {
-                  height: 38px;
-                  width: 38px;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  padding: 0;
-                  border-radius: 8px;
-                  transition: all 0.2s;
-                  cursor: pointer;
-                }
-                .custom-dropdown-btn:hover {
-                  background: rgba(139, 92, 246, 0.4) !important;
-                  border-color: #a78bfa !important;
-                  color: #fff !important;
-                }
-                .dropdown-option-btn:hover { background: rgba(139, 92, 246, 0.4) !important; }
-                .staggered-item { }
                 .entering .staggered-item {
                   animation-name: zoomInControl;
                   animation-duration: 0.3s;
@@ -1618,23 +1600,16 @@ export default function StationClient({
                             ].map((opt) => (
                               <button
                                 key={opt.id}
-                                className="dropdown-option-btn"
+                                className={`dropdown-option ${filterVisibility === opt.id ? "active" : ""}`}
                                 style={{
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "space-between",
                                   padding: "0.5rem",
-                                  background:
-                                    filterVisibility === opt.id
-                                      ? "rgba(139, 92, 246, 0.2)"
-                                      : "transparent",
-                                  color: "#fff",
                                   border: "none",
-                                  borderRadius: "6px",
                                   cursor: "pointer",
                                   textAlign: "left",
                                   fontSize: "0.85rem",
-                                  transition: "all 0.2s",
                                 }}
                                 onClick={() => {
                                   applyFilterSort(() =>
@@ -1662,17 +1637,7 @@ export default function StationClient({
                     <div className="staggered-item">
                       <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
                         <button
-                          className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
-                          style={{
-                            background: selectedTags.length > 0 ? "var(--sector-active-bg)" : "var(--nav-glass-bg)",
-                            borderRadius: "8px",
-                            height: "38px",
-                            padding: "0 0.8rem",
-                            width: "auto",
-                            transition: "all 0.15s",
-                            border: `1px solid ${selectedTags.length > 0 ? "var(--color-border-active)" : "var(--glass-border)"}`,
-                            color: selectedTags.length > 0 ? "var(--sector-active-text)" : "var(--color-comet)",
-                          }}
+                          className={`station-btn ${selectedTags.length > 0 ? "active" : ""}`}
                           onClick={() => setOpenMenu(openMenu === "tags" ? null : "tags")}
                           title="Filter by Tags">
                           <TagIcon width={18} height={18} />
@@ -1755,15 +1720,7 @@ export default function StationClient({
                       className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`}
                       style={{ position: "relative" }}>
                       <button
-                        className="custom-dropdown-btn"
-                        style={{
-                          background:
-                            sortBy !== "date"
-                              ? "var(--sector-active-bg)"
-                              : "var(--item-bg)",
-                          border: `1px solid ${sortBy !== "date" ? "var(--sector-active-border)" : "var(--color-border)"}`,
-                          color: sortBy !== "date" ? "var(--sector-active-text)" : "var(--color-comet)",
-                        }}
+                        className={`station-btn ${sortBy !== "date" ? "active" : ""}`}
                         onClick={() =>
                           setOpenMenu(openMenu === "sort" ? null : "sort")
                         }
@@ -1825,7 +1782,7 @@ export default function StationClient({
                                   transition: "all 0.2s",
                                 }}>
                                 <button
-                                  className="dropdown-option-btn hover:bg-white/5"
+                                  className={`dropdown-option ${sortBy === opt.id ? "active" : ""}`}
                                   style={{
                                     flex: 1,
                                     display: "flex",
@@ -1833,8 +1790,6 @@ export default function StationClient({
                                     justifyContent: "space-between",
                                     padding: "0.5rem",
                                     border: "none",
-                                    background: "transparent",
-                                    color: "inherit",
                                     cursor: "pointer",
                                     textAlign: "left",
                                     fontSize: "0.85rem",
@@ -1865,17 +1820,16 @@ export default function StationClient({
                                     }}
                                     style={{
                                       padding: "0.5rem",
-                                      background: "rgba(255,255,255,0.05)",
+                                      background: "var(--item-bg)",
                                       border: "none",
-                                      borderLeft:
-                                        "1px solid rgba(255,255,255,0.1)",
-                                      color: "inherit",
+                                      borderLeft: "1px solid var(--color-border)",
+                                      color: "var(--color-starlight)",
                                       cursor: "pointer",
                                       display: "flex",
                                       alignItems: "center",
                                       justifyContent: "center",
                                     }}
-                                    className="hover:bg-starlight/10"
+                                    className="dropdown-option"
                                     title={`Sort ${sortDir === "asc" ? "Descending" : "Ascending"}`}>
                                     {sortDir === "asc" ? (
                                       <BarsArrowUpIcon width={16} height={16} />
