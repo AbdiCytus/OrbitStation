@@ -57,14 +57,27 @@ export default function TagManagementModal({
     }
   }, [isOpen]);
 
+  const [isReady, setIsReady] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => setIsReady(true), 10);
+    } else {
+      setIsReady(false);
+    }
+  }, [isOpen]);
+
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
       onClose();
       setIsClosing(false);
-    }, 180);
+    }, 300);
   };
+
+  const overlayClass = isClosing || !isReady ? "opacity-0" : "opacity-100";
+  const panelClass = isClosing || !isReady ? "translate-y-full opacity-0" : "translate-y-0 opacity-100";
 
   if (!isOpen && !isClosing) return null;
 
@@ -72,9 +85,10 @@ export default function TagManagementModal({
   const handleAddTag = async () => {
     const trimmed = newTagName.trim();
     if (!trimmed) return;
-    if (trimmed.length > 20) return toast.error("Nama tagar maksimal 20 karakter");
+    if (trimmed.length > 20) return toast.error("Tag name max 20 characters");
+    if (localTags.length >= 10) return toast.error("Max 10 tags allowed per sector");
     if (localTags.some((t) => t.name.toLowerCase() === trimmed.toLowerCase()))
-      return toast.error("Tagar sudah ada");
+      return toast.error("Tag already exists");
 
     setIsSubmitting(true);
     const res = await createTag(sector.id, trimmed);
@@ -89,7 +103,7 @@ export default function TagManagementModal({
       setLocalTags(updated);
       onTagsChanged?.(updated);
       setNewTagName("");
-      toast.success("Tagar berhasil dibuat!");
+      toast.success("Tag created successfully!");
       router.refresh();
     }
   };
@@ -97,7 +111,7 @@ export default function TagManagementModal({
   const handleUpdateTag = async (tagId: string) => {
     const trimmed = editTagName.trim();
     if (!trimmed) { setEditingTagId(null); return; }
-    if (trimmed.length > 20) return toast.error("Nama tagar maksimal 20 karakter");
+    if (trimmed.length > 20) return toast.error("Tag name max 20 characters");
 
     setIsSubmitting(true);
     const res = await updateTag(tagId, trimmed);
@@ -110,13 +124,13 @@ export default function TagManagementModal({
       setLocalTags(updated);
       onTagsChanged?.(updated);
       setEditingTagId(null);
-      toast.success("Tagar berhasil diubah!");
+      toast.success("Tag updated successfully!");
       router.refresh();
     }
   };
 
   const handleDeleteTag = async (tagId: string) => {
-    if (!confirm("Hapus tagar ini? Tagar akan dilepas dari semua beacon.")) return;
+    if (!confirm("Delete this tag? It will be removed from all beacons.")) return;
     setIsSubmitting(true);
     const res = await deleteTag(tagId);
     setIsSubmitting(false);
@@ -135,7 +149,7 @@ export default function TagManagementModal({
         });
         return next;
       });
-      toast.success("Tagar berhasil dihapus!");
+      toast.success("Tag deleted successfully!");
       router.refresh();
     }
   };
@@ -148,7 +162,7 @@ export default function TagManagementModal({
         return { ...prev, [beaconId]: current.filter((id) => id !== tagId) };
       } else {
         if (current.length >= 5) {
-          toast.error("Maksimal 5 tagar per beacon");
+          toast.error("Max 5 tags per beacon");
           return prev;
         }
         return { ...prev, [beaconId]: [...current, tagId] };
@@ -178,22 +192,19 @@ export default function TagManagementModal({
     setIsSavingAssignments(false);
 
     if (hasError) {
-      toast.error("Beberapa assignment gagal disimpan");
+      toast.error("Some assignments failed to save");
     } else {
-      toast.success("Assignment tagar berhasil disimpan!");
+      toast.success("Tag assignments saved successfully!");
       router.refresh();
       handleClose();
     }
   };
 
-  // Animation classes
-  const overlayClass = isClosing ? "opacity-0" : "opacity-100";
-  const panelClass = isClosing ? "translate-y-full opacity-0" : "translate-y-0 opacity-100";
+
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center"
-      style={{ padding: "1rem", paddingBottom: 0 }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-end sm:justify-center px-0 sm:px-4"
     >
       {/* Backdrop */}
       <div
@@ -203,14 +214,15 @@ export default function TagManagementModal({
 
       {/* Panel */}
       <div
-        className={`relative w-full sm:max-w-2xl flex flex-col overflow-hidden z-10 transition-all duration-200 ${panelClass}`}
+        className={`relative w-full sm:max-w-2xl flex flex-col overflow-hidden z-10 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${panelClass}`}
         style={{
           background: "#0d0e14",
           border: "1px solid rgba(255,255,255,0.08)",
           borderRadius: "1rem 1rem 0 0",
-          maxHeight: "88vh",
         }}
       >
+        {/* Added wrapper for height limits */}
+        <div className="flex flex-col w-full h-full sm:h-auto min-h-[50vh] sm:min-h-0 sm:h-[50vh]">
         {/* Header */}
         <div
           className="flex items-center justify-between border-b border-white/10"
@@ -257,7 +269,7 @@ export default function TagManagementModal({
                 background: activeTab === tab ? "rgba(139,92,246,0.07)" : "transparent",
               }}
             >
-              {tab === "manage" ? "Kelola Tagar" : "Pasang Tagar"}
+              {tab === "manage" ? "Manage Tags" : "Assign Tags"}
             </button>
           ))}
         </div>
@@ -273,7 +285,7 @@ export default function TagManagementModal({
               <div className="flex" style={{ gap: "0.5rem" }}>
                 <input
                   type="text"
-                  placeholder="Nama tagar baru (maks. 20 karakter)..."
+                  placeholder="New tag name (max 20 chars)..."
                   maxLength={20}
                   value={newTagName}
                   onChange={(e) => setNewTagName(e.target.value)}
@@ -289,7 +301,7 @@ export default function TagManagementModal({
                   style={{ padding: "0.6rem 1rem", gap: "0.375rem", flexShrink: 0, fontSize: "0.875rem" }}
                 >
                   <PlusIcon width={16} height={16} />
-                  <span>Tambah</span>
+                  <span>Add</span>
                 </button>
               </div>
 
@@ -301,10 +313,10 @@ export default function TagManagementModal({
                 >
                   <span style={{ fontSize: "2rem" }}>🏷️</span>
                   <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-                    Belum ada tagar di sektor ini.
+                    No tags in this sector yet.
                   </p>
                   <p style={{ color: "#4b5563", fontSize: "0.8rem" }}>
-                    Tambahkan tagar pertama di atas.
+                    Add your first tag above.
                   </p>
                 </div>
               ) : (
@@ -361,7 +373,7 @@ export default function TagManagementModal({
                             className="text-green-400 hover:bg-white/10 rounded transition-colors"
                             style={{ padding: "0.375rem 0.5rem", fontSize: "0.8rem", fontWeight: 600 }}
                           >
-                            Simpan
+                            Save
                           </button>
                         ) : (
                           <>
@@ -369,7 +381,7 @@ export default function TagManagementModal({
                               onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }}
                               className="text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
                               style={{ padding: "0.375rem" }}
-                              title="Edit tagar"
+                              title="Edit tag"
                             >
                               <PencilIcon width={15} height={15} />
                             </button>
@@ -378,7 +390,7 @@ export default function TagManagementModal({
                               disabled={isSubmitting}
                               className="text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
                               style={{ padding: "0.375rem" }}
-                              title="Hapus tagar"
+                              title="Delete tag"
                             >
                               <TrashIcon width={15} height={15} />
                             </button>
@@ -396,38 +408,49 @@ export default function TagManagementModal({
               {localTags.length === 0 ? (
                 <div className="text-center" style={{ padding: "2.5rem 1rem" }}>
                   <p style={{ color: "#6b7280", fontSize: "0.875rem", marginBottom: "0.75rem" }}>
-                    Buat tagar dulu di tab "Kelola Tagar".
+                    Create tags first in the "Manage Tags" tab.
                   </p>
                   <button
                     onClick={() => setActiveTab("manage")}
                     style={{ color: "#a78bfa", fontSize: "0.875rem" }}
                   >
-                    Ke Kelola Tagar →
+                    To Manage Tags →
                   </button>
                 </div>
               ) : sector.beacons.length === 0 ? (
                 <p className="text-center" style={{ color: "#6b7280", fontSize: "0.875rem", padding: "2.5rem 1rem" }}>
-                  Tidak ada beacon di sektor ini.
+                  No beacons in this sector.
                 </p>
               ) : (
                 sector.beacons.map((beacon) => {
                   const selectedTagIds = assignments[beacon.id] || [];
+                  const domain = (() => { try { return new URL(beacon.url).hostname.replace("www.", ""); } catch { return beacon.url; } })();
                   return (
                     <div
                       key={beacon.id}
-                      className="border border-white/5"
+                      className="border border-white/5 flex flex-col"
                       style={{
                         background: "rgba(255,255,255,0.03)",
                         borderRadius: "0.625rem",
                         padding: "0.875rem",
+                        gap: "0.75rem"
                       }}
                     >
-                      <p
-                        className="truncate"
-                        style={{ color: "#d1d5db", fontWeight: 500, fontSize: "0.875rem", marginBottom: "0.625rem" }}
-                      >
-                        {beacon.title}
-                      </p>
+                      <div className="flex items-center gap-3">
+                        {beacon.imageUrl ? (
+                           <img src={beacon.imageUrl} alt="" className="w-8 h-8 sm:w-10 sm:h-10 rounded object-cover flex-shrink-0" />
+                        ) : beacon.faviconUrl ? (
+                           <img src={beacon.faviconUrl} alt="" className="w-8 h-8 sm:w-10 sm:h-10 rounded object-cover flex-shrink-0 bg-white/5" />
+                        ) : (
+                           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded bg-white/10 flex flex-shrink-0 items-center justify-center text-sm sm:text-lg font-bold text-white uppercase">{domain.charAt(0)}</div>
+                        )}
+                        <p
+                          className="truncate flex-1"
+                          style={{ color: "#d1d5db", fontWeight: 500, fontSize: "0.875rem" }}
+                        >
+                          {beacon.title}
+                        </p>
+                      </div>
                       <div className="flex flex-wrap" style={{ gap: "0.375rem" }}>
                         {localTags.map((tag) => {
                           const isSelected = selectedTagIds.includes(tag.id);
@@ -454,8 +477,8 @@ export default function TagManagementModal({
                         })}
                       </div>
                       {selectedTagIds.length > 0 && (
-                        <p style={{ fontSize: "0.72rem", color: "#6b7280", marginTop: "0.375rem" }}>
-                          {selectedTagIds.length}/5 tagar dipilih
+                        <p style={{ fontSize: "0.72rem", color: "#6b7280", marginTop: "0.125rem" }}>
+                          {selectedTagIds.length}/5 tags selected
                         </p>
                       )}
                     </div>
@@ -478,10 +501,11 @@ export default function TagManagementModal({
               className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
               style={{ padding: "0.625rem 1.5rem", fontSize: "0.875rem" }}
             >
-              {isSavingAssignments ? "Menyimpan..." : "Simpan Assignment"}
+              {isSavingAssignments ? "Saving..." : "Save Assignments"}
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

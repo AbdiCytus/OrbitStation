@@ -407,35 +407,36 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             {/* Title */}
             <h2 className="hsr-title">{beacon.title}</h2>
 
-            {/* Tags */}
-            {beacon.tags && beacon.tags.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "1rem" }}>
-                {beacon.tags.map(bt => (
-                  <span
-                    key={bt.tag.id}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                      fontSize: "0.75rem",
-                      padding: "0.25rem 0.6rem",
-                      borderRadius: "9999px",
-                      background: "rgba(139, 92, 246, 0.15)",
-                      color: "#c4b5fd",
-                      border: "1px solid rgba(139, 92, 246, 0.3)",
-                    }}
-                  >
-                    <TagIcon width={12} height={12} />
-                    {bt.tag.name}
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* Tags (Mobile Only) */}
+            <div className="flex sm:hidden flex-wrap gap-1.5 mb-4 mt-1">
+              {beacon.tags?.map(bt => (
+                <span
+                  key={bt.tag.id}
+                  className="inline-flex items-center gap-1 text-[0.65rem] px-2.5 py-1 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
+                >
+                  <TagIcon width={10} height={10} />
+                  {bt.tag.name}
+                </span>
+              ))}
+            </div>
 
             {/* Description */}
             {beacon.description && (
               <p className="hsr-desc">{beacon.description}</p>
             )}
+
+            {/* Tags (Desktop Only) */}
+            <div className="hidden sm:flex flex-wrap gap-1.5 mb-4 mt-2">
+              {beacon.tags?.map(bt => (
+                <span
+                  key={bt.tag.id}
+                  className="inline-flex items-center gap-1.5 text-[0.75rem] px-3 py-1.5 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
+                >
+                  <TagIcon width={12} height={12} />
+                  {bt.tag.name}
+                </span>
+              ))}
+            </div>
 
             <div className="hsr-divider" />
 

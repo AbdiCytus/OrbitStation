@@ -260,6 +260,7 @@ export default function StationClient({
   const [showAddBeacon, setShowAddBeacon] = useState(false);
   const [showAddSector, setShowAddSector] = useState(false);
   const [showTagModal, setShowTagModal] = useState(false);
+  const [showTagFilterModal, setShowTagFilterModal] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showGroupChat, setShowGroupChat] = useState(false);
   // Track which private chat is open so useNotifications can suppress its toast
@@ -1431,13 +1432,14 @@ export default function StationClient({
                       <button
                         className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
                         style={{
-                          background: "rgba(255, 255, 255, 0.05)",
+                          background: "rgba(14, 165, 233, 0.15)",
+                          border: "1px solid rgba(14, 165, 233, 0.3)",
                           borderRadius: "8px",
                           height: "38px",
                           padding: "0 0.8rem",
                           width: "auto",
-                          color: "var(--color-comet)",
-                          transition: "background 0.15s",
+                          color: "#38bdf8",
+                          transition: "all 0.15s",
                         }}
                         onClick={() => {
                           setEditingSector(activeSector);
@@ -1453,7 +1455,7 @@ export default function StationClient({
                             fontSize: "0.85rem",
                             marginLeft: "0.4rem",
                             display: "inline-block",
-                            color: "var(--color-comet)",
+                            color: "inherit",
                           }}>
                           Edit Sector
                         </span>
@@ -1667,63 +1669,10 @@ export default function StationClient({
                             border: `1px solid ${selectedTags.length > 0 ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`,
                             color: selectedTags.length > 0 ? "#fff" : "#a1a1aa",
                           }}
-                          onClick={() => setOpenMenu(openMenu === "tags" ? null : "tags")}
+                          onClick={() => setShowTagFilterModal(true)}
                           title="Filter by Tags">
                           <TagIcon width={18} height={18} />
                         </button>
-                        {openMenu === "tags" && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "calc(100% + 0.5rem)",
-                              left: 0,
-                              background: "#1a1a2e",
-                              border: "1px solid rgba(255,255,255,0.1)",
-                              borderRadius: "8px",
-                              padding: "0.5rem",
-                              zIndex: 50,
-                              minWidth: "180px",
-                              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "0.25rem",
-                            }}>
-                            {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).map((opt) => (
-                              <button
-                                key={opt.id}
-                                className="dropdown-option-btn"
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                  padding: "0.5rem",
-                                  background: selectedTags.includes(opt.id) ? "rgba(139, 92, 246, 0.2)" : "transparent",
-                                  color: "#fff",
-                                  border: "none",
-                                  borderRadius: "6px",
-                                  cursor: "pointer",
-                                  textAlign: "left",
-                                  fontSize: "0.85rem",
-                                  transition: "all 0.2s",
-                                }}
-                                onClick={() => {
-                                  applyFilterSort(() => {
-                                    setSelectedTags(prev => 
-                                      prev.includes(opt.id) 
-                                        ? prev.filter(id => id !== opt.id) 
-                                        : [...prev, opt.id]
-                                    );
-                                  });
-                                  // keep menu open for multi-select
-                                }}>
-                                {opt.name}
-                                {selectedTags.includes(opt.id) && (
-                                  <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     </div>
                   )}
@@ -2171,6 +2120,38 @@ export default function StationClient({
             setSelectedTags(prev => prev.filter(id => tagIds.includes(id)));
           }}
         />
+      )}
+
+      {showTagFilterModal && displaySectorId !== "all" && (
+        <div className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center px-0 sm:px-4 pb-0 sm:pb-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onClick={() => setShowTagFilterModal(false)} />
+          <div 
+            className="relative w-full sm:w-[450px] overflow-hidden flex flex-col z-10 shadow-2xl rounded-t-[1.5rem] sm:rounded-2xl" 
+            style={{ maxHeight: "80vh", background: "#0d0e14", border: "1px solid rgba(255,255,255,0.08)", animation: "zoomInControl 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }}
+          >
+            <div className="p-4 flex items-center justify-between border-b border-white/10" style={{ background: "rgba(139, 92, 246, 0.1)" }}>
+               <h2 className="text-white font-semibold text-lg flex items-center gap-2"><TagIcon width={20} height={20} className="text-violet-400" /> Filter results</h2>
+               <button onClick={() => setShowTagFilterModal(false)} className="text-gray-400 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-colors"><XMarkIcon width={20} height={20} /></button>
+            </div>
+            <div className="p-5 flex-1 overflow-y-auto custom-scrollbar">
+               <h3 className="text-gray-400 font-medium mb-4 text-sm uppercase tracking-wider">Tags</h3>
+               <div className="flex flex-wrap gap-2.5">
+                  {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).map(opt => (
+                     <button
+                        key={opt.id}
+                        onClick={() => applyFilterSort(() => setSelectedTags(prev => prev.includes(opt.id) ? prev.filter(id => id !== opt.id) : [...prev, opt.id]))}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${selectedTags.includes(opt.id) ? 'bg-violet-600/20 text-violet-300 border-violet-500/50 hover:bg-violet-600/30' : 'bg-white/5 text-gray-300 border-transparent hover:bg-white/10'}`}
+                     >
+                        {opt.name}
+                     </button>
+                  ))}
+                  {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).length === 0 && (
+                     <p className="text-gray-500 text-sm italic w-full text-center py-4">No tags available in this sector.</p>
+                  )}
+               </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <AnimatePresence>
