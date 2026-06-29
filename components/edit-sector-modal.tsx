@@ -224,7 +224,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         title={ic}
                         style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "var(--item-bg)", border: "1px solid var(--item-border)", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
                       >
-                        <DynamicIcon name={ic} style={{ color: icon === ic ? "var(--color-violet-glow)" : "var(--color-starlight)" }} />
+                        <DynamicIcon name={ic} style={{ color: icon === ic ? "var(--color-primary)" : "var(--color-starlight)" }} />
                       </button>
                     ))}
                   </div>
@@ -275,7 +275,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                   <label className="form-label">Visibility</label>
                   {(isCollabSector || hasPendingInvites || inviteEnabled) ? (
                     <div style={{ padding: "0.75rem", background: "rgba(139, 92, 246, 0.1)", border: "1px solid rgba(139, 92, 246, 0.2)", borderRadius: "8px", display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                      <DynamicIcon name="LockClosedIcon" width={20} height={20} style={{ color: "var(--color-violet-glow)" }} />
+                      <DynamicIcon name="LockClosedIcon" width={20} height={20} style={{ color: "var(--color-primary)" }} />
                       <span style={{ fontSize: "0.85rem", color: "#e2e8f0" }}>Collab sectors are permanently Private</span>
                     </div>
                   ) : (
@@ -344,7 +344,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         <span style={{ fontSize: "0.9rem", color: "#e2e8f0", fontWeight: 500 }}>QR & Link Join</span>
                         <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Allow users to join via invite link or QR code</span>
                       </div>
-                      <button type="button" onClick={() => setInviteEnabled(!inviteEnabled)} style={{ width: "40px", height: "24px", borderRadius: "12px", background: inviteEnabled ? "var(--color-violet-glow)" : "var(--item-border)", position: "relative", cursor: "pointer", border: "none", transition: "background 0.2s" }}>
+                      <button type="button" onClick={() => setInviteEnabled(!inviteEnabled)} style={{ width: "40px", height: "24px", borderRadius: "12px", background: inviteEnabled ? "var(--color-primary)" : "var(--item-border)", position: "relative", cursor: "pointer", border: "none", transition: "background 0.2s" }}>
                         <div style={{ width: "20px", height: "20px", borderRadius: "10px", background: "white", position: "absolute", top: "2px", left: inviteEnabled ? "18px" : "2px", transition: "left 0.2s" }} />
                       </button>
                     </div>
@@ -506,7 +506,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                       <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>
                         <label className="form-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span>Select Friends</span>
-                          <span style={{ fontSize: "0.8rem", color: "var(--color-violet-glow)" }}>{invitedFriends.length} selected</span>
+                          <span style={{ fontSize: "0.8rem", color: "var(--color-primary)" }}>{invitedFriends.length} selected</span>
                         </label>
                         <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "40vh" }}>
                           {friends.length === 0 ? (
@@ -524,7 +524,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
                                 </div>
-                                <div className="flex items-center justify-center w-5 h-5 rounded-full border transition-colors" style={{ borderColor: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "var(--item-border)", background: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "transparent" }}>
+                                <div className="flex items-center justify-center w-5 h-5 rounded-full border transition-colors" style={{ borderColor: invitedFriends.includes(f.id) ? "var(--color-primary)" : "var(--item-border)", background: invitedFriends.includes(f.id) ? "var(--color-primary)" : "transparent" }}>
                                   {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "white" }} />}
                                 </div>
                                 <input
@@ -562,10 +562,10 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
             }}>
               {isMobile && (
                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%", padding: "0 0.5rem" }}>
-                  <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.max(0, p - 1))} disabled={mobilePage === 0} style={{ width: "44px", height: "44px", background: "var(--color-violet-glow)", opacity: mobilePage === 0 ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
+                  <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.max(0, p - 1))} disabled={mobilePage === 0} style={{ width: "44px", height: "44px", background: "var(--color-primary)", opacity: mobilePage === 0 ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
                     <span style={{ marginTop: "1px", marginLeft: "-2px" }}>{"◀"}</span>
                   </button>
-                  <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.min(rightPanelMode ? 2 : 1, p + 1))} disabled={mobilePage === (rightPanelMode ? 2 : 1)} style={{ width: "44px", height: "44px", background: "var(--color-violet-glow)", opacity: mobilePage === (rightPanelMode ? 2 : 1) ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
+                  <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.min(rightPanelMode ? 2 : 1, p + 1))} disabled={mobilePage === (rightPanelMode ? 2 : 1)} style={{ width: "44px", height: "44px", background: "var(--color-primary)", opacity: mobilePage === (rightPanelMode ? 2 : 1) ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
                     <span style={{ marginTop: "1px", marginLeft: "2px" }}>{"▶"}</span>
                   </button>
                 </div>
@@ -704,7 +704,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                     <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>
                       <label className="form-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span>Select Friends</span>
-                        <span style={{ fontSize: "0.8rem", color: "var(--color-violet-glow)" }}>{invitedFriends.length} selected</span>
+                        <span style={{ fontSize: "0.8rem", color: "var(--color-primary)" }}>{invitedFriends.length} selected</span>
                       </label>
                       <motion.div
                         style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}
@@ -865,4 +865,5 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
     </div>
   );
 }
+
 

@@ -60,6 +60,7 @@
   --sector-count-bg: rgba(255, 255, 255, 0.08);
   --sector-count-text: var(--color-comet);
   --nav-bg: rgba(5, 5, 20, 0.7);
+  --color-primary: var(--color-violet-glow);
   --nav-glass-bg: rgba(10, 10, 30, 0.75);
   --glass-bg: rgba(17, 24, 39, 0.6);
   --sidebar-bg: transparent;
@@ -76,6 +77,16 @@
   --glow-pink: 0 0 20px rgba(244, 114, 182, 0.35);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--glass-border);
+
+  /* --- Primary Button --- */
+  --btn-primary-from: var(--color-violet-mid);
+  --btn-primary-to: var(--color-violet-glow);
+  --btn-primary-hover-from: var(--color-violet-glow);
+  --btn-primary-hover-to: #9d7aff;
+  --btn-primary-shadow: 0 2px 12px rgba(91, 63, 222, 0.3);
+  --btn-primary-shadow-hover: var(--glow-violet);
+  --btn-primary-text: rgba(255, 255, 255, 0.9);
+  --sector-active-border: var(--color-violet-glow);
 
   /* --- Spacing & Radius --- */
   --radius-sm: 6px;
@@ -115,11 +126,13 @@
   --nav-danger-color: var(--color-pink-mid);
   --nav-icon-color: #475569;
   --nav-icon-hover-bg: rgba(15, 23, 42, 0.05);
-  --sector-active-bg: rgba(124, 92, 252, 0.1);
-  --sector-active-text: #6d28d9;
+  --sector-active-bg: rgba(15, 23, 42, 0.05);
+  --sector-active-text: #0f172a;
+  --sector-active-border: #0f172a;
   --sector-count-bg: rgba(15, 23, 42, 0.05);
   --sector-count-text: var(--color-comet);
   --nav-bg: rgba(255, 255, 255, 0.8);
+  --color-primary: #0f172a;
   --nav-glass-bg: rgba(248, 250, 252, 0.85);
   --glass-bg: rgba(255, 255, 255, 0.7);
   --sidebar-bg: var(--glass-bg);
@@ -130,6 +143,14 @@
   
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--glass-border);
+
+  --btn-primary-from: #0f172a;
+  --btn-primary-to: #334155;
+  --btn-primary-hover-from: #1e293b;
+  --btn-primary-hover-to: #475569;
+  --btn-primary-shadow: 0 2px 12px rgba(15, 23, 42, 0.2);
+  --btn-primary-shadow-hover: 0 4px 16px rgba(15, 23, 42, 0.3);
+  --btn-primary-text: #f8fafc;
 }
 
 /* --- Dark Theme Overrides --- */
@@ -148,11 +169,13 @@
   --nav-danger-color: var(--color-pink-glow);
   --nav-icon-color: #a1a1aa;
   --nav-icon-hover-bg: rgba(255, 255, 255, 0.08);
-  --sector-active-bg: rgba(124, 92, 252, 0.15);
-  --sector-active-text: var(--color-violet-light);
+  --sector-active-bg: rgba(255, 255, 255, 0.08);
+  --sector-active-text: #fafafa;
+  --sector-active-border: #fafafa;
   --sector-count-bg: rgba(255, 255, 255, 0.08);
   --sector-count-text: var(--color-comet);
   --nav-bg: rgba(18, 18, 20, 0.7);
+  --color-primary: #fafafa;
   --nav-glass-bg: rgba(24, 24, 27, 0.75);
   --glass-bg: rgba(18, 18, 20, 0.6);
   --sidebar-bg: var(--glass-bg);
@@ -164,6 +187,14 @@
   
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--glass-border);
+
+  --btn-primary-from: #fafafa;
+  --btn-primary-to: #e4e4e7;
+  --btn-primary-hover-from: #ffffff;
+  --btn-primary-hover-to: #f4f4f5;
+  --btn-primary-shadow: 0 2px 12px rgba(255, 255, 255, 0.1);
+  --btn-primary-shadow-hover: 0 4px 16px rgba(255, 255, 255, 0.2);
+  --btn-primary-text: #09090b;
 }
 
 /* ============================================================
@@ -373,16 +404,16 @@ pre {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-violet-mid), var(--color-violet-glow));
-  color: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 2px 12px rgba(91, 63, 222, 0.3);
+  background: linear-gradient(135deg, var(--btn-primary-from), var(--btn-primary-to));
+  color: var(--btn-primary-text);
+  box-shadow: var(--btn-primary-shadow);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--color-violet-glow), #9d7aff);
-  box-shadow: var(--glow-violet);
+  background: linear-gradient(135deg, var(--btn-primary-hover-from), var(--btn-primary-hover-to));
+  box-shadow: var(--btn-primary-shadow-hover);
   transform: translateY(-1px);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--btn-primary-text);
 }
 
 .btn-primary:active {
@@ -3623,10 +3654,10 @@ pre {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(124, 92, 252, 0.12);
-  border: 1px solid rgba(124, 92, 252, 0.2);
+  background: var(--item-bg);
+  border: 1px solid var(--item-border);
   border-radius: 6px;
-  color: rgba(167, 139, 250, 0.8);
+  color: var(--color-comet);
   cursor: pointer;
   font-size: 0.8rem;
   transition: opacity 0.15s, background 0.15s, color 0.15s;
@@ -3646,7 +3677,7 @@ pre {
 
 /* Active tab gets sector color accent */
 .sector-tab.active {
-  border-left: 2px solid var(--color-violet-glow);
+  border-left: 2px solid var(--sector-active-border);
 }
 
 /* ============================================================
@@ -3744,7 +3775,7 @@ pre {
 
 .visibility-btn.active {
   background: var(--sector-active-bg);
-  border-color: var(--color-violet-mid);
+  border-color: var(--sector-active-border);
   color: var(--sector-active-text);
   font-weight: 600;
 }

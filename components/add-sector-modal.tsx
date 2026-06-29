@@ -187,7 +187,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                   aria-label={em}
                   style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "var(--item-bg)", border: "1px solid var(--item-border)", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
                 >
-                  <DynamicIcon name={em} style={{ color: icon === em ? "var(--color-violet-glow)" : "var(--color-starlight)" }} />
+                  <DynamicIcon name={em} style={{ color: icon === em ? "var(--color-primary)" : "var(--color-starlight)" }} />
                 </button>
               ))}
             </div>
@@ -284,7 +284,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                 <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>
                   <label className="form-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span>Select Friends</span>
-                    <span style={{ fontSize: "0.8rem", color: "var(--color-violet-glow)" }}>{invitedFriends.length} selected</span>
+                    <span style={{ fontSize: "0.8rem", color: "var(--color-primary)" }}>{invitedFriends.length} selected</span>
                   </label>
                   <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "40vh" }}>
                   {friends.length === 0 ? (
@@ -302,7 +302,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
                         </div>
-                        <div className="flex items-center justify-center rounded-full border transition-colors" style={{ width: "20px", height: "20px", borderColor: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "var(--item-border)", background: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "transparent" }}>
+                        <div className="flex items-center justify-center rounded-full border transition-colors" style={{ width: "20px", height: "20px", borderColor: invitedFriends.includes(f.id) ? "var(--color-primary)" : "var(--item-border)", background: invitedFriends.includes(f.id) ? "var(--color-primary)" : "transparent" }}>
                           {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "var(--color-cosmos)" }} />}
                         </div>
                         <input
@@ -338,10 +338,10 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
           }}>
             {isMobile && (
               <div style={{ display: "flex", justifyContent: "space-between", width: "100%", padding: "0 0.5rem" }}>
-                <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.max(0, p - 1))} disabled={mobilePage === 0} style={{ width: "44px", height: "44px", background: "var(--color-violet-glow)", opacity: mobilePage === 0 ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
+                <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.max(0, p - 1))} disabled={mobilePage === 0} style={{ width: "44px", height: "44px", background: "var(--color-primary)", opacity: mobilePage === 0 ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
                   <span style={{ marginTop: "1px", marginLeft: "-2px" }}>{"◀"}</span>
                 </button>
-                <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.min((showInvite && !isPublic) ? 2 : 1, p + 1))} disabled={mobilePage === ((showInvite && !isPublic) ? 2 : 1)} style={{ width: "44px", height: "44px", background: "var(--color-violet-glow)", opacity: mobilePage === ((showInvite && !isPublic) ? 2 : 1) ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
+                <button type="button" className="btn btn-secondary btn-icon flex items-center justify-center" onClick={() => setMobilePage(p => Math.min((showInvite && !isPublic) ? 2 : 1, p + 1))} disabled={mobilePage === ((showInvite && !isPublic) ? 2 : 1)} style={{ width: "44px", height: "44px", background: "var(--color-primary)", opacity: mobilePage === ((showInvite && !isPublic) ? 2 : 1) ? 0.5 : 1, border: "none", color: "white", fontSize: "16px", lineHeight: 1 }}>
                   <span style={{ marginTop: "1px", marginLeft: "2px" }}>{"▶"}</span>
                 </button>
               </div>
@@ -376,7 +376,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
               <div className="form-group" style={{ marginBottom: 0, flex: 1, display: "flex", flexDirection: "column" }}>
                 <label className="form-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span>Select Friends</span>
-                  <span style={{ fontSize: "0.8rem", color: "var(--color-violet-glow)" }}>{invitedFriends.length} selected</span>
+                  <span style={{ fontSize: "0.8rem", color: "var(--color-primary)" }}>{invitedFriends.length} selected</span>
                 </label>
                 <motion.div 
                   style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem" }}
@@ -399,7 +399,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
                         </div>
-                        <div className="flex items-center justify-center rounded-full border transition-colors" style={{ width: "20px", height: "20px", borderColor: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "var(--item-border)", background: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "transparent" }}>
+                        <div className="flex items-center justify-center rounded-full border transition-colors" style={{ width: "20px", height: "20px", borderColor: invitedFriends.includes(f.id) ? "var(--color-primary)" : "var(--item-border)", background: invitedFriends.includes(f.id) ? "var(--color-primary)" : "transparent" }}>
                           {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "var(--color-cosmos)" }} />}
                         </div>
                       <input 
@@ -425,5 +425,6 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
     </div>
   );
 }
+
 
 
