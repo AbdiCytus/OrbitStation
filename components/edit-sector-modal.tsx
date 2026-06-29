@@ -222,7 +222,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         className={"icon-option" + (icon === ic ? " selected" : "")}
                         onClick={() => setIcon(ic)}
                         title={ic}
-                        style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "var(--item-bg)", border: "1px solid var(--item-border)", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
                       >
                         <DynamicIcon name={ic} style={{ color: icon === ic ? "var(--color-violet-glow)" : "var(--color-starlight)" }} />
                       </button>
@@ -308,7 +308,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
 
                   {/* Invite friends toggle */}
                   {(!isPublic || isCollabSector || hasPendingInvites || inviteEnabled) && (
-                    <div style={{ marginTop: "1rem", display: "flex", flexDirection: isMobile ? "column" : "row", gap: "0.5rem", background: isMobile ? "transparent" : "rgba(255,255,255,0.03)", padding: isMobile ? "0" : "0.25rem", borderRadius: "10px" }}>
+                    <div style={{ marginTop: "1rem", display: "flex", flexDirection: isMobile ? "column" : "row", gap: "0.5rem", background: isMobile ? "transparent" : "var(--item-bg)", padding: isMobile ? "0" : "0.25rem", borderRadius: "10px" }}>
                       {(isCollabSector || pendingMembers.length > 0) && (
                         <button
                           type="button"
@@ -339,12 +339,12 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                   )}
                   {/* QR Link toggle */}
                   {currentUserId === sectorOwner?.id && (
-                    <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem", background: "rgba(255,255,255,0.02)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem", background: "var(--item-bg)", borderRadius: "8px", border: "1px solid var(--item-border)" }}>
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
                         <span style={{ fontSize: "0.9rem", color: "#e2e8f0", fontWeight: 500 }}>QR & Link Join</span>
                         <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Allow users to join via invite link or QR code</span>
                       </div>
-                      <button type="button" onClick={() => setInviteEnabled(!inviteEnabled)} style={{ width: "40px", height: "24px", borderRadius: "12px", background: inviteEnabled ? "var(--color-violet-glow)" : "rgba(255,255,255,0.1)", position: "relative", cursor: "pointer", border: "none", transition: "background 0.2s" }}>
+                      <button type="button" onClick={() => setInviteEnabled(!inviteEnabled)} style={{ width: "40px", height: "24px", borderRadius: "12px", background: inviteEnabled ? "var(--color-violet-glow)" : "var(--item-border)", position: "relative", cursor: "pointer", border: "none", transition: "background 0.2s" }}>
                         <div style={{ width: "20px", height: "20px", borderRadius: "10px", background: "white", position: "absolute", top: "2px", left: inviteEnabled ? "18px" : "2px", transition: "left 0.2s" }} />
                       </button>
                     </div>
@@ -423,11 +423,11 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                           {/* Owner */}
                           {sectorOwner && (
                             <div
-                              className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                              className="flex items-center justify-between rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] hover:bg-[var(--glass-bg-hover)] transition-colors group"
                               style={{ padding: "0.5rem 1rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                                <div className="rounded-full bg-[var(--item-bg)] border border-[var(--item-border)] overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                                   {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
                                 </div>
                                 <div className="flex flex-col min-w-0">
@@ -445,11 +445,11 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                           {localCollaborators?.map((c: any) => (
                             <div
                               key={c.user.id}
-                              className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                              className="flex items-center justify-between rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] hover:bg-[var(--glass-bg-hover)] transition-colors group"
                               style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                                <div className="rounded-full bg-[var(--item-bg)] border border-[var(--item-border)] overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                                   {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
                                 </div>
                                 <div className="flex flex-col min-w-0">
@@ -483,11 +483,11 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                               {pendingMembers.map((u: any) => (
                                 <div
                                   key={u.id}
-                                  className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] transition-colors group opacity-60"
+                                  className="flex items-center justify-between rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] transition-colors group opacity-60"
                                   style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                                 >
                                   <div className="flex items-center gap-3 min-w-0">
-                                    <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                                    <div className="rounded-full bg-[var(--item-bg)] border border-[var(--item-border)] overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                                       {u.image ? <img src={u.image} alt={u.name ?? ""} className="w-full h-full object-cover grayscale" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(u.name || u.username || "?")[0].toUpperCase()}</span>}
                                     </div>
                                     <p className="text-sm font-medium text-comet truncate">{u.name || u.username}</p>
@@ -515,16 +515,16 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                             friends.filter(f => !localCollaborators?.find((c: any) => c.user.id === f.id) && !pendingMembers.find((p: any) => p.id === f.id)).map(f => (
                               <label
                                 key={f.id}
-                                className="flex items-center rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group"
+                                className="flex items-center rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] hover:bg-[var(--glass-bg-hover)] cursor-pointer transition-colors group"
                                 style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                               >
-                                <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                                <div className="rounded-full bg-[var(--item-bg)] border border-[var(--item-border)] overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                                   {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
                                 </div>
-                                <div className="flex items-center justify-center w-5 h-5 rounded-full border transition-colors" style={{ borderColor: invitedFriends.includes(f.id) ? "#a78bfa" : "rgba(255,255,255,0.1)", background: invitedFriends.includes(f.id) ? "#a78bfa" : "transparent" }}>
+                                <div className="flex items-center justify-center w-5 h-5 rounded-full border transition-colors" style={{ borderColor: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "var(--item-border)", background: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "transparent" }}>
                                   {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "white" }} />}
                                 </div>
                                 <input
@@ -620,12 +620,12 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         {/* Owner */}
                         {sectorOwner && (
                           <motion.div
-                            className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                            className="flex items-center justify-between rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] hover:bg-[var(--glass-bg-hover)] transition-colors group"
                             style={{ padding: "0.5rem 1rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                             variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                              <div className="rounded-full bg-[var(--item-bg)] border border-[var(--item-border)] overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                                 {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
                               </div>
                               <p className="text-sm font-medium text-comet truncate">
@@ -641,12 +641,12 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         {localCollaborators?.map((c: any) => (
                           <motion.div
                             key={c.user.id}
-                            className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                            className="flex items-center justify-between rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] hover:bg-[var(--glass-bg-hover)] transition-colors group"
                             style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                             variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                              <div className="rounded-full bg-[var(--item-bg)] border border-[var(--item-border)] overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
                                 {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
                               </div>
                               <div className="flex flex-col min-w-0">
@@ -680,7 +680,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                             {pendingMembers.map((u: any) => (
                               <motion.div
                                 key={u.id}
-                                className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] transition-colors group opacity-60"
+                                className="flex items-center justify-between rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] transition-colors group opacity-60"
                                 style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                                 variants={{ hidden: { opacity: 0, y: -10 }, visible: { opacity: 0.6, y: 0 } }}
                               >
@@ -717,7 +717,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                           friends.filter(f => !localCollaborators?.find((c: any) => c.user.id === f.id) && !pendingMembers.find((p: any) => p.id === f.id)).map(f => (
                             <motion.label
                               key={f.id}
-                              className="flex items-center rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group"
+                              className="flex items-center rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] hover:bg-[var(--glass-bg-hover)] cursor-pointer transition-colors group"
                               style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                               variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                             >
@@ -865,3 +865,4 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
     </div>
   );
 }
+

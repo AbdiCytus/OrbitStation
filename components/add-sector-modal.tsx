@@ -185,7 +185,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                   className={"icon-option" + (icon === em ? " selected" : "")}
                   onClick={() => setIcon(em)}
                   aria-label={em}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "var(--item-bg)", border: "1px solid var(--item-border)", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
                 >
                   <DynamicIcon name={em} style={{ color: icon === em ? "var(--color-violet-glow)" : "var(--color-starlight)" }} />
                 </button>
@@ -293,17 +293,17 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                     friends.map(f => (
                       <label 
                         key={f.id} 
-                        className="flex items-center rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group" 
-                        style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                        className="flex items-center rounded-full border cursor-pointer transition-colors group" 
+                        style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem", background: "var(--item-bg)", borderColor: "var(--item-border)" }}
                       >
-                        <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                        <div className="rounded-full overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", background: "var(--item-bg)", border: "1px solid var(--item-border)" }}>
                           {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
                         </div>
-                        <div className="flex items-center justify-center rounded-full border transition-colors" style={{ width: "20px", height: "20px", borderColor: invitedFriends.includes(f.id) ? "#a78bfa" : "rgba(255,255,255,0.1)", background: invitedFriends.includes(f.id) ? "#a78bfa" : "transparent" }}>
-                          {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "white" }} />}
+                        <div className="flex items-center justify-center rounded-full border transition-colors" style={{ width: "20px", height: "20px", borderColor: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "var(--item-border)", background: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "transparent" }}>
+                          {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "var(--color-cosmos)" }} />}
                         </div>
                         <input
                           type="checkbox"
@@ -389,19 +389,19 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                   friends.map(f => (
                     <motion.label 
                       key={f.id} 
-                      className="flex items-center rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group" 
-                      style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
+                      className="flex items-center rounded-full border cursor-pointer transition-colors group" 
+                      style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem", background: "var(--item-bg)", borderColor: "var(--item-border)" }}
                       variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                     >
-                      <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                      <div className="rounded-full overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", background: "var(--item-bg)", border: "1px solid var(--item-border)" }}>
                         {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
-                      </div>
-                      <div className="flex items-center justify-center rounded-full border transition-colors" style={{ width: "20px", height: "20px", borderColor: invitedFriends.includes(f.id) ? "#a78bfa" : "rgba(255,255,255,0.1)", background: invitedFriends.includes(f.id) ? "#a78bfa" : "transparent" }}>
-                        {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "white" }} />}
-                      </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
+                        </div>
+                        <div className="flex items-center justify-center rounded-full border transition-colors" style={{ width: "20px", height: "20px", borderColor: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "var(--item-border)", background: invitedFriends.includes(f.id) ? "var(--color-violet-light)" : "transparent" }}>
+                          {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "var(--color-cosmos)" }} />}
+                        </div>
                       <input 
                         type="checkbox" 
                         className="hidden"
@@ -425,4 +425,5 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
     </div>
   );
 }
+
 

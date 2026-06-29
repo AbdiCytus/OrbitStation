@@ -83,7 +83,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
             {/* Owner */}
             {sectorOwner && (
               <motion.div
-                className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                className="flex items-center justify-between rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] hover:bg-[var(--glass-bg-hover)] transition-colors group"
                 style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               >
@@ -121,7 +121,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
             {localCollaborators.map((c: any) => (
               <motion.div
                 key={c.user.id}
-                className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                className="flex items-center justify-between rounded-full border bg-[var(--item-bg)] border-[var(--item-border)] hover:bg-[var(--glass-bg-hover)] transition-colors group"
                 style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               >
@@ -164,3 +164,4 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
     </div>
   );
 }
+

@@ -62,6 +62,9 @@
   --nav-bg: rgba(5, 5, 20, 0.7);
   --nav-glass-bg: rgba(10, 10, 30, 0.75);
   --glass-bg: rgba(17, 24, 39, 0.6);
+  --sidebar-bg: transparent;
+  --item-bg: rgba(255, 255, 255, 0.05);
+  --item-border: rgba(255, 255, 255, 0.1);
   --glass-bg-hover: rgba(28, 42, 74, 0.7);
   --glass-border: rgba(124, 92, 252, 0.15);
   --glass-blur: blur(16px);
@@ -119,6 +122,9 @@
   --nav-bg: rgba(255, 255, 255, 0.8);
   --nav-glass-bg: rgba(248, 250, 252, 0.85);
   --glass-bg: rgba(255, 255, 255, 0.7);
+  --sidebar-bg: var(--glass-bg);
+  --item-bg: #f1f5f9;
+  --item-border: transparent;
   --glass-bg-hover: rgba(248, 250, 252, 0.8);
   --glass-border: rgba(15, 23, 42, 0.1);
   
@@ -149,6 +155,9 @@
   --nav-bg: rgba(18, 18, 20, 0.7);
   --nav-glass-bg: rgba(24, 24, 27, 0.75);
   --glass-bg: rgba(18, 18, 20, 0.6);
+  --sidebar-bg: var(--glass-bg);
+  --item-bg: #27272a;
+  --item-border: transparent;
   --glass-bg-hover: rgba(24, 24, 27, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
   --color-border: rgba(255, 255, 255, 0.08);
@@ -1146,6 +1155,7 @@ pre {
 
 /* SIDEBAR */
 .station-sidebar {
+  background: var(--sidebar-bg) !important;
   width: 220px;
   flex-shrink: 0;
   padding: 1rem;
@@ -2951,7 +2961,7 @@ pre {
 
   .sector-tab.active {
     border-left-color: currentcolor !important;
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--sector-active-bg) !important;
   }
 
   .sector-tab-name {
@@ -3624,8 +3634,8 @@ pre {
 }
 
 .sector-tab-edit-btn:hover {
-  background: rgba(124, 92, 252, 0.25);
-  color: #a78bfa;
+  background: var(--nav-icon-hover-bg);
+  color: var(--color-starlight);
 }
 
 .sector-tab-private {
@@ -3825,23 +3835,23 @@ pre {
 /* Sector tab text */
 .sector-tab-name {
   font-size: 0.875rem;
-  color: #c4cde8;
+  color: var(--color-starlight);
   /* brighter than before */
 }
 
 .sector-tab-count {
   font-size: 0.7rem;
-  color: #6b7db3;
+  color: var(--color-comet);
   margin-left: auto;
 }
 
 .sector-tab.active .sector-tab-name {
-  color: #f0f4ff;
+  color: var(--sector-active-text);
   font-weight: 600;
 }
 
 .sector-tab.active .sector-tab-count {
-  color: rgba(167, 139, 250, 0.8);
+  color: var(--color-violet-light);
 }
 
 /* Station section sub (beacon count) */
