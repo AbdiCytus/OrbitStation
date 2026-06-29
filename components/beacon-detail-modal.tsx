@@ -92,8 +92,9 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
       await new Promise(res => setTimeout(res, 100));
 
       const emptyPixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+      const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--color-void').trim() || '#121214';
       const dataUrl = await toPng(clone, {
-        backgroundColor: "var(--color-cosmos)",
+        backgroundColor: bgColor,
         pixelRatio: 2,
         imagePlaceholder: emptyPixel,
         style: {
@@ -504,3 +505,4 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     </div>
   );
 }
+
