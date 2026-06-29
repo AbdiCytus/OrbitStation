@@ -1,23 +1,35 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { XMarkIcon, PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { createTag, updateTag, deleteTag, assignTagsToBeacon } from "@/lib/actions";
-import type { SectorWithBeacons, Tag, Beacon, BeaconTag } from "@/types";
+import type { SectorWithBeacons, Tag } from "@/types";
 import { useRouter } from "next/navigation";
+
+type BeaconTag = { tagId: string; tag: Tag };
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   sector: SectorWithBeacons;
+  sectorTagsOverride?: Tag[];
+  onTagsChanged?: (tags: Tag[]) => void;
 };
 
-export default function TagManagementModal({ isOpen, onClose, sector }: Props) {
-  const [activeTab, setActiveTab] = useState<"manage" | "assign">("manage");
+export default function TagManagementModal({
+  isOpen,
+  onClose,
+  sector,
+  sectorTagsOverride,
+  onTagsChanged,
+}: Props) {
   const router = useRouter();
-  
+  const [activeTab, setActiveTab] = useState<"manage" | "assign">("manage");
+
+  // Local tag state — optimistically managed
+  const [localTags, setLocalTags] = useState<Tag[]>([]);
+
   // Manage Tab State
   const [newTagName, setNewTagName] = useState("");
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
@@ -28,85 +40,115 @@ export default function TagManagementModal({ isOpen, onClose, sector }: Props) {
   const [assignments, setAssignments] = useState<Record<string, string[]>>({});
   const [isSavingAssignments, setIsSavingAssignments] = useState(false);
 
+  // Sync local tags when modal opens or override changes
   useEffect(() => {
     if (isOpen) {
-      // Initialize assignments from current sector state
-      const initial: Record<string, string[]> = {};
-      sector.beacons.forEach(b => {
-        initial[b.id] = b.tags?.map(bt => bt.tagId) || [];
-      });
-      setAssignments(initial);
+      const sourceTags = sectorTagsOverride ?? sector.tags ?? [];
+      setLocalTags(sourceTags);
       setActiveTab("manage");
       setNewTagName("");
       setEditingTagId(null);
+      // Init assignments from beacons
+      const initial: Record<string, string[]> = {};
+      sector.beacons.forEach((b) => {
+        initial[b.id] = (b.tags as BeaconTag[] | undefined)?.map((bt) => bt.tagId) || [];
+      });
+      setAssignments(initial);
     }
-  }, [isOpen, sector]);
+  }, [isOpen]);
 
   const [isClosing, setIsClosing] = useState(false);
-  const handleClose = () => { setIsClosing(true); setTimeout(() => { onClose(); setIsClosing(false); }, 200); };
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      setIsClosing(false);
+    }, 180);
+  };
 
   if (!isOpen && !isClosing) return null;
-
-  const tags = sector.tags || [];
 
   // --- Manage Tag Handlers ---
   const handleAddTag = async () => {
     const trimmed = newTagName.trim();
     if (!trimmed) return;
-    if (trimmed.length > 20) return toast.error("Tag name is too long (max 20 characters)");
-    if (tags.some(t => t.name.toLowerCase() === trimmed.toLowerCase())) return toast.error("Tag already exists");
+    if (trimmed.length > 20) return toast.error("Nama tagar maksimal 20 karakter");
+    if (localTags.some((t) => t.name.toLowerCase() === trimmed.toLowerCase()))
+      return toast.error("Tagar sudah ada");
 
     setIsSubmitting(true);
     const res = await createTag(sector.id, trimmed);
     setIsSubmitting(false);
-    
-    if (res.error) toast.error(res.error);
-    else {
-      toast.success("Tag created!");
+
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      // Optimistic update: add to local state immediately
+      const newTag = res.data as Tag;
+      const updated = [...localTags, newTag];
+      setLocalTags(updated);
+      onTagsChanged?.(updated);
       setNewTagName("");
+      toast.success("Tagar berhasil dibuat!");
       router.refresh();
     }
   };
 
   const handleUpdateTag = async (tagId: string) => {
     const trimmed = editTagName.trim();
-    if (!trimmed) return setEditingTagId(null);
-    if (trimmed.length > 20) return toast.error("Tag name is too long (max 20 characters)");
+    if (!trimmed) { setEditingTagId(null); return; }
+    if (trimmed.length > 20) return toast.error("Nama tagar maksimal 20 karakter");
 
     setIsSubmitting(true);
     const res = await updateTag(tagId, trimmed);
     setIsSubmitting(false);
 
-    if (res.error) toast.error(res.error);
-    else {
-      toast.success("Tag updated!");
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      const updated = localTags.map((t) => (t.id === tagId ? { ...t, name: trimmed } : t));
+      setLocalTags(updated);
+      onTagsChanged?.(updated);
       setEditingTagId(null);
+      toast.success("Tagar berhasil diubah!");
       router.refresh();
     }
   };
 
   const handleDeleteTag = async (tagId: string) => {
-    if (!confirm("Are you sure you want to delete this tag?")) return;
+    if (!confirm("Hapus tagar ini? Tagar akan dilepas dari semua beacon.")) return;
     setIsSubmitting(true);
     const res = await deleteTag(tagId);
     setIsSubmitting(false);
 
-    if (res.error) toast.error(res.error);
-    else {
-      toast.success("Tag deleted!");
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      const updated = localTags.filter((t) => t.id !== tagId);
+      setLocalTags(updated);
+      onTagsChanged?.(updated);
+      // Remove from assignments too
+      setAssignments((prev) => {
+        const next = { ...prev };
+        Object.keys(next).forEach((bid) => {
+          next[bid] = next[bid].filter((id) => id !== tagId);
+        });
+        return next;
+      });
+      toast.success("Tagar berhasil dihapus!");
       router.refresh();
     }
   };
 
   // --- Assign Tag Handlers ---
   const toggleTagAssignment = (beaconId: string, tagId: string) => {
-    setAssignments(prev => {
+    setAssignments((prev) => {
       const current = prev[beaconId] || [];
       if (current.includes(tagId)) {
-        return { ...prev, [beaconId]: current.filter(id => id !== tagId) };
+        return { ...prev, [beaconId]: current.filter((id) => id !== tagId) };
       } else {
         if (current.length >= 5) {
-          toast.error("Maximum 5 tags allowed per beacon");
+          toast.error("Maksimal 5 tagar per beacon");
           return prev;
         }
         return { ...prev, [beaconId]: [...current, tagId] };
@@ -117,15 +159,15 @@ export default function TagManagementModal({ isOpen, onClose, sector }: Props) {
   const handleSaveAssignments = async () => {
     setIsSavingAssignments(true);
     let hasError = false;
-    
-    // We only need to save if something changed
-    const promises = sector.beacons.map(async b => {
-      const initialTagIds = b.tags?.map(bt => bt.tagId) || [];
+
+    const promises = sector.beacons.map(async (b) => {
+      const initialTagIds =
+        (b.tags as BeaconTag[] | undefined)?.map((bt) => bt.tagId) || [];
       const currentTagIds = assignments[b.id] || [];
-      
-      const isChanged = initialTagIds.length !== currentTagIds.length || 
-                        !initialTagIds.every(id => currentTagIds.includes(id));
-      
+      const isChanged =
+        initialTagIds.length !== currentTagIds.length ||
+        !initialTagIds.every((id) => currentTagIds.includes(id));
+
       if (isChanged) {
         const res = await assignTagsToBeacon(b.id, currentTagIds);
         if (res.error) hasError = true;
@@ -135,197 +177,312 @@ export default function TagManagementModal({ isOpen, onClose, sector }: Props) {
     await Promise.all(promises);
     setIsSavingAssignments(false);
 
-    if (hasError) toast.error("Some assignments failed to save");
-    else {
-      toast.success("Tag assignments saved!");
+    if (hasError) {
+      toast.error("Beberapa assignment gagal disimpan");
+    } else {
+      toast.success("Assignment tagar berhasil disimpan!");
       router.refresh();
-      handleClose(); // Close after save
+      handleClose();
     }
   };
 
+  // Animation classes
+  const overlayClass = isClosing ? "opacity-0" : "opacity-100";
+  const panelClass = isClosing ? "translate-y-full opacity-0" : "translate-y-0 opacity-100";
+
   return (
-    <AnimatePresence>
-      {(isOpen || isClosing) && (
-        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center" style={{ padding: "1rem", paddingBottom: 0 }}>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isClosing ? 0 : 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+    <div
+      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center"
+      style={{ padding: "1rem", paddingBottom: 0 }}
+    >
+      {/* Backdrop */}
+      <div
+        className={`absolute inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200 ${overlayClass}`}
+        onClick={handleClose}
+      />
+
+      {/* Panel */}
+      <div
+        className={`relative w-full sm:max-w-2xl flex flex-col overflow-hidden z-10 transition-all duration-200 ${panelClass}`}
+        style={{
+          background: "#0d0e14",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "1rem 1rem 0 0",
+          maxHeight: "88vh",
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between border-b border-white/10"
+          style={{ padding: "1rem 1.5rem" }}
+        >
+          <div className="flex items-center" style={{ gap: "0.625rem" }}>
+            <span style={{ color: "#a78bfa", fontSize: "1.2rem" }}>🏷</span>
+            <h2 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#fff" }}>
+              Manage Tags
+            </h2>
+            <span
+              style={{
+                fontSize: "0.7rem",
+                background: "rgba(139,92,246,0.15)",
+                color: "#a78bfa",
+                border: "1px solid rgba(139,92,246,0.3)",
+                borderRadius: "9999px",
+                padding: "0.125rem 0.5rem",
+              }}
+            >
+              {sector.name}
+            </span>
+          </div>
+          <button
             onClick={handleClose}
-          />
-
-          <motion.div
-            initial={{ y: "100%", opacity: 0 }}
-            animate={{ y: isClosing ? "100%" : 0, opacity: isClosing ? 0 : 1 }}
-            exit={{ y: "100%", opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative bg-[#0b0c10] border-t sm:border border-white/10 sm:rounded-2xl w-full sm:max-w-2xl flex flex-col overflow-hidden max-h-[90vh] sm:max-h-[85vh] rounded-t-2xl shadow-2xl z-10"
+            className="text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            style={{ padding: "0.375rem" }}
           >
-            {/* Header */}
-            <div className="border-b border-white/10 flex items-center justify-between bg-black/20" style={{ padding: "1.5rem" }}>
-              <h2 className="text-xl font-bold text-white">Manage Tags</h2>
-              <button
-                onClick={handleClose}
-                className="text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
-                style={{ padding: "0.5rem" }}
-              >
-                <XMarkIcon width={24} height={24} />
-              </button>
-            </div>
+            <XMarkIcon width={20} height={20} />
+          </button>
+        </div>
 
-            {/* Tabs */}
-            <div className="flex border-b border-white/10">
-              <button
-                className={`flex-1 text-sm font-semibold transition-colors ${activeTab === "manage" ? "text-violet-400 border-b-2 border-violet-500 bg-violet-500/10" : "text-gray-400 hover:text-gray-200 hover:bg-white/5"}`}
-                style={{ padding: "0.75rem 0" }}
-                onClick={() => setActiveTab("manage")}
-              >
-                Manage Tags
-              </button>
-              <button
-                className={`flex-1 text-sm font-semibold transition-colors ${activeTab === "assign" ? "text-violet-400 border-b-2 border-violet-500 bg-violet-500/10" : "text-gray-400 hover:text-gray-200 hover:bg-white/5"}`}
-                style={{ padding: "0.75rem 0" }}
-                onClick={() => setActiveTab("assign")}
-              >
-                Assign Tags
-              </button>
-            </div>
+        {/* Tabs */}
+        <div className="flex border-b border-white/10">
+          {(["manage", "assign"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className="flex-1 text-sm font-semibold transition-colors"
+              style={{
+                padding: "0.75rem",
+                color: activeTab === tab ? "#c4b5fd" : "#6b7280",
+                borderBottom: activeTab === tab ? "2px solid #8b5cf6" : "2px solid transparent",
+                background: activeTab === tab ? "rgba(139,92,246,0.07)" : "transparent",
+              }}
+            >
+              {tab === "manage" ? "Kelola Tagar" : "Pasang Tagar"}
+            </button>
+          ))}
+        </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ padding: "1.5rem" }}>
-              {activeTab === "manage" ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                  {/* Create Tag */}
-                  <div className="flex" style={{ gap: "0.5rem" }}>
-                    <input
-                      type="text"
-                      placeholder="New tag name (max 20 chars)..."
-                      maxLength={20}
-                      value={newTagName}
-                      onChange={e => setNewTagName(e.target.value)}
-                      className="flex-1 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all"
-                      style={{ padding: "0.625rem 1rem" }}
-                      onKeyDown={e => e.key === "Enter" && handleAddTag()}
-                    />
-                    <button
-                      onClick={handleAddTag}
-                      disabled={isSubmitting || !newTagName.trim()}
-                      className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-lg font-medium transition-colors flex items-center"
-                      style={{ padding: "0.625rem 1rem", gap: "0.5rem" }}
-                    >
-                      <PlusIcon width={20} height={20} />
-                      <span className="hidden sm:inline">Add Tag</span>
-                    </button>
-                  </div>
+        {/* Content */}
+        <div
+          className="flex-1 overflow-y-auto custom-scrollbar"
+          style={{ padding: "1.25rem 1.5rem" }}
+        >
+          {activeTab === "manage" ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {/* Create Tag */}
+              <div className="flex" style={{ gap: "0.5rem" }}>
+                <input
+                  type="text"
+                  placeholder="Nama tagar baru (maks. 20 karakter)..."
+                  maxLength={20}
+                  value={newTagName}
+                  onChange={(e) => setNewTagName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
+                  disabled={isSubmitting}
+                  className="flex-1 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-all"
+                  style={{ padding: "0.6rem 0.875rem", fontSize: "0.875rem" }}
+                />
+                <button
+                  onClick={handleAddTag}
+                  disabled={isSubmitting || !newTagName.trim()}
+                  className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white rounded-lg font-medium transition-colors flex items-center"
+                  style={{ padding: "0.6rem 1rem", gap: "0.375rem", flexShrink: 0, fontSize: "0.875rem" }}
+                >
+                  <PlusIcon width={16} height={16} />
+                  <span>Tambah</span>
+                </button>
+              </div>
 
-                  {/* Tag List */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {tags.length === 0 ? (
-                      <p className="text-gray-500 text-center" style={{ padding: "2rem 0" }}>No tags in this sector yet.</p>
-                    ) : (
-                      tags.map(tag => (
-                        <div key={tag.id} className="flex items-center justify-between bg-white/5 rounded-lg border border-white/5 group hover:border-white/10 transition-colors" style={{ padding: "0.75rem" }}>
-                          {editingTagId === tag.id ? (
-                            <input
-                              type="text"
-                              value={editTagName}
-                              onChange={e => setEditTagName(e.target.value)}
-                              maxLength={20}
-                              className="flex-1 bg-black/50 border border-violet-500/50 rounded text-white focus:outline-none focus:border-violet-400"
-                              style={{ padding: "0.25rem 0.5rem" }}
-                              autoFocus
-                              onKeyDown={e => {
-                                if (e.key === "Enter") handleUpdateTag(tag.id);
-                                if (e.key === "Escape") setEditingTagId(null);
-                              }}
-                            />
-                          ) : (
-                            <div className="flex items-center" style={{ gap: "0.5rem" }}>
-                              <span className="w-2 h-2 rounded-full bg-violet-400" />
-                              <span className="text-gray-200 font-medium">{tag.name}</span>
-                            </div>
-                          )}
-
-                          <div className="flex items-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" style={{ gap: "0.25rem" }}>
-                            {editingTagId === tag.id ? (
-                              <button onClick={() => handleUpdateTag(tag.id)} className="text-green-400 hover:bg-white/10 rounded" style={{ padding: "0.375rem" }}>Save</button>
-                            ) : (
-                              <>
-                                <button onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }} className="text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors" style={{ padding: "0.375rem" }} title="Edit Tag">
-                                  <PencilIcon width={18} height={18} />
-                                </button>
-                                <button onClick={() => handleDeleteTag(tag.id)} className="text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors" style={{ padding: "0.375rem" }} title="Delete Tag">
-                                  <TrashIcon width={18} height={18} />
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+              {/* Tag List */}
+              {localTags.length === 0 ? (
+                <div
+                  className="flex flex-col items-center justify-center text-center"
+                  style={{ padding: "2.5rem 1rem", gap: "0.5rem" }}
+                >
+                  <span style={{ fontSize: "2rem" }}>🏷️</span>
+                  <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                    Belum ada tagar di sektor ini.
+                  </p>
+                  <p style={{ color: "#4b5563", fontSize: "0.8rem" }}>
+                    Tambahkan tagar pertama di atas.
+                  </p>
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  {tags.length === 0 ? (
-                    <div className="text-center" style={{ padding: "2rem 0" }}>
-                      <p className="text-gray-500" style={{ marginBottom: "1rem" }}>No tags created yet.</p>
-                      <button onClick={() => setActiveTab("manage")} className="text-violet-400 hover:text-violet-300">Go to Manage Tags</button>
-                    </div>
-                  ) : sector.beacons.length === 0 ? (
-                    <p className="text-gray-500 text-center" style={{ padding: "2rem 0" }}>No beacons in this sector to assign tags to.</p>
-                  ) : (
-                    sector.beacons.map(beacon => {
-                      const selectedTagIds = assignments[beacon.id] || [];
-                      return (
-                        <div key={beacon.id} className="bg-white/5 rounded-xl border border-white/5 flex flex-col" style={{ padding: "1rem", gap: "0.75rem" }}>
-                          <h3 className="text-gray-200 font-medium truncate">{beacon.title}</h3>
-                          <div className="flex flex-wrap" style={{ gap: "0.5rem" }}>
-                            {tags.map(tag => {
-                              const isSelected = selectedTagIds.includes(tag.id);
-                              const isMaxed = !isSelected && selectedTagIds.length >= 5;
-                              return (
-                                <button
-                                  key={tag.id}
-                                  onClick={() => toggleTagAssignment(beacon.id, tag.id)}
-                                  disabled={isMaxed && !isSelected}
-                                  className={`text-sm rounded-full border transition-all ${
-                                    isSelected 
-                                      ? "bg-violet-600/20 border-violet-500/50 text-violet-300" 
-                                      : "bg-black/40 border-white/10 text-gray-400 hover:border-white/30 hover:text-gray-200"
-                                  } ${isMaxed && !isSelected ? "opacity-30 cursor-not-allowed" : ""}`}
-                                  style={{ padding: "0.25rem 0.75rem" }}
-                                >
-                                  {tag.name}
-                                </button>
-                              );
-                            })}
-                          </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+                  {localTags.map((tag) => (
+                    <div
+                      key={tag.id}
+                      className="flex items-center justify-between border border-white/5 group hover:border-white/10 transition-colors"
+                      style={{
+                        background: "rgba(255,255,255,0.04)",
+                        borderRadius: "0.5rem",
+                        padding: "0.625rem 0.75rem",
+                      }}
+                    >
+                      {editingTagId === tag.id ? (
+                        <input
+                          type="text"
+                          value={editTagName}
+                          onChange={(e) => setEditTagName(e.target.value)}
+                          maxLength={20}
+                          className="flex-1 bg-black/50 border border-violet-500/60 rounded text-white focus:outline-none"
+                          style={{ padding: "0.25rem 0.5rem", fontSize: "0.875rem" }}
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleUpdateTag(tag.id);
+                            if (e.key === "Escape") setEditingTagId(null);
+                          }}
+                        />
+                      ) : (
+                        <div className="flex items-center" style={{ gap: "0.5rem" }}>
+                          <span
+                            style={{
+                              width: "0.5rem",
+                              height: "0.5rem",
+                              borderRadius: "9999px",
+                              background: "#8b5cf6",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span style={{ color: "#e5e7eb", fontWeight: 500, fontSize: "0.875rem" }}>
+                            {tag.name}
+                          </span>
                         </div>
-                      );
-                    })
-                  )}
+                      )}
+
+                      <div
+                        className="flex items-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                        style={{ gap: "0.125rem" }}
+                      >
+                        {editingTagId === tag.id ? (
+                          <button
+                            onClick={() => handleUpdateTag(tag.id)}
+                            disabled={isSubmitting}
+                            className="text-green-400 hover:bg-white/10 rounded transition-colors"
+                            style={{ padding: "0.375rem 0.5rem", fontSize: "0.8rem", fontWeight: 600 }}
+                          >
+                            Simpan
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }}
+                              className="text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
+                              style={{ padding: "0.375rem" }}
+                              title="Edit tagar"
+                            >
+                              <PencilIcon width={15} height={15} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTag(tag.id)}
+                              disabled={isSubmitting}
+                              className="text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
+                              style={{ padding: "0.375rem" }}
+                              title="Hapus tagar"
+                            >
+                              <TrashIcon width={15} height={15} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
-
-            {/* Footer */}
-            {activeTab === "assign" && (
-              <div className="border-t border-white/10 bg-black/20 flex justify-end" style={{ padding: "1.5rem" }}>
-                <button
-                  onClick={handleSaveAssignments}
-                  disabled={isSavingAssignments}
-                  className="w-full sm:w-auto bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold rounded-lg transition-colors"
-                  style={{ padding: "0.625rem 1.5rem" }}
-                >
-                  {isSavingAssignments ? "Saving..." : "Save Assignments"}
-                </button>
-              </div>
-            )}
-          </motion.div>
+          ) : (
+            /* Assign Tab */
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+              {localTags.length === 0 ? (
+                <div className="text-center" style={{ padding: "2.5rem 1rem" }}>
+                  <p style={{ color: "#6b7280", fontSize: "0.875rem", marginBottom: "0.75rem" }}>
+                    Buat tagar dulu di tab "Kelola Tagar".
+                  </p>
+                  <button
+                    onClick={() => setActiveTab("manage")}
+                    style={{ color: "#a78bfa", fontSize: "0.875rem" }}
+                  >
+                    Ke Kelola Tagar →
+                  </button>
+                </div>
+              ) : sector.beacons.length === 0 ? (
+                <p className="text-center" style={{ color: "#6b7280", fontSize: "0.875rem", padding: "2.5rem 1rem" }}>
+                  Tidak ada beacon di sektor ini.
+                </p>
+              ) : (
+                sector.beacons.map((beacon) => {
+                  const selectedTagIds = assignments[beacon.id] || [];
+                  return (
+                    <div
+                      key={beacon.id}
+                      className="border border-white/5"
+                      style={{
+                        background: "rgba(255,255,255,0.03)",
+                        borderRadius: "0.625rem",
+                        padding: "0.875rem",
+                      }}
+                    >
+                      <p
+                        className="truncate"
+                        style={{ color: "#d1d5db", fontWeight: 500, fontSize: "0.875rem", marginBottom: "0.625rem" }}
+                      >
+                        {beacon.title}
+                      </p>
+                      <div className="flex flex-wrap" style={{ gap: "0.375rem" }}>
+                        {localTags.map((tag) => {
+                          const isSelected = selectedTagIds.includes(tag.id);
+                          const isMaxed = !isSelected && selectedTagIds.length >= 5;
+                          return (
+                            <button
+                              key={tag.id}
+                              onClick={() => toggleTagAssignment(beacon.id, tag.id)}
+                              disabled={isMaxed}
+                              className="rounded-full border transition-all"
+                              style={{
+                                padding: "0.25rem 0.75rem",
+                                fontSize: "0.78rem",
+                                background: isSelected ? "rgba(139,92,246,0.2)" : "rgba(255,255,255,0.05)",
+                                borderColor: isSelected ? "rgba(139,92,246,0.5)" : "rgba(255,255,255,0.1)",
+                                color: isSelected ? "#c4b5fd" : "#9ca3af",
+                                opacity: isMaxed ? 0.35 : 1,
+                                cursor: isMaxed ? "not-allowed" : "pointer",
+                              }}
+                            >
+                              {tag.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {selectedTagIds.length > 0 && (
+                        <p style={{ fontSize: "0.72rem", color: "#6b7280", marginTop: "0.375rem" }}>
+                          {selectedTagIds.length}/5 tagar dipilih
+                        </p>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
         </div>
-      )}
-    </AnimatePresence>
+
+        {/* Footer */}
+        {activeTab === "assign" && localTags.length > 0 && sector.beacons.length > 0 && (
+          <div
+            className="border-t border-white/10 flex justify-end"
+            style={{ padding: "0.875rem 1.5rem", background: "rgba(0,0,0,0.2)" }}
+          >
+            <button
+              onClick={handleSaveAssignments}
+              disabled={isSavingAssignments}
+              className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
+              style={{ padding: "0.625rem 1.5rem", fontSize: "0.875rem" }}
+            >
+              {isSavingAssignments ? "Menyimpan..." : "Simpan Assignment"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

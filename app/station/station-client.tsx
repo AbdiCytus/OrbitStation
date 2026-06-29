@@ -222,6 +222,8 @@ export default function StationClient({
   >("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  // Local override for sector tags — updated optimistically from TagManagementModal
+  const [sectorTagsOverride, setSectorTagsOverride] = useState<Record<string, import("@/types").Tag[]>>({});
   const [isFilterExiting, setIsFilterExiting] = useState(false);
   const [isFilterEntering, setIsFilterEntering] = useState(false);
   const [visibleLimit, setVisibleLimit] = useState(12);
@@ -1655,7 +1657,7 @@ export default function StationClient({
                     </div>
                   )}
 
-                  {displaySectorId !== "all" && (allSectors.find(s => s.id === displaySectorId)?.tags?.length ?? 0) > 0 && (
+                  {displaySectorId !== "all" && ((sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).length) > 0 && (
                     <div className="staggered-item">
                       <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
                         <button
@@ -1686,7 +1688,7 @@ export default function StationClient({
                               flexDirection: "column",
                               gap: "0.25rem",
                             }}>
-                            {allSectors.find(s => s.id === displaySectorId)?.tags?.map((opt) => (
+                            {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).map((opt) => (
                               <button
                                 key={opt.id}
                                 className="dropdown-option-btn"
@@ -2161,6 +2163,13 @@ export default function StationClient({
           isOpen={showTagModal}
           onClose={() => setShowTagModal(false)}
           sector={allSectors.find(s => s.id === displaySectorId)!}
+          sectorTagsOverride={sectorTagsOverride[displaySectorId]}
+          onTagsChanged={(tags) => {
+            setSectorTagsOverride(prev => ({ ...prev, [displaySectorId]: tags }));
+            // Remove any selected tag filters that no longer exist
+            const tagIds = tags.map(t => t.id);
+            setSelectedTags(prev => prev.filter(id => tagIds.includes(id)));
+          }}
         />
       )}
 
