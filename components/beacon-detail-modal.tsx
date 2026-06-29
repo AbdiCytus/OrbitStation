@@ -367,11 +367,10 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                 <div className="hsr-card-bottom-gradient" />
               </div>
 
-              {/* Front glass frame or standard frame */}
               {beacon.imageUrl ? (
-                <div className="hsr-card-front-glass" style={{ borderColor: sector?.color ?? "rgba(124,92,252,0.6)" }} />
+                <div className="hsr-card-front-glass" style={{ borderColor: sector?.color ?? "var(--color-primary)" }} />
               ) : (
-                <div className="hsr-card-frame" style={{ borderColor: sector?.color ?? "rgba(124,92,252,0.6)" }} />
+                <div className="hsr-card-frame" style={{ borderColor: sector?.color ?? "var(--color-primary)" }} />
               )}
 
               {/* Stars row at bottom of card */}
@@ -413,8 +412,13 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               {beacon.tags?.map(bt => (
                 <span
                   key={bt.tag.id}
-                  className="inline-flex items-center gap-1 text-[0.65rem] rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
-                  style={{ padding: "0.05rem 0.6rem" }}
+                  style={{
+                    padding: "0.05rem 0.6rem",
+                    background: "var(--sector-active-bg)",
+                    color: "var(--sector-active-text)",
+                    border: "1px solid var(--sector-active-border)"
+                  }}
+                  className="inline-flex items-center gap-1 text-[0.65rem] rounded-full"
                 >
                   <TagIcon width={10} height={10} />
                   {bt.tag.name}
@@ -432,8 +436,13 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               {beacon.tags?.map(bt => (
                 <span
                   key={bt.tag.id}
-                  className="inline-flex items-center gap-1.5 text-[0.75rem] rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
-                  style={{ padding: "0.25rem 0.75rem" }}
+                  style={{
+                    padding: "0.25rem 0.75rem",
+                    background: "var(--sector-active-bg)",
+                    color: "var(--sector-active-text)",
+                    border: "1px solid var(--sector-active-border)"
+                  }}
+                  className="inline-flex items-center gap-1.5 text-[0.75rem] rounded-full"
                 >
                   <TagIcon width={12} height={12} />
                   {bt.tag.name}

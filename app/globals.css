@@ -556,7 +556,7 @@ pre {
 .badge-violet {
   background: rgba(124, 92, 252, 0.15);
   color: var(--color-violet-light);
-  border: 1px solid rgba(124, 92, 252, 0.25);
+  border: 1px solid var(--glass-border);
 }
 
 .badge-cyan {
@@ -752,9 +752,7 @@ pre {
 .star {
   position: absolute;
   border-radius: 50%;
-  background: white;
-  opacity: 0;
-  animation: twinkle 4s infinite ease-in-out;
+  background: var(--color-starlight); opacity: 0; animation: twinkle 4s infinite ease-in-out;
 }
 
 @keyframes twinkle {
@@ -1833,7 +1831,7 @@ pre {
   min-height: 480px;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(124, 92, 252, 0.25);
+  border: 1px solid var(--glass-border);
   box-shadow:
     0 0 0 1px rgba(124, 92, 252, 0.12),
     0 24px 80px rgba(0, 0, 0, 0.7),
@@ -1841,10 +1839,7 @@ pre {
   animation: fade-in-scale 0.25s ease both;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg,
-      rgba(10, 8, 28, 0.97) 0%,
-      rgba(14, 10, 36, 0.97) 50%,
-      rgba(8, 14, 32, 0.97) 100%);
+  background: var(--glass-bg); backdrop-filter: blur(24px);
 }
 
 /* Starfield background inside panel */
@@ -1880,9 +1875,7 @@ pre {
 .hsr-star-particle {
   position: absolute;
   border-radius: 50%;
-  background: white;
-  opacity: 0;
-  animation: twinkle var(--dur, 3s) var(--delay, 0s) infinite ease-in-out;
+  background: var(--color-starlight); opacity: 0; animation: twinkle var(--dur, 3s) var(--delay, 0s) infinite ease-in-out;
 }
 
 /* Top action bar */
@@ -5054,12 +5047,12 @@ pre {
 }
 
 .beacon-card-body {
-  background: rgba(20, 20, 30, 0.6);
+  background: var(--nav-glass-bg);
   border-bottom: none;
 }
 
 .beacon-card-footer {
-  background: rgba(20, 20, 30, 0.6);
+  background: var(--nav-glass-bg);
 }
 
 .beacon-hologram-text {
@@ -5183,13 +5176,13 @@ pre {
 
   .beacon-masonry .beacon-card .beacon-card-body,
   .beacon-card-body {
-    background: rgba(20, 20, 30, 0.6) !important;
+    background: var(--nav-glass-bg) !important;
     border-top-right-radius: var(--radius-lg) !important;
   }
 
   .beacon-masonry .beacon-card .beacon-card-footer,
   .beacon-card-footer {
-    background: rgba(20, 20, 30, 0.6) !important;
+    background: var(--nav-glass-bg) !important;
     border-bottom-right-radius: var(--radius-lg) !important;
   }
 }
@@ -5394,5 +5387,6 @@ body.no-loading-anim #warp-loader {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 
 

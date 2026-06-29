@@ -1647,7 +1647,7 @@ export default function StationClient({
                                   <CheckIcon
                                     width={14}
                                     height={14}
-                                    style={{ color: "var(--color-violet-mid)" }}
+                                    style={{ color: "var(--color-primary)" }}
                                   />
                                 )}
                               </button>
@@ -1732,7 +1732,7 @@ export default function StationClient({
                                     fontSize: "0.75rem",
                                     fontWeight: 500,
                                     transition: "all 0.2s",
-                                    border: selectedTags.includes(opt.id) ? "1px solid var(--color-violet-mid)" : "1px solid transparent",
+                                    border: selectedTags.includes(opt.id) ? "1px solid var(--color-primary)" : "1px solid transparent",
                                     background: selectedTags.includes(opt.id) ? "var(--sector-active-bg)" : "var(--nav-icon-hover-bg)",
                                     color: selectedTags.includes(opt.id) ? "var(--sector-active-text)" : "var(--color-starlight)",
                                     }}
@@ -1759,10 +1759,10 @@ export default function StationClient({
                         style={{
                           background:
                             sortBy !== "date"
-                              ? "rgba(139, 92, 246, 0.2)"
-                              : "rgba(15, 15, 25, 0.6)",
-                          border: `1px solid ${sortBy !== "date" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`,
-                          color: sortBy !== "date" ? "#fff" : "#a1a1aa",
+                              ? "var(--sector-active-bg)"
+                              : "var(--item-bg)",
+                          border: `1px solid ${sortBy !== "date" ? "var(--sector-active-border)" : "var(--color-border)"}`,
+                          color: sortBy !== "date" ? "var(--sector-active-text)" : "var(--color-comet)",
                         }}
                         onClick={() =>
                           setOpenMenu(openMenu === "sort" ? null : "sort")
@@ -1775,7 +1775,7 @@ export default function StationClient({
                             style={{
                               position: "absolute",
                               top: "calc(100% + 0.5rem)",
-                              right: 0,
+                              left: 0,
                               background: "var(--nav-glass-bg)",
                               border: "1px solid var(--glass-border)",
                               borderRadius: "8px",
@@ -1849,7 +1849,7 @@ export default function StationClient({
                                     <CheckIcon
                                       width={14}
                                       height={14}
-                                      style={{ color: "#a78bfa" }}
+                                      style={{ color: "var(--color-primary)" }}
                                     />
                                   )}
                                 </button>
@@ -1928,20 +1928,20 @@ export default function StationClient({
                             style={{
                               width: "100%",
                               height: "38px",
-                              background: "rgba(15, 15, 25, 0.6)",
-                              border: "1px solid rgba(255, 255, 255, 0.1)",
+                              background: "var(--color-void)",
+                              border: "1px solid var(--color-border)",
                               borderRadius: "8px",
                               padding: "0 1rem 0 36px",
-                              color: "#fff",
+                              color: "var(--color-starlight)",
                               outline: "none",
                               transition: "all 0.2s",
                             }}
                             onFocus={(e) =>
-                              (e.target.style.borderColor = "#a78bfa")
+                              (e.target.style.borderColor = "var(--color-primary)")
                             }
                             onBlur={(e) =>
                             (e.target.style.borderColor =
-                              "rgba(255, 255, 255, 0.1)")
+                              "var(--color-border)")
                             }
                           />
                         </div>
