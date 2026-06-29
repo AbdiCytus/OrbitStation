@@ -186,11 +186,11 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                     key={pilot.id}
                     href={`/station/${pilot.username}`}
                     className={`pilot-suggest-item ${focusedSuggestIndex === idx ? "bg-starlight/10" : ""}`}
-                    style={focusedSuggestIndex === idx ? { background: "var(--color-border)" } : {}}
+                    style={focusedSuggestIndex === idx ? { background: "var(--color-nebula)" } : {}}
                     onClick={() => setShowSuggestions(false)}
                     onMouseEnter={() => setFocusedSuggestIndex(idx)}
                   >
-                    <div style={{ width: 24, height: 24, borderRadius: "50%", background: "var(--color-border)", overflow: "hidden" }}>
+                    <div style={{ width: 24, height: 24, borderRadius: "50%", background: "var(--color-nebula)", overflow: "hidden" }}>
                       {pilot.image ? <img src={pilot.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", width: "100%", height: "100%" }}>{(pilot.name || pilot.username)[0].toUpperCase()}</span>}
                     </div>
                     <span style={{ fontSize: "0.85rem" }}>{pilot.name || pilot.username}</span>
@@ -240,14 +240,14 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
             <>
               <div className="hidden md:flex items-center" style={{ gap: "0.5rem", marginRight: "2.5rem" }}>
                 {user.station?.isPublic && user.username && (
-                  <Link href={`/station/${user.username}`} className="navbar-icon-btn group relative hover:bg-[var(--color-border)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }}>
+                  <Link href={`/station/${user.username}`} className="navbar-icon-btn group relative hover:bg-[var(--nav-icon-hover-bg)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--nav-icon-color)", transition: "all 0.2s" }}>
                     <GlobeAltIcon width={20} height={20} />
                     <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-nebula border border-border rounded-lg text-xs font-semibold text-starlight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
                       Public Station <span className="text-comet ml-1">({parsedShortcuts.publicStation})</span>
                     </div>
                   </Link>
                 )}
-                <button onClick={onOpenFriends} className="navbar-icon-btn group relative hover:bg-[var(--color-border)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }}>
+                <button onClick={onOpenFriends} className="navbar-icon-btn group relative hover:bg-[var(--nav-icon-hover-bg)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--nav-icon-color)", transition: "all 0.2s" }}>
                   <UsersIcon width={20} height={20} />
                   {stats?.hasNotifications && (
                     <span style={{ position: "absolute", top: "2px", right: "2px", width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid var(--color-cosmos)" }}></span>
@@ -257,14 +257,14 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                   </div>
                 </button>
                 {user.station?.isPublic && (
-                  <Link href="/analytics" className="navbar-icon-btn group relative hover:bg-[var(--color-border)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }}>
+                  <Link href="/analytics" className="navbar-icon-btn group relative hover:bg-[var(--nav-icon-hover-bg)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--nav-icon-color)", transition: "all 0.2s" }}>
                     <ChartBarIcon width={20} height={20} />
                     <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-nebula border border-border rounded-lg text-xs font-semibold text-starlight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
                       Analytics <span className="text-comet ml-1">({parsedShortcuts.analytics})</span>
                     </div>
                   </Link>
                 )}
-                <Link href="/settings" className="navbar-icon-btn group relative hover:bg-[var(--color-border)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }}>
+                <Link href="/settings" className="navbar-icon-btn group relative hover:bg-[var(--nav-icon-hover-bg)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--nav-icon-color)", transition: "all 0.2s" }}>
                   <Cog8ToothIcon width={20} height={20} />
                   <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-nebula border border-border rounded-lg text-xs font-semibold text-starlight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
                     Settings <span className="text-comet ml-1">({parsedShortcuts.settings})</span>
@@ -274,7 +274,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
 
               <div className="navbar-user-info" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", marginRight: "0.75rem", justifyContent: "center" }}>
                 <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--color-starlight)", lineHeight: 1 }}>{user.name ?? "Pilot"}</span>
-                {user.callsign && <span style={{ fontSize: "0.7rem", color: "var(--color-comet)", marginTop: "0.2rem" }}>{user.callsign}</span>}
+                {user.callsign && <span style={{ fontSize: "0.7rem", color: "var(--nav-icon-color)", marginTop: "0.2rem" }}>{user.callsign}</span>}
               </div>
               <button
                 id="btn-user-menu"
@@ -332,7 +332,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                           <SwatchIcon width={18} height={18} /> Theme
                         </div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--color-comet)", textTransform: "capitalize" }}>{theme || "space"}</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--nav-icon-color)", textTransform: "capitalize" }}>{theme || "space"}</span>
                       </button>
                       <AnimatePresence>
                         {themeMenuOpen && (
@@ -340,7 +340,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
-                            style={{ overflow: "hidden", background: "var(--color-border)", borderRadius: "8px", margin: "0.25rem 0.5rem", padding: "0.25rem 0" }}
+                            style={{ overflow: "hidden", background: "var(--color-nebula)", borderRadius: "8px", margin: "0.25rem 0.5rem", padding: "0.25rem 0" }}
                           >
                             <button className="navbar-menu-item" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem", width: "100%" }} onClick={() => { setTheme("space"); setThemeMenuOpen(false); }}>
                               <SparklesIcon width={14} height={14} /> Space (Galaxy)

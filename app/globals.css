@@ -50,6 +50,8 @@
   --color-border-active: rgba(124, 92, 252, 0.7);
 
   /* --- Glassmorphism --- */
+  --nav-icon-color: #a78bfa;
+  --nav-icon-hover-bg: rgba(139,92,246,0.2);
   --nav-bg: rgba(5, 5, 20, 0.7);
   --nav-glass-bg: rgba(10, 10, 30, 0.75);
   --glass-bg: rgba(17, 24, 39, 0.6);
@@ -98,6 +100,8 @@
   --color-violet-dim: #ede9fe;
   --color-border: rgba(124, 92, 252, 0.15);
   
+  --nav-icon-color: #475569;
+  --nav-icon-hover-bg: rgba(15, 23, 42, 0.05);
   --nav-bg: rgba(255, 255, 255, 0.8);
   --nav-glass-bg: rgba(248, 250, 252, 0.85);
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -119,6 +123,8 @@
   --color-comet: #a1a1aa;
   --color-dust: #52525b;
   
+  --nav-icon-color: #a1a1aa;
+  --nav-icon-hover-bg: rgba(255, 255, 255, 0.08);
   --nav-bg: rgba(18, 18, 20, 0.7);
   --nav-glass-bg: rgba(24, 24, 27, 0.75);
   --glass-bg: rgba(18, 18, 20, 0.6);
