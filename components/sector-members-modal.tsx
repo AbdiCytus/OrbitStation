@@ -83,16 +83,16 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
             {/* Owner */}
             {sectorOwner && (
               <motion.div
-                className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
                 style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", border: "2px solid #FFD700", boxShadow: "0 0 10px rgba(255,215,0,0.6)" }}>
-                    {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
+                    {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <p className="text-sm font-medium text-gray-300 truncate leading-tight">
+                    <p className="text-sm font-medium text-comet truncate leading-tight">
                       {sectorOwner.name || sectorOwner.username}
                       {sectorOwner.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                     </p>
@@ -101,17 +101,17 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                 </div>
                 <div className="flex items-center gap-1">
                   {(sectorOwner.isPublic || sectorOwner.station?.isPublic) && sectorOwner.username && (
-                    <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
+                    <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-comet hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
                   {sectorOwner.id !== currentUserId && !isFriendsLoading && !isFriend(sectorOwner.id) && !pendingRequests.has(sectorOwner.id) && (
-                    <button type="button" onClick={() => handleAddFriend(sectorOwner.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Add Friend">
+                    <button type="button" onClick={() => handleAddFriend(sectorOwner.id)} className="flex items-center justify-center text-comet hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Add Friend">
                       <UserPlusIcon width={16} height={16} />
                     </button>
                   )}
                   {pendingRequests.has(sectorOwner.id) && (
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
+                    <span className="text-[10px] font-bold text-dust uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
                   )}
                 </div>
               </motion.div>
@@ -121,16 +121,16 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
             {localCollaborators.map((c: any) => (
               <motion.div
                 key={c.user.id}
-                className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
                 style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", border: c.role === "ADMIN" ? "2px solid #10B981" : "1px solid rgba(255,255,255,0.1)" }}>
-                    {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
+                    {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <p className="text-sm font-medium text-gray-300 truncate leading-tight">
+                    <p className="text-sm font-medium text-comet truncate leading-tight">
                       {c.user.name || c.user.username}
                       {c.user.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                     </p>
@@ -139,24 +139,24 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                 </div>
                 <div className="flex items-center gap-1">
                   {(c.user as any).station?.isPublic && c.user.username && (
-                    <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
+                    <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-comet hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
                   {c.userId !== currentUserId && !isFriendsLoading && !isFriend(c.user.id) && !pendingRequests.has(c.user.id) && (
-                    <button type="button" onClick={() => handleAddFriend(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Add Friend">
+                    <button type="button" onClick={() => handleAddFriend(c.user.id)} className="flex items-center justify-center text-comet hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Add Friend">
                       <UserPlusIcon width={16} height={16} />
                     </button>
                   )}
                   {pendingRequests.has(c.user.id) && (
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
+                    <span className="text-[10px] font-bold text-dust uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
                   )}
                 </div>
               </motion.div>
             ))}
 
             {localCollaborators.length === 0 && !sectorOwner && (
-              <p className="text-sm text-gray-400 text-center py-4">No members found.</p>
+              <p className="text-sm text-comet text-center py-4">No members found.</p>
             )}
           </motion.div>
         </div>

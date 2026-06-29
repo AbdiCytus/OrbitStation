@@ -294,7 +294,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                               <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
                                 <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
                               </div>
-                              <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[13px] drop-shadow-md" style={{marginRight: "1rem"}}>
+                              <span className="badge-content relative z-10 text-starlight font-bold tracking-wide text-[13px] drop-shadow-md" style={{marginRight: "1rem"}}>
                                 {badge.name}
                               </span>
                             </div>
@@ -352,7 +352,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                     </button>
                   )}
                   <button
-                    className="btn btn-secondary hover:bg-white/10"
+                    className="btn btn-secondary hover:bg-starlight/10"
                     style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flex: "1", background: "rgba(255,255,255,0.05)" }}
                     onClick={() => {
                       if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => { });
@@ -389,7 +389,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                 )}
                 {!isMobile && (
                   <button
-                    className="btn btn-secondary hover:bg-white/10"
+                    className="btn btn-secondary hover:bg-starlight/10"
                     style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)" }}
                     onClick={() => {
                       if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => { });

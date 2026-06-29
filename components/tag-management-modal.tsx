@@ -262,7 +262,7 @@ export default function TagManagementModal({
         <div className="flex flex-col w-full h-full sm:h-auto min-h-[75vh] sm:min-h-[70vh] sm:max-h-[85vh]">
         {/* Header */}
         <div
-          className="flex items-center justify-between border-b border-white/10"
+          className="flex items-center justify-between border-b border-border"
           style={{ padding: "1rem 1.5rem" }}
         >
           <div className="flex items-center" style={{ gap: "0.625rem" }}>
@@ -285,7 +285,7 @@ export default function TagManagementModal({
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            className="text-comet hover:text-starlight hover:bg-starlight/10 rounded-lg transition-colors"
             style={{ padding: "0.375rem" }}
           >
             <XMarkIcon width={20} height={20} />
@@ -293,7 +293,7 @@ export default function TagManagementModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-white/10">
+        <div className="flex border-b border-border">
           {(["manage", "assign"] as const).map((tab) => (
             <button
               key={tab}
@@ -328,7 +328,7 @@ export default function TagManagementModal({
                   onChange={(e) => setNewTagName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
                   disabled={isSubmitting}
-                  className="flex-1 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-all"
+                  className="flex-1 bg-starlight/5 border border-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-all"
                   style={{ padding: "0.6rem 0.875rem", fontSize: "0.875rem" }}
                 />
                 <button
@@ -375,7 +375,7 @@ export default function TagManagementModal({
                   {filteredLocalTags.map((tag) => (
                     <div
                       key={tag.id}
-                      className="flex items-center justify-between border border-white/5 group hover:border-white/10 transition-colors"
+                      className="flex items-center justify-between border border-border group hover:border-border transition-colors"
                       style={{
                         background: "rgba(255,255,255,0.04)",
                         borderRadius: "0.5rem",
@@ -388,7 +388,7 @@ export default function TagManagementModal({
                           value={editTagName}
                           onChange={(e) => setEditTagName(e.target.value)}
                           maxLength={20}
-                          className="flex-1 bg-black/50 border border-violet-500/60 rounded text-white focus:outline-none"
+                          className="flex-1 bg-cosmos/50 border border-violet-500/60 rounded text-white focus:outline-none"
                           style={{ padding: "0.25rem 0.5rem", fontSize: "0.875rem" }}
                           autoFocus
                           onKeyDown={(e) => {
@@ -432,7 +432,7 @@ export default function TagManagementModal({
                           <button
                             onClick={() => handleUpdateTag(tag.id)}
                             disabled={isSubmitting}
-                            className="text-green-400 hover:bg-white/10 rounded transition-colors"
+                            className="text-green-400 hover:bg-starlight/10 rounded transition-colors"
                             style={{ padding: "0.375rem 0.5rem", fontSize: "0.8rem", fontWeight: 600 }}
                           >
                             Save
@@ -441,7 +441,7 @@ export default function TagManagementModal({
                           <>
                             <button
                               onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }}
-                              className="text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
+                              className="text-comet hover:text-starlight hover:bg-starlight/10 rounded transition-colors"
                               style={{ padding: "0.375rem" }}
                               title="Edit tag"
                             >
@@ -450,7 +450,7 @@ export default function TagManagementModal({
                             <button
                               onClick={() => handleDeleteTag(tag.id)}
                               disabled={isSubmitting}
-                              className="text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
+                              className="text-comet hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
                               style={{ padding: "0.375rem" }}
                               title="Delete tag"
                             >
@@ -500,7 +500,7 @@ export default function TagManagementModal({
                   return (
                     <div
                       key={beacon.id}
-                      className="border border-white/5 flex flex-col"
+                      className="border border-border flex flex-col"
                       style={{
                         background: "rgba(255,255,255,0.03)",
                         borderRadius: "0.625rem",
@@ -512,9 +512,9 @@ export default function TagManagementModal({
                         {beacon.imageUrl ? (
                            <img src={beacon.imageUrl} alt="" className="w-8 h-8 sm:w-10 sm:h-10 rounded object-cover flex-shrink-0" />
                         ) : beacon.faviconUrl ? (
-                           <img src={beacon.faviconUrl} alt="" className="w-8 h-8 sm:w-10 sm:h-10 rounded object-cover flex-shrink-0 bg-white/5" />
+                           <img src={beacon.faviconUrl} alt="" className="w-8 h-8 sm:w-10 sm:h-10 rounded object-cover flex-shrink-0 bg-starlight/5" />
                         ) : (
-                           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded bg-white/10 flex flex-shrink-0 items-center justify-center text-sm sm:text-lg font-bold text-white uppercase">{domain.charAt(0)}</div>
+                           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded bg-starlight/10 flex flex-shrink-0 items-center justify-center text-sm sm:text-lg font-bold text-white uppercase">{domain.charAt(0)}</div>
                         )}
                         <p
                           className="truncate flex-1"
@@ -565,7 +565,7 @@ export default function TagManagementModal({
         {/* Footer */}
         {activeTab === "assign" && localTags.length > 0 && sector.beacons.length > 0 && (
           <div
-            className="border-t border-white/10 flex justify-end"
+            className="border-t border-border flex justify-end"
             style={{ padding: "0.875rem 1.5rem", background: "rgba(0,0,0,0.2)" }}
           >
             <button

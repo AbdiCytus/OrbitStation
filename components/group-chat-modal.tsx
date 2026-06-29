@@ -826,7 +826,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                   <div style={{ width: "48px", height: "48px", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", boxShadow: "inset 0 2px 4px rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", backgroundColor: sector.color || "#8b5cf6", flexShrink: 0 }}>
                     {sector.icon && typeof sector.icon === "string" && sector.icon.endsWith("Icon") ? (
-                      <DynamicIcon name={sector.icon as any} className="w-6 h-6 text-white" />
+                      <DynamicIcon name={sector.icon as any} className="w-6 h-6 text-starlight" />
                     ) : (sector.icon || "🌌")}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
@@ -879,7 +879,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                           <button onClick={async () => {
                             setPinnedMessage(null);
                             await unpinGroupMessageAction(sector.id);
-                          }} className="text-gray-500 hover:text-white bg-transparent border-none cursor-pointer" style={{ padding: "10px 0", marginRight: "20px" }}>
+                          }} className="text-dust hover:text-starlight bg-transparent border-none cursor-pointer" style={{ padding: "10px 0", marginRight: "20px" }}>
                             <XMarkIcon width={18} height={18} />
                           </button>
                         )}
@@ -895,7 +895,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                     {isLoading ? (
                       <div className="flex flex-col items-center justify-center h-full gap-4 opacity-80 mt-10">
                         {/* Spinner bergaya radar kosmos */}
-                        <div className="w-10 h-10 border-4 border-white/5 border-t-violet-500 rounded-full animate-spin"></div>
+                        <div className="w-10 h-10 border-4 border-border border-t-violet-500 rounded-full animate-spin"></div>
                         <span className="text-violet-400 text-xs font-bold tracking-[0.2em] uppercase animate-pulse">
                           Establishing Connection...
                         </span>
@@ -903,7 +903,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                     ) : messages.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full gap-2 opacity-50 mt-10">
                         <span className="text-4xl">🌌</span>
-                        <span className="text-gray-400 text-sm">No signals detected yet. Be the first to transmit.</span>
+                        <span className="text-comet text-sm">No signals detected yet. Be the first to transmit.</span>
                       </div>
                     ) : (
                       messages.map(msg => {
@@ -1071,22 +1071,22 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     setSelectedMsgId(null);
                                     setPinnedMessage(msg);
                                     await pinGroupMessageAction(sector.id, msg.id);
-                                  }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Pin Message" style={{ padding: "10px" }}>
+                                  }} className="p-2 text-comet hover:text-starlight hover:bg-starlight/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Pin Message" style={{ padding: "10px" }}>
                                     <MapPinIcon width={18} height={18} />
                                   </button>
-                                  <button onClick={() => { setReplyToMsg(msg); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Reply" style={{ padding: "10px" }}>
+                                  <button onClick={() => { setReplyToMsg(msg); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-comet hover:text-starlight hover:bg-starlight/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Reply" style={{ padding: "10px" }}>
                                     <ArrowUturnLeftIcon width={18} height={18} />
                                   </button>
-                                  <button onClick={() => { navigator.clipboard.writeText(msg.content); toast.success("Copied to clipboard"); setSelectedMsgId(null); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Copy" style={{ padding: "10px" }}>
+                                  <button onClick={() => { navigator.clipboard.writeText(msg.content); toast.success("Copied to clipboard"); setSelectedMsgId(null); }} className="p-2 text-comet hover:text-starlight hover:bg-starlight/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Copy" style={{ padding: "10px" }}>
                                     <ClipboardDocumentIcon width={18} height={18} />
                                   </button>
                                   {msg.content.match(/https?:\/\/[^\s]+/) && (
-                                    <button onClick={() => window.open(msg.content.match(/https?:\/\/[^\s]+/)[0], "_blank")} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Open Link" style={{ padding: "10px" }}>
+                                    <button onClick={() => window.open(msg.content.match(/https?:\/\/[^\s]+/)[0], "_blank")} className="p-2 text-comet hover:text-starlight hover:bg-starlight/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Open Link" style={{ padding: "10px" }}>
                                       <LinkIcon width={18} height={18} />
                                     </button>
                                   )}
                                   {isMine && (
-                                    <button onClick={() => { setEditMsgId(msg.id); setInputMessage(msg.content); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Edi t" style={{ padding: "10px" }}>
+                                    <button onClick={() => { setEditMsgId(msg.id); setInputMessage(msg.content); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-comet hover:text-starlight hover:bg-starlight/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Edi t" style={{ padding: "10px" }}>
                                       <PencilIcon width={18} height={18} />
                                     </button>
                                   )}
@@ -1237,7 +1237,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                       initial={{ width: 0, opacity: 0 }}
                       animate={{ width: 240, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
-                      className="absolute right-0 top-0 bottom-0 sm:relative sm:top-auto sm:bottom-auto z-50 flex flex-col flex-shrink-0 h-full border-l border-white/10"
+                      className="absolute right-0 top-0 bottom-0 sm:relative sm:top-auto sm:bottom-auto z-50 flex flex-col flex-shrink-0 h-full border-l border-border"
                       style={{ background: "rgba(15,15,25,0.95)", backdropFilter: "blur(12px)", overflow: "hidden" }}
                     >
                       {/* Members Header */}
@@ -1392,7 +1392,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                         {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-wave-layer" />}
                         {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-blackhole" />}
                       </div>
-                      <button onClick={() => setMentionDetail(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-transparent border-none cursor-pointer z-50">
+                      <button onClick={() => setMentionDetail(null)} className="absolute top-4 right-4 text-comet hover:text-starlight transition-colors bg-transparent border-none cursor-pointer z-50">
                         <XMarkIcon width={20} height={20} />
                       </button>
 
@@ -1423,10 +1423,10 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                           )}
                         </div>
                         <div className="flex flex-col pr-6">
-                          <h4 className="text-white font-bold text-lg m-0">{mentionDetail.data.name || mentionDetail.data.title}</h4>
+                          <h4 className="text-starlight font-bold text-lg m-0">{mentionDetail.data.name || mentionDetail.data.title}</h4>
                           {isUserType ? (
                             <>
-                              <p className="text-gray-400 text-sm m-0">@{mentionDetail.data.username} {mentionDetail.data.callsign ? `• ${mentionDetail.data.callsign}` : ''}</p>
+                              <p className="text-comet text-sm m-0">@{mentionDetail.data.username} {mentionDetail.data.callsign ? `• ${mentionDetail.data.callsign}` : ''}</p>
                               {badge && (
                                 <div className="zodiac-orbit-wrapper" style={{ position: 'relative', width: 'fit-content' }}>
                                   {badge.id === 'zodiac-horizon' && (
@@ -1441,7 +1441,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     <div className="badge-icon w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
                                       <DynamicIcon name={badge.icon as any} className="w-3.5 h-3.5 relative z-10" />
                                     </div>
-                                    <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[12px] drop-shadow-md" style={{marginRight: "0.5rem"}}>
+                                    <span className="badge-content relative z-10 text-starlight font-bold tracking-wide text-[12px] drop-shadow-md" style={{marginRight: "0.5rem"}}>
                                       {badge.name}
                                     </span>
                                   </div>
@@ -1483,7 +1483,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                 }}
                                 style={{ padding: "5px 0" }}
                                 className={`flex-1 flex justify-center items-center gap-2 rounded-xl text-sm font-semibold transition-colors border-none ${
-                                  isAlreadyFriend || isPending ? 'bg-white/5 text-gray-400 cursor-default' : 'bg-violet-600 hover:bg-violet-500 text-white cursor-pointer'
+                                  isAlreadyFriend || isPending ? 'bg-starlight/5 text-comet cursor-default' : 'bg-violet-600 hover:bg-violet-500 text-white cursor-pointer'
                                 }`}
                               >
                                 {isAlreadyFriend ? <UsersIcon width={18} height={18} /> : <UserPlusIcon width={18} height={18} />}
@@ -1495,13 +1495,13 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                 href={`/station/${mentionDetail.data.username}`}
                                 target="_blank"
                                 style={{ padding: "5px 0", color: "white" }}
-                                className="flex-1 flex justify-center items-center gap-2 text-center bg-white/10 hover:bg-white/20 rounded-xl text-sm font-semibold transition-colors no-underline"
+                                className="flex-1 flex justify-center items-center gap-2 text-center bg-starlight/10 hover:bg-starlight/20 rounded-xl text-sm font-semibold transition-colors no-underline"
                               >
                                 <GlobeAltIcon width={18} height={18} /> Visit Profile
                               </a>
                             )}
                             {!allowAddFriend && !allowVisitProfile && (
-                              <p className="text-gray-500 text-sm italic w-full text-center m-0">This pilot's station is completely private.</p>
+                              <p className="text-dust text-sm italic w-full text-center m-0">This pilot's station is completely private.</p>
                             )}
                           </>
                         ) : (
@@ -1520,7 +1520,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                               href={mentionDetail.data.url}
                               target="_blank"
                               style={{ padding: "5px 0", color: "white" }}
-                              className="flex-1 flex justify-center items-center gap-2 text-center bg-white/10 hover:bg-white/20 rounded-xl text-sm font-semibold transition-colors no-underline"
+                              className="flex-1 flex justify-center items-center gap-2 text-center bg-starlight/10 hover:bg-starlight/20 rounded-xl text-sm font-semibold transition-colors no-underline"
                             >
                               <RocketLaunchIcon width={18} height={18} /> Launch
                             </a>
@@ -1554,7 +1554,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
         {confirmAction && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4"
+            className="fixed inset-0 z-[9999] bg-cosmos/80 flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -1564,7 +1564,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
               <h3 className="text-[#ef4444] text-xl font-bold m-0">
                 {confirmAction.type === 'clear' ? 'Clear Chat History?' : 'Kick Member?'}
               </h3>
-              <p className="text-gray-300 text-sm leading-relaxed m-0">
+              <p className="text-comet text-sm leading-relaxed m-0">
                 {confirmAction.type === 'clear'
                   ? "Are you absolutely sure you want to clear all messages in this group chat? This action cannot be undone and will affect all members."
                   : `Are you sure you want to kick ${confirmAction.targetUser?.name || confirmAction.targetUser?.username} (@${confirmAction.targetUser?.username}) from this sector? They will lose access immediately.`}
@@ -1573,7 +1573,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
               <div className="flex justify-end gap-3 mt-4">
                 <button
                   onClick={() => setConfirmAction(null)}
-                  className="px-4 py-2 rounded-xl bg-transparent text-gray-400 hover:text-white border border-white/20 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-transparent text-comet hover:text-starlight border border-white/20 transition-colors cursor-pointer"
                   style={{ padding: "8px 24px" }}
                 >
                   Cancel

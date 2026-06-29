@@ -1186,7 +1186,7 @@ export default function StationClient({
                             </div>
                             {/* Edit Button (visible when hovered on desktop, hidden on mobile) */}
                             <div
-                              className="absolute inset-0 items-center justify-center text-gray-400 hover:text-white opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-white/10 rounded-md hidden md:flex"
+                              className="absolute inset-0 items-center justify-center text-comet hover:text-starlight opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-starlight/10 rounded-md hidden md:flex"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setEditingSector(sector);
@@ -1200,7 +1200,7 @@ export default function StationClient({
                         {!isOwner && (
                           <div className="relative w-6 h-6 flex items-center justify-center shrink-0 ml-1">
                             <div
-                              className="absolute inset-0 flex items-center justify-center text-gray-400 hover:text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-white/10 rounded-md"
+                              className="absolute inset-0 flex items-center justify-center text-comet hover:text-starlight opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-starlight/10 rounded-md"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setViewingMembersSector(sector);
@@ -1832,7 +1832,7 @@ export default function StationClient({
                                   transition: "all 0.2s",
                                 }}>
                                 <button
-                                  className="dropdown-option-btn hover:bg-white/5"
+                                  className="dropdown-option-btn hover:bg-starlight/5"
                                   style={{
                                     flex: 1,
                                     display: "flex",
@@ -1882,7 +1882,7 @@ export default function StationClient({
                                       alignItems: "center",
                                       justifyContent: "center",
                                     }}
-                                    className="hover:bg-white/10"
+                                    className="hover:bg-starlight/10"
                                     title={`Sort ${sortDir === "asc" ? "Descending" : "Ascending"}`}>
                                     {sortDir === "asc" ? (
                                       <BarsArrowUpIcon width={16} height={16} />
@@ -2068,7 +2068,7 @@ export default function StationClient({
           )}
 
           {visibleLimit < visibleBeacons.length && (
-            <div className="w-full text-center py-6 text-gray-500 text-sm italic">
+            <div className="w-full text-center py-6 text-dust text-sm italic">
               Scanning space for more signals...
             </div>
           )}
@@ -2099,7 +2099,7 @@ export default function StationClient({
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
-                      className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[rgba(20,20,30,1)] shadow-lg">
+                      className="absolute -top-2 -right-2 bg-pink-500 text-starlight text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[rgba(20,20,30,1)] shadow-lg">
                       {hasMentionInCurrentSector ? "@" : "!"}
                     </motion.div>
                   )}
@@ -2206,13 +2206,13 @@ export default function StationClient({
 
       <AnimatePresence>
         {showAccessDenied && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center backdrop-blur-sm" onClick={() => setShowAccessDenied(false)} style={{ padding: "12px" }}>
-            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="bg-[#0b0c10] border border-white/10 shadow-2xl relative overflow-hidden flex flex-col items-center text-center p-8 rounded-3xl w-[90%] max-w-sm" onClick={e => e.stopPropagation()} style={{ padding: "12px" }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9999] bg-cosmos/80 flex items-center justify-center backdrop-blur-sm" onClick={() => setShowAccessDenied(false)} style={{ padding: "12px" }}>
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="bg-[#0b0c10] border border-border shadow-2xl relative overflow-hidden flex flex-col items-center text-center p-8 rounded-3xl w-[90%] max-w-sm" onClick={e => e.stopPropagation()} style={{ padding: "12px" }}>
               <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4 border border-red-500/30">
                 <svg width="32" height="32" fill="none" stroke="#f87171" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Access Denied</h3>
-              <p className="text-gray-400 text-sm mb-6 leading-relaxed">You do not have permission to perform this action. Only Sector Admins or the Owner can modify beacons here.</p>
+              <h3 className="text-xl font-bold text-starlight mb-2">Access Denied</h3>
+              <p className="text-comet text-sm mb-6 leading-relaxed">You do not have permission to perform this action. Only Sector Admins or the Owner can modify beacons here.</p>
               <button onClick={() => window.location.reload()} className="w-full py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl transition-colors cursor-pointer border-none">
                 OK
               </button>

@@ -79,14 +79,14 @@ export default function SectorQRModal({ isOpen, onClose, sectorId, sectorName }:
             {/* Header */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors border-none cursor-pointer z-10"
+              className="absolute top-4 right-4 text-comet hover:text-starlight bg-starlight/5 hover:bg-starlight/10 rounded-full transition-colors border-none cursor-pointer z-10"
               style={{ padding: "8px" }}
             >
               <XMarkIcon className="w-5 h-5" />
             </button>
 
-            <h2 className="text-2xl font-bold text-white text-center relative z-10" style={{ margin: "8px 0 12px 0", textShadow: "0 0 12px rgba(139, 92, 246, 0.6)" }}>Invite to {sectorName}</h2>
-            <p className="text-gray-400 text-sm text-center relative z-10" style={{ margin: "0 0 24px 0" }}>
+            <h2 className="text-2xl font-bold text-starlight text-center relative z-10" style={{ margin: "8px 0 12px 0", textShadow: "0 0 12px rgba(139, 92, 246, 0.6)" }}>Invite to {sectorName}</h2>
+            <p className="text-comet text-sm text-center relative z-10" style={{ margin: "0 0 24px 0" }}>
               Scan the QR code below or share the link to invite members without adding them as friends.
             </p>
 
@@ -109,12 +109,12 @@ export default function SectorQRModal({ isOpen, onClose, sectorId, sectorName }:
             </div>
 
             {/* Link Copy */}
-            <div className="w-full flex bg-black/40 rounded-xl border border-white/10 overflow-hidden relative z-10 shadow-inner" style={{ margin: "0" }}>
+            <div className="w-full flex bg-cosmos/40 rounded-xl border border-border overflow-hidden relative z-10 shadow-inner" style={{ margin: "0" }}>
               <input
                 type="text"
                 readOnly
                 value={joinUrl}
-                className="w-full bg-transparent border-none text-gray-300 text-sm focus:outline-none"
+                className="w-full bg-transparent border-none text-comet text-sm focus:outline-none"
                 style={{ padding: "12px 16px" }}
                 placeholder={isLoading ? "Generating link..." : ""}
               />

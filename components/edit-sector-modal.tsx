@@ -423,15 +423,15 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                           {/* Owner */}
                           {sectorOwner && (
                             <div
-                              className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                              className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
                               style={{ padding: "0.5rem 1rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
-                                  {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
+                                  {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                  <p className="text-sm font-medium text-gray-300 truncate leading-tight">
+                                  <p className="text-sm font-medium text-comet truncate leading-tight">
                                     {sectorOwner.name || sectorOwner.username}
                                     {sectorOwner.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                                   </p>
@@ -445,15 +445,15 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                           {localCollaborators?.map((c: any) => (
                             <div
                               key={c.user.id}
-                              className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                              className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
                               style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
-                                  {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
+                                  {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                  <p className="text-sm font-medium text-gray-300 truncate leading-tight">
+                                  <p className="text-sm font-medium text-comet truncate leading-tight">
                                     {c.user.name || c.user.username}
                                     {c.user.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                                   </p>
@@ -462,14 +462,14 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                               </div>
                               <div className="flex items-center transition-opacity" style={{ gap: "0.25rem" }}>
                                 {currentUserId === sectorOwner?.id && (
-                                  <button type="button" onClick={() => setRoleAction({ id: c.user.id, type: c.role === "ADMIN" ? "demote" : "promote" })} className="flex items-center justify-center text-gray-400 rounded-full transition-colors" style={{ width: "36px", height: "36px" }} title={c.role === "ADMIN" ? "Demote to Member" : "Promote to Admin"} onMouseEnter={(e) => { e.currentTarget.style.color = c.role === "ADMIN" ? "#fb923c" : "#10b981"; e.currentTarget.style.background = c.role === "ADMIN" ? "rgba(251,146,60,0.2)" : "rgba(16,185,129,0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "transparent"; }}>
+                                  <button type="button" onClick={() => setRoleAction({ id: c.user.id, type: c.role === "ADMIN" ? "demote" : "promote" })} className="flex items-center justify-center text-comet rounded-full transition-colors" style={{ width: "36px", height: "36px" }} title={c.role === "ADMIN" ? "Demote to Member" : "Promote to Admin"} onMouseEnter={(e) => { e.currentTarget.style.color = c.role === "ADMIN" ? "#fb923c" : "#10b981"; e.currentTarget.style.background = c.role === "ADMIN" ? "rgba(251,146,60,0.2)" : "rgba(16,185,129,0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "transparent"; }}>
                                     {c.role === "ADMIN" ? <ShieldExclamationIcon width={16} height={16} /> : <ShieldCheckIcon width={16} height={16} />}
                                   </button>
                                 )}
-                                <button type="button" onClick={() => setTransferringTo(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Transfer Ownership">
+                                <button type="button" onClick={() => setTransferringTo(c.user.id)} className="flex items-center justify-center text-comet hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Transfer Ownership">
                                   <DynamicIcon name="ArrowsRightLeftIcon" width={16} height={16} />
                                 </button>
-                                <button type="button" onClick={() => setRemovingMemberId(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-pink-400 rounded-full hover:bg-pink-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Remove Member">
+                                <button type="button" onClick={() => setRemovingMemberId(c.user.id)} className="flex items-center justify-center text-comet hover:text-pink-400 rounded-full hover:bg-pink-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Remove Member">
                                   <DynamicIcon name="UserMinusIcon" width={16} height={16} />
                                 </button>
                               </div>
@@ -479,20 +479,20 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                           {/* Pending Members */}
                           {pendingMembers.length > 0 && (
                             <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-                              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2" style={{ marginBottom: "1rem" }}>Pending Invites</div>
+                              <div className="text-[10px] font-bold text-comet uppercase tracking-widest pl-2" style={{ marginBottom: "1rem" }}>Pending Invites</div>
                               {pendingMembers.map((u: any) => (
                                 <div
                                   key={u.id}
-                                  className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] transition-colors group opacity-60"
+                                  className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] transition-colors group opacity-60"
                                   style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                                 >
                                   <div className="flex items-center gap-3 min-w-0">
                                     <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
-                                      {u.image ? <img src={u.image} alt={u.name ?? ""} className="w-full h-full object-cover grayscale" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(u.name || u.username || "?")[0].toUpperCase()}</span>}
+                                      {u.image ? <img src={u.image} alt={u.name ?? ""} className="w-full h-full object-cover grayscale" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(u.name || u.username || "?")[0].toUpperCase()}</span>}
                                     </div>
-                                    <p className="text-sm font-medium text-gray-300 truncate">{u.name || u.username}</p>
+                                    <p className="text-sm font-medium text-comet truncate">{u.name || u.username}</p>
                                   </div>
-                                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
+                                  <span className="text-[10px] font-bold text-comet uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
                                 </div>
                               ))}
                             </div>
@@ -510,19 +510,19 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         </label>
                         <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "40vh" }}>
                           {friends.length === 0 ? (
-                            <p className="text-gray-400 text-sm m-auto text-center" style={{ padding: "2rem 0" }}>You have no friends to invite yet.</p>
+                            <p className="text-comet text-sm m-auto text-center" style={{ padding: "2rem 0" }}>You have no friends to invite yet.</p>
                           ) : (
                             friends.filter(f => !localCollaborators?.find((c: any) => c.user.id === f.id) && !pendingMembers.find((p: any) => p.id === f.id)).map(f => (
                               <label
                                 key={f.id}
-                                className="flex items-center rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group"
+                                className="flex items-center rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group"
                                 style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                               >
                                 <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
-                                  {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
+                                  {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-300 truncate">{f.name || f.username}</p>
+                                  <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
                                 </div>
                                 <div className="flex items-center justify-center w-5 h-5 rounded-full border transition-colors" style={{ borderColor: invitedFriends.includes(f.id) ? "#a78bfa" : "rgba(255,255,255,0.1)", background: invitedFriends.includes(f.id) ? "#a78bfa" : "transparent" }}>
                                   {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "white" }} />}
@@ -620,15 +620,15 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         {/* Owner */}
                         {sectorOwner && (
                           <motion.div
-                            className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                            className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
                             style={{ padding: "0.5rem 1rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                             variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
-                                {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
+                                {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
                               </div>
-                              <p className="text-sm font-medium text-gray-300 truncate">
+                              <p className="text-sm font-medium text-comet truncate">
                                 {sectorOwner.name || sectorOwner.username}
                                 {sectorOwner.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                               </p>
@@ -641,16 +641,16 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         {localCollaborators?.map((c: any) => (
                           <motion.div
                             key={c.user.id}
-                            className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
+                            className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
                             style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                             variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
-                                {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
+                                {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
                               </div>
                               <div className="flex flex-col min-w-0">
-                                <p className="text-sm font-medium text-gray-300 truncate leading-tight">
+                                <p className="text-sm font-medium text-comet truncate leading-tight">
                                   {c.user.name || c.user.username}
                                   {c.user.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                                 </p>
@@ -659,14 +659,14 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                             </div>
                             <div className="flex items-center transition-opacity" style={{ gap: "0.25rem" }}>
                               {currentUserId === sectorOwner?.id && (
-                                <button type="button" onClick={() => setRoleAction({ id: c.user.id, type: c.role === "ADMIN" ? "demote" : "promote" })} className="flex items-center justify-center text-gray-400 rounded-full transition-colors" style={{ width: "36px", height: "36px" }} title={c.role === "ADMIN" ? "Demote to Member" : "Promote to Admin"} onMouseEnter={(e) => { e.currentTarget.style.color = c.role === "ADMIN" ? "#fb923c" : "#10b981"; e.currentTarget.style.background = c.role === "ADMIN" ? "rgba(251,146,60,0.2)" : "rgba(16,185,129,0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "transparent"; }}>
+                                <button type="button" onClick={() => setRoleAction({ id: c.user.id, type: c.role === "ADMIN" ? "demote" : "promote" })} className="flex items-center justify-center text-comet rounded-full transition-colors" style={{ width: "36px", height: "36px" }} title={c.role === "ADMIN" ? "Demote to Member" : "Promote to Admin"} onMouseEnter={(e) => { e.currentTarget.style.color = c.role === "ADMIN" ? "#fb923c" : "#10b981"; e.currentTarget.style.background = c.role === "ADMIN" ? "rgba(251,146,60,0.2)" : "rgba(16,185,129,0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "transparent"; }}>
                                   {c.role === "ADMIN" ? <ShieldExclamationIcon width={16} height={16} /> : <ShieldCheckIcon width={16} height={16} />}
                                 </button>
                               )}
-                              <button type="button" onClick={() => setTransferringTo(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Transfer Ownership">
+                              <button type="button" onClick={() => setTransferringTo(c.user.id)} className="flex items-center justify-center text-comet hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Transfer Ownership">
                                 <DynamicIcon name="ArrowsRightLeftIcon" width={16} height={16} />
                               </button>
-                              <button type="button" onClick={() => setRemovingMemberId(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-pink-400 rounded-full hover:bg-pink-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Remove Member">
+                              <button type="button" onClick={() => setRemovingMemberId(c.user.id)} className="flex items-center justify-center text-comet hover:text-pink-400 rounded-full hover:bg-pink-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Remove Member">
                                 <DynamicIcon name="UserMinusIcon" width={16} height={16} />
                               </button>
                             </div>
@@ -676,21 +676,21 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         {/* Pending Members */}
                         {pendingMembers.length > 0 && (
                           <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-                            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2" style={{ marginBottom: "1rem" }}>Pending Invites</div>
+                            <div className="text-[10px] font-bold text-comet uppercase tracking-widest pl-2" style={{ marginBottom: "1rem" }}>Pending Invites</div>
                             {pendingMembers.map((u: any) => (
                               <motion.div
                                 key={u.id}
-                                className="flex items-center justify-between rounded-full border border-white/5 bg-white/[0.02] transition-colors group opacity-60"
+                                className="flex items-center justify-between rounded-full border border-border bg-white/[0.02] transition-colors group opacity-60"
                                 style={{ padding: "0.5rem 0.75rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                                 variants={{ hidden: { opacity: 0, y: -10 }, visible: { opacity: 0.6, y: 0 } }}
                               >
                                 <div className="flex items-center gap-3 min-w-0">
                                   <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
-                                    {u.image ? <img src={u.image} alt={u.name ?? ""} className="w-full h-full object-cover grayscale" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(u.name || u.username || "?")[0].toUpperCase()}</span>}
+                                    {u.image ? <img src={u.image} alt={u.name ?? ""} className="w-full h-full object-cover grayscale" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(u.name || u.username || "?")[0].toUpperCase()}</span>}
                                   </div>
-                                  <p className="text-sm font-medium text-gray-300 truncate">{u.name || u.username}</p>
+                                  <p className="text-sm font-medium text-comet truncate">{u.name || u.username}</p>
                                 </div>
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
+                                <span className="text-[10px] font-bold text-comet uppercase tracking-widest px-2 py-1 rounded-md">Pending</span>
                               </motion.div>
                             ))}
                           </div>
@@ -712,20 +712,20 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } }}
                       >
                         {friends.length === 0 ? (
-                          <p className="text-gray-400 text-sm m-auto text-center" style={{ padding: "2rem 0" }}>You have no friends to invite yet.</p>
+                          <p className="text-comet text-sm m-auto text-center" style={{ padding: "2rem 0" }}>You have no friends to invite yet.</p>
                         ) : (
                           friends.filter(f => !localCollaborators?.find((c: any) => c.user.id === f.id) && !pendingMembers.find((p: any) => p.id === f.id)).map(f => (
                             <motion.label
                               key={f.id}
-                              className="flex items-center rounded-full border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group"
+                              className="flex items-center rounded-full border border-border bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors group"
                               style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                               variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                             >
                               <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
-                                {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-gray-300 font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
+                                {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-300 truncate">{f.name || f.username}</p>
+                                <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
                               </div>
                               <div className="flex items-center justify-center w-5 h-5 rounded-full border transition-colors" style={{ borderColor: invitedFriends.includes(f.id) ? "#a78bfa" : "rgba(255,255,255,0.1)", background: invitedFriends.includes(f.id) ? "#a78bfa" : "transparent" }}>
                                 {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "white" }} />}
@@ -774,7 +774,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-[#0b0c10] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col"
+              className="bg-[#0b0c10] border border-border shadow-2xl relative overflow-hidden flex flex-col"
               style={{ borderRadius: isMobile ? "1.5rem" : "2rem", maxWidth: "24rem", width: isMobile ? "90%" : "100%", padding: isMobile ? "1.5rem" : "2.5rem" }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -789,9 +789,9 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
               </div>
 
               {/* Content */}
-              <div className="text-center text-white" style={{ marginBottom: "2rem" }}>
+              <div className="text-center text-starlight" style={{ marginBottom: "2rem" }}>
                 <h4 className="text-2xl font-bold tracking-tight" style={{ marginBottom: "1rem" }}>{removingMemberId ? "Remove Member?" : "Transfer Ownership?"}</h4>
-                <p className="text-sm text-gray-400 leading-relaxed px-2">
+                <p className="text-sm text-comet leading-relaxed px-2">
                   {removingMemberId
                     ? "Are you sure you want to remove this member from the collaboration?"
                     : "You will lose ownership of this sector and become a regular collaborator. This action cannot be undone."}
@@ -800,8 +800,8 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
 
               {/* Buttons */}
               <div className="flex" style={{ gap: "1rem" }}>
-                <button type="button" className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-2xl transition-all font-medium text-sm border border-white/5" style={{ padding: "0.75rem 0" }} onClick={() => { setRemovingMemberId(null); setTransferringTo(null); }}>Cancel</button>
-                <button type="button" className={`flex-1 text-white rounded-2xl transition-all font-medium text-sm shadow-xl ${removingMemberId ? "bg-[#e11d48] hover:bg-[#be123c] shadow-pink-500/20" : "bg-[#8b5cf6] hover:bg-[#7c3aed] shadow-violet-500/20"}`} style={{ padding: "0.75rem 0" }} onClick={async () => {
+                <button type="button" className="flex-1 bg-starlight/5 hover:bg-starlight/10 text-starlight rounded-2xl transition-all font-medium text-sm border border-border" style={{ padding: "0.75rem 0" }} onClick={() => { setRemovingMemberId(null); setTransferringTo(null); }}>Cancel</button>
+                <button type="button" className={`flex-1 text-starlight rounded-2xl transition-all font-medium text-sm shadow-xl ${removingMemberId ? "bg-[#e11d48] hover:bg-[#be123c] shadow-pink-500/20" : "bg-[#8b5cf6] hover:bg-[#7c3aed] shadow-violet-500/20"}`} style={{ padding: "0.75rem 0" }} onClick={async () => {
                   if (removingMemberId) {
                     const id = removingMemberId; setRemovingMemberId(null);
                     const result = await removeCollaborator(sector.id, id);
@@ -829,20 +829,20 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
         )}
         {roleAction && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); setRoleAction(null); }}>
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="bg-[#0b0c10] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col" style={{ borderRadius: isMobile ? "1.5rem" : "2rem", maxWidth: "24rem", width: isMobile ? "90%" : "100%", padding: isMobile ? "1.5rem" : "2.5rem" }} onClick={(e) => e.stopPropagation()}>
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="bg-[#0b0c10] border border-border shadow-2xl relative overflow-hidden flex flex-col" style={{ borderRadius: isMobile ? "1.5rem" : "2rem", maxWidth: "24rem", width: isMobile ? "90%" : "100%", padding: isMobile ? "1.5rem" : "2.5rem" }} onClick={(e) => e.stopPropagation()}>
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: roleAction.type === "promote" ? "linear-gradient(90deg, transparent, #10b981, transparent)" : "linear-gradient(90deg, transparent, #fb923c, transparent)" }}></div>
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem", marginTop: "0.5rem" }}>
                 <div style={{ width: "80px", height: "80px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: roleAction.type === "promote" ? "radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)" : "radial-gradient(circle, rgba(251,146,60,0.15) 0%, transparent 70%)", border: roleAction.type === "promote" ? "1px solid rgba(16,185,129,0.2)" : "1px solid rgba(251,146,60,0.2)" }}>
                   {roleAction.type === "promote" ? <ShieldCheckIcon width={32} height={32} style={{ color: "#10b981", filter: "drop-shadow(0 0 12px rgba(16,185,129,0.6))" }} /> : <ShieldExclamationIcon width={32} height={32} style={{ color: "#fb923c", filter: "drop-shadow(0 0 12px rgba(251,146,60,0.6))" }} />}
                 </div>
               </div>
-              <div className="text-center text-white" style={{ marginBottom: "2rem" }}>
+              <div className="text-center text-starlight" style={{ marginBottom: "2rem" }}>
                 <h4 className="text-2xl font-bold tracking-tight" style={{ marginBottom: "1rem" }}>{roleAction.type === "promote" ? "Promote to Admin?" : "Demote to Member?"}</h4>
-                <p className="text-sm text-gray-400 leading-relaxed px-2">{roleAction.type === "promote" ? "This member will be able to add, edit, and delete beacons in this sector." : "This member will lose their admin privileges and become a regular member."}</p>
+                <p className="text-sm text-comet leading-relaxed px-2">{roleAction.type === "promote" ? "This member will be able to add, edit, and delete beacons in this sector." : "This member will lose their admin privileges and become a regular member."}</p>
               </div>
               <div className="flex" style={{ gap: "1rem" }}>
-                <button type="button" className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-2xl transition-all font-medium text-sm border border-white/5" style={{ padding: "0.75rem 0" }} onClick={() => setRoleAction(null)}>Cancel</button>
-                <button type="button" className={`flex-1 text-white rounded-2xl transition-all font-medium text-sm shadow-xl ${roleAction.type === "promote" ? "bg-[#10b981] hover:bg-[#059669] shadow-emerald-500/20" : "bg-[#fb923c] hover:bg-[#ea580c] shadow-orange-500/20"}`} style={{ padding: "0.75rem 0" }} onClick={async () => {
+                <button type="button" className="flex-1 bg-starlight/5 hover:bg-starlight/10 text-starlight rounded-2xl transition-all font-medium text-sm border border-border" style={{ padding: "0.75rem 0" }} onClick={() => setRoleAction(null)}>Cancel</button>
+                <button type="button" className={`flex-1 text-starlight rounded-2xl transition-all font-medium text-sm shadow-xl ${roleAction.type === "promote" ? "bg-[#10b981] hover:bg-[#059669] shadow-emerald-500/20" : "bg-[#fb923c] hover:bg-[#ea580c] shadow-orange-500/20"}`} style={{ padding: "0.75rem 0" }} onClick={async () => {
                   const id = roleAction.id;
                   const newRole = roleAction.type === "promote" ? "ADMIN" : "MEMBER";
                   setRoleAction(null);

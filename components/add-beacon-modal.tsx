@@ -217,7 +217,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                               </div>
                             )}
                             <div
-                              className="dropdown-option-btn hover:bg-white/5"
+                              className="dropdown-option-btn hover:bg-starlight/5"
                               style={{ padding: "0.6rem 1rem", paddingLeft: "1.5rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
                               onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
                             >

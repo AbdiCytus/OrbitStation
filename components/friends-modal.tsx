@@ -338,20 +338,20 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
             <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", background: "radial-gradient(circle at top right, rgba(139, 92, 246, 0.05), transparent 50%)" }}>
             </div>
             {/* Modal Header */}
-            <div className="flex items-center justify-between relative z-10 bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] fm-modal-header" style={{ padding: "16px 24px", borderRadius: "16px" }}>
+            <div className="flex items-center justify-between relative z-10 bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-border fm-modal-header" style={{ padding: "16px 24px", borderRadius: "16px" }}>
               <div className="flex items-center w-full fm-header-left">
-                <div className="font-bold text-white tracking-wide shrink-0 mr-4 flex items-center gap-3 fm-header-title" style={{ fontSize: "20px", width: "180px" }}>
+                <div className="font-bold text-starlight tracking-wide shrink-0 mr-4 flex items-center gap-3 fm-header-title" style={{ fontSize: "20px", width: "180px" }}>
                   {activeTab === "add" ? "Find Pilots" : activeTab === "list" ? (
                     <>Friend List <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{friends.length}</span></>
                   ) : "Friend Requests"}
                 </div>
 
                 <div className="relative flex-1 max-w-lg ml-6 fm-header-search">
-                  <MagnifyingGlassIcon className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" width={20} height={20} />
+                  <MagnifyingGlassIcon className="absolute left-6 top-1/2 -translate-y-1/2 text-comet" width={20} height={20} />
                   <input
                     type="text"
                     placeholder={activeTab === "add" ? "Search by name, username, or callsign..." : "Search friends..."}
-                    className="w-full bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.1)] text-white focus:outline-none focus:border-violet-500 focus:bg-[rgba(0,0,0,0.5)] transition-all"
+                    className="w-full bg-[rgba(0,0,0,0.3)] border border-border text-starlight focus:outline-none focus:border-violet-500 focus:bg-[rgba(0,0,0,0.5)] transition-all"
                     style={{ padding: "12px 24px 12px 48px", borderRadius: "9999px" }}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -359,7 +359,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                 </div>
               </div>
 
-              <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white ml-6 shrink-0 fm-close-btn">
+              <button onClick={onClose} className="p-2 hover:bg-starlight/10 rounded-full transition-colors text-comet hover:text-starlight ml-6 shrink-0 fm-close-btn">
                 <XMarkIcon width={24} height={24} />
               </button>
             </div>
@@ -367,17 +367,17 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
             {/* Modal Body */}
             <div className="flex flex-1 overflow-hidden relative z-10 fm-modal-body" style={{ gap: "24px" }}>
               {/* Sidebar Tabs */}
-              <div className="w-24 flex flex-col items-center border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] glass-sm fm-sidebar" style={{ padding: "24px 0", gap: "24px", borderRadius: "16px" }}>
+              <div className="w-24 flex flex-col items-center border border-border bg-[rgba(255,255,255,0.02)] glass-sm fm-sidebar" style={{ padding: "24px 0", gap: "24px", borderRadius: "16px" }}>
                 <button
                   onClick={() => { setActiveTab("add"); closeChat(); setSearchQuery(""); setMobileOptionsId(null); }}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${activeTab === "add" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${activeTab === "add" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-comet hover:text-starlight hover:bg-starlight/5 border border-transparent"}`}
                   title="Find Pilots"
                 >
                   <UserPlusIcon width={28} height={28} />
                 </button>
                 <button
                   onClick={() => { setActiveTab("list"); setSearchQuery(""); setMobileOptionsId(null); }}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "list" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "list" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-comet hover:text-starlight hover:bg-starlight/5 border border-transparent"}`}
                   title="Friend List"
                 >
                   <UsersIcon width={28} height={28} />
@@ -387,7 +387,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                 </button>
                 <button
                   onClick={() => { setActiveTab("requests"); closeChat(); setSearchQuery(""); setMobileOptionsId(null); }}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "requests" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "requests" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-comet hover:text-starlight hover:bg-starlight/5 border border-transparent"}`}
                   title="Friend Requests"
                 >
                   <EnvelopeIcon width={28} height={28} />
@@ -398,7 +398,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
               </div>
 
               {/* Main Content Area */}
-              <div className="flex-1 flex overflow-hidden border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.02)] fm-content-wrapper" style={{ borderRadius: "16px" }}>
+              <div className="flex-1 flex overflow-hidden border border-border bg-[rgba(255,255,255,0.02)] fm-content-wrapper" style={{ borderRadius: "16px" }}>
                 {/* Left Section (List) */}
                 <motion.div
                   className={`flex flex-col h-full overflow-y-auto bg-[rgba(0,0,0,0.2)] backdrop-blur-sm fm-list-section ${activeTab === 'list' && activeChatId ? 'fm-list-hidden-on-mobile' : ''}`}
@@ -424,42 +424,42 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         whileHover={user.animationEnabled ? { scale: 1.02, boxShadow: "0 0 15px rgba(139,92,246,0.3)" } : {}}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-white/10 flex items-center justify-center shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-border flex items-center justify-center shrink-0">
                             {p.image ? (
                               <img src={p.image} alt={p.name} fetchPriority="high" className="w-full h-full object-cover" />
                             ) : (
-                              <span className="text-gray-400 font-bold">{(p.name || p.username || "?")[0].toUpperCase()}</span>
+                              <span className="text-comet font-bold">{(p.name || p.username || "?")[0].toUpperCase()}</span>
                             )}
                           </div>
                           <div className="fm-user-text">
-                            <div className="font-semibold text-white flex items-center gap-2">
+                            <div className="font-semibold text-starlight flex items-center gap-2">
                               {p.name || "Pilot"}
                             </div>
-                            <div className="text-sm text-gray-400">@{p.username} {p.callsign && `• ${p.callsign}`}</div>
+                            <div className="text-sm text-comet">@{p.username} {p.callsign && `• ${p.callsign}`}</div>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-2 transition-opacity fm-action-buttons">
                           {p.station?.isPublic && (
-                            <a href={`/station/${p.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
+                            <a href={`/station/${p.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-starlight/5 hover:bg-violet-500/20 text-comet hover:text-violet-400 border border-border hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
                               <GlobeAltIcon width={22} height={22} />
                             </a>
                           )}
                           {p.friendshipStatus === "ACCEPTED" ? (
-                            <button onClick={() => { setActiveTab("list"); openChat(p.id); setActiveChatName(p.name || p.username); }} className="rounded-full bg-white/5 hover:bg-cyan-500/20 text-gray-300 hover:text-cyan-400 border border-white/10 hover:border-cyan-500/50 transition-all" title="Chat" style={{ padding: "10px" }}>
+                            <button onClick={() => { setActiveTab("list"); openChat(p.id); setActiveChatName(p.name || p.username); }} className="rounded-full bg-starlight/5 hover:bg-cyan-500/20 text-comet hover:text-cyan-400 border border-border hover:border-cyan-500/50 transition-all" title="Chat" style={{ padding: "10px" }}>
                               <ChatBubbleOvalLeftEllipsisIcon width={22} height={22} />
                             </button>
                           ) : p.friendshipStatus === "PENDING" ? (
-                            <button disabled className="rounded-full bg-white/5 text-gray-500 text-sm font-medium border border-white/5 cursor-not-allowed flex items-center justify-center transition-all fm-text-btn" style={{ padding: "0 20px", height: "44px" }}>
+                            <button disabled className="rounded-full bg-starlight/5 text-dust text-sm font-medium border border-border cursor-not-allowed flex items-center justify-center transition-all fm-text-btn" style={{ padding: "0 20px", height: "44px" }}>
                               Pending
                             </button>
                           ) : (
-                            <button onClick={() => handleAddFriend(p.id)} className="rounded-full bg-white/5 hover:bg-cyan-500/20 text-gray-300 hover:text-cyan-400 border border-white/10 hover:border-cyan-500/50 transition-all" title="Add Friend" style={{ padding: "10px" }}>
+                            <button onClick={() => handleAddFriend(p.id)} className="rounded-full bg-starlight/5 hover:bg-cyan-500/20 text-comet hover:text-cyan-400 border border-border hover:border-cyan-500/50 transition-all" title="Add Friend" style={{ padding: "10px" }}>
                               <UserPlusIcon width={22} height={22} />
                             </button>
                           )}
                         </div>
-                        <button className="fm-mobile-options-btn text-gray-400 hover:text-white p-2" onClick={() => setMobileOptionsId(prev => prev === p.id ? null : p.id)}>
+                        <button className="fm-mobile-options-btn text-comet hover:text-starlight p-2" onClick={() => setMobileOptionsId(prev => prev === p.id ? null : p.id)}>
                           <EllipsisVerticalIcon width={24} height={24} />
                         </button>
                       </motion.div>
@@ -489,12 +489,12 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                             animate={{ width: activeChatId ? 64 : 48, height: activeChatId ? 64 : 48 }}
                             transition={user.animationEnabled ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
                           >
-                            <div className="w-full h-full rounded-full bg-gray-700 overflow-hidden border border-white/10 flex items-center justify-center relative">
+                            <div className="w-full h-full rounded-full bg-gray-700 overflow-hidden border border-border flex items-center justify-center relative">
                               {f.image ? (
                                 <img src={f.image} alt={f.name} fetchPriority="high" className="w-full h-full object-cover" />
                               ) : (
                                 <motion.span
-                                  className="text-gray-400 font-bold"
+                                  className="text-comet font-bold"
                                   animate={{ fontSize: activeChatId ? 24 : 16 }}
                                 >
                                   {(f.name || f.username || "?")[0].toUpperCase()}
@@ -515,10 +515,10 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                                 transition={{ duration: 0.2 }}
                                 className="fm-user-text"
                               >
-                                <div className="font-semibold text-white flex items-center gap-2">
+                                <div className="font-semibold text-starlight flex items-center gap-2">
                                   {f.name || "Pilot"}
                                 </div>
-                                <div className="text-sm text-gray-400">@{f.username} {f.callsign && `• ${f.callsign}`}</div>
+                                <div className="text-sm text-comet">@{f.username} {f.callsign && `• ${f.callsign}`}</div>
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -526,7 +526,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
 
                         <div className={`flex items-center gap-2 transition-opacity fm-action-buttons ${activeChatId ? "flex-wrap justify-center" : ""}`}>
                           {f.station?.isPublic && (
-                            <a href={`/station/${f.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
+                            <a href={`/station/${f.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-starlight/5 hover:bg-violet-500/20 text-comet hover:text-violet-400 border border-border hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
                               <GlobeAltIcon width={22} height={22} />
                             </a>
                           )}
@@ -539,7 +539,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                                 setActiveChatName(f.name || f.username);
                               }
                             }}
-                            className={`rounded-full border transition-all ${activeChatId === f.id ? "bg-violet-500 text-white border-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.5)]" : "bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border-white/10 hover:border-violet-500/50"}`}
+                            className={`rounded-full border transition-all ${activeChatId === f.id ? "bg-violet-500 text-white border-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.5)]" : "bg-starlight/5 hover:bg-violet-500/20 text-comet hover:text-violet-400 border-border hover:border-violet-500/50"}`}
                             title="Chat"
                             style={{ padding: "10px" }}
                           >
@@ -548,7 +548,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           {!activeChatId && (
                             <button
                               onClick={() => setFriendToRemove({ id: f.id, name: f.name || f.username })}
-                              className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all"
+                              className="rounded-full bg-starlight/5 hover:bg-pink-500/20 text-comet hover:text-pink-400 border border-border hover:border-pink-500/50 transition-all"
                               title="Remove Friend"
                               style={{ padding: "10px" }}
                             >
@@ -557,7 +557,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           )}
                         </div>
                         {!activeChatId && (
-                          <button className="fm-mobile-options-btn text-gray-400 hover:text-white p-2" onClick={() => setMobileOptionsId(prev => prev === f.id ? null : f.id)}>
+                          <button className="fm-mobile-options-btn text-comet hover:text-starlight p-2" onClick={() => setMobileOptionsId(prev => prev === f.id ? null : f.id)}>
                             <EllipsisVerticalIcon width={24} height={24} />
                           </button>
                         )}
@@ -576,25 +576,25 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         whileHover={user.animationEnabled ? { scale: 1.02, boxShadow: "0 0 15px rgba(139,92,246,0.3)" } : {}}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-white/10 flex items-center justify-center shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden relative border border-border flex items-center justify-center shrink-0">
                             {r.image ? (
                               <img src={r.image} alt={r.name} fetchPriority="high" className="w-full h-full object-cover" />
                             ) : (
-                              <span className="text-gray-400 font-bold">{(r.name || r.username || "?")[0].toUpperCase()}</span>
+                              <span className="text-comet font-bold">{(r.name || r.username || "?")[0].toUpperCase()}</span>
                             )}
                           </div>
                           <div className="fm-user-text">
-                            <div className="font-semibold text-white flex items-center gap-2">
+                            <div className="font-semibold text-starlight flex items-center gap-2">
                               {r.name || "Pilot"}
                             </div>
-                            <div className="text-sm text-gray-400">@{r.username} wants to be friends</div>
+                            <div className="text-sm text-comet">@{r.username} wants to be friends</div>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-2 transition-opacity fm-action-buttons">
                           <button
                             onClick={() => handleRejectRequest(r.id, r.friendshipId)}
-                            className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all flex items-center justify-center"
+                            className="rounded-full bg-starlight/5 hover:bg-pink-500/20 text-comet hover:text-pink-400 border border-border hover:border-pink-500/50 transition-all flex items-center justify-center"
                             title="Refuse"
                             style={{ width: "48px", height: "48px" }}
                           >
@@ -608,7 +608,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                             <CheckIcon width={20} height={20} /> Accept
                           </button>
                         </div>
-                        <button className="fm-mobile-options-btn text-gray-400 hover:text-white p-2" onClick={() => setMobileOptionsId(prev => prev === r.id ? null : r.id)}>
+                        <button className="fm-mobile-options-btn text-comet hover:text-starlight p-2" onClick={() => setMobileOptionsId(prev => prev === r.id ? null : r.id)}>
                           <EllipsisVerticalIcon width={24} height={24} />
                         </button>
                       </motion.div>
@@ -619,7 +619,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         key="empty-add-1"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="text-gray-400" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
+                        className="text-comet" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
                       >
                         No pilots found matching "{searchQuery}"
                       </motion.div>
@@ -629,7 +629,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         key="empty-add-2"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="text-gray-500 gap-2" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}
+                        className="text-dust gap-2" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}
                       >
                         <UserPlusIcon width={48} height={48} className="opacity-50 mb-2" />
                         Type at least 2 characters to search for pilots across Orbit Station.
@@ -640,7 +640,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         key="empty-list"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="text-gray-500 gap-2" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}
+                        className="text-dust gap-2" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}
                       >
                         <UsersIcon width={48} height={48} className="opacity-50 mb-2" />
                         Your friend list is empty. Go to "Find Pilots" to connect!
@@ -651,7 +651,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         key="empty-requests"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="text-gray-500 gap-2" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}
+                        className="text-dust gap-2" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}
                       >
                         <EnvelopeIcon width={48} height={48} className="opacity-50 mb-2" />
                         No pending friend requests.
@@ -678,7 +678,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                             <span className="text-violet-300 font-bold">{activeChatName[0]?.toUpperCase()}</span>
                           </div>
                           <div>
-                            <h3 className="font-bold text-white" style={{ fontSize: "16px" }}>{activeChatName}</h3>
+                            <h3 className="font-bold text-starlight" style={{ fontSize: "16px" }}>{activeChatName}</h3>
                             {(() => {
                               const chatFriend = friends.find(f => f.id === activeChatId);
                               const isTyping = typingUsers.some(u => u.id === activeChatId);
@@ -690,10 +690,10 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button onClick={handleClearChat} className="text-gray-400 hover:text-red-400 transition-colors" style={{ padding: "8px" }} title="Clear Chat">
+                          <button onClick={handleClearChat} className="text-comet hover:text-red-400 transition-colors" style={{ padding: "8px" }} title="Clear Chat">
                             <TrashIcon width={20} height={20} />
                           </button>
-                          <button onClick={() => closeChat()} className="text-gray-400 hover:text-white transition-colors" style={{ padding: "8px" }}>
+                          <button onClick={() => closeChat()} className="text-comet hover:text-starlight transition-colors" style={{ padding: "8px" }}>
                             <XMarkIcon width={24} height={24} />
                           </button>
                         </div>
@@ -743,7 +743,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
 
                         {isLoadingChat ? (
                           <div className="flex flex-col items-center justify-center h-full gap-4 opacity-80 mt-10">
-                            <div className="w-10 h-10 border-4 border-white/5 border-t-violet-500 rounded-full animate-spin"></div>
+                            <div className="w-10 h-10 border-4 border-border border-t-violet-500 rounded-full animate-spin"></div>
                             <span className="text-violet-400 text-xs font-bold tracking-[0.2em] uppercase animate-pulse">
                               Decrypting Transmission...
                             </span>
@@ -751,7 +751,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         ) : messages.length === 0 ? (
                           <div className="flex flex-col items-center justify-center h-full gap-2 opacity-50 mt-10">
                             <span className="text-4xl">🛰️</span>
-                            <span className="text-gray-400 text-sm text-center px-4">
+                            <span className="text-comet text-sm text-center px-4">
                               This is the beginning of your transmission history with {activeChatName}.
                             </span>
                           </div>
@@ -778,12 +778,12 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
 
                                 {(msg.type === "COLLAB_INVITE" || msg.type === "OWNERSHIP_TRANSFER_INVITE") && (
                                   <div className="flex flex-col gap-3">
-                                    <div className="text-sm text-white/90 leading-relaxed">
+                                    <div className="text-sm text-starlight/90 leading-relaxed">
                                       <span className="font-semibold text-violet-300">{isMine ? "You" : activeChatName}</span>
                                       {msg.type === "OWNERSHIP_TRANSFER_INVITE" ? (
                                         <>
                                           {isMine ? " want to transfer ownership of sector " : " wants to transfer ownership of sector "}
-                                          <span className="font-bold text-white">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch (e) { return "Unknown Sector"; } })()}"</span>
+                                          <span className="font-bold text-starlight">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch (e) { return "Unknown Sector"; } })()}"</span>
                                           {" to "}
                                           <span className="font-semibold text-violet-300">{isMine ? "them" : "you"}</span>.
                                         </>
@@ -792,7 +792,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                                           {" invited "}
                                           <span className="font-semibold text-violet-300">{isMine ? "them" : "you"}</span>
                                           {" to collaborate on sector "}
-                                          <span className="font-bold text-white">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch (e) { return "Unknown Sector"; } })()}"</span>.
+                                          <span className="font-bold text-starlight">"{(() => { try { return JSON.parse(msg.metadata).sectorName || "Unknown Sector"; } catch (e) { return "Unknown Sector"; } })()}"</span>.
                                         </>
                                       )}
                                     </div>
@@ -814,7 +814,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                                               } else toast.error((res as any).error);
                                             }
                                           }}
-                                          className="flex-1 bg-white/10 hover:bg-pink-500/80 text-white rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
+                                          className="flex-1 bg-starlight/10 hover:bg-pink-500/80 text-starlight rounded-lg flex justify-center items-center gap-2 transition-colors font-medium text-sm"
                                           style={{ padding: "0.75rem 0" }}
                                         >
                                           <XMarkIcon width={18} height={18} /> Reject
@@ -883,12 +883,12 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           <input
                             type="text"
                             placeholder="Transmit message..."
-                            className="w-full text-white focus:outline-none transition-all"
+                            className="w-full text-starlight focus:outline-none transition-all"
                             style={{ backgroundColor: "rgba(0, 0, 0, 0.2)", border: "1px solid rgba(139, 92, 246, 0.3)", padding: "14px 60px 14px 24px", borderRadius: "9999px" }}
                             value={messageInput}
                             onChange={handleMessageInputChange}
                           />
-                          <button type="submit" disabled={!messageInput.trim()} className="absolute disabled:bg-gray-600 disabled:text-gray-400 transition-colors" style={{ right: "8px", top: "50%", transform: "translateY(-50%)", padding: "10px", borderRadius: "9999px", backgroundColor: messageInput.trim() ? "rgba(139, 92, 246, 1)" : "rgba(75, 85, 99, 1)", color: "white" }}>
+                          <button type="submit" disabled={!messageInput.trim()} className="absolute disabled:bg-gray-600 disabled:text-comet transition-colors" style={{ right: "8px", top: "50%", transform: "translateY(-50%)", padding: "10px", borderRadius: "9999px", backgroundColor: messageInput.trim() ? "rgba(139, 92, 246, 1)" : "rgba(75, 85, 99, 1)", color: "white" }}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                               <path d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z" />
                             </svg>
@@ -929,7 +929,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                     </div>
                     <h3 style={{ color: "white", fontWeight: "bold", fontSize: "1.125rem", margin: 0 }}>Remove Friend?</h3>
                     <p style={{ color: "#9ca3af", fontSize: "0.875rem", margin: 0, lineHeight: 1.5 }}>
-                      Are you sure you want to remove <span className="text-white font-semibold">{friendToRemove.name}</span> from your friends list?
+                      Are you sure you want to remove <span className="text-starlight font-semibold">{friendToRemove.name}</span> from your friends list?
                     </p>
                     <div style={{ display: "flex", width: "100%", gap: "12px", marginTop: "8px" }}>
                       <button style={{ flex: 1, padding: "10px 16px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", color: "white", fontWeight: 500, border: "none", cursor: "pointer", transition: "background 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"} onMouseOut={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"} onClick={() => setFriendToRemove(null)}>Cancel</button>

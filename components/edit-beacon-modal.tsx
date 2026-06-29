@@ -214,7 +214,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
                       }).map((s) => (
                         <div
                           key={s.id}
-                          className="dropdown-option-btn hover:bg-white/5"
+                          className="dropdown-option-btn hover:bg-starlight/5"
                           style={{ padding: "0.6rem 1rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
                           onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
                         >
