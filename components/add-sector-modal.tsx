@@ -185,7 +185,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                   className={"icon-option" + (icon === em ? " selected" : "")}
                   onClick={() => setIcon(em)}
                   aria-label={em}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "var(--item-bg)", border: "1px solid var(--item-border)", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
                 >
                   <DynamicIcon name={em} style={{ color: icon === em ? "var(--color-primary)" : "var(--color-starlight)" }} />
                 </button>
@@ -425,6 +425,9 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
     </div>
   );
 }
+
+
+
 
 
 

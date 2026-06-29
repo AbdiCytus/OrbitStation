@@ -222,9 +222,9 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         className={"icon-option" + (icon === ic ? " selected" : "")}
                         onClick={() => setIcon(ic)}
                         title={ic}
-                        style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "var(--item-bg)", border: "1px solid var(--item-border)", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
                       >
-                        <DynamicIcon name={ic} style={{ color: icon === ic ? "var(--color-primary)" : "var(--color-starlight)" }} />
+                        <DynamicIcon name={ic} style={{ color: "var(--color-starlight)" }} />
                       </button>
                     ))}
                   </div>
@@ -276,7 +276,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                   {(isCollabSector || hasPendingInvites || inviteEnabled) ? (
                     <div style={{ padding: "0.75rem", background: "rgba(139, 92, 246, 0.1)", border: "1px solid rgba(139, 92, 246, 0.2)", borderRadius: "8px", display: "flex", gap: "0.5rem", alignItems: "center" }}>
                       <DynamicIcon name="LockClosedIcon" width={20} height={20} style={{ color: "var(--color-primary)" }} />
-                      <span style={{ fontSize: "0.85rem", color: "#e2e8f0" }}>Collab sectors are permanently Private</span>
+                      <span style={{ fontSize: "0.85rem", color: "var(--color-starlight)" }}>Collab sectors are permanently Private</span>
                     </div>
                   ) : (
                     <>
@@ -313,7 +313,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         <button
                           type="button"
                           className="btn btn-secondary"
-                          style={{ flex: 1, justifyContent: "center", borderStyle: isMobile ? "dashed" : "none", background: !isMobile && rightPanelMode === "members" ? "rgba(139, 92, 246, 0.2)" : "transparent", color: !isMobile && rightPanelMode === "members" ? "white" : undefined }}
+                          style={{ flex: 1, justifyContent: "center", borderStyle: isMobile ? "dashed" : "none", background: !isMobile && rightPanelMode === "members" ? "var(--sector-active-bg)" : "transparent", color: !isMobile && rightPanelMode === "members" ? "var(--sector-active-text)" : undefined }}
                           onClick={() => {
                             const newMode = rightPanelMode === "members" ? null : "members";
                             setRightPanelMode(newMode);
@@ -326,7 +326,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                       <button
                         type="button"
                         className="btn btn-secondary"
-                        style={{ flex: 1, justifyContent: "center", borderStyle: isMobile ? "dashed" : "none", background: !isMobile && rightPanelMode === "invite" ? "rgba(139, 92, 246, 0.2)" : "transparent", color: !isMobile && rightPanelMode === "invite" ? "white" : undefined }}
+                        style={{ flex: 1, justifyContent: "center", borderStyle: isMobile ? "dashed" : "none", background: !isMobile && rightPanelMode === "invite" ? "var(--sector-active-bg)" : "transparent", color: !isMobile && rightPanelMode === "invite" ? "var(--sector-active-text)" : undefined }}
                         onClick={() => {
                           const newMode = rightPanelMode === "invite" ? null : "invite";
                           setRightPanelMode(newMode);
@@ -341,8 +341,8 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                   {currentUserId === sectorOwner?.id && (
                     <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem", background: "var(--item-bg)", borderRadius: "8px", border: "1px solid var(--item-border)" }}>
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                        <span style={{ fontSize: "0.9rem", color: "#e2e8f0", fontWeight: 500 }}>QR & Link Join</span>
-                        <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Allow users to join via invite link or QR code</span>
+                        <span style={{ fontSize: "0.9rem", color: "var(--color-starlight)", fontWeight: 500 }}>QR & Link Join</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--color-comet)" }}>Allow users to join via invite link or QR code</span>
                       </div>
                       <button type="button" onClick={() => setInviteEnabled(!inviteEnabled)} style={{ width: "40px", height: "24px", borderRadius: "12px", background: inviteEnabled ? "var(--color-primary)" : "var(--item-border)", position: "relative", cursor: "pointer", border: "none", transition: "background 0.2s" }}>
                         <div style={{ width: "20px", height: "20px", borderRadius: "10px", background: "white", position: "absolute", top: "2px", left: inviteEnabled ? "18px" : "2px", transition: "left 0.2s" }} />
@@ -410,7 +410,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <h3 style={{ fontSize: "1rem", fontWeight: 600, color: "var(--color-starlight)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                         {rightPanelMode === "members" ? (
-                          <>Members <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span></>
+                          <>Members <span className="text-xs rounded-full border flex items-center justify-center shrink-0" style={{ background: "var(--sector-active-bg)", borderColor: "var(--sector-active-border)", color: "var(--color-primary)", padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span></>
                         ) : "Invite Friends"}
                       </h3>
                     </div>
@@ -601,7 +601,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                 <div className="modal-header" style={{ paddingBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
                   <h3 className="modal-title flex items-center gap-2" style={{ fontSize: "1.1rem" }}>
                     {rightPanelMode === "members" ? (
-                      <>Members <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span></>
+                      <>Members <span className="text-xs rounded-full border flex items-center justify-center shrink-0" style={{ background: "var(--sector-active-bg)", borderColor: "var(--sector-active-border)", color: "var(--color-primary)", padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span></>
                     ) : "Invite Friends"}
                   </h3>
                   <button className="btn-icon modal-close" style={{ display: isMobile ? "flex" : "none" }} onClick={() => setRightPanelMode(null)} aria-label="Close">✕</button>
@@ -633,7 +633,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                                 {sectorOwner.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                               </p>
                             </div>
-                            <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest">Owner</span>
+                            <span className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-widest">Owner</span>
                           </motion.div>
                         )}
 
@@ -865,5 +865,8 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
     </div>
   );
 }
+
+
+
 
 

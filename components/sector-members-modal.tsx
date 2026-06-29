@@ -69,7 +69,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
         >        <div className="modal-header" style={{ padding: "1.5rem 1.5rem 1rem 1.5rem", borderBottom: "1px solid var(--glass-border)", marginBottom: "1rem" }}>
             <h2 className="modal-title flex items-center gap-2" style={{ fontSize: "1.1rem" }}>
               Members of {sector.name}
-              <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span>
+              <span className="text-xs rounded-full border flex items-center justify-center shrink-0" style={{ background: "var(--sector-active-bg)", borderColor: "var(--sector-active-border)", color: "var(--color-primary)", padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span>
             </h2>
             <button className="btn-icon modal-close" onClick={handleClose} aria-label="Close" style={{ right: "1.5rem", top: "1.5rem" }}>✕</button>
           </div>
@@ -96,12 +96,12 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                       {sectorOwner.name || sectorOwner.username}
                       {sectorOwner.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                     </p>
-                    <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "var(--color-amber-glow)" }}>Owner</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "var(--color-primary)" }}>Owner</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
                   {(sectorOwner.isPublic || sectorOwner.station?.isPublic) && sectorOwner.username && (
-                    <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-comet hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
+                    <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-comet hover:text-[var(--color-primary)] rounded-full hover:bg-[var(--sector-active-bg)] transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
@@ -139,7 +139,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                 </div>
                 <div className="flex items-center gap-1">
                   {(c.user as any).station?.isPublic && c.user.username && (
-                    <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-comet hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
+                    <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-comet hover:text-[var(--color-primary)] rounded-full hover:bg-[var(--sector-active-bg)] transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
@@ -164,4 +164,5 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
     </div>
   );
 }
+
 
