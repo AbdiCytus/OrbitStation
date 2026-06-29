@@ -344,8 +344,8 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         <span style={{ fontSize: "0.9rem", color: "var(--color-starlight)", fontWeight: 500 }}>QR & Link Join</span>
                         <span style={{ fontSize: "0.75rem", color: "var(--color-comet)" }}>Allow users to join via invite link or QR code</span>
                       </div>
-                      <button type="button" onClick={() => setInviteEnabled(!inviteEnabled)} style={{ width: "40px", height: "24px", borderRadius: "12px", background: inviteEnabled ? "var(--color-primary)" : "var(--item-border)", position: "relative", cursor: "pointer", border: "none", transition: "background 0.2s" }}>
-                        <div style={{ width: "20px", height: "20px", borderRadius: "10px", background: "var(--nav-bg)", position: "absolute", top: "2px", left: inviteEnabled ? "18px" : "2px", transition: "left 0.2s" }} />
+                      <button type="button" onClick={() => setInviteEnabled(!inviteEnabled)} style={{ width: "40px", height: "24px", borderRadius: "12px", background: inviteEnabled ? "var(--color-primary)" : "var(--toggle-inactive)", position: "relative", cursor: "pointer", border: "none", transition: "background 0.2s" }}>
+                        <div style={{ width: "20px", height: "20px", borderRadius: "10px", background: "var(--toggle-knob)", position: "absolute", top: "2px", left: inviteEnabled ? "18px" : "2px", transition: "left 0.2s" }} />
                       </button>
                     </div>
                   )}
@@ -865,6 +865,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
     </div>
   );
 }
+
 
 
 

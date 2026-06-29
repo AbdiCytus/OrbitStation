@@ -142,6 +142,8 @@
   --item-border: transparent;
   --glass-bg-hover: rgba(248, 250, 252, 0.8);
   --glass-border: rgba(15, 23, 42, 0.1);
+  --toggle-inactive: #cbd5e1;
+  --toggle-knob: white;
   
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--glass-border);
@@ -186,6 +188,8 @@
   --item-border: transparent;
   --glass-bg-hover: rgba(24, 24, 27, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
+  --toggle-inactive: #3f3f46;
+  --toggle-knob: var(--nav-glass-bg);
   --color-border: rgba(255, 255, 255, 0.08);
   
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5);
