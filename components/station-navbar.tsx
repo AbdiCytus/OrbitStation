@@ -4,7 +4,8 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon, Bars3Icon, ChartBarIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon, Bars3Icon, ChartBarIcon, GlobeAltIcon, SunIcon, MoonIcon, SparklesIcon, SwatchIcon } from "@heroicons/react/24/outline";
+import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { searchPilots } from "@/lib/actions";
 
@@ -34,6 +35,8 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -313,6 +316,44 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                   >
                     <div className="navbar-menu-user">
                       <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
+                    </div>
+                    <hr className="divider" />
+                    
+                    {/* Theme Switcher */}
+                    <div style={{ position: "relative" }}>
+                      <button
+                        className="navbar-menu-item"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setThemeMenuOpen(!themeMenuOpen);
+                        }}
+                        style={{ display: "flex", justifyContent: "space-between", width: "100%" }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          <SwatchIcon width={18} height={18} /> Theme
+                        </div>
+                        <span style={{ fontSize: "0.75rem", color: "#a78bfa", textTransform: "capitalize" }}>{theme || "space"}</span>
+                      </button>
+                      <AnimatePresence>
+                        {themeMenuOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            style={{ overflow: "hidden", background: "rgba(0,0,0,0.2)", borderRadius: "8px", margin: "0.25rem 0.5rem", padding: "0.25rem 0" }}
+                          >
+                            <button className="navbar-menu-item" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem", width: "100%" }} onClick={() => { setTheme("space"); setThemeMenuOpen(false); }}>
+                              <SparklesIcon width={14} height={14} /> Space (Galaxy)
+                            </button>
+                            <button className="navbar-menu-item" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem", width: "100%" }} onClick={() => { setTheme("light"); setThemeMenuOpen(false); }}>
+                              <SunIcon width={14} height={14} /> Light (Minimal)
+                            </button>
+                            <button className="navbar-menu-item" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem", width: "100%" }} onClick={() => { setTheme("dark"); setThemeMenuOpen(false); }}>
+                              <MoonIcon width={14} height={14} /> Dark (Matte)
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                     <hr className="divider" />
                     {pathname !== "/station" && (

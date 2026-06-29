@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getMyProfile } from "@/lib/queries";
 import SettingsClient from "./settings-client";
 import StationNavbar from "@/components/station-navbar";
-import SpaceBackground from "@/components/space-background";
+import DynamicBackground from "@/components/dynamic-background";
 import StaticStarfield from "@/components/static-starfield";
 import type { Metadata } from "next";
 
@@ -47,7 +47,7 @@ export default async function SettingsPage() {
           <div className="cosmic-dust"></div>
         </div>
       ) : profile.animationEnabled ? (
-        <SpaceBackground key="on" variant="settings" animEnabled={true} />
+        <DynamicBackground key="on" variant="settings" animEnabled={true} />
       ) : (
         <StaticStarfield seed={42} />
       )}

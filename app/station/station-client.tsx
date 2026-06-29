@@ -8,6 +8,7 @@ import {
   useEffect,
   useRef,
 } from "react";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import type { StationWithSectors, SectorWithBeacons, Beacon } from "@/types";
 import BeaconCard from "@/components/beacon-card";
@@ -20,7 +21,7 @@ import TagManagementModal from "@/components/tag-management-modal";
 import SectorMembersModal from "@/components/sector-members-modal";
 import FriendsModal from "@/components/friends-modal";
 import StationNavbar from "@/components/station-navbar";
-import SpaceBackground from "@/components/space-background";
+import DynamicBackground from "@/components/dynamic-background";
 import StaticStarfield from "@/components/static-starfield";
 import { deleteSector, reorderSectors } from "@/lib/actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
@@ -73,6 +74,9 @@ export default function StationClient({
   initialCollabSectors = [],
   user,
 }: Props) {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+  
   const [station, setStation] = useState(initialStation);
   const [collabSectors, setCollabSectors] = useState(initialCollabSectors);
   const [activeSectorId, setActiveSectorId] = useState<string | "all">("all");
@@ -915,7 +919,7 @@ export default function StationClient({
           <div className="cosmic-dust"></div>
         </div>
       ) : animEnabled ? (
-        <SpaceBackground
+        <DynamicBackground
           key="on"
           sector={activeSectorId}
           sectorColor={activeSector?.color}
@@ -943,6 +947,8 @@ export default function StationClient({
         />
       )}
 
+
+
       {/* Fun fact overlay */}
       {isExiting && user.animationEnabled && (
         <div
@@ -961,7 +967,7 @@ export default function StationClient({
               return "0.8s";
             })(),
           }}>
-          <p className="fun-fact-text">
+          <p className="fun-fact-text" style={isLight ? { color: "rgba(0,0,0,0.8)", textShadow: "0 0 10px rgba(255,255,255,1)" } : undefined}>
             <SparklesIcon
               width={20}
               height={20}

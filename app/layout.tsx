@@ -46,6 +46,7 @@ import { Toaster } from "sonner";
 import PwaRegister from "@/components/pwa-register";
 
 import { cookies } from "next/headers";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default async function RootLayout({
   children,
@@ -67,7 +68,8 @@ export default async function RootLayout({
         />
       </head>
       <body className={!isAnim ? "no-loading-anim" : ""}>
-        <PwaRegister />
+        <ThemeProvider attribute="data-theme" defaultTheme="space" enableSystem={false}>
+          <PwaRegister />
         <MouseTrail />
         <Toaster 
           theme="dark" 
@@ -93,7 +95,8 @@ export default async function RootLayout({
             className: "font-sans",
           }}
         />
-        {children}
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
