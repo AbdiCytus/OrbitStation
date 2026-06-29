@@ -274,7 +274,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Visibility</label>
                   {(isCollabSector || hasPendingInvites || inviteEnabled) ? (
-                    <div style={{ padding: "0.75rem", background: "rgba(139, 92, 246, 0.1)", border: "1px solid rgba(139, 92, 246, 0.2)", borderRadius: "8px", display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                    <div style={{ padding: "0.75rem", background: "var(--sector-active-bg)", border: "1px solid var(--sector-active-border)", borderRadius: "8px", display: "flex", gap: "0.5rem", alignItems: "center" }}>
                       <DynamicIcon name="LockClosedIcon" width={20} height={20} style={{ color: "var(--color-primary)" }} />
                       <span style={{ fontSize: "0.85rem", color: "var(--color-starlight)" }}>Collab sectors are permanently Private</span>
                     </div>
@@ -345,7 +345,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         <span style={{ fontSize: "0.75rem", color: "var(--color-comet)" }}>Allow users to join via invite link or QR code</span>
                       </div>
                       <button type="button" onClick={() => setInviteEnabled(!inviteEnabled)} style={{ width: "40px", height: "24px", borderRadius: "12px", background: inviteEnabled ? "var(--color-primary)" : "var(--item-border)", position: "relative", cursor: "pointer", border: "none", transition: "background 0.2s" }}>
-                        <div style={{ width: "20px", height: "20px", borderRadius: "10px", background: "white", position: "absolute", top: "2px", left: inviteEnabled ? "18px" : "2px", transition: "left 0.2s" }} />
+                        <div style={{ width: "20px", height: "20px", borderRadius: "10px", background: "var(--nav-bg)", position: "absolute", top: "2px", left: inviteEnabled ? "18px" : "2px", transition: "left 0.2s" }} />
                       </button>
                     </div>
                   )}
