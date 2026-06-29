@@ -16,6 +16,7 @@ import AddSectorModal from "@/components/add-sector-modal";
 import EditSectorModal from "@/components/edit-sector-modal";
 import EditBeaconModal from "@/components/edit-beacon-modal";
 import BeaconDetailModal from "@/components/beacon-detail-modal";
+import TagManagementModal from "@/components/tag-management-modal";
 import SectorMembersModal from "@/components/sector-members-modal";
 import FriendsModal from "@/components/friends-modal";
 import StationNavbar from "@/components/station-navbar";
@@ -42,6 +43,7 @@ import {
   ArrowPathIcon,
   EllipsisVerticalIcon,
   ChatBubbleOvalLeftEllipsisIcon,
+  TagIcon,
 } from "@heroicons/react/24/outline";
 import GroupChatModal from "@/components/group-chat-modal";
 import { motion, AnimatePresence } from "framer-motion";
@@ -219,13 +221,14 @@ export default function StationClient({
     "date" | "name" | "sector" | "creator" | "visits"
   >("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterExiting, setIsFilterExiting] = useState(false);
   const [isFilterEntering, setIsFilterEntering] = useState(false);
   const [visibleLimit, setVisibleLimit] = useState(12);
 
   useEffect(() => {
     setVisibleLimit(12);
-  }, [displaySectorId, searchQuery, filterVisibility, sortBy, sortDir]);
+  }, [displaySectorId, searchQuery, filterVisibility, sortBy, sortDir, selectedTags]);
 
   const applyFilterSort = (updateFn: () => void) => {
     if (!user.animationEnabled) {
@@ -249,11 +252,12 @@ export default function StationClient({
     }, 300);
   };
 
-  const [openMenu, setOpenMenu] = useState<"filter" | "sort" | null>(null);
+  const [openMenu, setOpenMenu] = useState<"filter" | "sort" | "tags" | null>(null);
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
   const [editingBeacon, setEditingBeacon] = useState<Beacon | null>(null);
   const [showAddBeacon, setShowAddBeacon] = useState(false);
   const [showAddSector, setShowAddSector] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showGroupChat, setShowGroupChat] = useState(false);
   // Track which private chat is open so useNotifications can suppress its toast
@@ -433,6 +437,12 @@ export default function StationClient({
       beacons = beacons.filter((b) => !b._isPublic);
     }
 
+    if (selectedTags.length > 0) {
+      beacons = beacons.filter((b) =>
+        b.tags?.some((bt: any) => selectedTags.includes(bt.tagId))
+      );
+    }
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       beacons = beacons.filter(
@@ -479,7 +489,7 @@ export default function StationClient({
     }
 
     return beacons;
-  }, [baseBeacons, searchQuery, filterVisibility, sortBy, sortDir]);
+  }, [baseBeacons, searchQuery, filterVisibility, sortBy, sortDir, selectedTags]);
 
   const [cols, setCols] = useState(6);
   useEffect(() => {
@@ -1308,6 +1318,25 @@ export default function StationClient({
                           className={isRefreshing ? "animate-spin" : ""}
                         />
                       </button>
+                      {isCurrentSectorAdminOrOwner && displaySectorId !== "all" && (
+                        <button
+                          className="btn-icon"
+                          style={{
+                            background: "rgba(255, 255, 255, 0.05)",
+                            border: "1px solid rgba(255, 255, 255, 0.1)",
+                            borderRadius: "8px",
+                            width: "38px",
+                            height: "38px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                          onClick={() => setShowTagModal(true)}
+                          title="Manage Tags">
+                          <TagIcon width={18} height={18} />
+                        </button>
+                      )}
                       {isCurrentSectorAdminOrOwner && (
                         <button
                           id="btn-add-beacon"
@@ -1377,6 +1406,24 @@ export default function StationClient({
                         className={isRefreshing ? "animate-spin" : ""}
                       />
                     </button>
+                    {isCurrentSectorAdminOrOwner && displaySectorId !== "all" && (
+                        <button
+                          className="flex shrink-0 items-center justify-center"
+                          style={{
+                            background: "rgba(255, 255, 255, 0.05)",
+                            borderRadius: "8px",
+                            height: "38px",
+                            width: "38px",
+                            color: "var(--color-comet)",
+                            transition: "background 0.15s",
+                          }}
+                          onClick={() => {
+                            setShowTagModal(true);
+                            setMobileMenuOpen(false);
+                          }}>
+                          <TagIcon width={18} height={18} />
+                        </button>
+                    )}
                     {/* Logika Akses: Hanya Owner atau Admin yang bisa edit/tambah */}
                     {displaySectorId !== "all" && activeSector && activeSector.stationId === station?.id && (
                       <button
@@ -1599,6 +1646,77 @@ export default function StationClient({
                                     height={14}
                                     style={{ color: "#a78bfa" }}
                                   />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {displaySectorId !== "all" && (allSectors.find(s => s.id === displaySectorId)?.tags?.length ?? 0) > 0 && (
+                    <div className="staggered-item">
+                      <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
+                        <button
+                          className="custom-dropdown-btn"
+                          style={{
+                            background: selectedTags.length > 0 ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)",
+                            border: `1px solid ${selectedTags.length > 0 ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`,
+                            color: selectedTags.length > 0 ? "#fff" : "#a1a1aa",
+                          }}
+                          onClick={() => setOpenMenu(openMenu === "tags" ? null : "tags")}
+                          title="Filter by Tags">
+                          <TagIcon width={18} height={18} />
+                        </button>
+                        {openMenu === "tags" && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "calc(100% + 0.5rem)",
+                              left: 0,
+                              background: "#1a1a2e",
+                              border: "1px solid rgba(255,255,255,0.1)",
+                              borderRadius: "8px",
+                              padding: "0.5rem",
+                              zIndex: 50,
+                              minWidth: "180px",
+                              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "0.25rem",
+                            }}>
+                            {allSectors.find(s => s.id === displaySectorId)?.tags?.map((opt) => (
+                              <button
+                                key={opt.id}
+                                className="dropdown-option-btn"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  padding: "0.5rem",
+                                  background: selectedTags.includes(opt.id) ? "rgba(139, 92, 246, 0.2)" : "transparent",
+                                  color: "#fff",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                  textAlign: "left",
+                                  fontSize: "0.85rem",
+                                  transition: "all 0.2s",
+                                }}
+                                onClick={() => {
+                                  applyFilterSort(() => {
+                                    setSelectedTags(prev => 
+                                      prev.includes(opt.id) 
+                                        ? prev.filter(id => id !== opt.id) 
+                                        : [...prev, opt.id]
+                                    );
+                                  });
+                                  // keep menu open for multi-select
+                                }}>
+                                {opt.name}
+                                {selectedTags.includes(opt.id) && (
+                                  <CheckIcon width={14} height={14} style={{ color: "#a78bfa" }} />
                                 )}
                               </button>
                             ))}
@@ -2035,6 +2153,14 @@ export default function StationClient({
           onUpdated={handleBeaconUpdated}
           onDeleted={handleBeaconDeleted}
           canEdit={isCurrentSectorAdminOrOwner}
+        />
+      )}
+
+      {showTagModal && displaySectorId !== "all" && (
+        <TagManagementModal
+          isOpen={showTagModal}
+          onClose={() => setShowTagModal(false)}
+          sector={allSectors.find(s => s.id === displaySectorId)!}
         />
       )}
 

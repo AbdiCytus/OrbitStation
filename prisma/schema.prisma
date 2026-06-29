@@ -152,6 +152,7 @@ model Sector {
   typingIndicators TypingIndicator[]
   blindedMembers BlindedMember[]
   invites        SectorInvite[]
+  tags           Tag[]
 }
 
 /// Shortcut web, disebut "Suar" (Beacon)
@@ -172,6 +173,7 @@ model Beacon {
   creatorId   String?
   creator     User?    @relation(fields: [creatorId], references: [id])
   visits      Int      @default(0)
+  tags        BeaconTag[]
 }
 
 // ============================================================
@@ -342,3 +344,33 @@ model OAuthConsent {
 
   @@unique([userId, clientId])
 }
+
+// ============================================================
+// TAGGING MODELS
+// ============================================================
+
+model Tag {
+  id        String   @id @default(cuid())
+  sectorId  String
+  name      String
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sector    Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  beacons   BeaconTag[]
+
+  @@unique([sectorId, name])
+}
+
+model BeaconTag {
+  beaconId String
+  tagId    String
+  assignedAt DateTime @default(now())
+
+  beacon   Beacon @relation(fields: [beaconId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([beaconId, tagId])
+}
+

@@ -1975,3 +1975,108 @@ export async function getPersonalToken() {
 
   return { token };
 }
+
+// ============================================================
+// TAG ACTIONS
+// ============================================================
+
+export async function createTag(sectorId: string, name: string) {
+  const user = await requireAuth();
+  if (name.trim().length === 0 || name.trim().length > 20) {
+    return { error: "Tag name must be between 1 and 20 characters" };
+  }
+  
+  const isOwner = await db.sector.findFirst({ where: { id: sectorId, station: { userId: user.id } } });
+  const collab = await db.sectorCollaborator.findUnique({ where: { sectorId_userId: { sectorId, userId: user.id } } });
+  
+  if (!isOwner && (!collab || collab.role !== "ADMIN")) {
+    return { error: "Unauthorized. Only Owner and Admins can manage tags." };
+  }
+
+  try {
+    const tag = await db.tag.create({
+      data: {
+        sectorId,
+        name: name.trim(),
+      }
+    });
+    revalidatePath("/station");
+    return { data: tag };
+  } catch (err: any) {
+    if (err.code === "P2002") {
+      return { error: "Tag already exists in this sector" };
+    }
+    return { error: "Failed to create tag" };
+  }
+}
+
+export async function updateTag(tagId: string, name: string) {
+  const user = await requireAuth();
+  if (name.trim().length === 0 || name.trim().length > 20) {
+    return { error: "Tag name must be between 1 and 20 characters" };
+  }
+  
+  const tag = await db.tag.findUnique({ where: { id: tagId }, include: { sector: { include: { station: true, collaborators: true } } } });
+  if (!tag) return { error: "Tag not found" };
+
+  const isOwner = tag.sector.station.userId === user.id;
+  const collab = tag.sector.collaborators.find(c => c.userId === user.id);
+  if (!isOwner && (!collab || collab.role !== "ADMIN")) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const updated = await db.tag.update({
+      where: { id: tagId },
+      data: { name: name.trim() }
+    });
+    revalidatePath("/station");
+    return { data: updated };
+  } catch (err: any) {
+    if (err.code === "P2002") return { error: "Tag name already in use" };
+    return { error: "Failed to update tag" };
+  }
+}
+
+export async function deleteTag(tagId: string) {
+  const user = await requireAuth();
+  const tag = await db.tag.findUnique({ where: { id: tagId }, include: { sector: { include: { station: true, collaborators: true } } } });
+  if (!tag) return { error: "Tag not found" };
+
+  const isOwner = tag.sector.station.userId === user.id;
+  const collab = tag.sector.collaborators.find(c => c.userId === user.id);
+  if (!isOwner && (!collab || collab.role !== "ADMIN")) {
+    return { error: "Unauthorized" };
+  }
+
+  await db.tag.delete({ where: { id: tagId } });
+  revalidatePath("/station");
+  return { success: true };
+}
+
+export async function assignTagsToBeacon(beaconId: string, tagIds: string[]) {
+  const user = await requireAuth();
+  const beacon = await db.beacon.findUnique({ where: { id: beaconId }, include: { sector: { include: { station: true, collaborators: true } } } });
+  if (!beacon) return { error: "Beacon not found" };
+
+  const isOwner = beacon.sector.station.userId === user.id;
+  const collab = beacon.sector.collaborators.find(c => c.userId === user.id);
+  if (!isOwner && (!collab || collab.role !== "ADMIN")) {
+    return { error: "Unauthorized" };
+  }
+  
+  if (tagIds.length > 5) {
+    return { error: "Maximum 5 tags allowed per beacon" };
+  }
+
+  await db.beaconTag.deleteMany({ where: { beaconId } });
+  
+  if (tagIds.length > 0) {
+    await db.beaconTag.createMany({
+      data: tagIds.map(tagId => ({ beaconId, tagId }))
+    });
+  }
+
+  revalidatePath("/station");
+  return { success: true };
+}

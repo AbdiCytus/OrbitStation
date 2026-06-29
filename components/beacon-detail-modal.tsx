@@ -15,13 +15,14 @@ import {
   InformationCircleIcon,
   XMarkIcon,
   RocketLaunchIcon,
-  CameraIcon
+  CameraIcon,
+  TagIcon
 } from "@heroicons/react/24/outline";
 import { toPng } from "html-to-image";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
 type Props = {
-  beacon: Beacon & { _creator?: { name: string | null; image: string | null } | null };
+  beacon: Beacon & { _creator?: { name: string | null; image: string | null } | null, tags?: { tag: { id: string, name: string } }[] };
   sector: SectorWithBeacons | null;
   onClose: () => void;
   onDeleted?: (id: string) => void;
@@ -405,6 +406,31 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
 
             {/* Title */}
             <h2 className="hsr-title">{beacon.title}</h2>
+
+            {/* Tags */}
+            {beacon.tags && beacon.tags.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "1rem" }}>
+                {beacon.tags.map(bt => (
+                  <span
+                    key={bt.tag.id}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                      fontSize: "0.75rem",
+                      padding: "0.25rem 0.6rem",
+                      borderRadius: "9999px",
+                      background: "rgba(139, 92, 246, 0.15)",
+                      color: "#c4b5fd",
+                      border: "1px solid rgba(139, 92, 246, 0.3)",
+                    }}
+                  >
+                    <TagIcon width={12} height={12} />
+                    {bt.tag.name}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Description */}
             {beacon.description && (

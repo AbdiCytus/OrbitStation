@@ -8,12 +8,14 @@ import type {
   Station,
   Sector,
   Beacon,
+  Tag,
+  BeaconTag,
 } from "@prisma/client";
 
 // ============================================================
 // RE-EXPORT PRISMA TYPES
 // ============================================================
-export type { User, Station, Sector, Beacon };
+export type { User, Station, Sector, Beacon, Tag, BeaconTag };
 
 // ============================================================
 // EXTENDED / COMPOSED TYPES
@@ -26,7 +28,8 @@ export type BeaconWithSector = Beacon & {
 
 /** Sektor dengan semua Beacon di dalamnya */
 export type SectorWithBeacons = Sector & {
-  beacons: Beacon[];
+  beacons: (Beacon & { tags?: (BeaconTag & { tag: Tag })[] })[];
+  tags?: Tag[];
   collaborators?: { user: { id: string; name: string | null; image: string | null; username?: string | null } }[];
 };
 
