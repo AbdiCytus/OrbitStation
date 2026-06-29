@@ -93,7 +93,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
 
       const emptyPixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
       const dataUrl = await toPng(clone, {
-        backgroundColor: "#0f0f16",
+        backgroundColor: "var(--color-cosmos)",
         pixelRatio: 2,
         imagePlaceholder: emptyPixel,
         style: {
@@ -245,11 +245,11 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
         {/* ── TOP ACTION BAR ──────────────────────────────── */}
 
         {showDeleteConfirm && (
-          <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "rgba(11, 12, 16, 0.9)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }}>
-            <div style={{ padding: "2rem", background: "#1f1f2e", borderRadius: "1rem", border: "1px solid rgba(239, 68, 68, 0.4)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+          <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "var(--nav-glass-bg)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }}>
+            <div style={{ padding: "2rem", background: "var(--glass-bg)", borderRadius: "1rem", border: "1px solid rgba(239, 68, 68, 0.4)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
               <TrashIcon width={32} height={32} style={{ color: "#ef4444", margin: "0 auto 1rem" }} />
-              <h3 style={{ color: "#fff", fontSize: "1.2rem", marginBottom: "0.5rem" }}>Delete Beacon?</h3>
-              <p style={{ color: "#a1a1aa", fontSize: "0.9rem", marginBottom: "1.5rem" }}>Are you sure you want to delete <strong style={{ color: "#ef4444" }}>{beacon.title}</strong>? This action cannot be undone.</p>
+              <h3 style={{ color: "var(--color-starlight)", fontSize: "1.2rem", marginBottom: "0.5rem" }}>Delete Beacon?</h3>
+              <p style={{ color: "var(--color-comet)", fontSize: "0.9rem", marginBottom: "1.5rem" }}>Are you sure you want to delete <strong style={{ color: "#ef4444" }}>{beacon.title}</strong>? This action cannot be undone.</p>
               <div style={{ display: "flex", gap: "1rem" }}>
                 <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
                 <button type="button" className="btn btn-danger" style={{ flex: 1, background: "#ef4444", color: "white" }} onClick={executeDelete}>Delete</button>
@@ -280,11 +280,11 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                   <>
                     <style>{`@media (max-width: 639px) { .hsr-subroute-label { display: none !important; } }`}</style>
                     <div className="hsr-subroute-label" style={{
-                      background: "rgba(255, 255, 255, 0.1)",
-                      padding: "0.2rem 0.5rem",
-                      borderRadius: "6px",
-                      fontSize: "0.75rem",
-                      color: "#c4b5fd",
+                      background: "var(--color-border)",
+                      backdropFilter: "blur(4px)",
+                      padding: "0.25rem 0.6rem",
+                      borderRadius: "1rem",
+                      color: "var(--color-violet-glow)",
                       marginRight: "0.5rem",
                       display: "flex",
                       alignItems: "center"
@@ -457,7 +457,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               </div>
               {beacon._creator && sector?.collaborators && sector.collaborators.length > 0 && (
                 <div className="hsr-stat-row">
-                  <span className="hsr-stat-icon" style={{ borderRadius: "50%", overflow: "hidden", width: 16, height: 16, background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyItems: "center" }}>
+                  <span className="hsr-stat-icon" style={{ borderRadius: "50%", overflow: "hidden", width: 16, height: 16, background: "var(--color-border)", display: "flex", alignItems: "center", justifyItems: "center" }}>
                     {beacon._creator.image ? <img src={beacon._creator.image} alt="" style={{ width: 16, height: 16, objectFit: "cover" }} /> : <span style={{ fontSize: "10px", width: "100%", textAlign: "center" }}>{(beacon._creator.name || "?")[0].toUpperCase()}</span>}
                   </span>
                   <span className="hsr-stat-key">Added by</span>

@@ -204,7 +204,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
                 {isSectorDropdownOpen && (
                   <>
                     <div style={{ position: "fixed", inset: 0, zIndex: 90 }} onClick={() => setIsSectorDropdownOpen(false)} />
-                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", zIndex: 100, overflow: "hidden", overflowY: "auto", maxHeight: "200px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem", background: "var(--nav-glass-bg)", border: "1px solid var(--glass-border)", borderRadius: "8px", zIndex: 100, overflow: "hidden", overflowY: "auto", maxHeight: "200px", boxShadow: "var(--shadow-card)" }}>
                       {sectors.filter((s) => {
                         const originalSector = sectors.find(sec => sec.id === beacon.sectorId);
                         const isOriginalCollab = originalSector && originalSector.collaborators && originalSector.collaborators.length > 0;
@@ -215,7 +215,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
                         <div
                           key={s.id}
                           className="dropdown-option-btn hover:bg-starlight/5"
-                          style={{ padding: "0.6rem 1rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
+                          style={{ padding: "0.6rem 1rem", cursor: "pointer", color: s.id === sectorId ? "var(--sector-active-text)" : "var(--color-starlight)", background: s.id === sectorId ? "var(--sector-active-bg)" : "transparent", transition: "all 0.2s" }}
                           onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
                         >
                           {s.name}
@@ -233,7 +233,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
                 {metaLoading && <span className="form-label-hint">⟳ Fetching metadata…</span>}
                 {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
               </label>
-              <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
+              <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "var(--color-void)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
                 {/* Conditional Rendering pada prefix Https:// */}
                 {autoHttps && <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>}
                 <input
@@ -357,7 +357,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
         <div className="modal-actions" style={{ padding: "0 1.5rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexDirection: "column" }}>
           {showDeleteConfirm ? (
             <div style={{ width: "100%", padding: "1rem", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <p style={{ color: "#fff", fontSize: "0.9rem", textAlign: "center", margin: 0 }}>
+              <p style={{ color: "var(--color-starlight)", fontSize: "0.9rem", textAlign: "center", margin: 0 }}>
                 Are you sure you want to delete <span style={{ fontWeight: "bold", color: "#ef4444" }}>{beacon.title}</span>? This action cannot be undone.
               </p>
               <div style={{ display: "flex", width: "100%", gap: "0.5rem" }}>

@@ -1350,7 +1350,6 @@ export default function StationClient({
                         <button
                           id="btn-add-beacon"
                           className="btn btn-primary"
-                          style={{ background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)", border: "1px solid rgba(139, 92, 246, 0.5)", color: "#fff", fontWeight: "600", textShadow: "0 1px 2px rgba(0,0,0,0.3)", whiteSpace: "nowrap" }}
                           onClick={() => isCurrentSectorAdminOrOwner ? setShowAddBeacon(true) : setShowAccessDenied(true)}
                           title="Add new beacon"
                         >
@@ -1471,20 +1470,14 @@ export default function StationClient({
                     {/* Logika Akses: Hanya Owner atau Admin yang bisa tambah beacon */}
                     {isCurrentSectorAdminOrOwner && (
                         <button
-                          className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
-                          style={{ color: "#fff", height: "38px", padding: "0 0.8rem", width: "auto", borderRadius: "8px", background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)", border: "1px solid rgba(139, 92, 246, 0.5)", transition: "all 0.15s" }}
+                          className="btn btn-primary"
                           onClick={() => {
                             setMobileMenuOpen(false);
                             if (!isCurrentSectorAdminOrOwner) { setShowAccessDenied(true); return; }
                             setShowAddBeacon(true);
                           }}
                         >
-                          <span
-                            style={{
-                              fontSize: "0.85rem",
-                              marginLeft: "0.4rem",
-                              display: "inline-block",
-                            }}>
+                          <span style={{ fontSize: "0.85rem", marginLeft: "0.4rem", display: "inline-block", color: "inherit" }}>
                             Add Beacon
                           </span>
                         </button>
@@ -1589,11 +1582,11 @@ export default function StationClient({
                           style={{
                             background:
                               filterVisibility !== "all"
-                                ? "rgba(139, 92, 246, 0.2)"
-                                : "rgba(15, 15, 25, 0.6)",
-                            border: `1px solid ${filterVisibility !== "all" ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`,
+                                ? "var(--sector-active-bg)"
+                                : "var(--nav-glass-bg)",
+                            border: `1px solid ${filterVisibility !== "all" ? "var(--color-border-active)" : "var(--glass-border)"}`,
                             color:
-                              filterVisibility !== "all" ? "#fff" : "#a1a1aa",
+                              filterVisibility !== "all" ? "var(--sector-active-text)" : "var(--color-comet)",
                           }}
                           onClick={() =>
                             setOpenMenu(openMenu === "filter" ? null : "filter")
@@ -1607,13 +1600,13 @@ export default function StationClient({
                               position: "absolute",
                               top: "calc(100% + 0.5rem)",
                               left: 0,
-                              background: "#1a1a2e",
-                              border: "1px solid rgba(255,255,255,0.1)",
+                              background: "var(--nav-glass-bg)",
+                              border: "1px solid var(--glass-border)",
                               borderRadius: "8px",
                               padding: "0.5rem",
                               zIndex: 50,
                               minWidth: "150px",
-                              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                              boxShadow: "var(--shadow-card)",
                               display: "flex",
                               flexDirection: "column",
                               gap: "0.25rem",
@@ -1654,7 +1647,7 @@ export default function StationClient({
                                   <CheckIcon
                                     width={14}
                                     height={14}
-                                    style={{ color: "#a78bfa" }}
+                                    style={{ color: "var(--color-violet-mid)" }}
                                   />
                                 )}
                               </button>
@@ -1671,14 +1664,14 @@ export default function StationClient({
                         <button
                           className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
                           style={{
-                            background: selectedTags.length > 0 ? "rgba(139, 92, 246, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                            background: selectedTags.length > 0 ? "var(--sector-active-bg)" : "var(--nav-glass-bg)",
                             borderRadius: "8px",
                             height: "38px",
                             padding: "0 0.8rem",
                             width: "auto",
                             transition: "all 0.15s",
-                            border: `1px solid ${selectedTags.length > 0 ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`,
-                            color: selectedTags.length > 0 ? "#fff" : "#a1a1aa",
+                            border: `1px solid ${selectedTags.length > 0 ? "var(--color-border-active)" : "var(--glass-border)"}`,
+                            color: selectedTags.length > 0 ? "var(--sector-active-text)" : "var(--color-comet)",
                           }}
                           onClick={() => setOpenMenu(openMenu === "tags" ? null : "tags")}
                           title="Filter by Tags">
@@ -1691,19 +1684,19 @@ export default function StationClient({
                               position: "absolute",
                               top: "calc(100% + 0.5rem)",
                               left: 0,
-                              background: "#1a1a2e",
-                              border: "1px solid rgba(255,255,255,0.1)",
+                              background: "var(--nav-glass-bg)",
+                              border: "1px solid var(--glass-border)",
                               borderRadius: "8px",
                               padding: "0.75rem",
                               zIndex: 50,
                               minWidth: "250px",
-                              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                              boxShadow: "var(--shadow-card)",
                               display: "flex",
                               flexDirection: "column",
                               gap: "0.5rem",
                             }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
-                                <div style={{ color: "#a1a1aa", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Filter by Tags</div>
+                                <div style={{ color: "var(--color-comet)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Filter by Tags</div>
                                 {selectedTags.length > 0 && (
                                     <button 
                                         onClick={() => setSelectedTags([])}
@@ -1716,13 +1709,13 @@ export default function StationClient({
                             
                             {/* Live Search Input */}
                             <div style={{ position: "relative" }}>
-                                <MagnifyingGlassIcon width={14} height={14} style={{ position: "absolute", left: "0.5rem", top: "50%", transform: "translateY(-50%)", color: "#6b7280" }} />
+                                <MagnifyingGlassIcon width={14} height={14} style={{ position: "absolute", left: "0.5rem", top: "50%", transform: "translateY(-50%)", color: "var(--color-comet)" }} />
                                 <input 
                                     type="text" 
                                     placeholder="Search tags..." 
                                     value={tagSearchQuery}
                                     onChange={(e) => setTagSearchQuery(e.target.value)}
-                                    style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", padding: "0.35rem 0.5rem 0.35rem 1.75rem", color: "#fff", fontSize: "0.75rem", outline: "none" }}
+                                    style={{ width: "100%", background: "var(--color-void)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "0.35rem 0.5rem 0.35rem 1.75rem", color: "var(--color-starlight)", fontSize: "0.75rem", outline: "none" }}
                                 />
                             </div>
 
@@ -1739,16 +1732,16 @@ export default function StationClient({
                                     fontSize: "0.75rem",
                                     fontWeight: 500,
                                     transition: "all 0.2s",
-                                    border: selectedTags.includes(opt.id) ? "1px solid rgba(139, 92, 246, 0.5)" : "1px solid transparent",
-                                    background: selectedTags.includes(opt.id) ? "rgba(139, 92, 246, 0.2)" : "rgba(255, 255, 255, 0.05)",
-                                    color: selectedTags.includes(opt.id) ? "#c4b5fd" : "#d1d5db",
+                                    border: selectedTags.includes(opt.id) ? "1px solid var(--color-violet-mid)" : "1px solid transparent",
+                                    background: selectedTags.includes(opt.id) ? "var(--sector-active-bg)" : "var(--nav-icon-hover-bg)",
+                                    color: selectedTags.includes(opt.id) ? "var(--sector-active-text)" : "var(--color-starlight)",
                                     }}
                                 >
                                     {opt.name}
                                 </button>
                                 ))}
                                 {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).filter(opt => opt.name.toLowerCase().includes(tagSearchQuery.toLowerCase())).length === 0 && (
-                                <p style={{ color: "#6b7280", fontSize: "0.875rem", fontStyle: "italic", width: "100%", textAlign: "center", padding: "1rem 0" }}>No matching tags.</p>
+                                <p style={{ color: "var(--color-comet)", fontSize: "0.875rem", fontStyle: "italic", width: "100%", textAlign: "center", padding: "1rem 0" }}>No matching tags.</p>
                                 )}
                             </div>
                           </div>
@@ -1778,22 +1771,22 @@ export default function StationClient({
                         <ArrowsUpDownIcon width={18} height={18} />
                       </button>
                       {openMenu === "sort" && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "calc(100% + 0.5rem)",
-                            left: 0,
-                            background: "#1a1a2e",
-                            border: "1px solid rgba(255,255,255,0.1)",
-                            borderRadius: "8px",
-                            padding: "0.5rem",
-                            zIndex: 50,
-                            minWidth: "180px",
-                            boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.25rem",
-                          }}>
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "calc(100% + 0.5rem)",
+                              right: 0,
+                              background: "var(--nav-glass-bg)",
+                              border: "1px solid var(--glass-border)",
+                              borderRadius: "8px",
+                              padding: "0.5rem",
+                              zIndex: 50,
+                              minWidth: "180px",
+                              boxShadow: "var(--shadow-card)",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "0.25rem",
+                            }}>
                           {[
                             { id: "date", label: "Date Added" },
                             { id: "name", label: "Name" },
@@ -1824,15 +1817,15 @@ export default function StationClient({
                                   justifyContent: "space-between",
                                   background:
                                     sortBy === opt.id
-                                      ? "rgba(139, 92, 246, 0.2)"
+                                      ? "var(--sector-active-bg)"
                                       : "transparent",
-                                  color: "#fff",
+                                  color: "var(--color-starlight)",
                                   borderRadius: "6px",
                                   overflow: "hidden",
                                   transition: "all 0.2s",
                                 }}>
                                 <button
-                                  className="dropdown-option-btn hover:bg-starlight/5"
+                                  className="dropdown-option-btn hover:bg-white/5"
                                   style={{
                                     flex: 1,
                                     display: "flex",
@@ -2090,9 +2083,8 @@ export default function StationClient({
                   }
                 }}
                 style={{ padding: "10px" }}
-                className="fixed bottom-6 right-6 z-[9999] bg-violet-600 hover:bg-violet-500 text-white rounded-full shadow-[0_0_20px_rgba(139,92,246,0.6)] transition-transform hover:scale-110 flex items-center justify-center group">
+                className="fixed bottom-6 right-6 z-[9999] btn btn-primary !rounded-full !shadow-lg transition-transform hover:scale-110 flex items-center justify-center group">
                 <ChatBubbleOvalLeftEllipsisIcon width={32} height={32} />
-
                 <AnimatePresence>
                   {hasUnreadInCurrentSector && (
                     <motion.div

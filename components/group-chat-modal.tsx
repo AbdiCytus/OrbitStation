@@ -1108,14 +1108,14 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                   {/* Typing Indicator */}
                   {typingUsers.length > 0 && (
                     <div style={{ padding: "4px 16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <div style={{ display: "flex", gap: "4px", alignItems: "center", background: "rgba(0,0,0,0.6)", padding: "6px 12px", borderRadius: "999px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(4px)" }}>
-                        <span style={{ fontSize: "12px", color: "#A78BFA", fontWeight: 500 }}>
+                      <div style={{ display: "flex", gap: "4px", alignItems: "center", background: "var(--glass-bg)", padding: "6px 12px", borderRadius: "999px", border: "1px solid var(--glass-border)", backdropFilter: "blur(4px)" }}>
+                        <span style={{ fontSize: "12px", color: "var(--color-violet-mid)", fontWeight: 500 }}>
                           {typingUsers.map((u: any) => u.name || u.username).join(', ')} {typingUsers.length > 1 ? 'are' : 'is'} typing
                         </span>
                         <div style={{ display: "flex", gap: "3px", marginLeft: "4px" }}>
-                          <motion.span animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} style={{ width: "4px", height: "4px", background: "#A78BFA", borderRadius: "50%", display: "block" }} />
-                          <motion.span animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} style={{ width: "4px", height: "4px", background: "#A78BFA", borderRadius: "50%", display: "block" }} />
-                          <motion.span animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} style={{ width: "4px", height: "4px", background: "#A78BFA", borderRadius: "50%", display: "block" }} />
+                          <motion.span animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} style={{ width: "4px", height: "4px", background: "var(--color-violet-mid)", borderRadius: "50%", display: "block" }} />
+                          <motion.span animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} style={{ width: "4px", height: "4px", background: "var(--color-violet-mid)", borderRadius: "50%", display: "block" }} />
+                          <motion.span animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} style={{ width: "4px", height: "4px", background: "var(--color-violet-mid)", borderRadius: "50%", display: "block" }} />
                         </div>
                       </div>
                     </div>
@@ -1144,24 +1144,24 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                   </AnimatePresence>
 
                   {/* Input Area */}
-                  <div style={{ padding: "12px 16px", background: "rgba(0,0,0,0.5)", borderTop: "1px solid rgba(255,255,255,0.07)", position: "relative", backdropFilter: "blur(10px)" }}>
+                  <div style={{ padding: "12px 16px", background: "var(--glass-bg)", borderTop: "1px solid var(--glass-border)", position: "relative", backdropFilter: "blur(10px)" }}>
 
                     {/* Reply / Edit Context... */}
                     {replyToMsg && (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", padding: "8px 12px", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", padding: "8px 12px", background: "var(--sector-active-bg)", border: "1px solid var(--color-border-active)", borderRadius: "10px" }}>
                         <div style={{ display: "flex", flexDirection: "column" }}>
-                          <span style={{ fontSize: "12px", color: "#A78BFA", fontWeight: 600 }}>Replying to {replyToMsg.sender?.name || replyToMsg.sender?.username}</span>
-                          <span style={{ fontSize: "13px", color: "#D1D5DB", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "300px" }}>{replyToMsg.content}</span>
+                          <span style={{ fontSize: "12px", color: "var(--color-violet-mid)", fontWeight: 600 }}>Replying to {replyToMsg.sender?.name || replyToMsg.sender?.username}</span>
+                          <span style={{ fontSize: "13px", color: "var(--color-starlight)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "300px" }}>{replyToMsg.content}</span>
                         </div>
-                        <button onClick={() => setReplyToMsg(null)} style={{ padding: "4px", color: "#9CA3AF", background: "transparent", border: "none", cursor: "pointer" }}>
+                        <button onClick={() => setReplyToMsg(null)} style={{ padding: "4px", color: "var(--color-comet)", background: "transparent", border: "none", cursor: "pointer" }}>
                           <XMarkIcon width={16} height={16} />
                         </button>
                       </div>
                     )}
                     {editMsgId && (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", padding: "8px 12px", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: "10px" }}>
-                        <span style={{ fontSize: "12px", color: "#60A5FA", fontWeight: 600 }}>Editing Message</span>
-                        <button onClick={() => { setEditMsgId(null); setInputMessage(""); }} style={{ padding: "4px", color: "#9CA3AF", background: "transparent", border: "none", cursor: "pointer" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", padding: "8px 12px", background: "var(--sector-active-bg)", border: "1px solid var(--color-border-active)", borderRadius: "10px" }}>
+                        <span style={{ fontSize: "12px", color: "var(--color-violet-mid)", fontWeight: 600 }}>Editing Message</span>
+                        <button onClick={() => { setEditMsgId(null); setInputMessage(""); }} style={{ padding: "4px", color: "var(--color-comet)", background: "transparent", border: "none", cursor: "pointer" }}>
                           <XMarkIcon width={16} height={16} />
                         </button>
                       </div>
@@ -1170,21 +1170,21 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                     {/* Mention Suggestions */}
                     <AnimatePresence>
                       {mentionQuery && mentionSuggestions.length > 0 && (
-                        <motion.div
+                          <motion.div
                           ref={suggestionContainerRef}
                           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                          style={{ position: "absolute", bottom: "100%", left: "16px", marginBottom: "8px", background: "rgba(17,17,30,0.97)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: "14px", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", overflow: "hidden", zIndex: 20, maxHeight: "156px", overflowY: "auto", minWidth: "220px" }}
+                          style={{ position: "absolute", bottom: "100%", left: "16px", marginBottom: "8px", background: "var(--nav-glass-bg)", border: "1px solid var(--color-border-active)", borderRadius: "14px", boxShadow: "var(--shadow-card)", overflow: "hidden", zIndex: 20, maxHeight: "156px", overflowY: "auto", minWidth: "220px" }}
                         >
                           {mentionSuggestions.map((sg: any, idx: number) => (
                             <div
                               key={idx}
                               onClick={() => insertMention(sg.text)}
-                              style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", transition: "background 0.15s", background: idx === mentionSelectedIndex ? "rgba(139,92,246,0.3)" : "transparent" }}
+                              style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", transition: "background 0.15s", background: idx === mentionSelectedIndex ? "var(--sector-active-bg)" : "transparent" }}
                             >
-                              {sg.image ? <img src={sg.image} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} /> : <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#374151", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", flexShrink: 0 }}>{sg.label[0]?.toUpperCase()}</div>}
+                              {sg.image ? <img src={sg.image} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} /> : <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "var(--nav-icon-hover-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", flexShrink: 0 }}>{sg.label[0]?.toUpperCase()}</div>}
                               <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                                <span style={{ fontSize: "14px", fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px", display: "block" }}>{sg.label}</span>
-                                {sg.subtitle && <span style={{ fontSize: "12px", color: "#9CA3AF", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sg.subtitle}</span>}
+                                <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-starlight)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px", display: "block" }}>{sg.label}</span>
+                                {sg.subtitle && <span style={{ fontSize: "12px", color: "var(--color-comet)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sg.subtitle}</span>}
                               </div>
                             </div>
                           ))}
@@ -1216,14 +1216,15 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                             }
                           }
                         }}
-                        style={{ flex: 1, background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", color: "white", padding: "10px 16px", borderRadius: "12px", outline: "none", fontSize: "14px", transition: "border-color 0.2s" }}
-                        onFocus={e => e.target.style.borderColor = "rgba(139,92,246,0.6)"}
-                        onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+                        style={{ flex: 1, background: "var(--color-void)", border: "1px solid var(--color-border)", color: "var(--color-starlight)", padding: "10px 16px", borderRadius: "12px", outline: "none", fontSize: "14px", transition: "border-color 0.2s" }}
+                        onFocus={e => e.target.style.borderColor = "var(--color-violet-mid)"}
+                        onBlur={e => e.target.style.borderColor = "var(--color-border)"}
                       />
                       <button
                         type="submit"
                         disabled={isUserMuted || !inputMessage.trim()}
-                        style={{ background: isUserMuted || !inputMessage.trim() ? "#374151" : "linear-gradient(135deg, #7c3aed, #4f46e5)", color: isUserMuted || !inputMessage.trim() ? "#6B7280" : "white", padding: "10px 14px", borderRadius: "12px", border: "none", cursor: isUserMuted || !inputMessage.trim() ? "not-allowed" : "pointer", boxShadow: inputMessage.trim() ? "0 0 15px rgba(109,40,217,0.4)" : "none", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                        className="btn btn-primary"
+                        style={{ padding: "10px 14px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, opacity: isUserMuted || !inputMessage.trim() ? 0.5 : 1 }}
                       >
                         <PaperAirplaneIcon width={22} height={22} />
                       </button>
@@ -1238,43 +1239,43 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                       animate={{ width: 240, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       className="absolute right-0 top-0 bottom-0 sm:relative sm:top-auto sm:bottom-auto z-50 flex flex-col flex-shrink-0 h-full border-l border-border"
-                      style={{ background: "rgba(15,15,25,0.95)", backdropFilter: "blur(12px)", overflow: "hidden" }}
+                      style={{ background: "var(--glass-bg)", backdropFilter: "blur(12px)", overflow: "hidden" }}
                     >
                       {/* Members Header */}
-                      <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", gap: "8px" }}>
-                        <UserGroupIcon width={16} height={16} style={{ color: "#A78BFA", flexShrink: 0 }} />
-                        <h4 style={{ color: "white", fontWeight: 700, fontSize: "14px", margin: 0 }}>Members</h4>
-                        <span style={{ fontSize: "12px", color: "#6B7280", marginLeft: "auto" }}>{1 + (localCollaborators?.length || 0)}</span>
+                      <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid var(--glass-border)", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <UserGroupIcon width={16} height={16} style={{ color: "var(--color-violet-mid)", flexShrink: 0 }} />
+                        <h4 style={{ color: "var(--color-starlight)", fontWeight: 700, fontSize: "14px", margin: 0 }}>Members</h4>
+                        <span style={{ fontSize: "12px", color: "var(--color-comet)", marginLeft: "auto" }}>{1 + (localCollaborators?.length || 0)}</span>
                       </div>
 
                       {/* Members List */}
                       <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
                         {sector.station?.user && (
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", marginBottom: "4px" }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", borderRadius: "10px", background: "var(--nav-icon-hover-bg)", marginBottom: "4px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                               <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
                                 <div
                                   onClick={(e) => { e.stopPropagation(), setMentionDetail({ type: 'user', data: sector.station.user }) }}
                                   className="cursor-pointer hover:opacity-80 transition-opacity"
-                                  style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#374151", border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)", overflow: "hidden" }}
+                                  style={{ width: "100%", height: "100%", borderRadius: "50%", background: "var(--nav-icon-hover-bg)", border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)", overflow: "hidden" }}
                                 >
                                   <div className="w-full h-full rounded-full overflow-hidden relative">
                                     {sector.station.user.image
                                       ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                      : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
+                                      : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "var(--color-starlight)" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
                                     }
                                   </div>
                                 </div>
                                 {/* Titik Online */}
                                 <div style={{
                                   position: "absolute", bottom: -2, right: -2, width: "12px", height: "12px", borderRadius: "50%",
-                                  background: onlineUserIds.has(sector.station.user.id) ? "#10B981" : "#4B5563", border: "2px solid rgba(15,15,25,0.95)",
+                                  background: onlineUserIds.has(sector.station.user.id) ? "var(--color-success)" : "var(--color-comet)", border: "2px solid var(--glass-bg)",
                                   transition: "background 0.3s"
                                 }} title={onlineUserIds.has(sector.station.user.id) ? "Online" : "Offline"} />
                               </div>
                               <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                                <span style={{ fontSize: "14px", fontWeight: 500, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "130px" }}>{sector.station.user.name || sector.station.user.username}</span>
-                                <span style={{ fontSize: "10px", color: "#A78BFA", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Owner</span>
+                                <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--color-starlight)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "130px" }}>{sector.station.user.name || sector.station.user.username}</span>
+                                <span style={{ fontSize: "10px", color: "var(--color-violet-mid)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Owner</span>
                               </div>
                             </div>
                           </div>
@@ -1298,14 +1299,14 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     onClick={(e) => { e.stopPropagation(); setMentionDetail({ type: 'user', data: c.user }) }}
                                     className="cursor-pointer hover:opacity-80 transition-opacity"
                                     style={{
-                                      width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden",
-                                      ...(c.role === "ADMIN" ? { border: "2px solid #10B981" } : { border: "1px solid rgba(255,255,255,0.1)" })
+                                      width: "100%", height: "100%", borderRadius: "50%", background: "var(--nav-icon-hover-bg)", overflow: "hidden",
+                                      ...(c.role === "ADMIN" ? { border: "2px solid var(--color-success)" } : { border: "1px solid var(--color-border)" })
                                     } as any}
                                   >
                                     <div className="w-full h-full rounded-full overflow-hidden relative">
                                       {c.user.image
                                         ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                        : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{c.user.username?.[0]?.toUpperCase()}</div>
+                                        : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "var(--color-starlight)" }}>{c.user.username?.[0]?.toUpperCase()}</div>
                                       }
                                     </div>
                                   </div>
@@ -1313,15 +1314,15 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                   {/* Titik Online Indicator */}
                                   <div style={{
                                     position: "absolute", bottom: -2, right: -2, width: "12px", height: "12px", borderRadius: "50%",
-                                    background: isOnline ? "#10B981" : "#4B5563", border: "2px solid rgba(15,15,25,0.95)",
+                                    background: isOnline ? "var(--color-success)" : "var(--color-comet)", border: "2px solid var(--glass-bg)",
                                     transition: "background 0.3s"
                                   }} title={isOnline ? "Online" : "Offline"} />
                                 </div>
                                 {/* END AVATAR MEMBER */}
 
                                 <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                                  <span style={{ fontSize: "14px", fontWeight: 500, color: "#E5E7EB", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100px" }}>{c.user.name || c.user.username}</span>
-                                  <span style={{ fontSize: "10px", color: c.role === "ADMIN" ? "#10B981" : "#9CA3AF", fontWeight: 700, textTransform: "uppercase" }}>{c.role} {isMuted && <span style={{ color: "#F87171" }}>• MUTED</span>}</span>
+                                  <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--color-starlight)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100px" }}>{c.user.name || c.user.username}</span>
+                                  <span style={{ fontSize: "10px", color: c.role === "ADMIN" ? "var(--color-success)" : "var(--color-comet)", fontWeight: 700, textTransform: "uppercase" }}>{c.role} {isMuted && <span style={{ color: "var(--color-error)" }}>• MUTED</span>}</span>
                                 </div>
                               </div>
                               {isOwner && (
@@ -1335,7 +1336,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                       setMutedMembers(prev => [...prev, c.user.id]);
                                     }
                                   }}
-                                  style={{ fontSize: "12px", padding: "4px 8px", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "6px", color: "white", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, transition: "background 0.15s" }}
+                                  style={{ fontSize: "12px", padding: "4px 8px", background: "var(--color-border)", border: "none", borderRadius: "6px", color: "var(--color-starlight)", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, transition: "background 0.15s" }}
                                 >
                                   {isMuted ? "Unmute" : "Mute"}
                                 </button>
@@ -1380,7 +1381,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                       className={`!absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border flex flex-col gap-4 min-w-[300px] chat-mention-modal ${isExclusive && badge ? badge.effectClass : ''} ${badge?.id === 'shattered' ? 'modal-shattered' : ''}`}
                       style={{ 
                         padding: "1.5rem", 
-                        backgroundColor: "rgba(15,15,25,0.95)",
+                        backgroundColor: "var(--glass-bg)",
                         backgroundImage: badge && isSpecial ? `radial-gradient(circle at top right, ${getModalTint(badge.color)}, transparent)` : undefined,
                         borderColor: getModalBorder(badge?.color),
                         backdropFilter: "blur(20px)"
@@ -1405,10 +1406,10 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                             <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-back" />
                           )}
                           <div 
-                            className={`shrink-0 flex items-center justify-center rounded-full bg-[#1a1a2e] ${avatarBadgeClass}`} 
+                            className={`shrink-0 flex items-center justify-center rounded-full bg-cosmos ${avatarBadgeClass}`} 
                             style={{ 
                               width: '74px', height: '74px', '--avatar-radius': '37px', overflow: 'visible', position: 'relative', zIndex: 1,
-                              ...( !badge ? { border: '3px solid #a78bfa', boxShadow: '0 0 20px rgba(167, 139, 250, 0.4)' } : {} )
+                              ...( !badge ? { border: '3px solid var(--color-violet-mid)', boxShadow: '0 0 20px rgba(139, 92, 246, 0.4)' } : {} )
                             } as React.CSSProperties}
                           >
                             <div className={`w-full h-full rounded-full overflow-hidden relative ${avatarSweepClass}`}>
@@ -1559,9 +1560,9 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 10 }}
               className="flex flex-col gap-4 w-full max-w-[400px] rounded-2xl p-6 shadow-2xl"
-              style={{ background: "rgba(20,20,30,0.95)", border: "1px solid rgba(239,68,68,0.3)", backdropFilter: "blur(12px)", padding: "20px" }}
+              style={{ background: "var(--glass-bg)", border: "1px solid rgba(239,68,68,0.3)", backdropFilter: "blur(12px)", padding: "20px" }}
             >
-              <h3 className="text-[#ef4444] text-xl font-bold m-0">
+              <h3 className="text-red-500 text-xl font-bold m-0">
                 {confirmAction.type === 'clear' ? 'Clear Chat History?' : 'Kick Member?'}
               </h3>
               <p className="text-comet text-sm leading-relaxed m-0">
@@ -1580,7 +1581,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                 </button>
                 <button
                   onClick={confirmAction.type === 'clear' ? executeClearChat : executeKickMember}
-                  className="px-4 py-2 rounded-xl bg-[#ef4444] hover:bg-red-600 text-white font-semibold border-none transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold border-none transition-colors cursor-pointer"
                   style={{ padding: "8px 24px" }}
                 >
                   {confirmAction.type === 'clear' ? 'Clear Messages' : 'Kick Member'}

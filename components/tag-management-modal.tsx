@@ -234,13 +234,13 @@ export default function TagManagementModal({
 
       {/* Delete Confirm Modal */}
       {tagToDelete && (
-        <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "rgba(11, 12, 16, 0.9)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }}>
-          <div style={{ padding: "1.5rem", background: "#1f1f2e", borderRadius: "1rem", border: "1px solid rgba(239, 68, 68, 0.4)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+        <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "var(--nav-glass-bg)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }}>
+          <div style={{ padding: "1.5rem", background: "var(--glass-bg)", borderRadius: "1rem", border: "1px solid rgba(239, 68, 68, 0.4)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
             <TrashIcon width={32} height={32} style={{ color: "#ef4444", margin: "0 auto 1rem" }} />
-            <h3 style={{ color: "#fff", fontSize: "1.1rem", marginBottom: "0.5rem" }}>Delete Tag?</h3>
-            <p style={{ color: "#a1a1aa", fontSize: "0.85rem", marginBottom: "1.5rem" }}>Are you sure? It will be removed from all beacons.</p>
+            <h3 style={{ color: "var(--color-starlight)", fontSize: "1.1rem", marginBottom: "0.5rem" }}>Delete Tag?</h3>
+            <p style={{ color: "var(--color-comet)", fontSize: "0.85rem", marginBottom: "1.5rem" }}>Are you sure? It will be removed from all beacons.</p>
             <div style={{ display: "flex", gap: "0.75rem" }}>
-              <button onClick={() => setTagToDelete(null)} disabled={isSubmitting} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "rgba(255,255,255,0.1)", color: "#fff" }}>Cancel</button>
+              <button onClick={() => setTagToDelete(null)} disabled={isSubmitting} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "var(--color-border)", color: "var(--color-starlight)" }}>Cancel</button>
               <button onClick={executeDeleteTag} disabled={isSubmitting} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "#ef4444", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                 {isSubmitting && <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" />}
                 Delete
@@ -254,8 +254,8 @@ export default function TagManagementModal({
       <div
         className={`relative w-full sm:max-w-2xl flex flex-col overflow-hidden z-10 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] rounded-t-2xl sm:rounded-2xl ${panelClass}`}
         style={{
-          background: "#0d0e14",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: "var(--glass-bg)",
+          border: "1px solid var(--glass-border)",
         }}
       >
         {/* Added wrapper for height limits */}
@@ -266,16 +266,16 @@ export default function TagManagementModal({
           style={{ padding: "1rem 1.5rem" }}
         >
           <div className="flex items-center" style={{ gap: "0.625rem" }}>
-            <span style={{ color: "#a78bfa", fontSize: "1.2rem" }}>🏷</span>
-            <h2 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#fff" }}>
+            <span style={{ color: "var(--color-violet-mid)", fontSize: "1.2rem" }}>🏷</span>
+            <h2 style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--color-starlight)" }}>
               Manage Tags
             </h2>
             <span
               style={{
                 fontSize: "0.7rem",
-                background: "rgba(139,92,246,0.15)",
-                color: "#a78bfa",
-                border: "1px solid rgba(139,92,246,0.3)",
+                background: "var(--sector-active-bg)",
+                color: "var(--sector-active-text)",
+                border: "1px solid var(--color-border-active)",
                 borderRadius: "9999px",
                 padding: "0.125rem 0.5rem",
               }}
@@ -301,9 +301,9 @@ export default function TagManagementModal({
               className="flex-1 text-sm font-semibold transition-colors"
               style={{
                 padding: "0.75rem",
-                color: activeTab === tab ? "#c4b5fd" : "#6b7280",
-                borderBottom: activeTab === tab ? "2px solid #8b5cf6" : "2px solid transparent",
-                background: activeTab === tab ? "rgba(139,92,246,0.07)" : "transparent",
+                color: activeTab === tab ? "var(--sector-active-text)" : "var(--color-comet)",
+                borderBottom: activeTab === tab ? "2px solid var(--color-violet-mid)" : "2px solid transparent",
+                background: activeTab === tab ? "var(--sector-active-bg)" : "transparent",
               }}
             >
               {tab === "manage" ? "Manage Tags" : "Assign Tags"}
@@ -334,7 +334,7 @@ export default function TagManagementModal({
                 <button
                   onClick={handleAddTag}
                   disabled={isSubmitting || !newTagName.trim()}
-                  className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white rounded-lg font-medium transition-colors flex items-center"
+                  className="btn btn-primary disabled:opacity-40 rounded-lg font-medium transition-colors flex items-center"
                   style={{ padding: "0.6rem 1rem", gap: "0.375rem", flexShrink: 0, fontSize: "0.875rem" }}
                 >
                   <PlusIcon width={16} height={16} />
@@ -349,7 +349,7 @@ export default function TagManagementModal({
                     placeholder="Search tags..." 
                     value={modalSearchQuery}
                     onChange={(e) => setModalSearchQuery(e.target.value)}
-                    style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "#fff", fontSize: "0.875rem", outline: "none", marginBottom: "1rem" }}
+                    style={{ width: "100%", background: "var(--color-void)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "var(--color-starlight)", fontSize: "0.875rem", outline: "none", marginBottom: "1rem" }}
                  />
               </div>
               
@@ -359,15 +359,15 @@ export default function TagManagementModal({
                   style={{ padding: "2.5rem 1rem", gap: "0.5rem" }}
                 >
                   <span style={{ fontSize: "2rem" }}>🏷️</span>
-                  <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                  <p style={{ color: "var(--color-comet)", fontSize: "0.875rem" }}>
                     No tags in this sector yet.
                   </p>
-                  <p style={{ color: "#4b5563", fontSize: "0.8rem" }}>
+                  <p style={{ color: "var(--color-comet)", fontSize: "0.8rem" }}>
                     Add your first tag above.
                   </p>
                 </div>
               ) : filteredLocalTags.length === 0 ? (
-                <p style={{ color: "#6b7280", fontSize: "0.875rem", textAlign: "center", padding: "2.5rem 1rem" }}>
+                <p style={{ color: "var(--color-comet)", fontSize: "0.875rem", textAlign: "center", padding: "2.5rem 1rem" }}>
                   No matching tags found.
                 </p>
               ) : (
@@ -377,7 +377,7 @@ export default function TagManagementModal({
                       key={tag.id}
                       className="flex items-center justify-between border border-border group hover:border-border transition-colors"
                       style={{
-                        background: "rgba(255,255,255,0.04)",
+                        background: "var(--nav-glass-bg)",
                         borderRadius: "0.5rem",
                         padding: "0.625rem 0.75rem",
                       }}
@@ -403,21 +403,21 @@ export default function TagManagementModal({
                               width: "0.5rem",
                               height: "0.5rem",
                               borderRadius: "9999px",
-                              background: "#8b5cf6",
+                              background: "var(--color-violet-mid)",
                               flexShrink: 0,
                             }}
                           />
-                          <span style={{ color: "#e5e7eb", fontWeight: 500, fontSize: "0.875rem" }}>
+                          <span style={{ color: "var(--color-starlight)", fontWeight: 500, fontSize: "0.875rem" }}>
                             {tag.name}
                           </span>
                           <span style={{
                               fontSize: "0.65rem",
-                              background: tagUsageCount[tag.id] ? "rgba(139, 92, 246, 0.15)" : "rgba(255,255,255,0.05)",
-                              color: tagUsageCount[tag.id] ? "#c4b5fd" : "#9ca3af",
+                              background: tagUsageCount[tag.id] ? "var(--sector-active-bg)" : "var(--nav-icon-hover-bg)",
+                              color: tagUsageCount[tag.id] ? "var(--sector-active-text)" : "var(--color-comet)",
                               padding: "0.1rem 0.4rem",
                               borderRadius: "4px",
                               fontWeight: 600,
-                              border: tagUsageCount[tag.id] ? "1px solid rgba(139, 92, 246, 0.3)" : "1px solid rgba(255,255,255,0.1)"
+                              border: tagUsageCount[tag.id] ? "1px solid var(--color-border-active)" : "1px solid var(--color-border)"
                           }}>
                               {tagUsageCount[tag.id] ? `${tagUsageCount[tag.id]} beacon${tagUsageCount[tag.id] > 1 ? 's' : ''}` : "Unused"}
                           </span>
@@ -469,18 +469,18 @@ export default function TagManagementModal({
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               {localTags.length === 0 ? (
                 <div className="text-center" style={{ padding: "2.5rem 1rem" }}>
-                  <p style={{ color: "#6b7280", fontSize: "0.875rem", marginBottom: "0.75rem" }}>
+                  <p style={{ color: "var(--color-comet)", fontSize: "0.875rem", marginBottom: "0.75rem" }}>
                     Create tags first in the "Manage Tags" tab.
                   </p>
                   <button
                     onClick={() => setActiveTab("manage")}
-                    style={{ color: "#a78bfa", fontSize: "0.875rem" }}
+                    style={{ color: "var(--color-violet-mid)", fontSize: "0.875rem" }}
                   >
                     To Manage Tags →
                   </button>
                 </div>
               ) : sector.beacons.length === 0 ? (
-                <p className="text-center" style={{ color: "#6b7280", fontSize: "0.875rem", padding: "2.5rem 1rem" }}>
+                <p className="text-center" style={{ color: "var(--color-comet)", fontSize: "0.875rem", padding: "2.5rem 1rem" }}>
                   No beacons in this sector.
                 </p>
               ) : (
@@ -491,7 +491,7 @@ export default function TagManagementModal({
                         placeholder="Search tags..." 
                         value={modalSearchQuery}
                         onChange={(e) => setModalSearchQuery(e.target.value)}
-                        style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "#fff", fontSize: "0.875rem", outline: "none", marginBottom: "0.25rem" }}
+                        style={{ width: "100%", background: "var(--color-void)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "var(--color-starlight)", fontSize: "0.875rem", outline: "none", marginBottom: "0.25rem" }}
                      />
                   </div>
                   {sector.beacons.map((beacon) => {
@@ -502,7 +502,7 @@ export default function TagManagementModal({
                       key={beacon.id}
                       className="border border-border flex flex-col"
                       style={{
-                        background: "rgba(255,255,255,0.03)",
+                        background: "var(--nav-glass-bg)",
                         borderRadius: "0.625rem",
                         padding: "0.875rem",
                         gap: "0.75rem"
@@ -518,7 +518,7 @@ export default function TagManagementModal({
                         )}
                         <p
                           className="truncate flex-1"
-                          style={{ color: "#d1d5db", fontWeight: 500, fontSize: "0.875rem" }}
+                          style={{ color: "var(--color-starlight)", fontWeight: 500, fontSize: "0.875rem" }}
                         >
                           {beacon.title}
                         </p>
@@ -536,9 +536,9 @@ export default function TagManagementModal({
                               style={{
                                 padding: "0.25rem 0.75rem",
                                 fontSize: "0.78rem",
-                                background: isSelected ? "rgba(139,92,246,0.2)" : "rgba(255,255,255,0.05)",
-                                borderColor: isSelected ? "rgba(139,92,246,0.5)" : "rgba(255,255,255,0.1)",
-                                color: isSelected ? "#c4b5fd" : "#9ca3af",
+                                background: isSelected ? "var(--sector-active-bg)" : "var(--nav-icon-hover-bg)",
+                                borderColor: isSelected ? "var(--color-border-active)" : "var(--color-border)",
+                                color: isSelected ? "var(--sector-active-text)" : "var(--color-comet)",
                                 opacity: isMaxed ? 0.35 : 1,
                                 cursor: isMaxed ? "not-allowed" : "pointer",
                               }}
@@ -549,7 +549,7 @@ export default function TagManagementModal({
                         })}
                       </div>
                       {selectedTagIds.length > 0 && (
-                        <p style={{ fontSize: "0.72rem", color: "#6b7280", marginTop: "0.125rem" }}>
+                        <p style={{ fontSize: "0.72rem", color: "var(--color-comet)", marginTop: "0.125rem" }}>
                           {selectedTagIds.length}/5 tags selected
                         </p>
                       )}
@@ -566,12 +566,12 @@ export default function TagManagementModal({
         {activeTab === "assign" && localTags.length > 0 && sector.beacons.length > 0 && (
           <div
             className="border-t border-border flex justify-end"
-            style={{ padding: "0.875rem 1.5rem", background: "rgba(0,0,0,0.2)" }}
+            style={{ padding: "0.875rem 1.5rem", background: "var(--glass-bg)" }}
           >
             <button
               onClick={handleSaveAssignments}
               disabled={isSavingAssignments}
-              className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
+              className="btn btn-primary disabled:opacity-50 rounded-lg transition-colors"
               style={{ padding: "0.625rem 1.5rem", fontSize: "0.875rem" }}
             >
               {isSavingAssignments ? "Saving..." : "Save Assignments"}

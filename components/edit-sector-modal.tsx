@@ -685,7 +685,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                                 variants={{ hidden: { opacity: 0, y: -10 }, visible: { opacity: 0.6, y: 0 } }}
                               >
                                 <div className="flex items-center gap-3 min-w-0">
-                                  <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                                  <div className="rounded-full overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", backgroundColor: "var(--color-border)" }}>
                                     {u.image ? <img src={u.image} alt={u.name ?? ""} className="w-full h-full object-cover grayscale" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(u.name || u.username || "?")[0].toUpperCase()}</span>}
                                   </div>
                                   <p className="text-sm font-medium text-comet truncate">{u.name || u.username}</p>
@@ -721,13 +721,13 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                               style={{ gap: "0.75rem", padding: "0.5rem 1.25rem 0.5rem 0.5rem", marginBottom: "0.5rem" }}
                               variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                             >
-                              <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px" }}>
+                              <div className="rounded-full overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", backgroundColor: "var(--color-border)" }}>
                                 {f.image ? <img src={f.image} alt={f.name} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(f.name || f.username || "?")[0].toUpperCase()}</span>}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-comet truncate">{f.name || f.username}</p>
                               </div>
-                              <div className="flex items-center justify-center w-5 h-5 rounded-full border transition-colors" style={{ borderColor: invitedFriends.includes(f.id) ? "#a78bfa" : "rgba(255,255,255,0.1)", background: invitedFriends.includes(f.id) ? "#a78bfa" : "transparent" }}>
+                              <div className="flex items-center justify-center w-5 h-5 rounded-full border transition-colors" style={{ borderColor: invitedFriends.includes(f.id) ? "var(--color-violet-mid)" : "var(--color-border)", background: invitedFriends.includes(f.id) ? "var(--color-violet-mid)" : "transparent" }}>
                                 {invitedFriends.includes(f.id) && <DynamicIcon name="CheckIcon" width={12} height={12} style={{ color: "white" }} />}
                               </div>
                               <input
@@ -749,7 +749,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                 </div>
 
                 {/* Right panel save button */}
-                <div style={{ padding: "1rem 1.5rem 1.5rem", borderTop: "1px solid rgba(255,255,255,0.05)", background: "rgba(20,20,35,0.8)", backdropFilter: "blur(10px)" }}>
+                <div style={{ padding: "1rem 1.5rem 1.5rem", borderTop: "1px solid var(--glass-border)", background: "var(--glass-bg)", backdropFilter: "blur(10px)" }}>
                   <button type="button" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => setRightPanelMode(null)}>
                     Done
                   </button>
@@ -774,7 +774,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-[#0b0c10] border border-border shadow-2xl relative overflow-hidden flex flex-col"
+              className="bg-cosmos border border-border shadow-2xl relative overflow-hidden flex flex-col"
               style={{ borderRadius: isMobile ? "1.5rem" : "2rem", maxWidth: "24rem", width: isMobile ? "90%" : "100%", padding: isMobile ? "1.5rem" : "2.5rem" }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -801,7 +801,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
               {/* Buttons */}
               <div className="flex" style={{ gap: "1rem" }}>
                 <button type="button" className="flex-1 bg-starlight/5 hover:bg-starlight/10 text-starlight rounded-2xl transition-all font-medium text-sm border border-border" style={{ padding: "0.75rem 0" }} onClick={() => { setRemovingMemberId(null); setTransferringTo(null); }}>Cancel</button>
-                <button type="button" className={`flex-1 text-starlight rounded-2xl transition-all font-medium text-sm shadow-xl ${removingMemberId ? "bg-[#e11d48] hover:bg-[#be123c] shadow-pink-500/20" : "bg-[#8b5cf6] hover:bg-[#7c3aed] shadow-violet-500/20"}`} style={{ padding: "0.75rem 0" }} onClick={async () => {
+                <button type="button" className={`flex-1 text-white rounded-2xl transition-all font-medium text-sm shadow-xl ${removingMemberId ? "bg-rose-600 hover:bg-rose-700 shadow-pink-500/20" : "bg-violet-500 hover:bg-violet-600 shadow-violet-500/20"}`} style={{ padding: "0.75rem 0" }} onClick={async () => {
                   if (removingMemberId) {
                     const id = removingMemberId; setRemovingMemberId(null);
                     const result = await removeCollaborator(sector.id, id);
@@ -829,7 +829,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
         )}
         {roleAction && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); setRoleAction(null); }}>
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="bg-[#0b0c10] border border-border shadow-2xl relative overflow-hidden flex flex-col" style={{ borderRadius: isMobile ? "1.5rem" : "2rem", maxWidth: "24rem", width: isMobile ? "90%" : "100%", padding: isMobile ? "1.5rem" : "2.5rem" }} onClick={(e) => e.stopPropagation()}>
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="bg-cosmos border border-border shadow-2xl relative overflow-hidden flex flex-col" style={{ borderRadius: isMobile ? "1.5rem" : "2rem", maxWidth: "24rem", width: isMobile ? "90%" : "100%", padding: isMobile ? "1.5rem" : "2.5rem" }} onClick={(e) => e.stopPropagation()}>
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: roleAction.type === "promote" ? "linear-gradient(90deg, transparent, #10b981, transparent)" : "linear-gradient(90deg, transparent, #fb923c, transparent)" }}></div>
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem", marginTop: "0.5rem" }}>
                 <div style={{ width: "80px", height: "80px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: roleAction.type === "promote" ? "radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)" : "radial-gradient(circle, rgba(251,146,60,0.15) 0%, transparent 70%)", border: roleAction.type === "promote" ? "1px solid rgba(16,185,129,0.2)" : "1px solid rgba(251,146,60,0.2)" }}>
@@ -842,7 +842,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
               </div>
               <div className="flex" style={{ gap: "1rem" }}>
                 <button type="button" className="flex-1 bg-starlight/5 hover:bg-starlight/10 text-starlight rounded-2xl transition-all font-medium text-sm border border-border" style={{ padding: "0.75rem 0" }} onClick={() => setRoleAction(null)}>Cancel</button>
-                <button type="button" className={`flex-1 text-starlight rounded-2xl transition-all font-medium text-sm shadow-xl ${roleAction.type === "promote" ? "bg-[#10b981] hover:bg-[#059669] shadow-emerald-500/20" : "bg-[#fb923c] hover:bg-[#ea580c] shadow-orange-500/20"}`} style={{ padding: "0.75rem 0" }} onClick={async () => {
+                <button type="button" className={`flex-1 text-white rounded-2xl transition-all font-medium text-sm shadow-xl ${roleAction.type === "promote" ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20" : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"}`} style={{ padding: "0.75rem 0" }} onClick={async () => {
                   const id = roleAction.id;
                   const newRole = roleAction.type === "promote" ? "ADMIN" : "MEMBER";
                   setRoleAction(null);

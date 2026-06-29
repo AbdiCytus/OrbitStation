@@ -117,11 +117,11 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
             {beacon._creator.image ? (
               <img src={beacon._creator.image} alt={beacon._creator.name || "?"} style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }} />
             ) : (
-              <span style={{ fontSize: "0.65rem", background: "rgba(255,255,255,0.1)", width: 16, height: 16, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+              <span style={{ fontSize: "0.65rem", background: "var(--color-border)", width: 16, height: 16, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
                 {(beacon._creator.name || "?")[0].toUpperCase()}
               </span>
             )}
-            <span style={{ fontSize: "0.7rem", color: "var(--color-starlight)" }} title={`Added by ${beacon._creator.name}`}>Added by <span style={{ color: "#fff" }}>{beacon._creator.name?.split(" ")[0]}</span></span>
+            <span style={{ fontSize: "0.7rem", color: "var(--color-comet)" }} title={`Added by ${beacon._creator.name}`}>Added by <span style={{ color: "var(--color-starlight)" }}>{beacon._creator.name?.split(" ")[0]}</span></span>
           </div>
         )}
         {!isAllBeacons && beacon.tags && beacon.tags.length > 0 && (
@@ -133,9 +133,9 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
                   fontSize: "0.65rem",
                   padding: "0.15rem 0.4rem",
                   borderRadius: "9999px",
-                  background: "rgba(139, 92, 246, 0.15)",
-                  color: "#c4b5fd",
-                  border: "1px solid rgba(139, 92, 246, 0.3)",
+                  background: "var(--sector-active-bg)",
+                  color: "var(--sector-active-text)",
+                  border: "1px solid var(--color-border-active)",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -160,7 +160,7 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
             aria-label={`Edit ${beacon.title}`}
             id={`btn-edit-${beacon.id}`}
             title="Edit beacon details"
-            style={{ width: "2rem", height: "2rem", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.05)", borderRadius: "var(--radius-md)" }}
+            style={{ width: "2rem", height: "2rem", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--nav-icon-hover-bg)", borderRadius: "var(--radius-md)" }}
           >
             <PencilSquareIcon width={14} height={14} />
           </button>

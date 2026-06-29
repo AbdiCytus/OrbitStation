@@ -66,7 +66,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
         <div
           className={`modal-panel ${isClosing ? "closing" : ""} glass rounded-t-3xl rounded-b-none sm:rounded-2xl`}
           style={{ margin: 0, display: "flex", flexDirection: "column", padding: 0, flex: 1, borderBottom: "none" }}
-        >        <div className="modal-header" style={{ padding: "1.5rem 1.5rem 1rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: "1rem" }}>
+        >        <div className="modal-header" style={{ padding: "1.5rem 1.5rem 1rem 1.5rem", borderBottom: "1px solid var(--glass-border)", marginBottom: "1rem" }}>
             <h2 className="modal-title flex items-center gap-2" style={{ fontSize: "1.1rem" }}>
               Members of {sector.name}
               <span className="bg-violet-500/20 text-violet-400 text-xs rounded-full border border-violet-500/30 flex items-center justify-center shrink-0" style={{ padding: "2px 8px", minWidth: "24px" }}>{(sectorOwner ? 1 : 0) + localCollaborators.length}</span>
@@ -88,7 +88,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", border: "2px solid #FFD700", boxShadow: "0 0 10px rgba(255,215,0,0.6)" }}>
+                  <div className="rounded-full overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", backgroundColor: "var(--color-border)", border: "2px solid var(--color-amber-glow)", boxShadow: "0 0 10px var(--color-amber-glow)" }}>
                     {sectorOwner.image ? <img src={sectorOwner.image} alt={sectorOwner.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(sectorOwner.name || sectorOwner.username || "?")[0].toUpperCase()}</span>}
                   </div>
                   <div className="flex flex-col min-w-0">
@@ -96,7 +96,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                       {sectorOwner.name || sectorOwner.username}
                       {sectorOwner.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                     </p>
-                    <span className="text-[10px] font-bold text-[#FFD700] uppercase tracking-widest mt-0.5">Owner</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "var(--color-amber-glow)" }}>Owner</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -126,7 +126,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                 variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="rounded-full bg-gray-700 overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", border: c.role === "ADMIN" ? "2px solid #10B981" : "1px solid rgba(255,255,255,0.1)" }}>
+                  <div className="rounded-full overflow-hidden relative flex-shrink-0" style={{ width: "40px", height: "40px", backgroundColor: "var(--color-border)", border: c.role === "ADMIN" ? "2px solid #10B981" : "1px solid var(--glass-border)" }}>
                     {c.user.image ? <img src={c.user.image} alt={c.user.name ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs text-comet font-bold w-full h-full flex items-center justify-center">{(c.user.name || c.user.username || "?")[0].toUpperCase()}</span>}
                   </div>
                   <div className="flex flex-col min-w-0">
@@ -134,7 +134,7 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                       {c.user.name || c.user.username}
                       {c.user.id === currentUserId && <span className="opacity-50 ml-1"> (You)</span>}
                     </p>
-                    <span className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: c.role === 'ADMIN' ? '#10B981' : '#9CA3AF' }}>{c.role || 'MEMBER'}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: c.role === 'ADMIN' ? '#10B981' : 'var(--color-comet)' }}>{c.role || 'MEMBER'}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">

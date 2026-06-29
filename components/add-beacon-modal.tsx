@@ -187,7 +187,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   type="button"
                   id="beacon-sector"
                   className="input"
-                  style={{ textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", ...(initialSectorId ? { backgroundColor: "rgba(15, 15, 25, 0.4)", color: "#a1a1aa", cursor: "not-allowed", opacity: 0.8 } : {}) }}
+                  style={{ textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", ...(initialSectorId ? { backgroundColor: "var(--glass-bg)", color: "var(--color-comet)", cursor: "not-allowed", opacity: 0.8 } : {}) }}
                   onClick={() => !initialSectorId && setIsSectorDropdownOpen(!isSectorDropdownOpen)}
                 >
                   {sectors.find(s => s.id === sectorId)?.name || "Select a sector"}
@@ -196,7 +196,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                 {isSectorDropdownOpen && (
                   <>
                     <div style={{ position: "fixed", inset: 0, zIndex: 90 }} onClick={() => setIsSectorDropdownOpen(false)} />
-                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", zIndex: 100, overflow: "hidden", overflowY: "auto", maxHeight: "200px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem", background: "var(--nav-glass-bg)", border: "1px solid var(--glass-border)", borderRadius: "8px", zIndex: 100, overflow: "hidden", overflowY: "auto", maxHeight: "200px", boxShadow: "var(--shadow-card)" }}>
                       {sectors.map((s, index) => {
                         const isOwned = currentStationId ? (s as any).stationId === currentStationId : true;
                         const prevIsOwned = index > 0 && currentStationId ? (sectors[index - 1] as any).stationId === currentStationId : true;
@@ -207,18 +207,18 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                         return (
                           <div key={s.id}>
                             {showMySectorsHeader && (
-                              <div style={{ padding: "0.4rem 1rem", fontSize: "0.7rem", color: "#a1a1aa", background: "rgba(0,0,0,0.3)", borderBottom: "1px solid rgba(255,255,255,0.05)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "bold" }}>
+                              <div style={{ padding: "0.4rem 1rem", fontSize: "0.7rem", color: "var(--color-comet)", background: "var(--nav-icon-hover-bg)", borderBottom: "1px solid var(--glass-border)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "bold" }}>
                                 My Sectors
                               </div>
                             )}
                             {showCollabSectorsHeader && (
-                              <div style={{ padding: "0.4rem 1rem", fontSize: "0.7rem", color: "#a1a1aa", background: "rgba(0,0,0,0.3)", borderTop: index > 0 ? "1px solid rgba(255,255,255,0.05)" : "none", borderBottom: "1px solid rgba(255,255,255,0.05)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "bold" }}>
+                              <div style={{ padding: "0.4rem 1rem", fontSize: "0.7rem", color: "var(--color-comet)", background: "var(--nav-icon-hover-bg)", borderTop: index > 0 ? "1px solid var(--glass-border)" : "none", borderBottom: "1px solid var(--glass-border)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "bold" }}>
                                 Collab Sectors
                               </div>
                             )}
                             <div
                               className="dropdown-option-btn hover:bg-starlight/5"
-                              style={{ padding: "0.6rem 1rem", paddingLeft: "1.5rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
+                              style={{ padding: "0.6rem 1rem", paddingLeft: "1.5rem", cursor: "pointer", color: s.id === sectorId ? "var(--sector-active-text)" : "var(--color-starlight)", background: s.id === sectorId ? "var(--sector-active-bg)" : "transparent", transition: "all 0.2s" }}
                               onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
                             >
                               {s.name}
@@ -240,7 +240,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                 {metaLoading && <span className="form-label-hint">⟳ Fetching metadata…</span>}
                 {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
               </label>
-              <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
+              <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "var(--color-void)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
                 {autoHttps && <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>}
                 <input
                   ref={inputRef}
