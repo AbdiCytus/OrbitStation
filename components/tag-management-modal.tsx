@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { XMarkIcon, PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { createTag, updateTag, deleteTag, assignTagsToBeacon } from "@/lib/actions";
@@ -28,14 +28,13 @@ export default function TagManagementModal({
   const [activeTab, setActiveTab] = useState<"manage" | "assign">("manage");
 
   // Local tag state — optimistically managed
-  const [localTags, setLocalTags] = useState<Tag[]>([]);
-
-  // Manage Tab State
+  const [localTags, setLocalTags] = useState<Tag[]>(sectorTagsOverride || sector.tags || []);
   const [newTagName, setNewTagName] = useState("");
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [editTagName, setEditTagName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagToDelete, setTagToDelete] = useState<string | null>(null);
+  const [modalSearchQuery, setModalSearchQuery] = useState("");
 
   // Assign Tab State: beaconId -> array of tagIds
   const [assignments, setAssignments] = useState<Record<string, string[]>>({});
@@ -58,8 +57,22 @@ export default function TagManagementModal({
     }
   }, [isOpen]);
 
-  const [isReady, setIsReady] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  const tagUsageCount = useMemo(() => {
+    const counts: Record<string, number> = {};
+    Object.values(assignments).forEach((tags) => {
+      tags.forEach((tagId) => {
+        counts[tagId] = (counts[tagId] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [assignments]);
+
+  const filteredLocalTags = useMemo(() => {
+    return localTags.filter(tag => tag.name.toLowerCase().includes(modalSearchQuery.toLowerCase()));
+  }, [localTags, modalSearchQuery]);
 
   useEffect(() => {
     if (isOpen) {
@@ -330,6 +343,16 @@ export default function TagManagementModal({
               </div>
 
               {/* Tag List */}
+              <div style={{ position: "relative" }}>
+                 <input 
+                    type="text" 
+                    placeholder="Search tags..." 
+                    value={modalSearchQuery}
+                    onChange={(e) => setModalSearchQuery(e.target.value)}
+                    style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "#fff", fontSize: "0.875rem", outline: "none", marginBottom: "1rem" }}
+                 />
+              </div>
+              
               {localTags.length === 0 ? (
                 <div
                   className="flex flex-col items-center justify-center text-center"
@@ -343,9 +366,13 @@ export default function TagManagementModal({
                     Add your first tag above.
                   </p>
                 </div>
+              ) : filteredLocalTags.length === 0 ? (
+                <p style={{ color: "#6b7280", fontSize: "0.875rem", textAlign: "center", padding: "2.5rem 1rem" }}>
+                  No matching tags found.
+                </p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-                  {localTags.map((tag) => (
+                  {filteredLocalTags.map((tag) => (
                     <div
                       key={tag.id}
                       className="flex items-center justify-between border border-white/5 group hover:border-white/10 transition-colors"
@@ -370,7 +397,7 @@ export default function TagManagementModal({
                           }}
                         />
                       ) : (
-                        <div className="flex items-center" style={{ gap: "0.5rem" }}>
+                        <div className="flex items-center" style={{ gap: "0.75rem" }}>
                           <span
                             style={{
                               width: "0.5rem",
@@ -382,6 +409,17 @@ export default function TagManagementModal({
                           />
                           <span style={{ color: "#e5e7eb", fontWeight: 500, fontSize: "0.875rem" }}>
                             {tag.name}
+                          </span>
+                          <span style={{
+                              fontSize: "0.65rem",
+                              background: tagUsageCount[tag.id] ? "rgba(139, 92, 246, 0.15)" : "rgba(255,255,255,0.05)",
+                              color: tagUsageCount[tag.id] ? "#c4b5fd" : "#9ca3af",
+                              padding: "0.1rem 0.4rem",
+                              borderRadius: "4px",
+                              fontWeight: 600,
+                              border: tagUsageCount[tag.id] ? "1px solid rgba(139, 92, 246, 0.3)" : "1px solid rgba(255,255,255,0.1)"
+                          }}>
+                              {tagUsageCount[tag.id] ? `${tagUsageCount[tag.id]} beacon${tagUsageCount[tag.id] > 1 ? 's' : ''}` : "Unused"}
                           </span>
                         </div>
                       )}
@@ -446,7 +484,17 @@ export default function TagManagementModal({
                   No beacons in this sector.
                 </p>
               ) : (
-                sector.beacons.map((beacon) => {
+                <>
+                  <div style={{ position: "relative" }}>
+                     <input 
+                        type="text" 
+                        placeholder="Search tags..." 
+                        value={modalSearchQuery}
+                        onChange={(e) => setModalSearchQuery(e.target.value)}
+                        style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "#fff", fontSize: "0.875rem", outline: "none", marginBottom: "0.25rem" }}
+                     />
+                  </div>
+                  {sector.beacons.map((beacon) => {
                   const selectedTagIds = assignments[beacon.id] || [];
                   const domain = (() => { try { return new URL(beacon.url).hostname.replace("www.", ""); } catch { return beacon.url; } })();
                   return (
@@ -507,7 +555,8 @@ export default function TagManagementModal({
                       )}
                     </div>
                   );
-                })
+                })}
+                </>
               )}
             </div>
           )}

@@ -222,6 +222,7 @@ export default function StationClient({
   >("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagSearchQuery, setTagSearchQuery] = useState("");
   // Local override for sector tags — updated optimistically from TagManagementModal
   const [sectorTagsOverride, setSectorTagsOverride] = useState<Record<string, import("@/types").Tag[]>>({});
   const [isFilterExiting, setIsFilterExiting] = useState(false);
@@ -1689,34 +1690,61 @@ export default function StationClient({
                               borderRadius: "8px",
                               padding: "0.75rem",
                               zIndex: 50,
-                              minWidth: "220px",
+                              minWidth: "250px",
                               boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
                               display: "flex",
-                              flexWrap: "wrap",
+                              flexDirection: "column",
                               gap: "0.5rem",
                             }}>
-                            <div style={{ width: "100%", marginBottom: "0.25rem", color: "#a1a1aa", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Filter by Tags</div>
-                            {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).map(opt => (
-                              <button
-                                key={opt.id}
-                                onClick={() => applyFilterSort(() => setSelectedTags(prev => prev.includes(opt.id) ? prev.filter(id => id !== opt.id) : [...prev, opt.id]))}
-                                style={{
-                                  padding: "0.25rem 0.75rem",
-                                  borderRadius: "9999px",
-                                  fontSize: "0.75rem",
-                                  fontWeight: 500,
-                                  transition: "all 0.2s",
-                                  border: selectedTags.includes(opt.id) ? "1px solid rgba(139, 92, 246, 0.5)" : "1px solid transparent",
-                                  background: selectedTags.includes(opt.id) ? "rgba(139, 92, 246, 0.2)" : "rgba(255, 255, 255, 0.05)",
-                                  color: selectedTags.includes(opt.id) ? "#c4b5fd" : "#d1d5db",
-                                }}
-                              >
-                                {opt.name}
-                              </button>
-                            ))}
-                            {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).length === 0 && (
-                               <p style={{ color: "#6b7280", fontSize: "0.875rem", fontStyle: "italic", width: "100%", textAlign: "center", padding: "1rem 0" }}>No tags available in this sector.</p>
-                            )}
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+                                <div style={{ color: "#a1a1aa", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Filter by Tags</div>
+                                {selectedTags.length > 0 && (
+                                    <button 
+                                        onClick={() => setSelectedTags([])}
+                                        style={{ color: "#ef4444", fontSize: "0.7rem", fontWeight: 600, background: "rgba(239, 68, 68, 0.1)", padding: "0.15rem 0.4rem", borderRadius: "4px" }}
+                                    >
+                                        Clear All
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {/* Live Search Input */}
+                            <div style={{ position: "relative" }}>
+                                <MagnifyingGlassIcon width={14} height={14} style={{ position: "absolute", left: "0.5rem", top: "50%", transform: "translateY(-50%)", color: "#6b7280" }} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search tags..." 
+                                    value={tagSearchQuery}
+                                    onChange={(e) => setTagSearchQuery(e.target.value)}
+                                    style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", padding: "0.35rem 0.5rem 0.35rem 1.75rem", color: "#fff", fontSize: "0.75rem", outline: "none" }}
+                                />
+                            </div>
+
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.25rem", maxHeight: "200px", overflowY: "auto" }}>
+                                {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? [])
+                                .filter(opt => opt.name.toLowerCase().includes(tagSearchQuery.toLowerCase()))
+                                .map(opt => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => applyFilterSort(() => setSelectedTags(prev => prev.includes(opt.id) ? prev.filter(id => id !== opt.id) : [...prev, opt.id]))}
+                                    style={{
+                                    padding: "0.25rem 0.75rem",
+                                    borderRadius: "9999px",
+                                    fontSize: "0.75rem",
+                                    fontWeight: 500,
+                                    transition: "all 0.2s",
+                                    border: selectedTags.includes(opt.id) ? "1px solid rgba(139, 92, 246, 0.5)" : "1px solid transparent",
+                                    background: selectedTags.includes(opt.id) ? "rgba(139, 92, 246, 0.2)" : "rgba(255, 255, 255, 0.05)",
+                                    color: selectedTags.includes(opt.id) ? "#c4b5fd" : "#d1d5db",
+                                    }}
+                                >
+                                    {opt.name}
+                                </button>
+                                ))}
+                                {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).filter(opt => opt.name.toLowerCase().includes(tagSearchQuery.toLowerCase())).length === 0 && (
+                                <p style={{ color: "#6b7280", fontSize: "0.875rem", fontStyle: "italic", width: "100%", textAlign: "center", padding: "1rem 0" }}>No matching tags.</p>
+                                )}
+                            </div>
                           </div>
                         )}
                       </div>
