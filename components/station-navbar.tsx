@@ -146,7 +146,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
         {/* Logo */}
         <Link href={user ? "/station" : "/"} className="navbar-logo" style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
           <img src="/logo.png" alt="Orbit Station" fetchPriority="high" style={{ height: "40px", width: "auto", objectFit: "contain", filter: "drop-shadow(0 0 10px rgba(139, 92, 246, 0.6))" }} />
-          <span style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#f8fafc", letterSpacing: "0.5px", textShadow: "0 0 10px rgba(139, 92, 246, 0.6), 0 0 20px rgba(139, 92, 246, 0.4)" }} className="hidden sm:inline">Orbit Station</span>
+          <span style={{ fontSize: "1.1rem", fontWeight: "bold", color: "var(--color-starlight)", letterSpacing: "0.5px", textShadow: "0 0 10px rgba(139, 92, 246, 0.6), 0 0 20px rgba(139, 92, 246, 0.4)" }} className="hidden sm:inline">Orbit Station</span>
         </Link>
         {user && pathname !== "/station" && pathname !== "/settings" && pathname !== "/analytics" && !isPublicProfile && (
           <Link href="/station" className="btn btn-outline btn-sm" style={{ marginLeft: "0.25rem", padding: "0.2rem 0.5rem", height: "auto", display: "flex", gap: "0.25rem", alignItems: "center", border: "1px solid rgba(139,92,246,0.3)", borderRadius: "6px" }}>
@@ -186,11 +186,11 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                     key={pilot.id}
                     href={`/station/${pilot.username}`}
                     className={`pilot-suggest-item ${focusedSuggestIndex === idx ? "bg-starlight/10" : ""}`}
-                    style={focusedSuggestIndex === idx ? { background: "rgba(255,255,255,0.1)" } : {}}
+                    style={focusedSuggestIndex === idx ? { background: "var(--color-border)" } : {}}
                     onClick={() => setShowSuggestions(false)}
                     onMouseEnter={() => setFocusedSuggestIndex(idx)}
                   >
-                    <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#374151", overflow: "hidden" }}>
+                    <div style={{ width: 24, height: 24, borderRadius: "50%", background: "var(--color-border)", overflow: "hidden" }}>
                       {pilot.image ? <img src={pilot.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", width: "100%", height: "100%" }}>{(pilot.name || pilot.username)[0].toUpperCase()}</span>}
                     </div>
                     <span style={{ fontSize: "0.85rem" }}>{pilot.name || pilot.username}</span>
@@ -273,8 +273,8 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
               </div>
 
               <div className="navbar-user-info" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", marginRight: "0.75rem", justifyContent: "center" }}>
-                <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#fff", lineHeight: 1 }}>{user.name ?? "Pilot"}</span>
-                {user.callsign && <span style={{ fontSize: "0.7rem", color: "#a78bfa", marginTop: "0.2rem" }}>{user.callsign}</span>}
+                <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--color-starlight)", lineHeight: 1 }}>{user.name ?? "Pilot"}</span>
+                {user.callsign && <span style={{ fontSize: "0.7rem", color: "var(--color-violet-light)", marginTop: "0.2rem" }}>{user.callsign}</span>}
               </div>
               <button
                 id="btn-user-menu"
@@ -332,7 +332,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                           <SwatchIcon width={18} height={18} /> Theme
                         </div>
-                        <span style={{ fontSize: "0.75rem", color: "#a78bfa", textTransform: "capitalize" }}>{theme || "space"}</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--color-violet-light)", textTransform: "capitalize" }}>{theme || "space"}</span>
                       </button>
                       <AnimatePresence>
                         {themeMenuOpen && (
@@ -340,7 +340,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
-                            style={{ overflow: "hidden", background: "rgba(0,0,0,0.2)", borderRadius: "8px", margin: "0.25rem 0.5rem", padding: "0.25rem 0" }}
+                            style={{ overflow: "hidden", background: "var(--color-border)", borderRadius: "8px", margin: "0.25rem 0.5rem", padding: "0.25rem 0" }}
                           >
                             <button className="navbar-menu-item" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem", width: "100%" }} onClick={() => { setTheme("space"); setThemeMenuOpen(false); }}>
                               <SparklesIcon width={14} height={14} /> Space (Galaxy)
