@@ -50,6 +50,8 @@
   --color-border-active: rgba(124, 92, 252, 0.7);
 
   /* --- Glassmorphism --- */
+  --nav-danger-hover-bg: rgba(244, 114, 182, 0.15);
+  --nav-danger-hover-color: var(--color-pink-glow);
   --nav-danger-color: var(--color-pink-glow);
   --nav-icon-color: #a78bfa;
   --nav-icon-hover-bg: rgba(139,92,246,0.2);
@@ -101,6 +103,8 @@
   --color-violet-dim: #ede9fe;
   --color-border: rgba(124, 92, 252, 0.15);
   
+  --nav-danger-hover-bg: rgba(219, 39, 119, 0.1);
+  --nav-danger-hover-color: var(--color-pink-mid);
   --nav-danger-color: var(--color-pink-mid);
   --nav-icon-color: #475569;
   --nav-icon-hover-bg: rgba(15, 23, 42, 0.05);
@@ -125,6 +129,8 @@
   --color-comet: #a1a1aa;
   --color-dust: #52525b;
   
+  --nav-danger-hover-bg: rgba(244, 114, 182, 0.15);
+  --nav-danger-hover-color: var(--color-pink-glow);
   --nav-danger-color: var(--color-pink-glow);
   --nav-icon-color: #a1a1aa;
   --nav-icon-hover-bg: rgba(255, 255, 255, 0.08);
@@ -1018,8 +1024,8 @@ pre {
 }
 
 .navbar-menu-item-danger:hover {
-  background: var(--color-pink-mid);
-  color: var(--color-starlight);
+  background: var(--nav-danger-hover-bg);
+  color: var(--nav-danger-hover-color) !important;
 }
 
 /* STATION LAYOUT GRID */
