@@ -5497,8 +5497,8 @@ body.no-loading-anim #warp-loader {
   --hsr-input-bg: var(--color-void);
   --hsr-input-border: var(--color-border);
   --hsr-input-focus: var(--color-primary);
-  --hsr-card-art-bg: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
-  --hsr-card-placeholder-bg: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
+  --hsr-card-art-bg: linear-gradient(160deg, #ffffff 0%, #cbd5e1 60%, #94a3b8 100%);
+  --hsr-card-placeholder-bg: linear-gradient(160deg, #ffffff 0%, #cbd5e1 60%, #94a3b8 100%);
   --hsr-card-initial-color: var(--color-comet);
   --hsr-card-back-glass-bg: var(--glass-bg);
   --hsr-card-back-glass-border: var(--glass-border);
@@ -5543,8 +5543,8 @@ body.no-loading-anim #warp-loader {
   --hsr-input-bg: var(--color-void);
   --hsr-input-border: var(--color-border);
   --hsr-input-focus: var(--color-primary);
-  --hsr-card-art-bg: var(--item-bg);
-  --hsr-card-placeholder-bg: var(--item-bg);
+  --hsr-card-art-bg: linear-gradient(160deg, #334155 0%, #0f172a 60%, #020617 100%);
+  --hsr-card-placeholder-bg: linear-gradient(160deg, #334155 0%, #0f172a 60%, #020617 100%);
   --hsr-card-initial-color: var(--color-comet);
   --hsr-card-back-glass-bg: var(--glass-bg);
   --hsr-card-back-glass-border: var(--glass-border);
