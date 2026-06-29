@@ -240,14 +240,14 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
             <>
               <div className="hidden md:flex items-center" style={{ gap: "0.5rem", marginRight: "2.5rem" }}>
                 {user.station?.isPublic && user.username && (
-                  <Link href={`/station/${user.username}`} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <Link href={`/station/${user.username}`} className="navbar-icon-btn group relative hover:bg-[var(--color-border)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }}>
                     <GlobeAltIcon width={20} height={20} />
                     <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-nebula border border-border rounded-lg text-xs font-semibold text-starlight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
                       Public Station <span className="text-comet ml-1">({parsedShortcuts.publicStation})</span>
                     </div>
                   </Link>
                 )}
-                <button onClick={onOpenFriends} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                <button onClick={onOpenFriends} className="navbar-icon-btn group relative hover:bg-[var(--color-border)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }}>
                   <UsersIcon width={20} height={20} />
                   {stats?.hasNotifications && (
                     <span style={{ position: "absolute", top: "2px", right: "2px", width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid var(--color-cosmos)" }}></span>
@@ -257,14 +257,14 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                   </div>
                 </button>
                 {user.station?.isPublic && (
-                  <Link href="/analytics" className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <Link href="/analytics" className="navbar-icon-btn group relative hover:bg-[var(--color-border)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }}>
                     <ChartBarIcon width={20} height={20} />
                     <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-nebula border border-border rounded-lg text-xs font-semibold text-starlight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
                       Analytics <span className="text-comet ml-1">({parsedShortcuts.analytics})</span>
                     </div>
                   </Link>
                 )}
-                <Link href="/settings" className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                <Link href="/settings" className="navbar-icon-btn group relative hover:bg-[var(--color-border)]" style={{ padding: "8px", borderRadius: "8px", color: "var(--color-comet)", transition: "all 0.2s" }}>
                   <Cog8ToothIcon width={20} height={20} />
                   <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-nebula border border-border rounded-lg text-xs font-semibold text-starlight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
                     Settings <span className="text-comet ml-1">({parsedShortcuts.settings})</span>
@@ -274,7 +274,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
 
               <div className="navbar-user-info" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", marginRight: "0.75rem", justifyContent: "center" }}>
                 <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--color-starlight)", lineHeight: 1 }}>{user.name ?? "Pilot"}</span>
-                {user.callsign && <span style={{ fontSize: "0.7rem", color: "var(--color-violet-light)", marginTop: "0.2rem" }}>{user.callsign}</span>}
+                {user.callsign && <span style={{ fontSize: "0.7rem", color: "var(--color-comet)", marginTop: "0.2rem" }}>{user.callsign}</span>}
               </div>
               <button
                 id="btn-user-menu"
@@ -332,7 +332,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                           <SwatchIcon width={18} height={18} /> Theme
                         </div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--color-violet-light)", textTransform: "capitalize" }}>{theme || "space"}</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--color-comet)", textTransform: "capitalize" }}>{theme || "space"}</span>
                       </button>
                       <AnimatePresence>
                         {themeMenuOpen && (
