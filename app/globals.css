@@ -10,23 +10,17 @@
    CSS CUSTOM PROPERTIES — DESIGN TOKENS
    ============================================================ */
 :root {
-  /* --- Base Colors --- */
+  /* --- Base Colors (Dark Theme) --- */
   --color-void: #030712;
-  /* deepest space — main bg */
   --color-cosmos: #0a0f1e;
-  /* slightly lighter — card bg */
   --color-nebula: #111827;
-  /* panel/surface bg */
   --color-aurora: #1c2a4a;
-  /* subtle hover / border */
-
+  
   /* --- Text Colors --- */
   --color-starlight: #f0f4ff;
-  /* primary text */
   --color-comet: #9aa5c4;
-  /* secondary/muted text */
   --color-dust: #4b5675;
-  /* disabled / placeholder */
+  --color-border: rgba(255, 255, 255, 0.1);
 
   /* --- Accent — Nebula Violet (primary brand) --- */
   --color-violet-dim: #2d1b69;
@@ -1280,8 +1274,8 @@ pre {
   cursor: pointer;
   overflow: visible;
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-cosmos);
+  border: 1px solid var(--color-border);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
