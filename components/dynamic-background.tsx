@@ -23,8 +23,8 @@ export default function DynamicBackground(props: Props) {
   }, []);
 
   if (!mounted) {
-    // Render default space background on server to avoid layout shift
-    return <SpaceBackground {...props} />;
+    // Render an empty div on server to avoid flashing the wrong theme
+    return <div className="fixed inset-0 z-[-1]" />;
   }
 
   if (theme === "light") {

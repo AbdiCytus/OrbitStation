@@ -108,7 +108,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
           <motion.div 
             className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] rounded-full blur-[120px] opacity-50"
             style={{ background: "#ede9fe", willChange: "transform, opacity" }}
-            animate={animEnabled && !warpFlash ? {
+            animate={animEnabled ? {
               scale: [1, 1.2, 1],
               opacity: [0.4, 0.6, 0.4]
             } : {}}
@@ -118,7 +118,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
           <motion.div 
             className="absolute bottom-[-10%] right-[-10%] w-[70vw] h-[70vw] rounded-full blur-[130px] opacity-50"
             style={{ background: "#cffafe", willChange: "transform, opacity" }}
-            animate={animEnabled && !warpFlash ? {
+            animate={animEnabled ? {
               scale: [1, 1.3, 1],
               opacity: [0.3, 0.7, 0.3]
             } : {}}
@@ -128,7 +128,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
           <motion.div 
             className="absolute top-[20%] left-[30%] w-[50vw] h-[50vw] rounded-full blur-[120px] opacity-[0.15] transition-colors duration-1000"
             style={{ background: sectorColor || "#fce7f3", willChange: "transform, opacity" }}
-            animate={animEnabled && !warpFlash ? {
+            animate={animEnabled ? {
               scale: [1, 1.1, 1],
               x: [0, 30, 0]
             } : {}}
@@ -144,7 +144,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
             boxShadow: "inset 0 -40px 60px rgba(255,255,255,1), inset 0 20px 40px rgba(148,163,184,0.15), 0 50px 100px rgba(148,163,184,0.2)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, 1, 0, -1, 0],
             scale: [1, 1.02, 1]
           } : {}}
@@ -162,7 +162,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
             boxShadow: "inset 0 40px 60px rgba(255,255,255,1), inset 0 -20px 40px rgba(148,163,184,0.15), 0 -50px 100px rgba(148,163,184,0.2)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, -1, 0, 1, 0],
             scale: [1, 1.02, 1]
           } : {}}
@@ -180,7 +180,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
             boxShadow: "inset -40px 0 60px rgba(255,255,255,1), inset 20px 0 40px rgba(148,163,184,0.15), 40px 0 100px rgba(148,163,184,0.2)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, 2, 0, -2, 0]
           } : {}}
           transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
@@ -196,7 +196,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
             boxShadow: "inset 40px 0 60px rgba(255,255,255,1), inset -20px 0 40px rgba(148,163,184,0.15), -40px 0 100px rgba(148,163,184,0.2)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, -2, 0, 2, 0]
           } : {}}
           transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
@@ -213,7 +213,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
             zIndex: -1,
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, 8, -8, 0],
             scale: [1, 1.05, 1]
           } : {}}
@@ -229,7 +229,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
             boxShadow: "inset -10px -10px 20px rgba(148,163,184,0.15), inset 10px 10px 20px rgba(255,255,255,1), 10px 20px 30px rgba(148,163,184,0.2)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             y: [0, -40, 0],
             x: [0, 20, 0],
             rotate: [0, 180, 360]
@@ -246,7 +246,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
             boxShadow: "inset -10px -10px 20px rgba(148,163,184,0.15), inset 15px 15px 20px rgba(255,255,255,1), 15px 30px 40px rgba(148,163,184,0.2)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             y: [0, 30, 0],
             rotate: [-10, 10, -10]
           } : {}}
@@ -261,7 +261,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
             boxShadow: "inset -5px -5px 10px rgba(148,163,184,0.2), inset 5px 5px 10px rgba(255,255,255,1), 5px 15px 20px rgba(148,163,184,0.15)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             y: [0, -20, 0],
             x: [0, -20, 0],
             scale: [1, 1.1, 1]
@@ -279,7 +279,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
             zIndex: -2,
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             y: [0, 50, 0],
             rotate: [0, -90, 0],
             scale: [1, 1.05, 1]
@@ -288,7 +288,7 @@ export default function LightBackground({ animEnabled = true, sector, sectorColo
         />
 
         {/* Animated Light Loops (The glowing energy reflecting on the walls) */}
-        {animEnabled && !warpFlash && (
+        {animEnabled && (
           <>
             <motion.div
               animate={{

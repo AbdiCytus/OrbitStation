@@ -114,7 +114,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
               backgroundRepeat: "repeat",
               willChange: "transform"
             }}
-            animate={animEnabled && !warpFlash ? {
+            animate={animEnabled ? {
               backgroundPosition: ["0px 0px", "200px 200px"]
             } : {}}
             transition={{ duration: 20, ease: "linear", repeat: Infinity }}
@@ -124,7 +124,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
           <motion.div 
             className="absolute top-[30%] left-[30%] w-[40vw] h-[40vw] rounded-full blur-[140px] opacity-[0.1] transition-colors duration-1000"
             style={{ background: sectorColor || "#ffffff", willChange: "transform, opacity" }}
-            animate={animEnabled && !warpFlash ? {
+            animate={animEnabled ? {
               scale: [1, 1.2, 1],
               x: [0, 20, 0]
             } : {}}
@@ -140,7 +140,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
             boxShadow: "inset 0 -3px 8px rgba(255,255,255,0.15), inset 0 20px 50px rgba(0,0,0,0.9), 0 50px 100px rgba(0,0,0,0.95)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, 1.5, 0, -1.5, 0]
           } : {}}
           transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
@@ -158,7 +158,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
             boxShadow: "inset 0 3px 8px rgba(255,255,255,0.15), inset 0 -20px 50px rgba(0,0,0,0.9), 0 -50px 100px rgba(0,0,0,0.95)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, -1.5, 0, 1.5, 0]
           } : {}}
           transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
@@ -176,7 +176,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
             boxShadow: "inset -3px 0 8px rgba(255,255,255,0.12), inset 20px 0 50px rgba(0,0,0,0.9), 50px 0 100px rgba(0,0,0,0.8)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, 2, 0, -2, 0]
           } : {}}
           transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
@@ -193,7 +193,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
             boxShadow: "inset 3px 0 8px rgba(255,255,255,0.12), inset -20px 0 50px rgba(0,0,0,0.9), -50px 0 100px rgba(0,0,0,0.8)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, -2, 0, 2, 0]
           } : {}}
           transition={{ duration: 29, repeat: Infinity, ease: "easeInOut" }}
@@ -211,7 +211,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
             zIndex: -1,
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             rotate: [0, 5, -5, 0]
           } : {}}
           transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
@@ -226,7 +226,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
             boxShadow: "inset -5px -5px 15px rgba(0,0,0,0.9), inset 2px 2px 5px rgba(255,255,255,0.2), 10px 15px 25px rgba(0,0,0,0.8)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             y: [0, -30, 0],
             x: [0, 15, 0],
             rotate: [0, 180, 360]
@@ -243,7 +243,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
             boxShadow: "inset -5px -5px 15px rgba(0,0,0,0.9), inset 2px 2px 5px rgba(255,255,255,0.2), 15px 20px 30px rgba(0,0,0,0.8)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             y: [0, 25, 0],
             rotate: [-15, 15, -15]
           } : {}}
@@ -258,7 +258,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
             boxShadow: "inset -3px -3px 8px rgba(0,0,0,0.9), inset 1px 1px 3px rgba(255,255,255,0.25), 5px 10px 15px rgba(0,0,0,0.7)",
             willChange: "transform"
           }}
-          animate={animEnabled && !warpFlash ? {
+          animate={animEnabled ? {
             y: [0, -15, 0],
             x: [0, -15, 0]
           } : {}}
@@ -266,7 +266,7 @@ export default function DarkBackground({ animEnabled = true, sector, sectorColor
         />
 
         {/* Animated Light Loops (The glowing energy reflecting on the dark walls) */}
-        {animEnabled && !warpFlash && (
+        {animEnabled && (
           <>
             <motion.div
               animate={{
