@@ -124,7 +124,7 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
             <span style={{ fontSize: "0.7rem", color: "var(--color-starlight)" }} title={`Added by ${beacon._creator.name}`}>Added by <span style={{ color: "#fff" }}>{beacon._creator.name?.split(" ")[0]}</span></span>
           </div>
         )}
-        {beacon.tags && beacon.tags.length > 0 && (
+        {!isAllBeacons && beacon.tags && beacon.tags.length > 0 && (
           <div style={{ marginTop: "0.75rem", display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
             {beacon.tags.slice(0, 3).map((bt) => (
               <span

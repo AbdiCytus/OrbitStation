@@ -265,13 +265,14 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
           </div>
           <div className="hsr-topbar-actions screenshot-ignore">
             <button
+              id="btn-screenshot"
               className="hsr-action-btn"
               onClick={captureScreenshot}
               disabled={isCapturing}
               title="Capture screenshot"
             >
               <span>{isCapturing ? <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" /> : <CameraIcon width={16} height={16} />}</span>
-              <span className="hsr-action-label hidden sm:inline">{isCapturing ? "Capturing..." : "Screenshot"}</span>
+              <span className="hsr-action-label hidden md:inline">{isCapturing ? "Capturing..." : "Screenshot"}</span>
             </button>
             {!readOnly && (
               <>
@@ -408,11 +409,12 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             <h2 className="hsr-title">{beacon.title}</h2>
 
             {/* Tags (Mobile Only) */}
-            <div className="flex sm:hidden flex-wrap gap-1.5 mb-4 mt-1">
+            <div className="flex sm:hidden flex-wrap items-center gap-1.5 mb-4 mt-1">
               {beacon.tags?.map(bt => (
                 <span
                   key={bt.tag.id}
-                  className="inline-flex items-center gap-1 text-[0.65rem] px-2.5 py-1 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
+                  className="inline-flex items-center gap-1 text-[0.65rem] rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
+                  style={{ padding: "0.05rem 0.6rem" }}
                 >
                   <TagIcon width={10} height={10} />
                   {bt.tag.name}
@@ -426,11 +428,12 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             )}
 
             {/* Tags (Desktop Only) */}
-            <div className="hidden sm:flex flex-wrap gap-1.5 mb-4 mt-2">
+            <div className="hidden sm:flex flex-wrap items-center gap-1.5 mb-4 mt-2">
               {beacon.tags?.map(bt => (
                 <span
                   key={bt.tag.id}
-                  className="inline-flex items-center gap-1.5 text-[0.75rem] px-3 py-1.5 rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
+                  className="inline-flex items-center gap-1.5 text-[0.75rem] rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
+                  style={{ padding: "0.25rem 0.75rem" }}
                 >
                   <TagIcon width={12} height={12} />
                   {bt.tag.name}

@@ -35,6 +35,7 @@ export default function TagManagementModal({
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [editTagName, setEditTagName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tagToDelete, setTagToDelete] = useState<string | null>(null);
 
   // Assign Tab State: beaconId -> array of tagIds
   const [assignments, setAssignments] = useState<Record<string, string[]>>({});
@@ -77,7 +78,7 @@ export default function TagManagementModal({
   };
 
   const overlayClass = isClosing || !isReady ? "opacity-0" : "opacity-100";
-  const panelClass = isClosing || !isReady ? "translate-y-full opacity-0" : "translate-y-0 opacity-100";
+  const panelClass = isClosing || !isReady ? "translate-y-full sm:translate-y-0 sm:scale-95 opacity-0" : "translate-y-0 sm:scale-100 opacity-100";
 
   if (!isOpen && !isClosing) return null;
 
@@ -129,8 +130,13 @@ export default function TagManagementModal({
     }
   };
 
-  const handleDeleteTag = async (tagId: string) => {
-    if (!confirm("Delete this tag? It will be removed from all beacons.")) return;
+  const handleDeleteTag = (tagId: string) => {
+    setTagToDelete(tagId);
+  };
+
+  const executeDeleteTag = async () => {
+    if (!tagToDelete) return;
+    const tagId = tagToDelete;
     setIsSubmitting(true);
     const res = await deleteTag(tagId);
     setIsSubmitting(false);
@@ -152,6 +158,7 @@ export default function TagManagementModal({
       toast.success("Tag deleted successfully!");
       router.refresh();
     }
+    setTagToDelete(null);
   };
 
   // --- Assign Tag Handlers ---
@@ -212,17 +219,34 @@ export default function TagManagementModal({
         onClick={handleClose}
       />
 
+      {/* Delete Confirm Modal */}
+      {tagToDelete && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "rgba(11, 12, 16, 0.9)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }}>
+          <div style={{ padding: "1.5rem", background: "#1f1f2e", borderRadius: "1rem", border: "1px solid rgba(239, 68, 68, 0.4)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+            <TrashIcon width={32} height={32} style={{ color: "#ef4444", margin: "0 auto 1rem" }} />
+            <h3 style={{ color: "#fff", fontSize: "1.1rem", marginBottom: "0.5rem" }}>Delete Tag?</h3>
+            <p style={{ color: "#a1a1aa", fontSize: "0.85rem", marginBottom: "1.5rem" }}>Are you sure? It will be removed from all beacons.</p>
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              <button onClick={() => setTagToDelete(null)} disabled={isSubmitting} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "rgba(255,255,255,0.1)", color: "#fff" }}>Cancel</button>
+              <button onClick={executeDeleteTag} disabled={isSubmitting} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "#ef4444", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                {isSubmitting && <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" />}
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Panel */}
       <div
-        className={`relative w-full sm:max-w-2xl flex flex-col overflow-hidden z-10 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${panelClass}`}
+        className={`relative w-full sm:max-w-2xl flex flex-col overflow-hidden z-10 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] rounded-t-2xl sm:rounded-2xl ${panelClass}`}
         style={{
           background: "#0d0e14",
           border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: "1rem 1rem 0 0",
         }}
       >
         {/* Added wrapper for height limits */}
-        <div className="flex flex-col w-full h-full sm:h-auto min-h-[50vh] sm:min-h-0 sm:h-[50vh]">
+        <div className="flex flex-col w-full h-full sm:h-auto min-h-[75vh] sm:min-h-[70vh] sm:max-h-[85vh]">
         {/* Header */}
         <div
           className="flex items-center justify-between border-b border-white/10"

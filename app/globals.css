@@ -2295,7 +2295,9 @@ pre {
     grid-column: 2 !important;
     grid-row: 2 !important;
     margin: 0 !important;
-    height: 100% !important;
+    height: auto !important;
+    align-self: start !important;
+    margin-top: 0.25rem !important;
     max-height: 130px !important;
     /* Limit height so it doesn't push down past the card */
     overflow: hidden !important;
