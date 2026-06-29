@@ -69,6 +69,8 @@
   --item-border: rgba(255, 255, 255, 0.1);
   --glass-bg-hover: rgba(28, 42, 74, 0.7);
   --glass-border: rgba(124, 92, 252, 0.15);
+  --toggle-inactive: rgba(255, 255, 255, 0.1);
+  --toggle-knob: white;
   --glass-blur: blur(16px);
   --glass-blur-sm: blur(8px);
 
@@ -5392,4 +5394,5 @@ body.no-loading-anim #warp-loader {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 
