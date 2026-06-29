@@ -24,7 +24,10 @@ export async function getMyStation() {
         include: {
           beacons: {
             orderBy: { order: "asc" },
-            include: { creator: { select: { name: true, image: true } } }
+            include: { 
+              creator: { select: { name: true, image: true } },
+              tags: { include: { tag: true } }
+            }
           },
           collaborators: {
             include: {
@@ -33,7 +36,8 @@ export async function getMyStation() {
           },
           station: {
             select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
-          }
+          },
+          tags: true,
         },
       },
     },
@@ -56,7 +60,10 @@ export async function getCollabSectors() {
     include: {
       beacons: {
         orderBy: { order: "asc" },
-        include: { creator: { select: { name: true, image: true } } }
+        include: { 
+          creator: { select: { name: true, image: true } },
+          tags: { include: { tag: true } }
+        }
       },
       collaborators: {
         include: {
@@ -65,7 +72,8 @@ export async function getCollabSectors() {
       },
       station: {
         select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
-      }
+      },
+      tags: true,
     }
   });
 }
