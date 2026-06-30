@@ -1560,16 +1560,7 @@ export default function StationClient({
                         className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`}
                         style={{ position: "relative" }}>
                         <button
-                          className="custom-dropdown-btn"
-                          style={{
-                            background:
-                              filterVisibility !== "all"
-                                ? "var(--sector-active-bg)"
-                                : "var(--nav-glass-bg)",
-                            border: `1px solid ${filterVisibility !== "all" ? "var(--color-border-active)" : "var(--glass-border)"}`,
-                            color:
-                              filterVisibility !== "all" ? "var(--sector-active-text)" : "var(--color-comet)",
-                          }}
+                          className={`station-btn ${filterVisibility !== "all" ? "active" : ""}`}
                           onClick={() =>
                             setOpenMenu(openMenu === "filter" ? null : "filter")
                           }
