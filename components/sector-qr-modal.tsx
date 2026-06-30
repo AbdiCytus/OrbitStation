@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { XMarkIcon, DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
-import { generateSectorInvite } from "@/lib/actions";
+import { generateSectorInvite } from "@/lib/actions/sector.actions";
 
 interface Props {
   isOpen: boolean;

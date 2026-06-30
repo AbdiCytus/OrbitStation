@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { updateSector, getFriends, removeCollaborator, sendTransferOwnershipInvite, hasCollabInvites, getPendingCollabInvites, getSectorOwner } from "@/lib/actions";
+import { updateSector, removeCollaborator, sendTransferOwnershipInvite, hasCollabInvites, getPendingCollabInvites, getSectorOwner } from "@/lib/actions/sector.actions";
+import { getFriends } from "@/lib/actions/social.actions";
 import type { SectorWithBeacons } from "@/types";
 import { toast } from "sonner";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ShieldCheckIcon, ShieldExclamationIcon } from "@heroicons/react/24/outline";
-import { setCollabRole } from "@/lib/actions";
+import { setCollabRole } from "@/lib/actions/chat.actions";
 
 import { DynamicIcon, ICON_OPTIONS } from "@/components/dynamic-icon";
 

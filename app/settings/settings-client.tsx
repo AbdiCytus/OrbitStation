@@ -5,7 +5,7 @@ import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Cropper from "react-easy-crop";
-import { deleteAccount } from "@/lib/actions";
+import { deleteAccount } from "@/lib/actions/social.actions";
 import { toast } from "sonner";
 import { BADGE_REGISTRY, BADGE_COLORS } from "@/lib/badges/registry";
 import * as SolidIcons from "@heroicons/react/24/solid";

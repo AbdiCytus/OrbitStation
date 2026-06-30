@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { XMarkIcon, PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
-import { createTag, updateTag, deleteTag, assignTagsToBeacon } from "@/lib/actions";
+import { createTag, updateTag, deleteTag, assignTagsToBeacon } from "@/lib/actions/chat.actions";
 import type { SectorWithBeacons, Tag } from "@/types";
 import { useRouter } from "next/navigation";
 

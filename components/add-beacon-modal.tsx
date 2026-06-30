@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from "react";
-import { createBeacon } from "@/lib/actions";
+import { createBeacon } from "@/lib/actions/beacon.actions";
 import { useMetaFetcher } from "@/hooks/use-meta-fetcher";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import type { Beacon, SectorWithBeacons } from "@/types";

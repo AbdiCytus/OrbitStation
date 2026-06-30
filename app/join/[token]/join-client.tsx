@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { joinSectorByInviteToken } from "@/lib/actions";
+import { joinSectorByInviteToken } from "@/lib/actions/sector.actions";
 import { toast } from "sonner";
 import { UserGroupIcon, RocketLaunchIcon } from "@heroicons/react/24/outline";
 

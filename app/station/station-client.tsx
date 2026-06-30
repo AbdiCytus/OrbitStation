@@ -22,7 +22,7 @@ import FriendsModal from "@/components/friends-modal";
 import StationNavbar from "@/components/station-navbar";
 import SpaceBackground from "@/components/space-background";
 import StaticStarfield from "@/components/static-starfield";
-import { deleteSector, reorderSectors } from "@/lib/actions";
+import { deleteSector, reorderSectors } from "@/lib/actions/sector.actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import {
   PlusIcon,

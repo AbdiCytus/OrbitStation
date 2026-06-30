@@ -10,14 +10,8 @@ import {
   ArrowUturnLeftIcon, LinkIcon, UserPlusIcon,
   GlobeAltIcon, EyeIcon, RocketLaunchIcon, UsersIcon, MapPinIcon
 } from "@heroicons/react/24/outline";
-import {
-  getGroupMessages, sendGroupMessage, editGroupMessage,
-  deleteGroupMessage, muteMember, unmuteMember,
-  clearGroupChat, kickMember, getMutedMembers,
-  sendFriendRequest, getFriends, pinGroupMessageAction,
-  setCollabRole, blindMember, sightMember, getBlindedMembers,
-  unpinGroupMessageAction
-} from "@/lib/actions";
+import { getGroupMessages, sendGroupMessage, editGroupMessage, deleteGroupMessage, muteMember, unmuteMember, clearGroupChat, kickMember, getMutedMembers, pinGroupMessageAction, setCollabRole, blindMember, sightMember, getBlindedMembers, unpinGroupMessageAction } from "@/lib/actions/chat.actions";
+import { sendFriendRequest, getFriends } from "@/lib/actions/social.actions";
 import { toast } from "sonner";
 import type { SectorWithBeacons } from "@/types";
 import { DynamicIcon } from "@/components/dynamic-icon";
@@ -503,7 +497,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
     setInputMessage(val);
 
     const now = Date.now();
-    if (now - lastTypingRef.current > 1000) {
+    if (now - lastTypingRef.current > 3000) {
       const channel = pusherClient.channel(`presence-sector-${sector?.id}`);
       if (channel && channel.subscribed && val.trim().length > 0) {
         channel.trigger('client-is-typing', { isTyping: true, userId: user.id, username: user.username, name: user.name });

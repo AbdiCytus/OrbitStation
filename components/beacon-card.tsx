@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Beacon } from "@/types";
-import { incrementBeaconVisit } from "@/lib/actions";
+import { incrementBeaconVisit } from "@/lib/actions/beacon.actions";
 import { PencilSquareIcon, ArrowTopRightOnSquareIcon, InformationCircleIcon } from "@heroicons/react/20/solid";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 

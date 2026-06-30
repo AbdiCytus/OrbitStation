@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createSector, getFriends } from "@/lib/actions";
+import { createSector } from "@/lib/actions/sector.actions";
+import { getFriends } from "@/lib/actions/social.actions";
 import type { SectorWithBeacons, Beacon } from "@/types";
 import { toast } from "sonner";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";

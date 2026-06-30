@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getNotificationStats } from "@/lib/actions";
+import { getNotificationStats } from "@/lib/actions/social.actions";
 import { toast } from "sonner";
 import { pusherClient } from "@/lib/pusher-client";
 

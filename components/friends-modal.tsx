@@ -8,11 +8,8 @@ import {
 } from "@heroicons/react/24/outline";
 import SpaceBackground from "./space-background";
 import StaticStarfield from "./static-starfield";
-import {
-  searchPilots, sendFriendRequest, acceptFriendRequest, rejectFriendRequest,
-  getChatMessages, sendChatMessage, removeFriend, clearChat,
-  acceptCollab, rejectCollab, getFriends, getFriendRequests, acceptTransferOwnership, rejectTransferOwnership, markChatAsRead
-} from "@/lib/actions";
+import { searchPilots, sendFriendRequest, acceptFriendRequest, rejectFriendRequest, getChatMessages, sendChatMessage, removeFriend, clearChat, getFriends, getFriendRequests, markChatAsRead } from "@/lib/actions/social.actions";
+import { acceptCollab, rejectCollab, acceptTransferOwnership, rejectTransferOwnership } from "@/lib/actions/sector.actions";
 import { toast } from "sonner";
 import { pusherClient } from "@/lib/pusher-client";
 
@@ -252,7 +249,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
     setMessageInput(e.target.value);
     // Pusher Client Event for typing indicator (throttled to 1/sec)
     const now = Date.now();
-    if (now - lastTypingRef.current > 1000 && activeChatId && e.target.value.trim().length > 0) {
+    if (now - lastTypingRef.current > 3000 && activeChatId && e.target.value.trim().length > 0) {
       const channelName = `private-chat-${[user.id, activeChatId].sort().join('_')}`;
       const channel = pusherClient.channel(channelName);
       if (channel && channel.subscribed) {

@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef, useEffect, useCallback } from "react";
 import type { Beacon, SectorWithBeacons } from "@/types";
-import { deleteBeacon, toggleBeaconPin, updateBeacon, incrementBeaconVisit } from "@/lib/actions";
+import { deleteBeacon, toggleBeaconPin, updateBeacon, incrementBeaconVisit } from "@/lib/actions/beacon.actions";
 import { toast } from "sonner";
 import { DynamicIcon } from "./dynamic-icon";
 import {

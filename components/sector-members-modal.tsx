@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSectorOwner, getFriends, sendFriendRequest, leaveSector } from "@/lib/actions";
+import { getSectorOwner } from "@/lib/actions/sector.actions";
+import { getFriends, sendFriendRequest } from "@/lib/actions/social.actions";
+import { leaveSector } from "@/lib/actions/chat.actions";
 import { toast } from "sonner";
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
 import type { SectorWithBeacons } from "@/types";

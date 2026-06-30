@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { getMyOAuthApps, createOAuthApp, deleteOAuthApp, updateOAuthApp, getPersonalToken } from "@/lib/actions";
+import { getMyOAuthApps, createOAuthApp, deleteOAuthApp, updateOAuthApp, getPersonalToken } from "@/lib/actions/chat.actions";
 import { PlayIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { createPortal } from "react-dom";
 
