@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { SignJWT } from "jose";
 import bcrypt from "bcryptjs";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { pusherServer } from "@/lib/pusher";
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -120,6 +121,9 @@ export async function POST(req: Request) {
     .setExpirationTime(`${expiresInSeconds}s`)
     .setIssuer(process.env.NEXTAUTH_URL ?? "https://orbitstation.com")
     .sign(secret);
+
+  // Trigger event for testing integration
+  await pusherServer.trigger(`oauth-test-${client_id}`, 'test-success', { success: true });
 
   return NextResponse.json({
     access_token,

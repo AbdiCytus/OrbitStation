@@ -73,6 +73,7 @@ export default async function SettingsPage() {
           staticBackgroundEnabled: (profile as any).staticBackgroundEnabled ?? false,
           notifSoundEnabled: (profile as any).notifSoundEnabled ?? true,
           notifSoundUrl: (profile as any).notifSoundUrl ?? null,
+          shortcuts: (profile as any).shortcuts ?? null,
           station: profile.station,
         }} 
         unlockedBadges={unlockedBadges}

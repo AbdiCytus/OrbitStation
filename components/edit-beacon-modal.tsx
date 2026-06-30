@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { updateBeacon, deleteBeacon } from "@/lib/actions/beacon.actions";
 import { useMetaFetcher } from "@/hooks/use-meta-fetcher";
+import { compressImage } from "@/lib/image-compress";
 import type { Beacon, SectorWithBeacons } from "@/types";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { toast } from "sonner";
@@ -92,36 +93,34 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
     };
   }, [onClose]);
 
-  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 500 * 1024) {
       toast.error("Icon size must be less than 500KB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (ev.target?.result) {
-        setFaviconUrl(ev.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, 128, 0.8);
+      setFaviconUrl(compressed);
+    } catch (err) {
+      toast.error("Failed to process icon.");
+    }
   };
 
-  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { // 2MB for banner
       toast.error("Banner image size must be less than 2MB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (ev.target?.result) {
-        setImageUrl(ev.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, 1200, 0.8);
+      setImageUrl(compressed);
+    } catch (err) {
+      toast.error("Failed to process banner.");
+    }
   };
 
   async function handleSave(e: React.FormEvent) {

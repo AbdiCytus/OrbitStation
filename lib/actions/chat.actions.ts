@@ -556,27 +556,36 @@ export async function createOAuthApp(name: string, redirectUris: string[], homep
   if (!name.trim()) return { error: "App name is required." };
   if (!redirectUris.length || !redirectUris[0].trim()) return { error: "At least one redirect URI is required." };
 
-  // 1. Validasi Redirect URIs (Kode asli kamu)
+  // 1. Validasi Homepage URL (Wajib dan tanpa sub-route)
+  let homeOrigin = "";
+  if (!homepageUrl || !homepageUrl.trim()) {
+    return { error: "Homepage URL is required." };
+  }
+  try {
+    const parsedHome = new URL(homepageUrl.trim());
+    if (!["http:", "https:"].includes(parsedHome.protocol)) {
+      return { error: `Homepage URL must use http or https: ${homepageUrl}` };
+    }
+    if (parsedHome.pathname !== "/" && parsedHome.pathname !== "") {
+      return { error: "Homepage URL must not contain sub-routes (e.g., use https://example.com instead of https://example.com/app)" };
+    }
+    homeOrigin = parsedHome.origin;
+  } catch {
+    return { error: `Invalid homepage URL format: ${homepageUrl}` };
+  }
+
+  // 2. Validasi Redirect URIs (Harus match dengan origin Homepage)
   for (const uri of redirectUris) {
     try {
       const parsed = new URL(uri.trim());
       if (!["http:", "https:"].includes(parsed.protocol)) {
         return { error: `Redirect URI must use http or https: ${uri}` };
       }
-    } catch {
-      return { error: `Invalid redirect URI format: ${uri}` };
-    }
-  }
-
-  // 2. Validasi Homepage URL (Ditambahkan dengan pola yang sama)
-  if (homepageUrl.trim()) {
-    try {
-      const parsed = new URL(homepageUrl.trim());
-      if (!["http:", "https:"].includes(parsed.protocol)) {
-        return { error: `Homepage URL must use http or https: ${homepageUrl}` };
+      if (parsed.origin !== homeOrigin) {
+        return { error: `Redirect URI origin (${parsed.origin}) must match Homepage URL origin (${homeOrigin})` };
       }
     } catch {
-      return { error: `Invalid homepage URL format: ${homepageUrl}` };
+      return { error: `Invalid redirect URI format: ${uri}` };
     }
   }
 
@@ -622,27 +631,36 @@ export async function updateOAuthApp(appId: string, name: string, redirectUris: 
   if (!name.trim()) return { error: "App name is required." };
   if (!redirectUris.length || !redirectUris[0].trim()) return { error: "At least one redirect URI is required." };
 
-  // 1. Validasi Redirect URIs (Kode asli kamu)
+  // 1. Validasi Homepage URL (Wajib dan tanpa sub-route)
+  let homeOrigin = "";
+  if (!homepageUrl || !homepageUrl.trim()) {
+    return { error: "Homepage URL is required." };
+  }
+  try {
+    const parsedHome = new URL(homepageUrl.trim());
+    if (!["http:", "https:"].includes(parsedHome.protocol)) {
+      return { error: `Homepage URL must use http or https: ${homepageUrl}` };
+    }
+    if (parsedHome.pathname !== "/" && parsedHome.pathname !== "") {
+      return { error: "Homepage URL must not contain sub-routes (e.g., use https://example.com instead of https://example.com/app)" };
+    }
+    homeOrigin = parsedHome.origin;
+  } catch {
+    return { error: `Invalid homepage URL format: ${homepageUrl}` };
+  }
+
+  // 2. Validasi Redirect URIs (Harus match dengan origin Homepage)
   for (const uri of redirectUris) {
     try {
       const parsed = new URL(uri.trim());
       if (!["http:", "https:"].includes(parsed.protocol)) {
         return { error: `Redirect URI must use http or https: ${uri}` };
       }
-    } catch {
-      return { error: `Invalid redirect URI format: ${uri}` };
-    }
-  }
-
-  // 2. Validasi Homepage URL (Ditambahkan dengan pola yang sama)
-  if (homepageUrl.trim()) {
-    try {
-      const parsed = new URL(homepageUrl.trim());
-      if (!["http:", "https:"].includes(parsed.protocol)) {
-        return { error: `Homepage URL must use http or https: ${homepageUrl}` };
+      if (parsed.origin !== homeOrigin) {
+        return { error: `Redirect URI origin (${parsed.origin}) must match Homepage URL origin (${homeOrigin})` };
       }
     } catch {
-      return { error: `Invalid homepage URL format: ${homepageUrl}` };
+      return { error: `Invalid redirect URI format: ${uri}` };
     }
   }
 

@@ -7,9 +7,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import Cropper from "react-easy-crop";
 import { deleteAccount } from "@/lib/actions/social.actions";
 import { toast } from "sonner";
+import { compressImage } from "@/lib/image-compress";
+import DeveloperTab from "@/components/developer-tab";
 import { BADGE_REGISTRY, BADGE_COLORS } from "@/lib/badges/registry";
 import * as SolidIcons from "@heroicons/react/24/solid";
-import DeveloperTab from "@/components/developer-tab";
 
 const DynamicIcon = ({ name, className }: { name: string, className?: string }) => {
   const Icon = (SolidIcons as any)[name];
@@ -144,6 +145,13 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
     const keyString = key === " " ? "Space" : key.length === 1 ? key.toUpperCase() : key;
     const finalCombo = [...modifiers, keyString].join("+");
 
+    const isDuplicate = Object.entries(shortcuts).some(([k, v]) => k !== keyName && v === finalCombo);
+    if (isDuplicate) {
+      toast.error(`Shortcut ${finalCombo} is already in use.`);
+      (e.target as HTMLInputElement).blur();
+      return;
+    }
+
     setShortcuts(s => ({ ...s, [keyName]: finalCombo }));
     (e.target as HTMLInputElement).blur();
   };
@@ -191,18 +199,19 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       if (file.size > 2 * 1024 * 1024) {
         toast.error("File size exceeds 2MB limit.");
         return;
       }
-      const reader = new FileReader();
-      reader.addEventListener("load", () => {
-        setImageSrc(reader.result?.toString() || null);
-      });
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file, 800, 0.8);
+        setImageSrc(compressed);
+      } catch (err) {
+        toast.error("Failed to process image.");
+      }
     }
   };
 
