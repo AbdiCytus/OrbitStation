@@ -5509,8 +5509,8 @@ body.no-loading-anim #warp-loader {
   --hsr-action-border-hover: transparent;
   --hsr-action-bg: var(--sector-active-bg);
   --hsr-action-border: transparent;
-  --hsr-action-pinned-bg: var(--nav-icon-hover-bg);
-  --hsr-action-pinned-text: var(--color-primary);
+  --hsr-action-pinned-bg: var(--color-starlight);
+  --hsr-action-pinned-text: var(--color-void);
   --hsr-card-shadow: var(--shadow-card);
   --hsr-card-frame-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
   --hsr-sector-tag-text: var(--color-comet);
@@ -5556,8 +5556,8 @@ body.no-loading-anim #warp-loader {
   --hsr-action-border-hover: transparent;
   --hsr-action-bg: var(--sector-active-bg);
   --hsr-action-border: transparent;
-  --hsr-action-pinned-bg: var(--nav-icon-hover-bg);
-  --hsr-action-pinned-text: var(--color-primary);
+  --hsr-action-pinned-bg: var(--color-starlight);
+  --hsr-action-pinned-text: var(--color-void);
   --hsr-card-shadow: var(--shadow-card);
   --hsr-card-frame-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
   --hsr-sector-tag-text: var(--color-comet);
