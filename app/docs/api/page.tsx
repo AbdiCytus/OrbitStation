@@ -93,6 +93,31 @@ const PublicResponse: Token[][] = [
   [{ type: "plain", text: "}" }],
 ];
 
+const FriendsResponse: Token[][] = [
+  [{ type: "plain", text: "{" }],
+  [{ type: "plain", text: "  " }, { type: "key", text: '"success"' }, { type: "plain", text: ": " }, { type: "bool", text: "true" }, { type: "plain", text: "," }],
+  [{ type: "plain", text: "  " }, { type: "key", text: '"data"' }, { type: "plain", text: ": [" }],
+  [{ type: "plain", text: "    {" }],
+  [{ type: "plain", text: "      " }, { type: "key", text: '"id"' }, { type: "plain", text: ": " }, { type: "string", text: '"user123"' }, { type: "plain", text: "," }],
+  [{ type: "plain", text: "      " }, { type: "key", text: '"username"' }, { type: "plain", text: ": " }, { type: "string", text: '"friend1"' }, { type: "plain", text: "," }],
+  [{ type: "plain", text: "      " }, { type: "key", text: '"name"' }, { type: "plain", text: ": " }, { type: "string", text: '"Friend One"' }],
+  [{ type: "plain", text: "    }" }],
+  [{ type: "plain", text: "  ]" }],
+  [{ type: "plain", text: "}" }],
+];
+
+const AnalyticsResponse: Token[][] = [
+  [{ type: "plain", text: "{" }],
+  [{ type: "plain", text: "  " }, { type: "key", text: '"success"' }, { type: "plain", text: ": " }, { type: "bool", text: "true" }, { type: "plain", text: "," }],
+  [{ type: "plain", text: "  " }, { type: "key", text: '"data"' }, { type: "plain", text: ": {" }],
+  [{ type: "plain", text: "    " }, { type: "key", text: '"totalStationVisits"' }, { type: "plain", text: ": " }, { type: "number", text: "4" }, { type: "plain", text: "," }],
+  [{ type: "plain", text: "    " }, { type: "key", text: '"totalBeaconVisits"' }, { type: "plain", text: ": " }, { type: "number", text: "17" }, { type: "plain", text: "," }],
+  [{ type: "plain", text: "    " }, { type: "key", text: '"totalBeacons"' }, { type: "plain", text: ": " }, { type: "number", text: "4" }],
+  [{ type: "plain", text: "  }" }],
+  [{ type: "plain", text: "}" }],
+];
+
+
 function CodeBlock({ lines }: { lines: Token[][] }) {
   return (
     <div style={{
@@ -275,6 +300,48 @@ export default function ApiDocsPage() {
               No authentication needed. Private sectors and sensitive fields (email, password) are automatically stripped.
             </p>
             <CodeBlock lines={PublicResponse} />
+          </SectionCard>
+
+          {/* GET /api/v1/friends */}
+          <SectionCard accentColor="#10b981">
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.875rem", marginBottom: "1rem" }}>
+              <div style={{ padding: "0.625rem", borderRadius: "10px", background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", color: "#10b981", flexShrink: 0, marginTop: "2px" }}>
+                <ServerStackIcon style={{ width: "20px", height: "20px" }} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: "1.375rem", fontWeight: 700, margin: "0 0 0.5rem", color: "#f0f4ff" }}>Get Friends List</h2>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                  <span style={{ background: "rgba(34,197,94,0.2)", color: "#4ade80", padding: "3px 10px", borderRadius: "6px", fontWeight: 700, fontSize: "0.75rem", border: "1px solid rgba(34,197,94,0.3)", letterSpacing: "0.05em" }}>GET</span>
+                  <code style={{ fontSize: "0.875rem", color: "#cbd5e1", fontFamily: "monospace" }}>/api/v1/friends</code>
+                  <span style={{ background: "rgba(167,139,250,0.15)", color: "#c4b5fd", padding: "2px 8px", borderRadius: "6px", fontSize: "0.7rem", border: "1px solid rgba(167,139,250,0.25)" }}>🔒 Auth Required</span>
+                </div>
+              </div>
+            </div>
+            <p style={{ color: "#94a3b8", lineHeight: 1.7, margin: 0 }}>
+              Retrieves the list of users you are currently friends with.
+            </p>
+            <CodeBlock lines={FriendsResponse} />
+          </SectionCard>
+
+          {/* GET /api/v1/analytics */}
+          <SectionCard accentColor="#f59e0b">
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.875rem", marginBottom: "1rem" }}>
+              <div style={{ padding: "0.625rem", borderRadius: "10px", background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.25)", color: "#f59e0b", flexShrink: 0, marginTop: "2px" }}>
+                <ServerStackIcon style={{ width: "20px", height: "20px" }} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: "1.375rem", fontWeight: 700, margin: "0 0 0.5rem", color: "#f0f4ff" }}>Get Analytics</h2>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                  <span style={{ background: "rgba(34,197,94,0.2)", color: "#4ade80", padding: "3px 10px", borderRadius: "6px", fontWeight: 700, fontSize: "0.75rem", border: "1px solid rgba(34,197,94,0.3)", letterSpacing: "0.05em" }}>GET</span>
+                  <code style={{ fontSize: "0.875rem", color: "#cbd5e1", fontFamily: "monospace" }}>/api/v1/analytics</code>
+                  <span style={{ background: "rgba(167,139,250,0.15)", color: "#c4b5fd", padding: "2px 8px", borderRadius: "6px", fontSize: "0.7rem", border: "1px solid rgba(167,139,250,0.25)" }}>🔒 Auth Required</span>
+                </div>
+              </div>
+            </div>
+            <p style={{ color: "#94a3b8", lineHeight: 1.7, margin: 0 }}>
+              Retrieves the analytics for your station and beacons (e.g. visits and clicks).
+            </p>
+            <CodeBlock lines={AnalyticsResponse} />
           </SectionCard>
 
         </motion.div>
