@@ -32,6 +32,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -46,6 +47,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
     const result = await signIn("credentials", {
       email,
       password,
@@ -63,6 +65,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
     try {
       const res = await fetch("/api/register", {
         method: "POST",
@@ -80,7 +83,7 @@ export default function LoginPage() {
       setLoading(false);
       if (result?.error) {
         setMode("login");
-        setError("Account created! Please sign in.");
+        setSuccessMsg("Account created! Please check your email to verify your account before logging in.");
       } else {
         router.push("/station");
       }
@@ -119,7 +122,7 @@ export default function LoginPage() {
             <button
               key={m}
               className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 h-[60px] px-1 sm:px-2 text-[0.8rem] sm:text-[1rem] font-bold rounded-[10px] transition-all duration-200 relative bg-transparent border-none focus:outline-none ${mode === m ? "text-white" : "text-slate-400 hover:text-slate-200"}`}
-              onClick={() => { setMode(m); setError(null); }}
+              onClick={() => { setMode(m); setError(null); setSuccessMsg(null); }}
               style={{ background: "transparent" }}
             >
               {mode === m && (
@@ -151,6 +154,21 @@ export default function LoginPage() {
               style={{color: "rgba(255, 100, 100)", padding: "10px 0"}}
             >
               {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        {/* Success */}
+        <AnimatePresence mode="wait">
+          {successMsg && (
+            <motion.p 
+              initial={{ opacity: 0, height: 0 }} 
+              animate={{ opacity: 1, height: "auto" }} 
+              exit={{ opacity: 0, height: 0 }}
+              className="text-sm text-center bg-violet-500/10 rounded-lg border border-violet-500/30"
+              style={{color: "#c4b5fd", padding: "12px 16px", lineHeight: "1.5"}}
+            >
+              {successMsg}
             </motion.p>
           )}
         </AnimatePresence>
