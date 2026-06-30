@@ -2092,7 +2092,7 @@ pre {
   border-radius: 12px;
   border: 1.5px solid;
   pointer-events: none;
-  box-shadow: inset 0 0 20px rgba(124, 92, 252, 0.1);
+  box-shadow: var(--hsr-card-frame-shadow);
 }
 
 /* Stars at bottom of card */
@@ -5457,6 +5457,7 @@ body.no-loading-anim #warp-loader {
   --hsr-card-back-glass-bg: rgba(10, 15, 30, 0.35);
   --hsr-card-back-glass-border: rgba(255, 255, 255, 0.15);
   --hsr-card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --hsr-card-frame-shadow: inset 0 0 20px rgba(124, 92, 252, 0.1);
   --hsr-action-text: rgba(160, 160, 200, 0.8);
   --hsr-action-text-hover: #f0f4ff;
   --hsr-action-bg-hover: rgba(255, 255, 255, 0.1);
@@ -5497,8 +5498,8 @@ body.no-loading-anim #warp-loader {
   --hsr-input-bg: var(--color-void);
   --hsr-input-border: var(--color-border);
   --hsr-input-focus: var(--color-primary);
-  --hsr-card-art-bg: linear-gradient(160deg, #ffffff 0%, #cbd5e1 60%, #94a3b8 100%);
-  --hsr-card-placeholder-bg: linear-gradient(160deg, #ffffff 0%, #cbd5e1 60%, #94a3b8 100%);
+  --hsr-card-art-bg: linear-gradient(160deg, #ffffff 0%, #f1f5f9 60%, #cbd5e1 100%);
+  --hsr-card-placeholder-bg: linear-gradient(160deg, #ffffff 0%, #f1f5f9 60%, #cbd5e1 100%);
   --hsr-card-initial-color: var(--color-comet);
   --hsr-card-back-glass-bg: var(--glass-bg);
   --hsr-card-back-glass-border: var(--glass-border);
@@ -5511,6 +5512,7 @@ body.no-loading-anim #warp-loader {
   --hsr-action-pinned-bg: var(--nav-icon-hover-bg);
   --hsr-action-pinned-text: var(--color-primary);
   --hsr-card-shadow: var(--shadow-card);
+  --hsr-card-frame-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
   --hsr-sector-tag-text: var(--color-comet);
   --hsr-domain-text: var(--color-starlight);
   --hsr-card-bottom-gradient: transparent;
@@ -5557,6 +5559,7 @@ body.no-loading-anim #warp-loader {
   --hsr-action-pinned-bg: var(--nav-icon-hover-bg);
   --hsr-action-pinned-text: var(--color-primary);
   --hsr-card-shadow: var(--shadow-card);
+  --hsr-card-frame-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
   --hsr-sector-tag-text: var(--color-comet);
   --hsr-domain-text: var(--color-starlight);
   --hsr-card-bottom-gradient: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
