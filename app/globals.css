@@ -1381,8 +1381,8 @@ pre {
 @media (hover: hover) and (pointer: fine) {
   .beacon-card:hover {
     scale: 1.02;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(124, 92, 252, 0.25) !important;
-    border-color: rgba(124, 92, 252, 0.2) !important;
+    box-shadow: var(--hsr-card-hover-shadow) !important;
+    border-color: var(--hsr-card-hover-border) !important;
     z-index: 9999;
   }
 }
@@ -3719,9 +3719,9 @@ pre {
 }
 
 .beacon-card-edit-btn:hover {
-  background: rgba(124, 92, 252, 0.2);
-  border-color: rgba(124, 92, 252, 0.4);
-  color: #a78bfa;
+  background: var(--hsr-action-bg-hover);
+  border-color: var(--hsr-action-border-hover);
+  color: var(--hsr-action-text-hover);
 }
 
 /* ============================================================
@@ -3895,8 +3895,14 @@ pre {
   font-weight: 600;
 }
 
+html[data-theme="space"] .sector-tab.active .sector-tab-name,
+html:not([data-theme="light"]):not([data-theme="dark"]) .sector-tab.active .sector-tab-name {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
 .sector-tab.active .sector-tab-count {
-  color: var(--color-violet-light);
+  color: var(--sector-active-text);
 }
 
 /* Station section sub (beacon count) */
@@ -5454,9 +5460,11 @@ body.no-loading-anim #warp-loader {
   --hsr-card-art-bg: linear-gradient(160deg, rgba(124, 92, 252, 0.25), rgba(6, 182, 212, 0.15));
   --hsr-card-placeholder-bg: linear-gradient(160deg, rgba(124, 92, 252, 0.3) 0%, rgba(30, 20, 80, 0.8) 60%, rgba(6, 182, 212, 0.15) 100%);
   --hsr-card-initial-color: var(--hsr-card-initial-color);
-  --hsr-card-back-glass-bg: rgba(10, 15, 30, 0.35);
+  --hsr-card-back-glass-bg: var(--glass-bg);
   --hsr-card-back-glass-border: rgba(255, 255, 255, 0.15);
   --hsr-card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --hsr-card-hover-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(124, 92, 252, 0.25);
+  --hsr-card-hover-border: rgba(124, 92, 252, 0.2);
   --hsr-card-frame-shadow: inset 0 0 20px rgba(124, 92, 252, 0.1);
   --hsr-action-text: rgba(160, 160, 200, 0.8);
   --hsr-action-text-hover: #f0f4ff;
@@ -5512,6 +5520,8 @@ body.no-loading-anim #warp-loader {
   --hsr-action-pinned-bg: var(--color-starlight);
   --hsr-action-pinned-text: var(--color-void);
   --hsr-card-shadow: var(--shadow-card);
+  --hsr-card-hover-shadow: 0 10px 28px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--border-subtle);
+  --hsr-card-hover-border: var(--border-subtle);
   --hsr-card-frame-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
   --hsr-sector-tag-text: var(--color-comet);
   --hsr-domain-text: var(--color-starlight);
@@ -5559,6 +5569,8 @@ body.no-loading-anim #warp-loader {
   --hsr-action-pinned-bg: var(--color-starlight);
   --hsr-action-pinned-text: var(--color-void);
   --hsr-card-shadow: var(--shadow-card);
+  --hsr-card-hover-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-subtle);
+  --hsr-card-hover-border: var(--border-subtle);
   --hsr-card-frame-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
   --hsr-sector-tag-text: var(--color-comet);
   --hsr-domain-text: var(--color-starlight);
