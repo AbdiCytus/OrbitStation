@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getApiUserId } from "@/lib/api-auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +19,11 @@ export async function OPTIONS() {
 // Kembalikan profil user berdasarkan Bearer JWT yang valid
 // ============================================================
 export async function GET(req: Request) {
+  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+  if (!checkRateLimit(ip, 100, 60000)) {
+    return NextResponse.json({ error: "rate_limit_exceeded", error_description: "Too many requests" }, { status: 429 });
+  }
+
   const userIdOrResponse = await getApiUserId(req);
   if (typeof userIdOrResponse !== "string") {
     // Apabila error, kembalikan response dengan CORS headers

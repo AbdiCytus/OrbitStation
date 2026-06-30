@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSectorOwner, getFriends, sendFriendRequest } from "@/lib/actions";
+import { getSectorOwner, getFriends, sendFriendRequest, leaveSector } from "@/lib/actions";
+import { toast } from "sonner";
+import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
 import type { SectorWithBeacons } from "@/types";
 import { UserPlusIcon, ArrowTopRightOnSquareIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -41,6 +43,20 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
       document.removeEventListener("keydown", fn);
     };
   }, [onClose]);
+
+  const handleLeaveSector = async () => {
+    if (confirm("Are you sure you want to leave this sector?")) {
+      toast.promise(leaveSector(sector.id), {
+        loading: "Leaving sector...",
+        success: (res) => {
+          if (res.error) throw new Error(res.error);
+          handleClose();
+          return "Left sector successfully!";
+        },
+        error: (err: any) => err.message
+      });
+    }
+  };
 
   const handleAddFriend = async (id: string) => {
     setPendingRequests(prev => new Set(prev).add(id));
@@ -138,6 +154,11 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  {c.user.id === currentUserId && (!ownerData || ownerData.id !== currentUserId) && (
+                    <button type="button" onClick={handleLeaveSector} className="flex items-center justify-center text-gray-400 hover:text-red-400 rounded-full hover:bg-red-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Leave Sector">
+                      <ArrowLeftOnRectangleIcon width={16} height={16} />
+                    </button>
+                  )}
                   {(c.user as any).station?.isPublic && c.user.username && (
                     <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />

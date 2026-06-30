@@ -3,8 +3,14 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 import { sendEmail } from "@/lib/resend";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+  if (!checkRateLimit(ip, 5, 3600000)) {
+    return NextResponse.json({ error: "Too many registrations from this IP. Please try again later." }, { status: 429 });
+  }
+
   const { email, password, name } = await req.json();
 
   if (!email || !password || !name) {

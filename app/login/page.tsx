@@ -196,12 +196,12 @@ export default function LoginPage() {
           {mode === "login" && (
             <motion.form key="login" onSubmit={handleCredentialsLogin} variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Email Address</label>
+                <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Email / Username</label>
                 <input
                   className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
                   style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                  type="email"
-                  placeholder="pilot@station.net"
+                  type="text"
+                  placeholder="pilot@station.net or Pilot1234"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

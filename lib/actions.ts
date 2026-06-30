@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { pusherServer } from "@/lib/pusher";
 import { SignJWT } from "jose";
+import bcrypt from "bcryptjs";
 
 // ============================================================
 // HELPER — ambil session + pastikan Station user sudah ada
@@ -1881,12 +1882,13 @@ export async function createOAuthApp(name: string, redirectUris: string[], homep
 
   const clientId = `orbit_${generateSecret(16)}`;
   const clientSecret = `secret_${generateSecret(40)}`;
+  const hashedSecret = await bcrypt.hash(clientSecret, 10);
 
   const app = await db.oAuthApp.create({
     data: {
       name: name.trim(),
       clientId,
-      clientSecret,
+      clientSecret: hashedSecret,
       redirectUris: redirectUris.map(u => u.trim()).filter(Boolean),
       homepageUrl: homepageUrl.trim(),
       ownerId: user.id,
@@ -2076,6 +2078,28 @@ export async function assignTagsToBeacon(beaconId: string, tagIds: string[]) {
       data: tagIds.map(tagId => ({ beaconId, tagId }))
     });
   }
+
+  revalidatePath("/station");
+  return { success: true };
+}
+
+export async function leaveSector(sectorId: string) {
+  const user = await requireAuth();
+
+  const sector = await db.sector.findUnique({
+    where: { id: sectorId },
+    include: { station: true },
+  });
+
+  if (!sector) return { error: "Sector not found" };
+
+  if (sector.station.userId === user.id) {
+    return { error: "Owner cannot leave their own sector" };
+  }
+
+  await db.sectorCollaborator.deleteMany({
+    where: { sectorId, userId: user.id },
+  });
 
   revalidatePath("/station");
   return { success: true };

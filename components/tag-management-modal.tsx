@@ -254,8 +254,10 @@ export default function TagManagementModal({
       <div
         className={`relative w-full sm:max-w-2xl flex flex-col overflow-hidden z-10 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] rounded-t-2xl sm:rounded-2xl ${panelClass}`}
         style={{
-          background: "#0d0e14",
+          background: "rgba(15, 15, 25, 0.6)",
+          backdropFilter: "blur(24px)",
           border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255,255,255,0.1)",
         }}
       >
         {/* Added wrapper for height limits */}

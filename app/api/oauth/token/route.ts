@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { SignJWT } from "jose";
-
+import bcrypt from "bcryptjs";
+import { checkRateLimit } from "@/lib/rate-limit";
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -18,6 +19,11 @@ export async function OPTIONS() {
 // Server-to-server: Tukarkan authorization_code dengan JWT access_token
 // ============================================================
 export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+  if (!checkRateLimit(ip, 50, 60000)) {
+    return NextResponse.json({ error: "rate_limit_exceeded", error_description: "Too many requests" }, { status: 429 });
+  }
+
   let body: Record<string, string>;
 
   // Support both form-urlencoded and JSON body
@@ -50,9 +56,17 @@ export async function POST(req: Request) {
 
   // --- Verifikasi Client credentials ---
   const oauthApp = await db.oAuthApp.findUnique({ where: { clientId: client_id } });
-  if (!oauthApp || oauthApp.clientSecret !== client_secret) {
+  if (!oauthApp) {
     return NextResponse.json(
-      { error: "invalid_client", error_description: "Invalid client_id or client_secret." },
+      { error: "invalid_client", error_description: "Invalid client_id." },
+      { status: 401 }
+    );
+  }
+
+  const isValidSecret = await bcrypt.compare(client_secret, oauthApp.clientSecret);
+  if (!isValidSecret) {
+    return NextResponse.json(
+      { error: "invalid_client", error_description: "Invalid client_secret." },
       { status: 401 }
     );
   }
