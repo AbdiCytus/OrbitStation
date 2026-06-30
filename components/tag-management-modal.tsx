@@ -388,7 +388,7 @@ export default function TagManagementModal({
                   {filteredLocalTags.map((tag) => (
                     <div
                       key={tag.id}
-                      className="flex items-center justify-between transition-colors"
+                      className="flex items-center justify-between transition-colors group"
                       style={{
                         background: "var(--hsr-domain-pill-bg)",
                         borderRadius: "0.5rem",
