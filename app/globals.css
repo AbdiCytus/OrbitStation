@@ -5489,7 +5489,7 @@ body.no-loading-anim #warp-loader {
   --hsr-btn-hover: #1e293b;
   --hsr-topbar-label: var(--color-comet);
   --hsr-ability-title: var(--color-starlight);
-  --hsr-domain-pill-bg: #f4f4f5;
+  --hsr-domain-pill-bg: #e4e4e7;
   --hsr-visit-btn-bg: var(--btn-primary-from);
   --hsr-visit-btn-border: var(--btn-primary-to);
   --hsr-visit-btn-text: var(--btn-primary-text);

@@ -1,9 +1,19 @@
-import PusherClient from 'pusher-js';
+import Pusher from 'pusher-js';
 
-// Enable pusher logging - don't include this in production
-PusherClient.logToConsole = process.env.NODE_ENV !== 'production';
+const isClient = typeof window !== 'undefined';
+const PusherConstructor = (Pusher as any).default || Pusher;
 
-export const pusherClient = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY || '', {
-  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'ap1',
-  authEndpoint: '/api/pusher/auth',
-});
+if (isClient) {
+  PusherConstructor.logToConsole = process.env.NODE_ENV !== 'production';
+}
+
+export const pusherClient = isClient 
+  ? new PusherConstructor(process.env.NEXT_PUBLIC_PUSHER_KEY || '', {
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'ap1',
+      authEndpoint: '/api/pusher/auth',
+    })
+  : {
+      subscribe: () => ({ bind: () => {}, unbind: () => {}, bind_global: () => {}, unbind_global: () => {} }),
+      unsubscribe: () => {},
+      channel: () => ({ trigger: () => {} })
+    } as any;
