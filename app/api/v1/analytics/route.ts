@@ -31,23 +31,36 @@ export async function GET(req: Request) {
     const station = await db.station.findUnique({ where: { userId } });
     
     let totalStationVisits = 0;
+    let uniqueVisitors = 0;
     if (station) {
       totalStationVisits = await db.stationVisit.count({ where: { stationId: station.id } });
+      const distinctVisitors = await db.stationVisit.findMany({
+        where: { stationId: station.id, visitorId: { not: null } },
+        distinct: ['visitorId'],
+        select: { visitorId: true }
+      });
+      uniqueVisitors = distinctVisitors.length;
     }
 
     const beacons = await db.beacon.findMany({
       where: { creatorId: userId },
-      select: { visits: true }
+      orderBy: { visits: 'desc' },
+      select: { title: true, visits: true }
     });
     
-    const totalBeaconVisits = beacons.reduce((acc, b) => acc + (b.visits || 0), 0);
+    const beaconsClicked = beacons.reduce((acc, b) => acc + (b.visits || 0), 0);
+    const topBeacons = beacons.slice(0, 5).map(b => ({
+      title: b.title,
+      clicks: b.visits || 0
+    }));
 
     return NextResponse.json({
       success: true,
       data: {
         totalStationVisits,
-        totalBeaconVisits,
-        totalBeacons: beacons.length
+        uniqueVisitors,
+        beaconsClicked,
+        topBeacons
       }
     }, { status: 200, headers: CORS_HEADERS });
   } catch (error) {
