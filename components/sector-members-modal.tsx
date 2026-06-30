@@ -44,18 +44,29 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
     };
   }, [onClose]);
 
-  const handleLeaveSector = async () => {
-    if (confirm("Are you sure you want to leave this sector?")) {
-      toast.promise(leaveSector(sector.id), {
-        loading: "Leaving sector...",
-        success: (res) => {
-          if (res.error) throw new Error(res.error);
-          handleClose();
-          return "Left sector successfully!";
-        },
-        error: (err: any) => err.message
-      });
-    }
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
+
+  const handleLeaveSector = () => {
+    setShowLeaveConfirm(true);
+  };
+
+  const executeLeaveSector = async () => {
+    setIsLeaving(true);
+    toast.promise(leaveSector(sector.id), {
+      loading: "Leaving sector...",
+      success: (res) => {
+        setIsLeaving(false);
+        if (res.error) throw new Error(res.error);
+        setShowLeaveConfirm(false);
+        handleClose();
+        return "Left sector successfully!";
+      },
+      error: (err: any) => {
+        setIsLeaving(false);
+        return err.message;
+      }
+    });
   };
 
   const handleAddFriend = async (id: string) => {
@@ -74,6 +85,22 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
       aria-label="Sector Members"
       style={{ overflowY: "hidden" }}
     >
+      {showLeaveConfirm && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "rgba(11, 12, 16, 0.9)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ padding: "1.5rem", background: "#1f1f2e", borderRadius: "1rem", border: "1px solid rgba(239, 68, 68, 0.4)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
+            <ArrowLeftOnRectangleIcon width={32} height={32} style={{ color: "#ef4444", margin: "0 auto 1rem" }} />
+            <h3 style={{ color: "#fff", fontSize: "1.1rem", marginBottom: "0.5rem" }}>Leave Sector?</h3>
+            <p style={{ color: "#a1a1aa", fontSize: "0.85rem", marginBottom: "1.5rem" }}>Are you sure you want to leave this sector?</p>
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              <button onClick={() => setShowLeaveConfirm(false)} disabled={isLeaving} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "rgba(255,255,255,0.1)", color: "#fff" }}>Cancel</button>
+              <button onClick={executeLeaveSector} disabled={isLeaving} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "#ef4444", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                {isLeaving && <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" />}
+                Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div
         className="w-full sm:max-w-[400px] flex flex-col"
         style={{ maxHeight: "85vh", minHeight: "50vh" }}

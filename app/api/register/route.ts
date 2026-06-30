@@ -54,12 +54,20 @@ export async function POST(req: Request) {
     subject: "Welcome to Orbit Station - Verify your email",
     html: `
       <h2>Welcome to Orbit Station, Pilot ${name}!</h2>
-      <p>Please verify your email address by clicking the link below:</p>
-      <p><a href="${verifyUrl}">Verify Email</a></p>
+      <p>To ensure the security of your station and unlock all communication channels, we need you to verify your email address.</p>
+      <div style="margin: 20px 0;">
+        <a href="${verifyUrl}" style="background-color: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Verify Email Address</a>
+      </div>
+      <p>If you did not request this, please ignore this email.</p>
       <br />
       <p>Safe travels!</p>
     `,
   });
+
+  // LOG FOR LOCAL DEVELOPMENT / DEBUGGING
+  console.log('\n\n=== [DEV] VERIFICATION LINK ===');
+  console.log(verifyUrl);
+  console.log('===============================\n\n');
 
   return NextResponse.json({ success: true, message: "Verification email sent" });
 }
