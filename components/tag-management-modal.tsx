@@ -234,13 +234,13 @@ export default function TagManagementModal({
 
       {/* Delete Confirm Modal */}
       {tagToDelete && (
-        <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "var(--nav-glass-bg)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }}>
-          <div style={{ padding: "1.5rem", background: "var(--glass-bg)", borderRadius: "1rem", border: "1px solid rgba(239, 68, 68, 0.4)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
+        <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "1.5rem" }}>
+          <div style={{ padding: "1.5rem", background: "var(--hsr-panel-bg)", borderRadius: "1rem", border: "1px solid var(--hsr-panel-border)", width: "90%", maxWidth: "400px", textAlign: "center", boxShadow: "var(--hsr-card-shadow)", backdropFilter: "var(--hsr-panel-blur)" }}>
             <TrashIcon width={32} height={32} style={{ color: "#ef4444", margin: "0 auto 1rem" }} />
-            <h3 style={{ color: "var(--color-starlight)", fontSize: "1.1rem", marginBottom: "0.5rem" }}>Delete Tag?</h3>
-            <p style={{ color: "var(--color-comet)", fontSize: "0.85rem", marginBottom: "1.5rem" }}>Are you sure? It will be removed from all beacons.</p>
+            <h3 style={{ color: "var(--hsr-text-title)", fontSize: "1.1rem", marginBottom: "0.5rem" }}>Delete Tag?</h3>
+            <p style={{ color: "var(--hsr-text-desc)", fontSize: "0.85rem", marginBottom: "1.5rem" }}>Are you sure? It will be removed from all beacons.</p>
             <div style={{ display: "flex", gap: "0.75rem" }}>
-              <button onClick={() => setTagToDelete(null)} disabled={isSubmitting} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "var(--color-border)", color: "var(--color-starlight)" }}>Cancel</button>
+              <button onClick={() => setTagToDelete(null)} disabled={isSubmitting} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "var(--hsr-action-bg-hover)", color: "var(--hsr-text-title)" }}>Cancel</button>
               <button onClick={executeDeleteTag} disabled={isSubmitting} style={{ flex: 1, padding: "0.5rem", borderRadius: "0.5rem", background: "#ef4444", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                 {isSubmitting && <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" />}
                 Delete
@@ -254,30 +254,30 @@ export default function TagManagementModal({
       <div
         className={`relative w-full sm:max-w-2xl flex flex-col overflow-hidden z-10 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] rounded-t-2xl sm:rounded-2xl ${panelClass}`}
         style={{
-          background: "var(--glass-bg)",
-          border: "1px solid var(--glass-border)",
+          background: "var(--hsr-panel-bg)",
+          border: "1px solid var(--hsr-panel-border)",
+          backdropFilter: "var(--hsr-panel-blur)",
         }}
       >
         {/* Added wrapper for height limits */}
         <div className="flex flex-col w-full h-full sm:h-auto min-h-[75vh] sm:min-h-[70vh] sm:max-h-[85vh]">
         {/* Header */}
         <div
-          className="flex items-center justify-between border-b border-border"
-          style={{ padding: "1rem 1.5rem" }}
+          className="flex items-center justify-between"
+          style={{ padding: "1rem 1.5rem", borderBottom: "1px solid var(--hsr-divider)" }}
         >
           <div className="flex items-center" style={{ gap: "0.625rem" }}>
-            <span style={{ color: "var(--color-violet-mid)", fontSize: "1.2rem" }}>🏷</span>
-            <h2 style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--color-starlight)" }}>
+            <span style={{ color: "var(--hsr-icon)", fontSize: "1.2rem" }}>🏷</span>
+            <h2 style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--hsr-text-title)" }}>
               Manage Tags
             </h2>
             <span
               style={{
                 fontSize: "0.7rem",
-                background: "var(--sector-active-bg)",
-                color: "var(--sector-active-text)",
-                border: "1px solid var(--color-border-active)",
+                background: "var(--hsr-domain-pill-bg)",
+                color: "var(--hsr-domain-text)",
                 borderRadius: "9999px",
-                padding: "0.125rem 0.5rem",
+                padding: "0.15rem 0.6rem",
               }}
             >
               {sector.name}
@@ -293,7 +293,7 @@ export default function TagManagementModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-border">
+        <div className="flex" style={{ borderBottom: "1px solid var(--hsr-divider)" }}>
           {(["manage", "assign"] as const).map((tab) => (
             <button
               key={tab}
@@ -301,9 +301,9 @@ export default function TagManagementModal({
               className="flex-1 text-sm font-semibold transition-colors"
               style={{
                 padding: "0.75rem",
-                color: activeTab === tab ? "var(--sector-active-text)" : "var(--color-comet)",
-                borderBottom: activeTab === tab ? "2px solid var(--color-violet-mid)" : "2px solid transparent",
-                background: activeTab === tab ? "var(--sector-active-bg)" : "transparent",
+                color: activeTab === tab ? "var(--hsr-text-title)" : "var(--hsr-text-desc)",
+                borderBottom: activeTab === tab ? "2px solid var(--hsr-icon)" : "2px solid transparent",
+                background: activeTab === tab ? "var(--hsr-action-bg)" : "transparent",
               }}
             >
               {tab === "manage" ? "Manage Tags" : "Assign Tags"}
@@ -328,14 +328,27 @@ export default function TagManagementModal({
                   onChange={(e) => setNewTagName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
                   disabled={isSubmitting}
-                  className="flex-1 bg-starlight/5 border border-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-all"
-                  style={{ padding: "0.6rem 0.875rem", fontSize: "0.875rem" }}
+                  className="flex-1 transition-all focus:outline-none"
+                  style={{ 
+                    padding: "0.6rem 0.875rem", 
+                    fontSize: "0.875rem",
+                    background: "var(--hsr-input-bg)",
+                    border: "1px solid var(--hsr-input-border)",
+                    color: "var(--hsr-text-title)",
+                    borderRadius: "0.5rem"
+                  }}
                 />
                 <button
                   onClick={handleAddTag}
                   disabled={isSubmitting || !newTagName.trim()}
-                  className="btn btn-primary disabled:opacity-40 rounded-lg font-medium transition-colors flex items-center"
-                  style={{ padding: "0.6rem 1rem", gap: "0.375rem", flexShrink: 0, fontSize: "0.875rem" }}
+                  className="disabled:opacity-40 rounded-lg font-medium transition-all flex items-center hover:-translate-y-[1px]"
+                  style={{ 
+                    padding: "0.6rem 1rem", gap: "0.375rem", flexShrink: 0, fontSize: "0.875rem",
+                    background: "var(--hsr-visit-btn-bg)",
+                    color: "var(--hsr-visit-btn-text)",
+                    border: "1px solid var(--hsr-visit-btn-border)",
+                    boxShadow: "var(--hsr-visit-btn-shadow)"
+                  }}
                 >
                   <PlusIcon width={16} height={16} />
                   <span>Add</span>
@@ -349,7 +362,7 @@ export default function TagManagementModal({
                     placeholder="Search tags..." 
                     value={modalSearchQuery}
                     onChange={(e) => setModalSearchQuery(e.target.value)}
-                    style={{ width: "100%", background: "var(--color-void)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "var(--color-starlight)", fontSize: "0.875rem", outline: "none", marginBottom: "1rem" }}
+                    style={{ width: "100%", background: "var(--hsr-input-bg)", border: "1px solid var(--hsr-input-border)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "var(--hsr-text-title)", fontSize: "0.875rem", outline: "none", marginBottom: "1rem" }}
                  />
               </div>
               
@@ -359,15 +372,15 @@ export default function TagManagementModal({
                   style={{ padding: "2.5rem 1rem", gap: "0.5rem" }}
                 >
                   <span style={{ fontSize: "2rem" }}>🏷️</span>
-                  <p style={{ color: "var(--color-comet)", fontSize: "0.875rem" }}>
+                  <p style={{ color: "var(--hsr-text-desc)", fontSize: "0.875rem" }}>
                     No tags in this sector yet.
                   </p>
-                  <p style={{ color: "var(--color-comet)", fontSize: "0.8rem" }}>
+                  <p style={{ color: "var(--hsr-text-desc)", fontSize: "0.8rem" }}>
                     Add your first tag above.
                   </p>
                 </div>
               ) : filteredLocalTags.length === 0 ? (
-                <p style={{ color: "var(--color-comet)", fontSize: "0.875rem", textAlign: "center", padding: "2.5rem 1rem" }}>
+                <p style={{ color: "var(--hsr-text-desc)", fontSize: "0.875rem", textAlign: "center", padding: "2.5rem 1rem" }}>
                   No matching tags found.
                 </p>
               ) : (
@@ -375,9 +388,9 @@ export default function TagManagementModal({
                   {filteredLocalTags.map((tag) => (
                     <div
                       key={tag.id}
-                      className="flex items-center justify-between border border-border group hover:border-border transition-colors"
+                      className="flex items-center justify-between transition-colors"
                       style={{
-                        background: "var(--nav-glass-bg)",
+                        background: "var(--hsr-domain-pill-bg)",
                         borderRadius: "0.5rem",
                         padding: "0.625rem 0.75rem",
                       }}
@@ -388,8 +401,13 @@ export default function TagManagementModal({
                           value={editTagName}
                           onChange={(e) => setEditTagName(e.target.value)}
                           maxLength={20}
-                          className="flex-1 bg-cosmos/50 border border-violet-500/60 rounded text-white focus:outline-none"
-                          style={{ padding: "0.25rem 0.5rem", fontSize: "0.875rem" }}
+                          className="flex-1 rounded focus:outline-none transition-all"
+                          style={{ 
+                            padding: "0.25rem 0.5rem", fontSize: "0.875rem",
+                            background: "var(--hsr-input-bg)",
+                            border: "1px solid var(--hsr-input-focus)",
+                            color: "var(--hsr-text-title)"
+                          }}
                           autoFocus
                           onKeyDown={(e) => {
                             if (e.key === "Enter") handleUpdateTag(tag.id);
@@ -403,21 +421,20 @@ export default function TagManagementModal({
                               width: "0.5rem",
                               height: "0.5rem",
                               borderRadius: "9999px",
-                              background: "var(--color-violet-mid)",
+                              background: "var(--hsr-icon)",
                               flexShrink: 0,
                             }}
                           />
-                          <span style={{ color: "var(--color-starlight)", fontWeight: 500, fontSize: "0.875rem" }}>
+                          <span style={{ color: "var(--hsr-text-title)", fontWeight: 500, fontSize: "0.875rem" }}>
                             {tag.name}
                           </span>
                           <span style={{
                               fontSize: "0.65rem",
-                              background: tagUsageCount[tag.id] ? "var(--sector-active-bg)" : "var(--nav-icon-hover-bg)",
-                              color: tagUsageCount[tag.id] ? "var(--sector-active-text)" : "var(--color-comet)",
-                              padding: "0.1rem 0.4rem",
+                              background: tagUsageCount[tag.id] ? "var(--hsr-action-pinned-bg)" : "var(--hsr-action-bg-hover)",
+                              color: tagUsageCount[tag.id] ? "var(--hsr-action-pinned-text)" : "var(--hsr-text-desc)",
+                              padding: "0.15rem 0.5rem",
                               borderRadius: "4px",
                               fontWeight: 600,
-                              border: tagUsageCount[tag.id] ? "1px solid var(--color-border-active)" : "1px solid var(--color-border)"
                           }}>
                               {tagUsageCount[tag.id] ? `${tagUsageCount[tag.id]} beacon${tagUsageCount[tag.id] > 1 ? 's' : ''}` : "Unused"}
                           </span>
@@ -432,7 +449,7 @@ export default function TagManagementModal({
                           <button
                             onClick={() => handleUpdateTag(tag.id)}
                             disabled={isSubmitting}
-                            className="text-green-400 hover:bg-starlight/10 rounded transition-colors"
+                            className="text-[var(--hsr-icon)] hover:bg-[var(--hsr-action-bg-hover)] rounded transition-colors"
                             style={{ padding: "0.375rem 0.5rem", fontSize: "0.8rem", fontWeight: 600 }}
                           >
                             Save
@@ -441,7 +458,7 @@ export default function TagManagementModal({
                           <>
                             <button
                               onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }}
-                              className="text-comet hover:text-starlight hover:bg-starlight/10 rounded transition-colors"
+                              className="text-[var(--hsr-text-desc)] hover:text-[var(--hsr-text-title)] hover:bg-[var(--hsr-action-bg-hover)] rounded transition-colors"
                               style={{ padding: "0.375rem" }}
                               title="Edit tag"
                             >
@@ -450,7 +467,7 @@ export default function TagManagementModal({
                             <button
                               onClick={() => handleDeleteTag(tag.id)}
                               disabled={isSubmitting}
-                              className="text-comet hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
+                              className="text-[var(--hsr-text-desc)] hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
                               style={{ padding: "0.375rem" }}
                               title="Delete tag"
                             >
@@ -469,18 +486,18 @@ export default function TagManagementModal({
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               {localTags.length === 0 ? (
                 <div className="text-center" style={{ padding: "2.5rem 1rem" }}>
-                  <p style={{ color: "var(--color-comet)", fontSize: "0.875rem", marginBottom: "0.75rem" }}>
+                  <p style={{ color: "var(--hsr-text-desc)", fontSize: "0.875rem", marginBottom: "0.75rem" }}>
                     Create tags first in the "Manage Tags" tab.
                   </p>
                   <button
                     onClick={() => setActiveTab("manage")}
-                    style={{ color: "var(--color-violet-mid)", fontSize: "0.875rem" }}
+                    style={{ color: "var(--hsr-icon)", fontSize: "0.875rem" }}
                   >
                     To Manage Tags →
                   </button>
                 </div>
               ) : sector.beacons.length === 0 ? (
-                <p className="text-center" style={{ color: "var(--color-comet)", fontSize: "0.875rem", padding: "2.5rem 1rem" }}>
+                <p className="text-center" style={{ color: "var(--hsr-text-desc)", fontSize: "0.875rem", padding: "2.5rem 1rem" }}>
                   No beacons in this sector.
                 </p>
               ) : (
@@ -491,7 +508,7 @@ export default function TagManagementModal({
                         placeholder="Search tags..." 
                         value={modalSearchQuery}
                         onChange={(e) => setModalSearchQuery(e.target.value)}
-                        style={{ width: "100%", background: "var(--color-void)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "var(--color-starlight)", fontSize: "0.875rem", outline: "none", marginBottom: "0.25rem" }}
+                        style={{ width: "100%", background: "var(--hsr-input-bg)", border: "1px solid var(--hsr-input-border)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "var(--hsr-text-title)", fontSize: "0.875rem", outline: "none", marginBottom: "0.25rem" }}
                      />
                   </div>
                   {sector.beacons.map((beacon) => {
@@ -500,9 +517,9 @@ export default function TagManagementModal({
                   return (
                     <div
                       key={beacon.id}
-                      className="border border-border flex flex-col"
+                      className="flex flex-col"
                       style={{
-                        background: "var(--nav-glass-bg)",
+                        background: "var(--hsr-domain-pill-bg)",
                         borderRadius: "0.625rem",
                         padding: "0.875rem",
                         gap: "0.75rem"
@@ -514,11 +531,11 @@ export default function TagManagementModal({
                         ) : beacon.faviconUrl ? (
                            <img src={beacon.faviconUrl} alt="" className="w-8 h-8 sm:w-10 sm:h-10 rounded object-cover flex-shrink-0 bg-starlight/5" />
                         ) : (
-                           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded bg-starlight/10 flex flex-shrink-0 items-center justify-center text-sm sm:text-lg font-bold text-white uppercase">{domain.charAt(0)}</div>
+                           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded flex flex-shrink-0 items-center justify-center text-sm sm:text-lg font-bold uppercase" style={{ background: "var(--hsr-action-bg-hover)", color: "var(--hsr-text-title)" }}>{domain.charAt(0)}</div>
                         )}
                         <p
                           className="truncate flex-1"
-                          style={{ color: "var(--color-starlight)", fontWeight: 500, fontSize: "0.875rem" }}
+                          style={{ color: "var(--hsr-text-title)", fontWeight: 500, fontSize: "0.875rem" }}
                         >
                           {beacon.title}
                         </p>
@@ -532,13 +549,12 @@ export default function TagManagementModal({
                               key={tag.id}
                               onClick={() => toggleTagAssignment(beacon.id, tag.id)}
                               disabled={isMaxed}
-                              className="rounded-full border transition-all"
+                              className="rounded-full transition-all"
                               style={{
-                                padding: "0.25rem 0.75rem",
+                                padding: "0.3rem 0.8rem",
                                 fontSize: "0.78rem",
-                                background: isSelected ? "var(--sector-active-bg)" : "var(--nav-icon-hover-bg)",
-                                borderColor: isSelected ? "var(--color-border-active)" : "var(--color-border)",
-                                color: isSelected ? "var(--sector-active-text)" : "var(--color-comet)",
+                                background: isSelected ? "var(--hsr-action-pinned-bg)" : "var(--hsr-action-bg-hover)",
+                                color: isSelected ? "var(--hsr-action-pinned-text)" : "var(--hsr-text-desc)",
                                 opacity: isMaxed ? 0.35 : 1,
                                 cursor: isMaxed ? "not-allowed" : "pointer",
                               }}
@@ -549,7 +565,7 @@ export default function TagManagementModal({
                         })}
                       </div>
                       {selectedTagIds.length > 0 && (
-                        <p style={{ fontSize: "0.72rem", color: "var(--color-comet)", marginTop: "0.125rem" }}>
+                        <p style={{ fontSize: "0.72rem", color: "var(--hsr-text-desc)", marginTop: "0.125rem" }}>
                           {selectedTagIds.length}/5 tags selected
                         </p>
                       )}
@@ -565,14 +581,20 @@ export default function TagManagementModal({
         {/* Footer */}
         {activeTab === "assign" && localTags.length > 0 && sector.beacons.length > 0 && (
           <div
-            className="border-t border-border flex justify-end"
-            style={{ padding: "0.875rem 1.5rem", background: "var(--glass-bg)" }}
+            className="flex justify-end"
+            style={{ padding: "0.875rem 1.5rem", background: "transparent", borderTop: "1px solid var(--hsr-divider)" }}
           >
             <button
               onClick={handleSaveAssignments}
               disabled={isSavingAssignments}
-              className="btn btn-primary disabled:opacity-50 rounded-lg transition-colors"
-              style={{ padding: "0.625rem 1.5rem", fontSize: "0.875rem" }}
+              className="disabled:opacity-50 rounded-lg transition-all hover:-translate-y-[1px]"
+              style={{ 
+                padding: "0.625rem 1.5rem", fontSize: "0.875rem", fontWeight: 500,
+                background: "var(--hsr-visit-btn-bg)",
+                color: "var(--hsr-visit-btn-text)",
+                border: "1px solid var(--hsr-visit-btn-border)",
+                boxShadow: "var(--hsr-visit-btn-shadow)"
+              }}
             >
               {isSavingAssignments ? "Saving..." : "Save Assignments"}
             </button>
