@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { authConfig } from "@/auth.config";
 import bcrypt from "bcryptjs";
 import { cookies, headers } from "next/headers";
-import { sendEmail } from "@/lib/resend";
+import { sendEmail } from "@/lib/email";
 import { randomBytes } from "crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({

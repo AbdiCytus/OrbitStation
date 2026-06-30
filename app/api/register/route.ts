@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
-import { sendEmail } from "@/lib/resend";
+import { sendEmail } from "@/lib/email";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
@@ -20,21 +20,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
   }
 
+  let user;
   const existing = await db.user.findUnique({ where: { email } });
+  
   if (existing) {
-    return NextResponse.json({ error: "Email is already registered" }, { status: 409 });
+    if (existing.emailVerified) {
+      return NextResponse.json({ error: "Email is already registered" }, { status: 409 });
+    } else {
+      // Overwrite unverified account so the real owner isn't locked out
+      const hashed = await bcrypt.hash(password, 12);
+      user = await db.user.update({
+        where: { email },
+        data: { name, password: hashed },
+      });
+      // Cleanup old tokens
+      await db.verificationToken.deleteMany({ where: { identifier: email } });
+    }
+  } else {
+    const hashed = await bcrypt.hash(password, 12);
+    let username = `Pilot${Math.floor(1000 + Math.random() * 9000)}`;
+    while (await db.user.findUnique({ where: { username } })) {
+      username = `Pilot${Math.floor(1000 + Math.random() * 9000)}`;
+    }
+    user = await db.user.create({
+      data: { email, name, password: hashed, username },
+    });
   }
-
-  const hashed = await bcrypt.hash(password, 12);
-
-  let username = `Pilot${Math.floor(1000 + Math.random() * 9000)}`;
-  while (await db.user.findUnique({ where: { username } })) {
-    username = `Pilot${Math.floor(1000 + Math.random() * 9000)}`;
-  }
-
-  const user = await db.user.create({
-    data: { email, name, password: hashed, username },
-  });
 
   const token = randomBytes(32).toString("hex");
   await db.verificationToken.create({
