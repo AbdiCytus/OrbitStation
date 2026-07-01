@@ -60,7 +60,7 @@ export async function POST(req: Request) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const verifyUrl = `${baseUrl}/api/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
 
-  await sendEmail({
+  const emailResult = await sendEmail({
     to: email,
     subject: "Welcome to Orbit Station - Verify your email",
     html: `
@@ -79,6 +79,14 @@ export async function POST(req: Request) {
   console.log('\n\n=== [DEV] VERIFICATION LINK ===');
   console.log(verifyUrl);
   console.log('===============================\n\n');
+
+  if (!emailResult.success) {
+    // We could delete the user or just tell them to try again/contact support.
+    // Usually it's better to tell the user the email failed so they know what happened.
+    return NextResponse.json({ 
+      error: "Account created but failed to send verification email. Please check your SMTP configuration." 
+    }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true, message: "Verification email sent" });
 }
