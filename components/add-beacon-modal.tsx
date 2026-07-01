@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from "react";
-import { createBeacon } from "@/lib/actions";
+import { createBeacon } from "@/lib/actions/beacon.actions";
 import { useMetaFetcher } from "@/hooks/use-meta-fetcher";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import type { Beacon, SectorWithBeacons } from "@/types";
 import { toast } from "sonner";
+import { compressImage } from "@/lib/image-compress";
 
 type Props = {
   sectors: SectorWithBeacons[];
@@ -70,56 +71,68 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
     return () => document.removeEventListener("keydown", fn);
   }, [onClose]);
 
-  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 500 * 1024) {
       toast.error("Icon size must be less than 500KB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (ev.target?.result) {
-        setCustomFaviconUrl(ev.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, 128, 0.8);
+      setCustomFaviconUrl(compressed);
+    } catch (err) {
+      toast.error("Failed to process icon.");
+    }
   };
 
-  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { // 2MB for banner
       toast.error("Banner image size must be less than 2MB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (ev.target?.result) {
-        setCustomImageUrl(ev.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, 1200, 0.8);
+      setCustomImageUrl(compressed);
+    } catch (err) {
+      toast.error("Failed to process banner.");
+    }
   };
 
   async function handleUrlBlur() {
-    const normalized = normalizeUrl(urlRaw);
-    if (normalized !== urlRaw) setUrlRaw(normalized);
-    if (normalized.length > 8 && normalized.includes(".")) {
+    let normalized = urlRaw;
+    const autoHttps = localStorage.getItem("os_auto_https") !== "false";
+    
+    if (autoHttps) {
+      normalized = normalizeUrl(urlRaw);
+      if (normalized !== urlRaw) setUrlRaw(normalized);
+    }
+    
+    const autoFetchMeta = localStorage.getItem("os_auto_fetch_meta") !== "false";
+    if (autoFetchMeta && normalized.length > 8 && normalized.includes(".")) {
       await fetchMeta(normalized);
     }
   }
 
   function handleUrlChange(value: string) {
-    const cleaned = value.replace(/^(https?:\/\/)+/, "");
-    setUrlRaw(cleaned);
+    const autoHttps = localStorage.getItem("os_auto_https") !== "false";
+    if (autoHttps) {
+      const cleaned = value.replace(/^(https?:\/\/)+/, "");
+      setUrlRaw(cleaned);
+    } else {
+      setUrlRaw(value);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const finalUrl = normalizeUrl(urlRaw);
+    const autoHttps = localStorage.getItem("os_auto_https") !== "false";
+    const finalUrl = autoHttps ? normalizeUrl(urlRaw) : (urlRaw.trim() || urlRaw);
+    
     const errors: { url?: string, title?: string, sector?: string } = {};
-    if (!finalUrl || finalUrl === "https://") errors.url = "URL is required.";
+    if (!finalUrl || (autoHttps && finalUrl === "https://")) errors.url = "URL is required.";
     if (!title.trim()) errors.title = "Title is required.";
     if (!sectorId) errors.sector = "Sector is required.";
 
@@ -148,9 +161,13 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
     }
   }
 
+  const autoHttps = typeof window !== "undefined" ? localStorage.getItem("os_auto_https") !== "false" : true;
+  const autoFetchMeta = typeof window !== "undefined" ? localStorage.getItem("os_auto_fetch_meta") !== "false" : true;
+
   const displayImageUrl = customImageUrl;
   const displayFaviconUrl = customFaviconUrl;
   const hasMetadata = !!(meta || title);
+  const showMetaPreview = hasMetadata || !autoFetchMeta;
 
   return (
     <div className={`modal-overlay ${isClosing ? "closing" : ""}`} onClick={handleClose} role="dialog" aria-modal="true" aria-label="Add Beacon">
@@ -223,7 +240,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                 {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
               </label>
               <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
-                <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>
+                {autoHttps && <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>}
                 <input
                   ref={inputRef}
                   id="beacon-url"
@@ -232,7 +249,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   value={urlRaw}
                   onChange={(e) => { handleUrlChange(e.target.value); setFormErrors(p => ({ ...p, url: undefined })); }}
                   onBlur={handleUrlBlur}
-                  style={{ border: "none", borderRadius: 0, flex: 1, outline: "none", boxShadow: "none", background: "transparent", color: "var(--color-starlight)", fontFamily: "var(--font-sans)", fontSize: "0.9rem", padding: "0.625rem 1rem 0.625rem 0" }}
+                  style={{ border: "none", borderRadius: 0, flex: 1, outline: "none", boxShadow: "none", background: "transparent", color: "var(--color-starlight)", fontFamily: "var(--font-sans)", fontSize: "0.9rem", padding: autoHttps ? "0.625rem 1rem 0.625rem 0" : "0.625rem 1rem" }}
                 />
               </div>
               {formErrors.url && <span className="text-red-500 text-xs mt-1 block">{formErrors.url}</span>}
@@ -272,7 +289,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
 
           <div className="modal-col">
             {/* Metadata preview */}
-            {hasMetadata && (
+            {showMetaPreview && (
               <div className="beacon-meta-preview">
                 <div className="favicon-preview-wrap">
                   <div className="favicon-preview-label">Icon</div>
@@ -314,13 +331,15 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                 <div className="og-preview-wrap">
                   <div className="og-preview-label-row">
                     <span className="favicon-preview-label">Banner Image</span>
-                    <button
-                      type="button"
-                      className="btn-text"
-                      onClick={() => setShowImageEdit((v) => !v)}
-                    >
-                      {showImageEdit ? "Hide" : "Edit URL"}
-                    </button>
+                    {autoFetchMeta && (
+                      <button
+                        type="button"
+                        className="btn-text"
+                        onClick={() => setShowImageEdit((v) => !v)}
+                      >
+                        {showImageEdit ? "Hide" : "Edit URL"}
+                      </button>
+                    )}
                   </div>
                   {displayImageUrl ? (
                     <div className="beacon-preview-image">
@@ -333,7 +352,7 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   ) : (
                     <div className="beacon-preview-empty">No banner image found</div>
                   )}
-                  {showImageEdit && (
+                  {(!autoFetchMeta || showImageEdit) && (
                     <div style={{ display: "flex", gap: "0.25rem", marginTop: "0.25rem" }}>
                       <input
                         className="input input-sm"

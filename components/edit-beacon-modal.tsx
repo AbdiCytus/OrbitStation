@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { updateBeacon, deleteBeacon } from "@/lib/actions";
+import { useState, useEffect } from "react";
+import { updateBeacon, deleteBeacon } from "@/lib/actions/beacon.actions";
 import { useMetaFetcher } from "@/hooks/use-meta-fetcher";
+import { compressImage } from "@/lib/image-compress";
 import type { Beacon, SectorWithBeacons } from "@/types";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { toast } from "sonner";
@@ -16,9 +17,23 @@ type Props = {
   onDeleted: (id: string) => void;
 };
 
+// Pindahkan ke luar komponen agar mudah diakses
+function normalizeUrl(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  return `https://${trimmed}`;
+}
+
 export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, onDeleted }: Props) {
+  // Ambil pengaturan dari localStorage
+  const autoHttps = typeof window !== "undefined" ? localStorage.getItem("os_auto_https") !== "false" : true;
+  const autoFetchMeta = typeof window !== "undefined" ? localStorage.getItem("os_auto_fetch_meta") !== "false" : true;
+
   const [sectorId, setSectorId] = useState(beacon.sectorId);
-  const [url, setUrl] = useState(beacon.url.replace(/^https?:\/\//, ""));
+  // Kondisikan inisialisasi URL awal berdasarkan autoHttps
+  const [url, setUrl] = useState(autoHttps ? beacon.url.replace(/^https?:\/\//, "") : beacon.url);
   const [title, setTitle] = useState(beacon.title);
   const [description, setDescription] = useState(beacon.description ?? "");
   const [imageUrl, setImageUrl] = useState(beacon.imageUrl ?? "");
@@ -30,7 +45,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   const [error, setError] = useState<string | null>(null);
-  const [formErrors, setFormErrors] = useState<{url?: string, title?: string}>({});
+  const [formErrors, setFormErrors] = useState<{ url?: string, title?: string }>({});
 
   const { data: meta, loading: metaLoading, fetchMeta } = useMetaFetcher();
 
@@ -41,22 +56,29 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
       if (meta.imageUrl) setImageUrl(meta.imageUrl);
       if (meta.faviconUrl) setFaviconUrl(meta.faviconUrl);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meta]);
 
-  function normalizeUrl(raw: string): string {
-    const trimmed = raw.trim();
-    if (!trimmed) return trimmed;
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
-    if (trimmed.startsWith("//")) return `https:${trimmed}`;
-    return `https://${trimmed}`;
+  function handleUrlChange(value: string) {
+    if (autoHttps) {
+      const cleaned = value.replace(/^(https?:\/\/)+/, "");
+      setUrl(cleaned);
+    } else {
+      setUrl(value);
+    }
   }
 
   async function handleUrlBlur() {
-    const normalized = normalizeUrl(url);
-    const cleaned = normalized.replace(/^https?:\/\//, "");
-    if (cleaned !== url) setUrl(cleaned);
-    if (normalized.length > 8 && normalized.includes(".")) {
+    let normalized = url;
+
+    if (autoHttps) {
+      normalized = normalizeUrl(url);
+      const cleaned = normalized.replace(/^https?:\/\//, "");
+      if (cleaned !== url) setUrl(cleaned);
+    }
+
+    // Cek toggle pengaturan sebelum melakukan fetching meta
+    if (autoFetchMeta && normalized.length > 8 && normalized.includes(".")) {
       await fetchMeta(normalized);
     }
   }
@@ -71,45 +93,45 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
     };
   }, [onClose]);
 
-  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 500 * 1024) {
       toast.error("Icon size must be less than 500KB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (ev.target?.result) {
-        setFaviconUrl(ev.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, 128, 0.8);
+      setFaviconUrl(compressed);
+    } catch (err) {
+      toast.error("Failed to process icon.");
+    }
   };
 
-  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { // 2MB for banner
       toast.error("Banner image size must be less than 2MB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (ev.target?.result) {
-        setImageUrl(ev.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, 1200, 0.8);
+      setImageUrl(compressed);
+    } catch (err) {
+      toast.error("Failed to process banner.");
+    }
   };
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    const finalUrl = (url.trim().startsWith("http://") || url.trim().startsWith("https://")) ? url.trim() : "https://" + url.trim();
-    const errors: {url?: string, title?: string} = {};
-    if (!url.trim()) errors.url = "URL is required.";
+    // Gunakan URL mentah jika autoHttps nonaktif
+    const finalUrl = autoHttps ? normalizeUrl(url) : (url.trim() || url);
+
+    const errors: { url?: string, title?: string } = {};
+    if (!finalUrl || (autoHttps && finalUrl === "https://")) errors.url = "URL is required.";
     if (!title.trim()) errors.title = "Title is required.";
-    
+
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
@@ -135,8 +157,13 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
   }
 
   async function handleDelete() {
+    setLoading(true);
+    setError(null);
     const result = await deleteBeacon(beacon.id);
+    setLoading(false);
+    
     if (result.error) {
+      setError(result.error);
       toast.error(result.error || "Failed to delete beacon");
     } else {
       toast.success("Beacon deleted successfully");
@@ -199,162 +226,163 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
               </div>
             </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="edit-beacon-url">
-              URL
-              {metaLoading && <span className="form-label-hint">⟳ Fetching metadata…</span>}
-              {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
-            </label>
-            <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
-              <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>
-              <input
-                id="edit-beacon-url"
-                className="input input-url"
-                type="text"
-                value={url}
-                onChange={(e) => { setUrl(e.target.value); setFormErrors(p => ({...p, url: undefined})); }}
-                onBlur={handleUrlBlur}
-                placeholder="example.com"
-                style={{ border: "none", background: "transparent", paddingLeft: "0", flex: 1 }}
-              />
-            </div>
-            {formErrors.url && <span className="text-red-500 text-xs mt-1 block">{formErrors.url}</span>}
-          </div>
-
-          {/* Title */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="edit-beacon-title">Title</label>
-            <input
-              id="edit-beacon-title"
-              className="input"
-              type="text"
-              value={title}
-              onChange={(e) => { setTitle(e.target.value); setFormErrors(p => ({...p, title: undefined})); }}
-              maxLength={100}
-              autoFocus
-            />
-            {formErrors.title && <span className="text-red-500 text-xs mt-1 block">{formErrors.title}</span>}
-          </div>
-
-          {/* Description */}
-          <div className="form-group">
-            <label className="form-label">Description <span className="optional">(optional)</span></label>
-            <input
-              className="input"
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              maxLength={200}
-              placeholder="Short description"
-            />
-          </div>
-        </div>
-
-        <div className="modal-col">
-          {/* Banner preview + edit */}
-          <div className="form-group">
-            <label className="form-label">Banner Image</label>
-            {imageUrl && (
-              <div className="beacon-preview-image" style={{ marginBottom: "0.5rem" }}>
-                <img src={imageUrl} alt="OG Preview"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            <div className="form-group">
+              <label className="form-label" htmlFor="edit-beacon-url">
+                URL
+                {metaLoading && <span className="form-label-hint">⟳ Fetching metadata…</span>}
+                {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
+              </label>
+              <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
+                {/* Conditional Rendering pada prefix Https:// */}
+                {autoHttps && <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>}
+                <input
+                  id="edit-beacon-url"
+                  className="input input-url"
+                  type="text"
+                  value={url}
+                  onChange={(e) => { handleUrlChange(e.target.value); setFormErrors(p => ({ ...p, url: undefined })); }}
+                  onBlur={handleUrlBlur}
+                  placeholder="example.com"
+                  style={{ border: "none", background: "transparent", paddingLeft: autoHttps ? "0" : "1rem", flex: 1 }}
+                />
               </div>
-            )}
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              {formErrors.url && <span className="text-red-500 text-xs mt-1 block">{formErrors.url}</span>}
+            </div>
+
+            {/* Title */}
+            <div className="form-group">
+              <label className="form-label" htmlFor="edit-beacon-title">Title</label>
               <input
-                className="input input-sm"
-                type="url"
-                placeholder="https://example.com/og.png"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                style={{ flex: 1 }}
+                id="edit-beacon-title"
+                className="input"
+                type="text"
+                value={title}
+                onChange={(e) => { setTitle(e.target.value); setFormErrors(p => ({ ...p, title: undefined })); }}
+                maxLength={100}
+                autoFocus
               />
-              <label className="btn-secondary" style={{ padding: "0.25rem 0.5rem", fontSize: "0.7rem", cursor: "pointer", display: "flex", alignItems: "center", borderRadius: "4px" }}>
-                Upload
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleBannerUpload}
-                />
-              </label>
+              {formErrors.title && <span className="text-red-500 text-xs mt-1 block">{formErrors.title}</span>}
+            </div>
+
+            {/* Description */}
+            <div className="form-group">
+              <label className="form-label">Description <span className="optional">(optional)</span></label>
+              <input
+                className="input"
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                maxLength={200}
+                placeholder="Short description"
+              />
             </div>
           </div>
 
-          {/* Favicon */}
-          <div className="form-group">
-            <label className="form-label">Favicon URL</label>
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              {faviconUrl && (
-                <img src={faviconUrl} alt="" width={24} height={24}
-                  style={{ borderRadius: 4, flexShrink: 0 }}
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+          <div className="modal-col">
+            {/* Banner preview + edit */}
+            <div className="form-group">
+              <label className="form-label">Banner Image</label>
+              {imageUrl && (
+                <div className="beacon-preview-image" style={{ marginBottom: "0.5rem" }}>
+                  <img src={imageUrl} alt="OG Preview"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                </div>
               )}
-              <input
-                className="input input-sm"
-                type="url"
-                placeholder="https://example.com/favicon.ico"
-                value={faviconUrl}
-                onChange={(e) => setFaviconUrl(e.target.value)}
-                style={{ flex: 1 }}
-              />
-              <label className="btn-secondary" style={{ padding: "0.25rem 0.5rem", fontSize: "0.7rem", cursor: "pointer", display: "flex", alignItems: "center", borderRadius: "4px" }}>
-                Upload
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                 <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleFaviconUpload}
+                  className="input input-sm"
+                  type="url"
+                  placeholder="https://example.com/og.png"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  style={{ flex: 1 }}
                 />
-              </label>
+                <label className="btn-secondary" style={{ padding: "0.25rem 0.5rem", fontSize: "0.7rem", cursor: "pointer", display: "flex", alignItems: "center", borderRadius: "4px" }}>
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleBannerUpload}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Favicon */}
+            <div className="form-group">
+              <label className="form-label">Favicon URL</label>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                {faviconUrl && (
+                  <img src={faviconUrl} alt="" width={24} height={24}
+                    style={{ borderRadius: 4, flexShrink: 0 }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                )}
+                <input
+                  className="input input-sm"
+                  type="url"
+                  placeholder="https://example.com/favicon.ico"
+                  value={faviconUrl}
+                  onChange={(e) => setFaviconUrl(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <label className="btn-secondary" style={{ padding: "0.25rem 0.5rem", fontSize: "0.7rem", cursor: "pointer", display: "flex", alignItems: "center", borderRadius: "4px" }}>
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleFaviconUpload}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="form-group">
+              <label className="form-label">Pilot Notes <span className="optional">(optional)</span></label>
+              <textarea
+                className="input"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={3}
+                maxLength={500}
+                placeholder="Your personal notes about this site"
+              />
             </div>
           </div>
+        </form>
 
-          {/* Notes */}
-          <div className="form-group">
-            <label className="form-label">Pilot Notes <span className="optional">(optional)</span></label>
-            <textarea
-              className="input"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              maxLength={500}
-              placeholder="Your personal notes about this site"
-            />
-          </div>
-        </div>
-      </form>
-
-      <div className="modal-actions" style={{ padding: "0 1.5rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexDirection: "column" }}>
-        {showDeleteConfirm ? (
-          <div style={{ width: "100%", padding: "1rem", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <p style={{ color: "#fff", fontSize: "0.9rem", textAlign: "center", margin: 0 }}>
-              Are you sure you want to delete <span style={{ fontWeight: "bold", color: "#ef4444" }}>{beacon.title}</span>? This action cannot be undone.
-            </p>
-            <div style={{ display: "flex", width: "100%", gap: "0.5rem" }}>
-              <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
-              <button type="button" className="btn btn-danger" style={{ flex: 1, background: "#ef4444", color: "white" }} onClick={handleDelete}>Yes, Delete</button>
+        <div className="modal-actions" style={{ padding: "0 1.5rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexDirection: "column" }}>
+          {showDeleteConfirm ? (
+            <div style={{ width: "100%", padding: "1rem", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <p style={{ color: "#fff", fontSize: "0.9rem", textAlign: "center", margin: 0 }}>
+                Are you sure you want to delete <span style={{ fontWeight: "bold", color: "#ef4444" }}>{beacon.title}</span>? This action cannot be undone.
+              </p>
+              <div style={{ display: "flex", width: "100%", gap: "0.5rem" }}>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+                <button type="button" className="btn btn-danger" style={{ flex: 1, background: "#ef4444", color: "white" }} onClick={handleDelete}>Yes, Delete</button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
-            <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirm(true)} style={{ color: "#ef4444", borderColor: "rgba(239, 68, 68, 0.3)" }}>Delete</button>
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-              {error && <p className="form-error">{error}</p>}
-              <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
-              <button
-                id="btn-save-beacon"
-                type="button"
-                onClick={handleSave}
-                className="btn btn-primary"
-                disabled={loading}
-              >
+          ) : (
+            <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirm(true)} style={{ color: "#ef4444", borderColor: "rgba(239, 68, 68, 0.3)" }}>Delete</button>
+              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                {error && <p className="form-error">{error}</p>}
+                <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
+                <button
+                  id="btn-save-beacon"
+                  type="button"
+                  onClick={handleSave}
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
                   {loading ? <span className="spinner" /> : "Save Changes"}
                 </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
-  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, notifSoundEnabled, notifSoundUrl, isPublic, image } = body;
+  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, notifSoundEnabled, notifSoundUrl, shortcuts, isPublic, image } = body;
 
   // Validate username uniqueness if changed
   if (username) {
@@ -30,19 +30,37 @@ export async function PATCH(req: Request) {
         ...(callsign !== undefined && { callsign: callsign.trim() || null }),
         ...(bio !== undefined && { bio: bio.trim() || null }),
         ...(bannerUrl !== undefined && { bannerUrl: bannerUrl.trim() || null }),
-        ...(titleBadge !== undefined && { titleBadge: titleBadge.trim() || null }),
         ...(animationEnabled !== undefined && { animationEnabled: Boolean(animationEnabled) }),
         ...(hologramEnabled !== undefined && { hologramEnabled: Boolean(hologramEnabled) }),
         ...(allowFriendRequests !== undefined && { allowFriendRequests: Boolean(allowFriendRequests) }),
         ...(staticBackgroundEnabled !== undefined && { staticBackgroundEnabled: Boolean(staticBackgroundEnabled) }),
         ...(notifSoundEnabled !== undefined && { notifSoundEnabled: Boolean(notifSoundEnabled) }),
         ...(notifSoundUrl !== undefined && { notifSoundUrl: notifSoundUrl.trim() || null }),
-        ...(image !== undefined && { image: image || null }),
+        ...(shortcuts !== undefined && { shortcuts }),
+        ...(image !== undefined && { image }),
       },
     });
 
-
-
+    // Verify Title Badge Eligibility
+    if (titleBadge !== undefined) {
+      const trimmedBadge = titleBadge.trim() || null;
+      if (trimmedBadge) {
+        // We import dynamically to avoid polluting the file scope
+        const { getUnlockedBadges } = await import("@/lib/badges");
+        const unlockedBadges = await getUnlockedBadges(session.user.id);
+        if (unlockedBadges.includes(trimmedBadge)) {
+          await db.user.update({
+            where: { id: session.user.id },
+            data: { titleBadge: trimmedBadge }
+          });
+        }
+      } else {
+        await db.user.update({
+          where: { id: session.user.id },
+          data: { titleBadge: null }
+        });
+      }
+    }
     if (isPublic !== undefined) {
       await db.station.upsert({
         where: { userId: session.user.id },
@@ -51,7 +69,13 @@ export async function PATCH(req: Request) {
       });
     }
 
-    return NextResponse.json({ data: updated });
+    const res = NextResponse.json({ data: updated });
+    
+    if (animationEnabled !== undefined) {
+      res.cookies.set("animationEnabled", String(animationEnabled), { maxAge: 60 * 60 * 24 * 365, path: "/" });
+    }
+
+    return res;
   } catch (err) {
     console.error("[PATCH /api/settings]", err);
     return NextResponse.json({ error: "Failed to save settings" }, { status: 500 });

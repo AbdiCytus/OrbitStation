@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { authConfig } from "@/auth.config";
 import bcrypt from "bcryptjs";
 import { cookies, headers } from "next/headers";
-import { sendEmail } from "@/lib/resend";
+import { sendEmail } from "@/lib/email";
 import { randomBytes } from "crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -17,17 +17,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       name: "Orbit Station",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email / Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email as string },
+        const input = credentials.email as string;
+        const user = await db.user.findFirst({
+          where: {
+            OR: [
+              { email: input },
+              { username: input },
+            ]
+          },
         });
 
         if (!user?.password) return null; // OAuth-only account
+
+        if (!user.emailVerified) {
+          throw new Error("Please verify your email address to log in.");
+        }
 
         const valid = await bcrypt.compare(
           credentials.password as string,

@@ -3,7 +3,7 @@ import StaticStarfield from '@/components/static-starfield';
 
 export default function Loading() {
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none">
+    <div id="warp-loader" className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none">
       <div className="absolute inset-0 z-0 opacity-60">
         <StaticStarfield />
       </div>

@@ -32,6 +32,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -46,6 +47,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
     const result = await signIn("credentials", {
       email,
       password,
@@ -63,6 +65,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
     try {
       const res = await fetch("/api/register", {
         method: "POST",
@@ -80,7 +83,7 @@ export default function LoginPage() {
       setLoading(false);
       if (result?.error) {
         setMode("login");
-        setError("Account created! Please sign in.");
+        setSuccessMsg("Account created! Please check your email to verify your account before logging in.");
       } else {
         router.push("/station");
       }
@@ -119,7 +122,7 @@ export default function LoginPage() {
             <button
               key={m}
               className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 h-[60px] px-1 sm:px-2 text-[0.8rem] sm:text-[1rem] font-bold rounded-[10px] transition-all duration-200 relative bg-transparent border-none focus:outline-none ${mode === m ? "text-white" : "text-slate-400 hover:text-slate-200"}`}
-              onClick={() => { setMode(m); setError(null); }}
+              onClick={() => { setMode(m); setError(null); setSuccessMsg(null); }}
               style={{ background: "transparent" }}
             >
               {mode === m && (
@@ -151,6 +154,21 @@ export default function LoginPage() {
               style={{color: "rgba(255, 100, 100)", padding: "10px 0"}}
             >
               {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        {/* Success */}
+        <AnimatePresence mode="wait">
+          {successMsg && (
+            <motion.p 
+              initial={{ opacity: 0, height: 0 }} 
+              animate={{ opacity: 1, height: "auto" }} 
+              exit={{ opacity: 0, height: 0 }}
+              className="text-sm text-center bg-violet-500/10 rounded-lg border border-violet-500/30"
+              style={{color: "#c4b5fd", padding: "12px 16px", lineHeight: "1.5"}}
+            >
+              {successMsg}
             </motion.p>
           )}
         </AnimatePresence>
@@ -196,12 +214,12 @@ export default function LoginPage() {
           {mode === "login" && (
             <motion.form key="login" onSubmit={handleCredentialsLogin} variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Email Address</label>
+                <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Email / Username</label>
                 <input
                   className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
                   style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                  type="email"
-                  placeholder="pilot@station.net"
+                  type="text"
+                  placeholder="pilot@station.net or Pilot1234"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

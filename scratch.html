@@ -1,0 +1,1320 @@
+
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CytusGallery</title>
+  <link rel="icon" type="image/png" href="/arona_doro.png">
+  <link href="/css/style.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen overflow-x-hidden flex flex-col">
+
+  <div id="loading-overlay" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="w-16 h-16 border-4 border-t-cyan-500 border-gray-600 rounded-full animate-spin"></div>
+    <p id="loading-text" class="text-lg text-white mt-4 animate-pulse">Loading Contents...</p>
+  </div>
+  <div id="custom-alert" class="fixed flex inset-0 z-50 items-center justify-center p-4 transition-opacity duration-300 ease-in-out hidden opacity-0">
+    <div id="custom-alert-overlay" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+
+    <div id="custom-alert-box" class="relative bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-11/12 max-w-md transition-all duration-300 ease-in-out transform">
+      <button id="custom-alert-close" class="absolute top-3 right-3 text-gray-400 hover:text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+
+      <div class="p-6 flex items-start gap-4">
+        <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-red-900/50">
+          <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        </div>
+        <div class="flex-grow">
+          <h3 id="custom-alert-title" class="text-xl font-bold text-white">Peringatan</h3>
+          <p id="custom-alert-message" class="text-sm text-gray-300 mt-2">Isi pesan akan muncul di sini.</p>
+        </div>
+      </div>
+
+      <div class="bg-gray-700/50 px-6 py-3 flex justify-end gap-3 rounded-b-lg">
+        <button id="custom-alert-cancel" class="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500">
+          Batal
+        </button>
+        <button id="custom-alert-confirm" class="px-4 py-2 bg-cyan-600 text-white text-sm font-medium rounded-md hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-cyan-500">
+          Aktifkan
+        </button>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      // Jalankan hanya di halaman utama
+      if (window.location.pathname !== '/') return;
+
+      // Fungsi untuk membangun URL dari filter
+      const buildUrlFromFilters = (filters) => {
+        const params = new URLSearchParams();
+        let filterQueryParts = [];
+
+        if (filters.ratingToggle && filters.rating && filters.rating !== "all") {
+          let ratingTag = filters.rating === "not_g" ? "-rating:g" : (filters.rating === "not_e" ? "-rating:e" : `rating:${filters.rating}`);
+          filterQueryParts.push(ratingTag);
+        }
+        if (filters.typeToggle && filters.type) {
+          let typeTag = '';
+          if (filters.type === 'image') typeTag = 'filetype:jpg,jpeg,png,webp,gif,avif';
+          else if (filters.type === 'video') typeTag = 'filetype:mp4,webm';
+          if (typeTag) filterQueryParts.push(typeTag);
+        }
+
+        const filterQuery = filterQueryParts.join(' ');
+        if (filterQuery) {
+          params.append('query', filterQuery);
+        }
+
+        params.append('limit', filters.limit || 25);
+        if (filters.lazyloadToggle) {
+          params.append('lazyload', 'true');
+        }
+
+        const queryString = params.toString();
+        return `/search?${queryString}`;
+      };
+
+      let filters = JSON.parse(localStorage.getItem("cytusGalleryFilters"));
+
+      // Jika pengguna baru (tidak ada setting), buat defaultnya
+      if (!filters) {
+        filters = {
+          ratingToggle: true,
+          rating: "g",
+          typeToggle: false,
+          type: "image",
+          limit: "25",
+          autoplayToggle: false,
+          lazyloadToggle: true,
+        };
+        localStorage.setItem("cytusGalleryFilters", JSON.stringify(filters));
+      }
+
+      // Cek jika perlu redirect (pengguna baru atau ada filter aktif)
+      const needsRedirect = !localStorage.getItem("cytusGalleryFilters") || filters.ratingToggle || filters.typeToggle;
+
+      if (needsRedirect) {
+        const newUrl = buildUrlFromFilters(filters);
+        // Ganti halaman saat ini, ini lebih cepat dari redirect biasa
+        window.location.replace(newUrl);
+      }
+    })();
+  </script>
+
+
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <aside id="sidebar" class="fixed top-0 right-0 h-full w-72 bg-gray-800 shadow-lg z-40 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+
+    <div class="p-4 relative">
+
+      <button id="close-sidebar-button" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div class="md:hidden pb-4 mb-4 border-b border-gray-700">
+        <h2 class="text-xl font-bold text-white mb-4">Menu</h2>
+        <nav class="flex flex-col space-y-1 text-gray-300">
+          <a id="home-link-mobile" href="/search" class="px-3 py-2 rounded-md hover:bg-gray-700 hover:text-white transition-colors">Beranda</a>
+          <a href="/tentang" class="px-3 py-2 rounded-md hover:bg-gray-700 hover:text-white transition-colors">Tentang</a>
+          <a href="/bantuan" class="px-3 py-2 rounded-md hover:bg-gray-700 hover:text-white transition-colors">Bantuan</a>
+        </nav>
+      </div>
+
+      <h2 class="text-xl font-bold text-white mb-6">Pengaturan</h2>
+
+      <form action="/search" method="GET" id="filter-form">
+        <div class="space-y-6 text-gray-300">
+          <div>
+            <div class="flex justify-between items-center">
+              <h3 class="font-semibold text-white">Filter Rating</h3>
+              <label for="rating-toggle" class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="rating-toggle" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+              </label>
+            </div>
+            <div id="rating-options" class="hidden mt-3 space-y-2">
+              <input type="radio" name="rating" value="g" id="rating-g" class="hidden peer/safe">
+              <label for="rating-g" class="w-full block text-start px-3 py-2 border-2 border-transparent rounded-md text-sm cursor-pointer hover:bg-gray-700 peer-checked/safe:border-green-500 peer-checked/safe:bg-green-900/50">Safe</label>
+              <input type="radio" name="rating" value="not_e" id="rating-not_e" class="hidden peer/moderate">
+              <label for="rating-not_e" class="w-full block text-start px-3 py-2 border-2 border-transparent rounded-md text-sm cursor-pointer hover:bg-gray-700 peer-checked/moderate:border-yellow-500 peer-checked/moderate:bg-yellow-900/50">Moderate</label>
+              <input type="radio" name="rating" value="not_g" id="rating-not_g" class="hidden peer/explicit">
+              <label for="rating-not_g" class="w-full block text-start px-3 py-2 border-2 border-transparent rounded-md text-sm cursor-pointer hover:bg-gray-700 peer-checked/explicit:border-red-500 peer-checked/explicit:bg-red-900/50">Explicit</label>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-gray-700">
+            <div class="flex justify-between items-center">
+              <h3 class="font-semibold text-white">Filter Tipe</h3>
+              <label for="type-toggle" class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="type-toggle" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+              </label>
+            </div>
+            <div id="type-options" class="hidden mt-3 space-y-2 text-sm">
+              <input type="radio" name="type" value="image" id="type-image" class="hidden peer/image">
+              <label for="type-image" class="w-full block text-start px-3 py-2 border-2 border-transparent rounded-md text-sm cursor-pointer hover:bg-gray-700 peer-checked/image:border-cyan-500 peer-checked/image:bg-cyan-900/50">Gambar</label>
+              <input type="radio" name="type" value="video" id="type-video" class="hidden peer/video">
+              <label for="type-video" class="w-full block text-start px-3 py-2 border-2 border-transparent rounded-md text-sm cursor-pointer hover:bg-gray-700 peer-checked/video:border-cyan-500 peer-checked/video:bg-cyan-900/50">Video</label>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-gray-700">
+            <label for="limit-input" class="font-semibold mb-2 block text-white">Konten per Halaman</label>
+            <input type="number" name="limit" id="limit-input" value="25" min="10" max="200" class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white">
+          </div>
+
+          <div class="pt-6 border-t border-gray-700">
+            <h3 class="font-semibold text-white mb-3">Pengaturan Lain</h3>
+            <div class="flex justify-between items-center text-sm mb-2">
+              <label for="autoplay-toggle">Autoplay Video saat Hover</label>
+              <label for="autoplay-toggle" class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="autoplay-toggle" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+              </label>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <label for="lazyload-toggle">Lazy Loading Gambar</label>
+              <label for="lazyload-toggle" class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="lazyload-toggle" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <button type="submit" class="w-full text-center bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md">
+            Terapkan Filter
+          </button>
+        </div>
+      </form>
+    </div>
+  </aside>
+
+  <header class="bg-gray-800/50 backdrop-blur-sm sticky top-0 z-30">
+    <nav class="container mx-auto p-4 flex justify-between items-center">
+      <div class="flex justify-center items-center gap-3">
+        <img src="/arona_doro.png" alt="CytusGallery Logo" width="30" height="30" class="mr-3 flex-shrink-0">
+        <a id="brand-link" href="/search" class="text-2xl font-bold text-cyan-400 flex-shrink-0">CytusGallery</a>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <div class="hidden md:flex items-center gap-6 text-gray-300">
+          <a id="home-link" href="/search" class="hover:text-white transition-colors">Home</a>
+          <a href="/tentang" class="hover:text-white transition-colors">Tentang</a>
+          <a href="/bantuan" class="hover:text-white transition-colors">Bantuan</a>
+        </div>
+
+        <button id="open-sidebar-button" class="space-y-2 cursor-pointer">
+          <span class="block w-8 h-0.5 bg-gray-100"></span>
+          <span class="block w-8 h-0.5 bg-gray-100"></span>
+          <span class="block w-8 h-0.5 bg-gray-100"></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+  <main class="flex-grow">
+    <section class="container mx-auto px-4 py-2">
+      <div class="relative">
+        <form action="/search" method="GET" id="search-form">
+          <div class="relative">
+            <input type="text" name="tags" id="search-input" class="w-full bg-gray-700 border border-gray-600 rounded-md py-3 pl-4 pr-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Cari berdasarkan tag..." autocomplete="off">
+            <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-cyan-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </form>
+        <div id="suggestions-box" class="absolute z-40 w-full bg-gray-800 border border-gray-700 rounded-md mt-1 hidden">
+        </div>
+      </div>
+    </section>
+
+<main class="container mx-auto p-4">
+  <div class="my-8">
+    
+  </div>
+  <h2 class="text-2xl font-bold mb-4 text-white">Contents</h2>
+  <div class="columns-2 md:columns-5 gap-4 space-y-4" id="main-gallery">
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681328"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        1
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/00/b4/sample-00b4cb4f136cd84e1445a82fb7254046.jpg" alt="Konten oleh: umekuritiko" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Sua (Alien Stage)</h4>
+          <p class="text-sm truncate">Alien Stage, Zombie Stage</p>
+          <a href="/posts/11681328" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681327"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        2
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">PNG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/98/6e/sample-986e8bc1ab7ee9a19db38048d18a086d.jpg" alt="Konten oleh: enoharatoki" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Hachikuji Mayoi, Kaiki Deishuu, Ononoki Yotsugi, Oshino Shinobu</h4>
+          <p class="text-sm truncate">Mister Donut, Monogatari (Series), Starbucks</p>
+          <a href="/posts/11681327" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681326"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        3
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/ab/5f/sample-ab5fbcaf021e87a751cade00107bf02e.jpg" alt="Konten oleh: opuricheri" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Velina Airgid</h4>
+          <p class="text-sm truncate">Zenless Zone Zero</p>
+          <a href="/posts/11681326" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681325"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        4
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/53/a5/sample-53a5160d7ed4e2ed8b3fab8988a3d860.jpg" alt="Konten oleh: sumi_(gfgf_045)" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Unknown Character</h4>
+          <p class="text-sm truncate">Original</p>
+          <a href="/posts/11681325" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681324"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        5
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/c8/e2/sample-c8e2de197a87fd3ed1ffa58741b14bf0.jpg" alt="Konten oleh: umekuritiko" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Mizi (Alien Stage), Sua (Alien Stage)</h4>
+          <p class="text-sm truncate">Alien Stage, Zombie Stage</p>
+          <a href="/posts/11681324" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681323"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        6
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/a8/5b/sample-a85b8f703ca189ea0bc98eeb6950d82a.jpg" alt="Konten oleh: shikigan1" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Cinderella (Nikke)</h4>
+          <p class="text-sm truncate">Goddess Of Victory: Nikke</p>
+          <a href="/posts/11681323" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681322"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        7
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/b3/6f/sample-b36ffc58be4db1c0d5b23f53dcb54d40.jpg" alt="Konten oleh: mokou_cooking" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Remilia Scarlet</h4>
+          <p class="text-sm truncate">Touhou</p>
+          <a href="/posts/11681322" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681321"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        8
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/f2/42/sample-f242cb1d2051c82bb1aceb7a308798d9.jpg" alt="Konten oleh: mokou_cooking" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Remilia Scarlet</h4>
+          <p class="text-sm truncate">Touhou</p>
+          <a href="/posts/11681321" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681320"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        9
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/cd/2d/sample-cd2d799c1d9ee53272b0dec7bdd02765.jpg" alt="Konten oleh: mokou_cooking" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Remilia Scarlet</h4>
+          <p class="text-sm truncate">Touhou</p>
+          <a href="/posts/11681320" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681319"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        10
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/f6/a5/sample-f6a58a41a8aaa4839d7b882183fb9a48.jpg" alt="Konten oleh: umekuritiko" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Sua (Alien Stage)</h4>
+          <p class="text-sm truncate">Alien Stage, Zombie Stage</p>
+          <a href="/posts/11681319" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681318"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        11
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/95/01/sample-9501792268601329d51c98c122d7b03c.jpg" alt="Konten oleh: mokou_cooking" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Remilia Scarlet</h4>
+          <p class="text-sm truncate">Touhou</p>
+          <a href="/posts/11681318" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681317"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        12
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/ff/22/sample-ff22399e3655270f1166df5ff81cfddf.jpg" alt="Konten oleh: niyaa288" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Hoshimachi Suisei</h4>
+          <p class="text-sm truncate">Hololive</p>
+          <a href="/posts/11681317" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681316"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        13
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/11/e8/sample-11e821c6119110a4f52a58f28bd776a6.jpg" alt="Konten oleh: tomoponcho" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Nymble</h4>
+          <p class="text-sm truncate">Pokemon</p>
+          <a href="/posts/11681316" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681315"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        14
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">PNG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/d4/be/sample-d4be03c7ffa9a04bcb423c7ee0024cd4.jpg" alt="Konten oleh: nene_man" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Kaguya (Cho Kaguya-Hime!), Kaguya (Tsukuyomi) (Cho Kaguya-Hime!), Runami Yachiyo, Runami Yachiyo (Tsukuyomi), Sakayori Iroha, Sakayori Iroha (Tsukuyomi)</h4>
+          <p class="text-sm truncate">Cho Kaguya-Hime!</p>
+          <a href="/posts/11681315" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681314"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        15
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/be/65/sample-be65cce3a0bc70a17c54bc9e5347f0c4.jpg" alt="Konten oleh: shale" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Shu (Arknights)</h4>
+          <p class="text-sm truncate">Arknights</p>
+          <a href="/posts/11681314" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681313"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        16
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/6d/6d/sample-6d6d288085e583bc6662018c3306fceb.jpg" alt="Konten oleh: kiya_machi" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Kamuri Amuru</h4>
+          <p class="text-sm truncate">Indie Virtual Youtuber</p>
+          <a href="/posts/11681313" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681312"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        17
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/c0/40/sample-c040ecd5efe2503452e4d3c0fee18ca3.jpg" alt="Konten oleh: s_ghost_art" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Jane Doe (Zenless Zone Zero)</h4>
+          <p class="text-sm truncate">Zenless Zone Zero</p>
+          <a href="/posts/11681312" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681311"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        18
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/e6/52/sample-e652b793137180b2b7998ec008634af4.jpg" alt="Konten oleh: murieli_0606" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Mizi (Alien Stage), Sua (Alien Stage)</h4>
+          <p class="text-sm truncate">Alien Stage, Zombie Stage</p>
+          <a href="/posts/11681311" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681310"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        19
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-purple-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">Q</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/c4/c7/sample-c4c7cfd772fd226b2902b8412b12dbb7.jpg" alt="Konten oleh: nori_gorou" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Sasaki Yukina</h4>
+          <p class="text-sm truncate">Imaizumin-Chi Wa Douyara Gal No Tamariba Ni Natteru Rashii</p>
+          <a href="/posts/11681310" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681309"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        20
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">PNG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/c4/49/sample-c449d6c32ab4b602150ce184ff17ed98.jpg" alt="Konten oleh: yoruniwa" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Kirisame Marisa, Patchouli Knowledge</h4>
+          <p class="text-sm truncate">Embodiment Of Scarlet Devil, Touhou</p>
+          <a href="/posts/11681309" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681308"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        21
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">PNG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/e3/75/sample-e375f15e16c6c31d5c9764150d10da9f.jpg" alt="Konten oleh: cine_(wazd0183)" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Gonzalez (Machita Chima), Machita Chima</h4>
+          <p class="text-sm truncate">Nijisanji</p>
+          <a href="/posts/11681308" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681307"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        22
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/d7/a5/sample-d7a52fa43ef391fbd2c6123980eaae20.jpg" alt="Konten oleh: hikari_(hikari_no_kobako)" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Bombermon, Tsujimine Sana</h4>
+          <p class="text-sm truncate">Digimon, Digimon Beatbreak</p>
+          <a href="/posts/11681307" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681306"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        23
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/5b/f7/sample-5bf7a694e9cf17d6b457373e734c724d.jpg" alt="Konten oleh: rchella" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Columbina (Genshin Impact), Flins (Genshin Impact), Lauma (Genshin Impact)</h4>
+          <p class="text-sm truncate">Genshin Impact</p>
+          <a href="/posts/11681306" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681305"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        24
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">G</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/87/41/sample-87418611242ea9fe8ba57c6afbf35029.jpg" alt="Konten oleh: b9pqpy" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Matikanetannhauser (Umamusume)</h4>
+          <p class="text-sm truncate">Umamusume</p>
+          <a href="/posts/11681305" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="group gallery-item relative break-inside-avoid bg-gray-800 rounded-md overflow-hidden" data-post-url="/posts/11681304"   data-is-video="false" >
+      <div class="absolute top-1 left-1 z-20 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+        25
+      </div>
+
+      <div class="absolute top-1.5 right-1.5 z-20 flex items-center gap-1.5">
+        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">JPG</span>
+
+        
+        
+        <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-md">S</span>
+        
+      </div>
+
+      <div class="media-container w-full h-auto">
+        
+        <img src="https://cdn.donmai.us/sample/43/93/sample-43934ec78f92d876645589137ed05cc9.jpg" alt="Konten oleh: hq_yunak" class="w-full h-auto transition-transform duration-300 group-hover:scale-105" >
+        
+      </div>
+
+      <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="overlay-content">
+          <h4 class="font-bold truncate">Unknown Character</h4>
+          <p class="text-sm truncate">Original</p>
+          <a href="/posts/11681304" class="detail-button mt-2 text-center w-full block bg-cyan-600 text-xs py-1 rounded-md hover:bg-cyan-700">
+            Lihat Detail
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    
+  </div>
+</main>
+
+<nav id="pagination-nav" class="flex justify-center items-center space-x-1 my-12">
+  
+
+  
+
+  <div class="hidden md:flex items-center space-x-1 md:space-x-2">
+    
+    
+    
+    <a href="/search?limit=25&amp;page=1" class="px-2 py-1 md:px-3 md:py-2 rounded-md text-xs md:text-sm bg-cyan-600 text-white font-bold">1</a>
+    
+    <a href="/search?limit=25&amp;page=2" class="px-2 py-1 md:px-3 md:py-2 rounded-md text-xs md:text-sm bg-gray-700 hover:bg-cyan-500">2</a>
+    
+    <a href="/search?limit=25&amp;page=3" class="px-2 py-1 md:px-3 md:py-2 rounded-md text-xs md:text-sm bg-gray-700 hover:bg-cyan-500">3</a>
+    
+    <a href="/search?limit=25&amp;page=4" class="px-2 py-1 md:px-3 md:py-2 rounded-md text-xs md:text-sm bg-gray-700 hover:bg-cyan-500">4</a>
+    
+    
+    <span class="px-2 py-1 md:px-3 md:py-2 text-gray-500 text-xs md:text-sm">...</span>
+    
+  </div>
+
+  <div class="flex md:hidden items-center space-x-1">
+    
+    
+    
+    <a href="/search?limit=25&amp;page=1" class="px-3 py-2 rounded-md text-sm bg-cyan-600 text-white font-bold">1</a>
+    
+    <a href="/search?limit=25&amp;page=2" class="px-3 py-2 rounded-md text-sm bg-gray-700 hover:bg-cyan-500">2</a>
+    
+    
+    <span class="px-3 py-2 text-gray-500 text-sm">...</span>
+    
+  </div>
+
+  
+  <a href="/search?limit=25&amp;page=2" class="px-3 py-2 md:px-3 md:py-2 bg-gray-700 rounded-md hover:bg-cyan-500 text-sm md:text-lg" rel="next">»</a>
+  
+</nav>
+
+
+
+<div class="py-8 bg-black/30">
+  <div class="container mx-auto mt-12">
+
+    
+    <section class="bg-gray-900/50 rounded-lg p-4">
+      <h2 class="text-2xl font-bold mb-4 text-white text-start">Popular Series</h2>
+      <div class="relative overflow-x-hidden">
+        <div class="marquee-container flex">
+          <div class="marquee-content flex-shrink-0 flex items-center justify-start min-w-full">
+            
+            <a href="/search?tags=bang_dream!" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">bang dream!</a>
+            
+            <a href="/search?tags=idolmaster_cinderella_girls" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">idolmaster cinderella girls</a>
+            
+            <a href="/search?tags=persona" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">persona</a>
+            
+            <a href="/search?tags=girls_und_panzer" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">girls und panzer</a>
+            
+            <a href="/search?tags=pokemon_sword_and_shield" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">pokemon sword and shield</a>
+            
+            <a href="/search?tags=original" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">original</a>
+            
+            <a href="/search?tags=nijisanji" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">nijisanji</a>
+            
+            <a href="/search?tags=honkai:_star_rail" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">honkai: star rail</a>
+            
+            <a href="/search?tags=honkai_(series)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">honkai (series)</a>
+            
+            <a href="/search?tags=danganronpa_2:_goodbye_despair" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">danganronpa 2: goodbye despair</a>
+            
+            <a href="/search?tags=jujutsu_kaisen" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">jujutsu kaisen</a>
+            
+            <a href="/search?tags=hololive_english" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">hololive english</a>
+            
+            <a href="/search?tags=idolmaster_million_live!" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">idolmaster million live!</a>
+            
+            <a href="/search?tags=kantai_collection" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">kantai collection</a>
+            
+            <a href="/search?tags=fire_emblem" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">fire emblem</a>
+            
+          </div>
+          <div class="marquee-content flex-shrink-0 flex items-center justify-start min-w-full">
+            
+            <a href="/search?tags=bang_dream!" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">bang dream!</a>
+            
+            <a href="/search?tags=idolmaster_cinderella_girls" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">idolmaster cinderella girls</a>
+            
+            <a href="/search?tags=persona" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">persona</a>
+            
+            <a href="/search?tags=girls_und_panzer" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">girls und panzer</a>
+            
+            <a href="/search?tags=pokemon_sword_and_shield" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">pokemon sword and shield</a>
+            
+            <a href="/search?tags=original" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">original</a>
+            
+            <a href="/search?tags=nijisanji" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">nijisanji</a>
+            
+            <a href="/search?tags=honkai:_star_rail" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">honkai: star rail</a>
+            
+            <a href="/search?tags=honkai_(series)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">honkai (series)</a>
+            
+            <a href="/search?tags=danganronpa_2:_goodbye_despair" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">danganronpa 2: goodbye despair</a>
+            
+            <a href="/search?tags=jujutsu_kaisen" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">jujutsu kaisen</a>
+            
+            <a href="/search?tags=hololive_english" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">hololive english</a>
+            
+            <a href="/search?tags=idolmaster_million_live!" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">idolmaster million live!</a>
+            
+            <a href="/search?tags=kantai_collection" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">kantai collection</a>
+            
+            <a href="/search?tags=fire_emblem" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">fire emblem</a>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+
+    
+    <section class="mt-6 bg-gray-900/50 rounded-lg p-4">
+      <h2 class="text-2xl font-bold mb-4 text-white text-start">Popular Characters</h2>
+      <div class="relative overflow-x-hidden">
+        <div class="marquee-container-reverse flex">
+          <div class="marquee-content-reverse flex-shrink-0 flex items-center justify-start min-w-full">
+            
+            <a href="/search?tags=artoria_pendragon_(fate)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">artoria pendragon (fate)</a>
+            
+            <a href="/search?tags=izayoi_sakuya" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">izayoi sakuya</a>
+            
+            <a href="/search?tags=kaenbyou_rin" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">kaenbyou rin</a>
+            
+            <a href="/search?tags=maribel_hearn" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">maribel hearn</a>
+            
+            <a href="/search?tags=alice_margatroid" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">alice margatroid</a>
+            
+            <a href="/search?tags=asuna_(blue_archive)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">asuna (blue archive)</a>
+            
+            <a href="/search?tags=firefly_(honkai:_star_rail)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">firefly (honkai: star rail)</a>
+            
+            <a href="/search?tags=warrior_of_light_(ff14)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">warrior of light (ff14)</a>
+            
+            <a href="/search?tags=tatara_kogasa" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">tatara kogasa</a>
+            
+            <a href="/search?tags=kagamine_rin" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">kagamine rin</a>
+            
+            <a href="/search?tags=hoshimachi_suisei" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">hoshimachi suisei</a>
+            
+            <a href="/search?tags=flandre_scarlet" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">flandre scarlet</a>
+            
+            <a href="/search?tags=hong_meiling" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">hong meiling</a>
+            
+            <a href="/search?tags=mash_kyrielight" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">mash kyrielight</a>
+            
+            <a href="/search?tags=hoshino_(blue_archive)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">hoshino (blue archive)</a>
+            
+          </div>
+          <div class="marquee-content-reverse flex-shrink-0 flex items-center justify-start min-w-full">
+            
+            <a href="/search?tags=artoria_pendragon_(fate)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">artoria pendragon (fate)</a>
+            
+            <a href="/search?tags=izayoi_sakuya" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">izayoi sakuya</a>
+            
+            <a href="/search?tags=kaenbyou_rin" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">kaenbyou rin</a>
+            
+            <a href="/search?tags=maribel_hearn" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">maribel hearn</a>
+            
+            <a href="/search?tags=alice_margatroid" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">alice margatroid</a>
+            
+            <a href="/search?tags=asuna_(blue_archive)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">asuna (blue archive)</a>
+            
+            <a href="/search?tags=firefly_(honkai:_star_rail)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">firefly (honkai: star rail)</a>
+            
+            <a href="/search?tags=warrior_of_light_(ff14)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">warrior of light (ff14)</a>
+            
+            <a href="/search?tags=tatara_kogasa" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">tatara kogasa</a>
+            
+            <a href="/search?tags=kagamine_rin" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">kagamine rin</a>
+            
+            <a href="/search?tags=hoshimachi_suisei" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">hoshimachi suisei</a>
+            
+            <a href="/search?tags=flandre_scarlet" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">flandre scarlet</a>
+            
+            <a href="/search?tags=hong_meiling" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">hong meiling</a>
+            
+            <a href="/search?tags=mash_kyrielight" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">mash kyrielight</a>
+            
+            <a href="/search?tags=hoshino_(blue_archive)" class="bg-gray-700 hover:bg-gray-600 text-base px-4 py-2 rounded-md mx-4 whitespace-nowrap tag-link">hoshino (blue archive)</a>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+  </div>
+</div>
+
+
+<button id="scroll-to-top-btn" class="fixed bottom-5 right-5 z-20 bg-cyan-600 hover:bg-cyan-700 text-white p-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300">
+  <h2>Going up?</h2>
+</button>
+
+</main>
+<footer class="bg-gray-900/50 mt-12 py-8 text-gray-400">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col md:flex-row gap-8 md:gap-16">
+      <div>
+        <h3 class="text-lg font-bold text-white mb-2">CytusGallery</h3>
+        <p class="text-sm">
+          Galeri web untuk menjelajahi dunia seni digital. Dibuat dengan data yang bersumber dari Danbooru API.
+        </p>
+      </div>
+
+      <div class="text-sm">
+        <h3 class="text-lg font-semibold text-white mb-2">Tautan</h3>
+        <ul class="space-y-2">
+          <li>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">GitHub</a>
+          </li>
+          <li>
+            <a href="https://danbooru.donmai.us/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Sumber Data (Danbooru)</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-gray-700 text-center text-sm">
+      <p>&copy; 2025 CytusGallery. Seluruh hak cipta dilindungi.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+<script src="/js/main.js"></script>
+</body>
+
+</html>

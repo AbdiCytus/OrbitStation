@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getMyStation, getMyProfile } from "@/lib/queries";
-import { getStationAnalytics } from "@/lib/actions";
+import { getStationAnalytics } from "@/lib/actions/social.actions";
 import AnalyticsClient from "./analytics-client";
 
 export const metadata = {

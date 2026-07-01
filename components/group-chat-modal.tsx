@@ -10,18 +10,62 @@ import {
   ArrowUturnLeftIcon, LinkIcon, UserPlusIcon,
   GlobeAltIcon, EyeIcon, RocketLaunchIcon, UsersIcon, MapPinIcon
 } from "@heroicons/react/24/outline";
-import {
-  getGroupMessages, sendGroupMessage, editGroupMessage,
-  deleteGroupMessage, muteMember, unmuteMember,
-  clearGroupChat, kickMember, getMutedMembers,
-  sendFriendRequest, getFriends, pinGroupMessageAction,
-  setCollabRole, blindMember, sightMember, getBlindedMembers,
-  unpinGroupMessageAction
-} from "@/lib/actions";
+import { getGroupMessages, sendGroupMessage, editGroupMessage, deleteGroupMessage, muteMember, unmuteMember, clearGroupChat, kickMember, getMutedMembers, pinGroupMessageAction, setCollabRole, blindMember, sightMember, getBlindedMembers, unpinGroupMessageAction } from "@/lib/actions/chat.actions";
+import { sendFriendRequest, getFriends } from "@/lib/actions/social.actions";
 import { toast } from "sonner";
 import type { SectorWithBeacons } from "@/types";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { pusherClient } from "@/lib/pusher-client";
+import { BADGE_REGISTRY } from "@/lib/badges/registry";
+import SectorQRModal from "./sector-qr-modal";
+import { QrCodeIcon } from "@heroicons/react/24/outline";
+
+export const getAvatarBadgeClass = (titleBadge?: string | null) => {
+  if (!titleBadge) return '';
+  const badge = BADGE_REGISTRY.find(b => b.id === titleBadge);
+  if (!badge) return '';
+  const isSpecial = badge.rarity === "ekslusif";
+  const isExclusive = badge.rarity === "super-ekslusif" || badge.rarity === "developer";
+  if (isExclusive) return `avatar-badge avatar-exclusive-${badge.id}`;
+  if (isSpecial) return `avatar-badge avatar-badge-special-${badge.color}`;
+  return `avatar-badge avatar-badge-common-${badge.color}`;
+};
+
+export const getAvatarSweepClass = (titleBadge?: string | null) => {
+  if (!titleBadge) return '';
+  const badge = BADGE_REGISTRY.find(b => b.id === titleBadge);
+  return badge && (badge.rarity === "ekslusif" || badge.rarity === "super-ekslusif" || badge.rarity === "developer") ? 'public-badge-sweep' : '';
+};
+
+export const getModalTint = (color?: string) => {
+  const map: Record<string, string> = {
+    gray: "rgba(156, 163, 175, 0.15)",
+    amber: "rgba(251, 191, 36, 0.15)",
+    rose: "rgba(251, 113, 133, 0.15)",
+    pink: "rgba(244, 114, 182, 0.15)",
+    cyan: "rgba(34, 211, 238, 0.15)",
+    emerald: "rgba(52, 211, 153, 0.15)",
+    purple: "rgba(192, 132, 252, 0.15)",
+    blue: "rgba(96, 165, 250, 0.15)",
+    indigo: "rgba(129, 140, 248, 0.15)",
+  };
+  return color ? map[color] : "transparent";
+};
+
+export const getModalBorder = (color?: string) => {
+  const map: Record<string, string> = {
+    gray: "rgba(156, 163, 175, 0.4)",
+    amber: "rgba(251, 191, 36, 0.4)",
+    rose: "rgba(251, 113, 133, 0.4)",
+    pink: "rgba(244, 114, 182, 0.4)",
+    cyan: "rgba(34, 211, 238, 0.4)",
+    emerald: "rgba(52, 211, 153, 0.4)",
+    purple: "rgba(192, 132, 252, 0.4)",
+    blue: "rgba(96, 165, 250, 0.4)",
+    indigo: "rgba(129, 140, 248, 0.4)",
+  };
+  return color ? map[color] : "rgba(139, 92, 246, 0.3)";
+};
 
 interface Props {
   isOpen: boolean;
@@ -38,8 +82,6 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   }, [incomingSector]);
   const sector = incomingSector || prevSectorRef.current;
 
-
-
   const [messages, setMessages] = useState<any[]>([]);
   const [localCollaborators, setLocalCollaborators] = useState<any[]>(sector?.collaborators || []);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +90,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
   const [blindedMembers, setBlindedMembers] = useState<string[]>([]);
   const [isMuteAll, setIsMuteAll] = useState(sector?.isMuteAll || false);
   const [showMembers, setShowMembers] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [typingUsers, setTypingUsers] = useState<any[]>([]);
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -454,7 +497,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
     setInputMessage(val);
 
     const now = Date.now();
-    if (now - lastTypingRef.current > 1000) {
+    if (now - lastTypingRef.current > 3000) {
       const channel = pusherClient.channel(`presence-sector-${sector?.id}`);
       if (channel && channel.subscribed && val.trim().length > 0) {
         channel.trigger('client-is-typing', { isTyping: true, userId: user.id, username: user.username, name: user.name });
@@ -790,6 +833,11 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  {(isOwner || amIAdmin) && sector.inviteEnabled && (
+                    <button onClick={() => setShowQRModal(true)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showQRModal ? "rgba(139,92,246,0.2)" : "transparent", color: showQRModal ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }} title="Share Invite QR">
+                      <QrCodeIcon width={22} height={22} />
+                    </button>
+                  )}
                   <button onClick={() => setShowMembers(!showMembers)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showMembers ? "rgba(139,92,246,0.2)" : "transparent", color: showMembers ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
                     <UserGroupIcon width={22} height={22} />
                   </button>
@@ -888,8 +936,9 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     ...(isMsgOwner ? { border: "2px solid #FFD700", boxShadow: "0 0 12px 2px rgba(255,215,0,0.8)" } :
                                       localCollaborators.find((c: any) => c.userId === msg.senderId)?.role === "ADMIN" ? { border: "2px solid #10B981" } :
                                         { border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" })
-                                  }}
+                                  } as any}
                                 >
+                                  <div className="w-full h-full rounded-full overflow-hidden relative">
                                   {msg.sender?.image ? (
                                     <img src={msg.sender.image} alt={msg.sender.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                   ) : (
@@ -897,6 +946,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                       {msg.sender?.username?.[0]?.toUpperCase()}
                                     </div>
                                   )}
+                                </div>
                                 </div>
                               )}
 
@@ -1200,12 +1250,14 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                 <div
                                   onClick={(e) => { e.stopPropagation(), setMentionDetail({ type: 'user', data: sector.station.user }) }}
                                   className="cursor-pointer hover:opacity-80 transition-opacity"
-                                  style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden", border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)" }}
+                                  style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#374151", border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)", overflow: "hidden" }}
                                 >
-                                  {sector.station.user.image
-                                    ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
-                                  }
+                                  <div className="w-full h-full rounded-full overflow-hidden relative">
+                                    {sector.station.user.image
+                                      ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                      : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
+                                    }
+                                  </div>
                                 </div>
                                 {/* Titik Online */}
                                 <div style={{
@@ -1242,12 +1294,14 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     style={{
                                       width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden",
                                       ...(c.role === "ADMIN" ? { border: "2px solid #10B981" } : { border: "1px solid rgba(255,255,255,0.1)" })
-                                    }}
+                                    } as any}
                                   >
-                                    {c.user.image
-                                      ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                      : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{c.user.username?.[0]?.toUpperCase()}</div>
-                                    }
+                                    <div className="w-full h-full rounded-full overflow-hidden relative">
+                                      {c.user.image
+                                        ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                        : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{c.user.username?.[0]?.toUpperCase()}</div>
+                                      }
+                                    </div>
                                   </div>
 
                                   {/* Titik Online Indicator */}
@@ -1298,25 +1352,102 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                   const isAlreadyFriend = isUserType && myFriends.some(f => f.id === mentionDetail.data.id);
                   const isPending = isUserType && pendingRequests.has(mentionDetail.data.id);
 
+                  const dataAsUser = mentionDetail.data as any;
+                  const badge = isUserType && dataAsUser.titleBadge ? BADGE_REGISTRY.find(b => b.id === dataAsUser.titleBadge) : null;
+                  const isSpecial = badge?.rarity === "ekslusif";
+                  const isExclusive = badge?.rarity === "super-ekslusif" || badge?.rarity === "developer";
+
+                  const avatarBadgeClass = badge 
+                    ? isExclusive 
+                      ? `avatar-badge avatar-exclusive-${badge.id}`
+                      : isSpecial 
+                        ? `avatar-badge avatar-badge-special-${badge.color}`
+                        : `avatar-badge avatar-badge-common-${badge.color}`
+                    : '';
+                  
+                  const avatarSweepClass = isExclusive || isSpecial ? 'public-badge-sweep' : '';
+
                   return (
                     <motion.div
                       onClick={(e) => e.stopPropagation()}
                       initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                      className="absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[rgba(20,20,30,0.95)] backdrop-blur-xl rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-violet-500/30 flex flex-col gap-4 min-w-[300px]"
-                      style={{ padding: "1.5rem" }}
+                      className={`!absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border flex flex-col gap-4 min-w-[300px] chat-mention-modal ${isExclusive && badge ? badge.effectClass : ''} ${badge?.id === 'shattered' ? 'modal-shattered' : ''}`}
+                      style={{ 
+                        padding: "1.5rem", 
+                        backgroundColor: "rgba(15,15,25,0.95)",
+                        backgroundImage: badge && isSpecial ? `radial-gradient(circle at top right, ${getModalTint(badge.color)}, transparent)` : undefined,
+                        borderColor: getModalBorder(badge?.color),
+                        backdropFilter: "blur(20px)"
+                      }}
                     >
-                      <button onClick={() => setMentionDetail(null)} className="absolute top-3 right-3 text-gray-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer p-1">
+                      {(isExclusive) && <div className="modal-exclusive-sparkles" />}
+                      <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none", zIndex: 0 }}>
+                        {badge?.id === 'the-completionist' && <div className="modal-completionist-wave" />}
+                        {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-wave-layer" />}
+                        {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-blackhole" />}
+                      </div>
+                      <button onClick={() => setMentionDetail(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-transparent border-none cursor-pointer z-50">
                         <XMarkIcon width={20} height={20} />
                       </button>
 
-                      <div className="flex items-center gap-5">
-                        <div className="p-1 rounded-full bg-white/5 border border-white/10 shrink-0">
-                          <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-16 h-16 rounded-full object-cover" />
+                      <div className="flex items-center gap-5 relative z-10">
+                        <div style={{ position: 'relative', flexShrink: 0 }}>
+                          {badge?.id === 'zodiac-horizon' && (
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-back" />
+                          )}
+                          {badge?.id === 'zodiac-horizon' && (
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-back" />
+                          )}
+                          <div 
+                            className={`shrink-0 flex items-center justify-center rounded-full bg-[#1a1a2e] ${avatarBadgeClass}`} 
+                            style={{ 
+                              width: '74px', height: '74px', '--avatar-radius': '37px', overflow: 'visible', position: 'relative', zIndex: 1,
+                              ...( !badge ? { border: '3px solid #a78bfa', boxShadow: '0 0 20px rgba(167, 139, 250, 0.4)' } : {} )
+                            } as React.CSSProperties}
+                          >
+                            <div className={`w-full h-full rounded-full overflow-hidden relative ${avatarSweepClass}`}>
+                              <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-full h-full object-cover relative z-10" />
+                            </div>
+                          </div>
+                          {badge?.id === 'zodiac-horizon' && (
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-front" />
+                          )}
+                          {badge?.id === 'zodiac-horizon' && (
+                            <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-front" />
+                          )}
                         </div>
                         <div className="flex flex-col pr-6">
                           <h4 className="text-white font-bold text-lg m-0">{mentionDetail.data.name || mentionDetail.data.title}</h4>
                           {isUserType ? (
-                            <p className="text-gray-400 text-sm m-0">@{mentionDetail.data.username} {mentionDetail.data.callsign ? `• ${mentionDetail.data.callsign}` : ''}</p>
+                            <>
+                              <p className="text-gray-400 text-sm m-0">@{mentionDetail.data.username} {mentionDetail.data.callsign ? `• ${mentionDetail.data.callsign}` : ''}</p>
+                              {badge && (
+                                <div className="zodiac-orbit-wrapper" style={{ position: 'relative', width: 'fit-content' }}>
+                                  {badge.id === 'zodiac-horizon' && (
+                                    <>
+                                      <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-back" />
+                                      <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-back" />
+                                    </>
+                                  )}
+                                  <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg mt-1.5`} style={{ width: 'fit-content', position: 'relative', zIndex: 1, marginTop: "0.25rem" }}>
+                                    {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
+                                    {badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
+                                    <div className="badge-icon w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                                      <DynamicIcon name={badge.icon as any} className="w-3.5 h-3.5 relative z-10" />
+                                    </div>
+                                    <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[12px] drop-shadow-md" style={{marginRight: "0.5rem"}}>
+                                      {badge.name}
+                                    </span>
+                                  </div>
+                                  {badge.id === 'zodiac-horizon' && (
+                                    <>
+                                      <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-front" />
+                                      <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-front" />
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </>
                           ) : (
                             <p className="text-violet-400 text-sm m-0">Sector Beacon Reference</p>
                           )}
@@ -1453,6 +1584,12 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
           </motion.div>
         )}
       </AnimatePresence>
+      <SectorQRModal
+        isOpen={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        sectorId={sector?.id}
+        sectorName={sector?.name}
+      />
     </>
   );
 }

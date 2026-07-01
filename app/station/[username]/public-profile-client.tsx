@@ -5,13 +5,14 @@ import type { PublicStationPage, Beacon } from "@/types";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import BeaconDetailModal from "@/components/beacon-detail-modal";
 import StationNavbar from "@/components/station-navbar";
-import { incrementBeaconVisit } from "@/lib/actions";
+import { incrementBeaconVisit } from "@/lib/actions/beacon.actions";
 import { useRouter } from "next/navigation";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { UserPlusIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
-import { sendFriendRequest, recordStationVisit } from "@/lib/actions";
+import { sendFriendRequest, recordStationVisit } from "@/lib/actions/social.actions";
 import { motion, useAnimation, PanInfo, useDragControls } from "framer-motion";
+import { getBadgeById, BADGE_COLORS } from "@/lib/badges/registry";
 import FriendsModal from "@/components/friends-modal";
 import { useNotifications } from "@/hooks/use-notifications";
 import "./public-profile.css";
@@ -48,14 +49,14 @@ function CosmicBackground({ enabled, isMobile }: { enabled: boolean; isMobile: b
 
 export default function PublicProfileClient({ data, sessionUser, isFriendOrPending }: Props) {
   const { user, station } = data;
-  
+
   // Exclude "All", and filter active sectors to those that have beacons
   const sectors = station.sectors.filter(s => s.beacons.length > 0);
-  
+
   const [activeSectorId, setActiveSectorId] = useState<string>(
     sectors[0]?.id ?? ""
   );
-  
+
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
   const [stationSearch, setStationSearch] = useState("");
   const [isAddingFriend, setIsAddingFriend] = useState(false);
@@ -107,16 +108,16 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
   const isOwnProfile = sessionUser?.id === user.id;
   const profileTitle = isOwnProfile ? user.name : `${user.name}'s Station`;
 
-  const isAnimationEnabled = sessionUser && 'animationEnabled' in sessionUser 
-    ? sessionUser.animationEnabled 
+  const isAnimationEnabled = sessionUser && 'animationEnabled' in sessionUser
+    ? sessionUser.animationEnabled
     : false;
 
   return (
     <>
       {/* Station Navbar */}
-      <StationNavbar 
-        user={sessionUser} 
-        displayName={sessionUser?.name || "Pilot"} 
+      <StationNavbar
+        user={sessionUser}
+        displayName={sessionUser?.name || "Pilot"}
         hideSearch={false}
         searchQuery={stationSearch}
         onSearchChange={setStationSearch}
@@ -143,7 +144,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
 
       <div className="zzz-wrapper" style={{ top: "60px", pointerEvents: "none" }}>
         {/* Modal Container */}
-        <motion.div 
+        <motion.div
           className={`zzz-modal ${isAnimationEnabled ? "floating" : ""}`}
           drag={isMobile ? "y" : false}
           dragControls={dragControls}
@@ -178,23 +179,23 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
             currentYRef.current = targetSnap;
             controls.start({ y: targetSnap, transition: { type: "spring", stiffness: 300, damping: 30 } });
           }}
-          style={{ 
-            pointerEvents: "auto", 
+          style={{
+            pointerEvents: "auto",
             touchAction: "auto",
             animation: isMobile ? "none" : undefined
           }}
         >
-          
+
           {/* Draggable handle for mobile */}
           {isMobile && (
-            <div 
+            <div
               onPointerDown={(e) => dragControls.start(e)}
               style={{ width: "100%", height: "30px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "grab", flexShrink: 0, paddingTop: "8px", touchAction: "none" }}
             >
               <div style={{ width: "50px", height: "5px", backgroundColor: "rgba(255,255,255,0.4)", borderRadius: "3px" }} />
             </div>
           )}
-          
+
           {/* Modal Background Sparkles */}
           {isAnimationEnabled && (
             <div className="zzz-modal-bg" aria-hidden="true">
@@ -227,31 +228,89 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
           <div className="zzz-content">
             {/* Banner Section */}
             <div className="zzz-banner-container">
-              <img 
-                src={user.bannerUrl || "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=2000&auto=format&fit=crop"} 
-                alt="Banner" 
-                className="zzz-banner-img" 
+              <img
+                src={user.bannerUrl || "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=2000&auto=format&fit=crop"}
+                alt="Banner"
+                className="zzz-banner-img"
               />
               <div className="zzz-banner-overlay">
-                <div className="zzz-banner-left">
-                  <div className="zzz-avatar">
-                    {user.image ? (
-                      <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                    ) : (
-                      user.name?.[0]?.toUpperCase() ?? "?"
-                    )}
-                  </div>
-                  <div className="zzz-user-info">
-                    <h1 className="zzz-user-name">{profileTitle || "Pilot"}</h1>
-                    {user.username && (
-                      <div className="zzz-user-username">@{user.username}</div>
-                    )}
-                    {user.titleBadge && (
-                      <div className="zzz-user-badge">{user.titleBadge}</div>
-                    )}
-                  </div>
-                </div>
-                
+                {(() => {
+                  const badge = user.titleBadge ? getBadgeById(user.titleBadge) : null;
+                  const isSpecial = badge?.rarity === "ekslusif";
+                  const isExclusive = badge?.rarity === "super-ekslusif" || badge?.rarity === "developer";
+
+                  const avatarBadgeClass = badge 
+                    ? isExclusive 
+                      ? `avatar-badge avatar-exclusive-${badge.id}`
+                      : isSpecial 
+                        ? `avatar-badge avatar-badge-special-${badge.color}`
+                        : `avatar-badge avatar-badge-common-${badge.color}`
+                    : '';
+
+                  return (
+                    <div className="zzz-banner-left">
+                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                        {badge?.id === 'zodiac-horizon' && (
+                          <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-back" />
+                        )}
+                        {badge?.id === 'zodiac-horizon' && (
+                          <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-back" />
+                        )}
+                        <div 
+                          className={`zzz-avatar ${avatarBadgeClass}`} 
+                          style={{ '--avatar-radius': '46px', overflow: 'visible', position: 'relative', zIndex: 1 } as any}
+                        >
+                          <div className={`w-full h-full rounded-full overflow-hidden relative ${isExclusive || isSpecial ? 'public-badge-sweep' : ''}`}>
+                            {user.image ? (
+                              <img src={user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'relative', zIndex: 10 }} />
+                            ) : (
+                              <span style={{ position: 'relative', zIndex: 10 }}>{user.name?.[0]?.toUpperCase() ?? "?"}</span>
+                            )}
+                          </div>
+                        </div>
+                        {badge?.id === 'zodiac-horizon' && (
+                          <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-front" />
+                        )}
+                        {badge?.id === 'zodiac-horizon' && (
+                          <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-front" />
+                        )}
+                      </div>
+                      <div className="zzz-user-info">
+                        <h1 className="zzz-user-name">{profileTitle || "Pilot"}</h1>
+                        {user.username && (
+                          <div className="zzz-user-username">@{user.username}</div>
+                        )}
+                        {badge && (
+                          <div className="zodiac-orbit-wrapper" style={{ position: 'relative', width: 'fit-content', marginTop: '4px' }}>
+                            {badge.id === 'zodiac-horizon' && (
+                              <>
+                                <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-back" />
+                                <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-back" />
+                              </>
+                            )}
+                            <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1.5 pl-1.5 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg`} style={{ position: 'relative', zIndex: 1 }}>
+                              {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
+                              {badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
+                              <div className="badge-icon w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
+                                <DynamicIcon name={badge.icon} className="w-4 h-4 relative z-10" />
+                              </div>
+                              <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[13px] drop-shadow-md" style={{marginRight: "1rem"}}>
+                                {badge.name}
+                              </span>
+                            </div>
+                            {badge.id === 'zodiac-horizon' && (
+                              <>
+                                <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-front" />
+                                <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-front" />
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div className="zzz-banner-right">
                   <div className="zzz-stats-row">
                     <div className="zzz-stat">
@@ -273,30 +332,30 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
               {isMobile && (
                 <div style={{ display: "flex", gap: "0.5rem", width: "100%" }}>
                   {sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
-                    <button 
-                      className="btn btn-primary" 
+                    <button
+                      className="btn btn-primary"
                       style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flex: "1" }}
                       disabled={isAddingFriend}
                       onClick={async () => {
-                         setIsAddingFriend(true);
-                         const res = await sendFriendRequest(user.id);
-                         if (res?.error) {
-                            toast.error(res.error);
-                         } else {
-                            toast.success("Friend request sent!");
-                         }
-                         setIsAddingFriend(false);
+                        setIsAddingFriend(true);
+                        const res = await sendFriendRequest(user.id);
+                        if (res?.error) {
+                          toast.error(res.error);
+                        } else {
+                          toast.success("Friend request sent!");
+                        }
+                        setIsAddingFriend(false);
                       }}
                     >
                       <UserPlusIcon width={16} height={16} />
                       {isAddingFriend ? "Sending..." : "Add Friend"}
                     </button>
                   )}
-                  <button 
-                    className="btn btn-secondary hover:bg-white/10" 
+                  <button
+                    className="btn btn-secondary hover:bg-white/10"
                     style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flex: "1", background: "rgba(255,255,255,0.05)" }}
                     onClick={() => {
-                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => {});
+                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => { });
                       else { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
                     }}
                   >
@@ -304,24 +363,24 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                   </button>
                 </div>
               )}
-              
+
               <div className="zzz-bio-text" style={{ flex: 1, textAlign: "center", padding: "0 1rem" }}>"{user.bio || "Exploring the internet galaxy."}"</div>
-              
+
               <div style={{ display: "flex", gap: "0.5rem", flexDirection: isMobile ? "column" : "row", width: isMobile ? "100%" : "auto", justifyContent: "flex-end" }}>
                 {!isMobile && sessionUser && sessionUser.id !== user.id && user.allowFriendRequests !== false && !isFriendOrPending && (
-                  <button 
-                    className="btn btn-primary" 
+                  <button
+                    className="btn btn-primary"
                     style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem" }}
                     disabled={isAddingFriend}
                     onClick={async () => {
-                       setIsAddingFriend(true);
-                       const res = await sendFriendRequest(user.id);
-                       if (res?.error) {
-                          toast.error(res.error);
-                       } else {
-                          toast.success("Friend request sent!");
-                       }
-                       setIsAddingFriend(false);
+                      setIsAddingFriend(true);
+                      const res = await sendFriendRequest(user.id);
+                      if (res?.error) {
+                        toast.error(res.error);
+                      } else {
+                        toast.success("Friend request sent!");
+                      }
+                      setIsAddingFriend(false);
                     }}
                   >
                     <UserPlusIcon width={16} height={16} />
@@ -329,11 +388,11 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                   </button>
                 )}
                 {!isMobile && (
-                  <button 
-                    className="btn btn-secondary hover:bg-white/10" 
+                  <button
+                    className="btn btn-secondary hover:bg-white/10"
                     style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)" }}
                     onClick={() => {
-                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => {});
+                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => { });
                       else { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
                     }}
                   >
@@ -371,8 +430,8 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
             {sectors.length > 0 && (
               <div className="zzz-beacon-grid">
                 {visibleBeacons.map((beacon, idx) => (
-                  <div 
-                    key={beacon.id} 
+                  <div
+                    key={beacon.id}
                     className={`zzz-beacon-card ${isAnimationEnabled ? "floating" : ""}`}
                     style={{ "--enter-delay": `${idx * 0.1}s`, animationDelay: isAnimationEnabled ? `${(idx * 0.1)}s, ${(idx * 0.2)}s` : "0s" } as any}
                     onClick={() => handleBeaconClick(beacon)}
@@ -408,10 +467,10 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
         />
       )}
 
-      <FriendsModal 
-        isOpen={showFriendsModal} 
-        onClose={() => setShowFriendsModal(false)} 
-        user={sessionUser} 
+      <FriendsModal
+        isOpen={showFriendsModal}
+        onClose={() => setShowFriendsModal(false)}
+        user={sessionUser}
         stats={stats}
         refetchStats={refetchNotifications}
       />

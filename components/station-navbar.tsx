@@ -6,10 +6,18 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { MagnifyingGlassIcon, XMarkIcon, Cog8ToothIcon, ArrowRightOnRectangleIcon, UserIcon, UsersIcon, Bars3Icon, ChartBarIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
-import { searchPilots } from "@/lib/actions";
+import { searchPilots } from "@/lib/actions/social.actions";
 
 type Props = {
-  user?: { id: string; name: string | null; image: string | null; callsign?: string | null; username?: string | null } | null;
+  user?: {
+    id: string;
+    name: string | null;
+    image: string | null;
+    callsign?: string | null;
+    username?: string | null;
+    shortcuts?: string | null;
+    station?: { isPublic: boolean } | null;
+  } | null;
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
   onSearchSubmit?: () => void;
@@ -103,6 +111,31 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
     }
   };
 
+  const defaultShortcuts = { publicStation: "F1", friends: "F2", analytics: "F3", settings: "F4" };
+  const parsedShortcuts = user?.shortcuts ? { ...defaultShortcuts, ...JSON.parse(user.shortcuts) } : defaultShortcuts;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if typing in an input
+      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") return;
+
+      if (e.key === parsedShortcuts.publicStation && user?.station?.isPublic && user?.username) {
+        e.preventDefault();
+        router.push(`/station/${user.username}`);
+      } else if (e.key === parsedShortcuts.friends) {
+        e.preventDefault();
+        onOpenFriends?.();
+      } else if (e.key === parsedShortcuts.analytics && user?.station?.isPublic) {
+        e.preventDefault();
+        router.push("/analytics");
+      } else if (e.key === parsedShortcuts.settings) {
+        e.preventDefault();
+        router.push("/settings");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [parsedShortcuts, user, router, onOpenFriends]);
 
   return (
     <header className="station-navbar glass-nav">
@@ -146,16 +179,16 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
             {showSuggestions && suggestedPilots.length > 0 && (
               <div className="pilot-suggest-dropdown">
                 {suggestedPilots.map((pilot, idx) => (
-                  <Link 
-                    key={pilot.id} 
-                    href={`/station/${pilot.username}`} 
+                  <Link
+                    key={pilot.id}
+                    href={`/station/${pilot.username}`}
                     className={`pilot-suggest-item ${focusedSuggestIndex === idx ? "bg-white/10" : ""}`}
                     style={focusedSuggestIndex === idx ? { background: "rgba(255,255,255,0.1)" } : {}}
                     onClick={() => setShowSuggestions(false)}
                     onMouseEnter={() => setFocusedSuggestIndex(idx)}
                   >
                     <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#374151", overflow: "hidden" }}>
-                      {pilot.image ? <img src={pilot.image} style={{width:"100%", height:"100%", objectFit:"cover"}}/> : <span style={{display:"flex", alignItems:"center", justifyContent:"center", fontSize:"10px", width:"100%", height:"100%"}}>{(pilot.name || pilot.username)[0].toUpperCase()}</span>}
+                      {pilot.image ? <img src={pilot.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", width: "100%", height: "100%" }}>{(pilot.name || pilot.username)[0].toUpperCase()}</span>}
                     </div>
                     <span style={{ fontSize: "0.85rem" }}>{pilot.name || pilot.username}</span>
                   </Link>
@@ -198,10 +231,44 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
 
       </div>
 
-              <div className="navbar-user" style={{ display: "flex", alignItems: "center" }} ref={menuRef}>
+      <div className="navbar-user" style={{ display: "flex", alignItems: "center" }} ref={menuRef}>
         {!hideProfile ? (
           user ? (
             <>
+              <div className="hidden md:flex items-center" style={{ gap: "0.5rem", marginRight: "2.5rem" }}>
+                {user.station?.isPublic && user.username && (
+                  <Link href={`/station/${user.username}`} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                    <GlobeAltIcon width={20} height={20} />
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#141423] border border-white/10 rounded-lg text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
+                      Public Station <span className="text-gray-400 ml-1">({parsedShortcuts.publicStation})</span>
+                    </div>
+                  </Link>
+                )}
+                <button onClick={onOpenFriends} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <UsersIcon width={20} height={20} />
+                  {stats?.hasNotifications && (
+                    <span style={{ position: "absolute", top: "2px", right: "2px", width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423" }}></span>
+                  )}
+                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#141423] border border-white/10 rounded-lg text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
+                    Friends <span className="text-gray-400 ml-1">({parsedShortcuts.friends})</span>
+                  </div>
+                </button>
+                {user.station?.isPublic && (
+                  <Link href="/analytics" className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                    <ChartBarIcon width={20} height={20} />
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#141423] border border-white/10 rounded-lg text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
+                      Analytics <span className="text-gray-400 ml-1">({parsedShortcuts.analytics})</span>
+                    </div>
+                  </Link>
+                )}
+                <Link href="/settings" className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <Cog8ToothIcon width={20} height={20} />
+                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#141423] border border-white/10 rounded-lg text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
+                    Settings <span className="text-gray-400 ml-1">({parsedShortcuts.settings})</span>
+                  </div>
+                </Link>
+              </div>
+
               <div className="navbar-user-info" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", marginRight: "0.75rem", justifyContent: "center" }}>
                 <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#fff", lineHeight: 1 }}>{user.name ?? "Pilot"}</span>
                 {user.callsign && <span style={{ fontSize: "0.7rem", color: "#a78bfa", marginTop: "0.2rem" }}>{user.callsign}</span>}
@@ -217,7 +284,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                 style={{ position: "relative", cursor: "pointer" }}
               >
                 {stats?.hasNotifications && (
-                  <span style={{ position: "absolute", top: 0, right: 0, width: "10px", height: "10px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423", zIndex: 10 }}></span>
+                  <span className="md:hidden" style={{ position: "absolute", top: 0, right: 0, width: "10px", height: "10px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423", zIndex: 10 }}></span>
                 )}
                 {user.image ? (
                   <img
@@ -234,79 +301,79 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                 )}
               </button>
 
-                <AnimatePresence>
-                  {menuOpen && (
-                    <motion.div 
-                      className="navbar-menu"
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      style={{ transformOrigin: "top right" }}
-                    >
-                      <div className="navbar-menu-user">
-                        <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
-                      </div>
-                      <hr className="divider" />
-                      {pathname !== "/station" && (
-                        <Link
-                          href="/station"
-                          className="navbar-menu-item"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          <UserIcon width={18} height={18} /> My Station
-                        </Link>
-                      )}
-                      {user.username && isPublicProfile && (
-                        <Link
-                          href={`/station/${user.username}`}
-                          className="navbar-menu-item"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          <GlobeAltIcon width={18} height={18} /> Public Station
-                        </Link>
-                      )}
-                      {pathname !== '/settings' && pathname !== '/analytics' && (
-                        <button
-                          className="navbar-menu-item"
-                          onClick={() => {
-                            setMenuOpen(false);
-                            onOpenFriends?.();
-                          }}
-                        >
-                          <UsersIcon width={18} height={18} /> 
-                          <span style={{ flex: 1, textAlign: "left" }}>Friends</span>
-                          {stats?.hasNotifications && (
-                            <span style={{ width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", display: "inline-block" }}></span>
-                          )}
-                        </button>
-                      )}
-                      {pathname !== '/analytics' && isPublicProfile && (
-                        <Link
-                          href="/analytics"
-                          className="navbar-menu-item"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          <ChartBarIcon width={18} height={18} /> Analytics
-                        </Link>
-                      )}
+              <AnimatePresence>
+                {menuOpen && (
+                  <motion.div
+                    className="navbar-menu"
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ transformOrigin: "top right" }}
+                  >
+                    <div className="navbar-menu-user">
+                      <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
+                    </div>
+                    <hr className="divider" />
+                    {pathname !== "/station" && (
                       <Link
-                        href="/settings"
+                        href="/station"
                         className="navbar-menu-item"
                         onClick={() => setMenuOpen(false)}
                       >
-                        <Cog8ToothIcon width={18} height={18} /> Settings
+                        <UserIcon width={18} height={18} /> My Station
                       </Link>
-                      <button
-                        id="btn-sign-out"
-                        className="navbar-menu-item navbar-menu-item-danger"
-                        onClick={() => signOut({ callbackUrl: "/login" })}
+                    )}
+                    {user.username && user.station?.isPublic && (
+                      <Link
+                        href={`/station/${user.username}`}
+                        className="navbar-menu-item md:hidden"
+                        onClick={() => setMenuOpen(false)}
                       >
-                        <ArrowRightOnRectangleIcon width={18} height={18} /> Sign out
+                        <GlobeAltIcon width={18} height={18} /> Public Station
+                      </Link>
+                    )}
+                    {pathname !== '/settings' && pathname !== '/analytics' && (
+                      <button
+                        className="navbar-menu-item md:hidden"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          onOpenFriends?.();
+                        }}
+                      >
+                        <UsersIcon width={18} height={18} />
+                        <span style={{ flex: 1, textAlign: "left" }}>Friends</span>
+                        {stats?.hasNotifications && (
+                          <span style={{ width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", display: "inline-block" }}></span>
+                        )}
                       </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    )}
+                    {pathname !== '/analytics' && user.station?.isPublic && (
+                      <Link
+                        href="/analytics"
+                        className="navbar-menu-item md:hidden"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <ChartBarIcon width={18} height={18} /> Analytics
+                      </Link>
+                    )}
+                    <Link
+                      href="/settings"
+                      className="navbar-menu-item md:hidden"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <Cog8ToothIcon width={18} height={18} /> Settings
+                    </Link>
+                    <button
+                      id="btn-sign-out"
+                      className="navbar-menu-item navbar-menu-item-danger"
+                      onClick={() => signOut({ callbackUrl: "/login" })}
+                    >
+                      <ArrowRightOnRectangleIcon width={18} height={18} /> Sign out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </>
           ) : (
             <Link href="/login" style={{

@@ -35,6 +35,7 @@ export default async function StationPage() {
         animationEnabled: profile?.animationEnabled ?? true,
         staticBackgroundEnabled: (profile as any)?.staticBackgroundEnabled ?? false,
         hologramEnabled: (profile as any)?.hologramEnabled ?? true,
+        shortcuts: profile?.shortcuts ?? null,
         station: { isPublic: profile?.station?.isPublic ?? false },
       }}
     />

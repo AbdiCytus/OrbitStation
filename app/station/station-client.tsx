@@ -16,12 +16,13 @@ import AddSectorModal from "@/components/add-sector-modal";
 import EditSectorModal from "@/components/edit-sector-modal";
 import EditBeaconModal from "@/components/edit-beacon-modal";
 import BeaconDetailModal from "@/components/beacon-detail-modal";
+import TagManagementModal from "@/components/tag-management-modal";
 import SectorMembersModal from "@/components/sector-members-modal";
 import FriendsModal from "@/components/friends-modal";
 import StationNavbar from "@/components/station-navbar";
 import SpaceBackground from "@/components/space-background";
 import StaticStarfield from "@/components/static-starfield";
-import { deleteSector, reorderSectors } from "@/lib/actions";
+import { deleteSector, reorderSectors } from "@/lib/actions/sector.actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import {
   PlusIcon,
@@ -42,6 +43,7 @@ import {
   ArrowPathIcon,
   EllipsisVerticalIcon,
   ChatBubbleOvalLeftEllipsisIcon,
+  TagIcon,
 } from "@heroicons/react/24/outline";
 import GroupChatModal from "@/components/group-chat-modal";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,6 +63,7 @@ type Props = {
     animationEnabled: boolean;
     hologramEnabled?: boolean;
     staticBackgroundEnabled?: boolean;
+    shortcuts?: string | null;
     station?: { isPublic: boolean };
   };
 };
@@ -218,13 +221,17 @@ export default function StationClient({
     "date" | "name" | "sector" | "creator" | "visits"
   >("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagSearchQuery, setTagSearchQuery] = useState("");
+  // Local override for sector tags — updated optimistically from TagManagementModal
+  const [sectorTagsOverride, setSectorTagsOverride] = useState<Record<string, import("@/types").Tag[]>>({});
   const [isFilterExiting, setIsFilterExiting] = useState(false);
   const [isFilterEntering, setIsFilterEntering] = useState(false);
   const [visibleLimit, setVisibleLimit] = useState(12);
 
   useEffect(() => {
     setVisibleLimit(12);
-  }, [displaySectorId, searchQuery, filterVisibility, sortBy, sortDir]);
+  }, [displaySectorId, searchQuery, filterVisibility, sortBy, sortDir, selectedTags]);
 
   const applyFilterSort = (updateFn: () => void) => {
     if (!user.animationEnabled) {
@@ -248,11 +255,12 @@ export default function StationClient({
     }, 300);
   };
 
-  const [openMenu, setOpenMenu] = useState<"filter" | "sort" | null>(null);
+  const [openMenu, setOpenMenu] = useState<"filter" | "sort" | "tags" | null>(null);
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
   const [editingBeacon, setEditingBeacon] = useState<Beacon | null>(null);
   const [showAddBeacon, setShowAddBeacon] = useState(false);
   const [showAddSector, setShowAddSector] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showGroupChat, setShowGroupChat] = useState(false);
   // Track which private chat is open so useNotifications can suppress its toast
@@ -432,6 +440,12 @@ export default function StationClient({
       beacons = beacons.filter((b) => !b._isPublic);
     }
 
+    if (selectedTags.length > 0) {
+      beacons = beacons.filter((b) =>
+        b.tags?.some((bt: any) => selectedTags.includes(bt.tagId))
+      );
+    }
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       beacons = beacons.filter(
@@ -478,7 +492,7 @@ export default function StationClient({
     }
 
     return beacons;
-  }, [baseBeacons, searchQuery, filterVisibility, sortBy, sortDir]);
+  }, [baseBeacons, searchQuery, filterVisibility, sortBy, sortDir, selectedTags]);
 
   const [cols, setCols] = useState(6);
   useEffect(() => {
@@ -1307,6 +1321,25 @@ export default function StationClient({
                           className={isRefreshing ? "animate-spin" : ""}
                         />
                       </button>
+                      {isCurrentSectorAdminOrOwner && displaySectorId !== "all" && (
+                        <button
+                          className="btn-icon"
+                          style={{
+                            background: "rgba(255, 255, 255, 0.05)",
+                            border: "1px solid rgba(255, 255, 255, 0.1)",
+                            borderRadius: "8px",
+                            width: "38px",
+                            height: "38px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                          onClick={() => setShowTagModal(true)}
+                          title="Manage Tags">
+                          <TagIcon width={18} height={18} />
+                        </button>
+                      )}
                       {isCurrentSectorAdminOrOwner && (
                         <button
                           id="btn-add-beacon"
@@ -1376,18 +1409,37 @@ export default function StationClient({
                         className={isRefreshing ? "animate-spin" : ""}
                       />
                     </button>
+                    {isCurrentSectorAdminOrOwner && displaySectorId !== "all" && (
+                        <button
+                          className="flex shrink-0 items-center justify-center"
+                          style={{
+                            background: "rgba(255, 255, 255, 0.05)",
+                            borderRadius: "8px",
+                            height: "38px",
+                            width: "38px",
+                            color: "var(--color-comet)",
+                            transition: "background 0.15s",
+                          }}
+                          onClick={() => {
+                            setShowTagModal(true);
+                            setMobileMenuOpen(false);
+                          }}>
+                          <TagIcon width={18} height={18} />
+                        </button>
+                    )}
                     {/* Logika Akses: Hanya Owner atau Admin yang bisa edit/tambah */}
                     {displaySectorId !== "all" && activeSector && activeSector.stationId === station?.id && (
                       <button
                         className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
                         style={{
-                          background: "rgba(255, 255, 255, 0.05)",
+                          background: "rgba(139, 92, 246, 0.15)",
+                          border: "1px solid rgba(139, 92, 246, 0.3)",
                           borderRadius: "8px",
                           height: "38px",
                           padding: "0 0.8rem",
                           width: "auto",
-                          color: "var(--color-comet)",
-                          transition: "background 0.15s",
+                          color: "#c4b5fd",
+                          transition: "all 0.15s",
                         }}
                         onClick={() => {
                           setEditingSector(activeSector);
@@ -1403,7 +1455,7 @@ export default function StationClient({
                             fontSize: "0.85rem",
                             marginLeft: "0.4rem",
                             display: "inline-block",
-                            color: "var(--color-comet)",
+                            color: "inherit",
                           }}>
                           Edit Sector
                         </span>
@@ -1601,6 +1653,98 @@ export default function StationClient({
                                 )}
                               </button>
                             ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {displaySectorId !== "all" && ((sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).length) > 0 && (
+                    <div className="staggered-item">
+                      <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
+                        <button
+                          className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
+                          style={{
+                            background: selectedTags.length > 0 ? "rgba(139, 92, 246, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                            borderRadius: "8px",
+                            height: "38px",
+                            padding: "0 0.8rem",
+                            width: "auto",
+                            transition: "all 0.15s",
+                            border: `1px solid ${selectedTags.length > 0 ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`,
+                            color: selectedTags.length > 0 ? "#fff" : "#a1a1aa",
+                          }}
+                          onClick={() => setOpenMenu(openMenu === "tags" ? null : "tags")}
+                          title="Filter by Tags">
+                          <TagIcon width={18} height={18} />
+                        </button>
+                        {/* Tags dropdown menu: renders inline when openMenu is "tags" */}
+                        {openMenu === "tags" && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "calc(100% + 0.5rem)",
+                              left: 0,
+                              background: "#1a1a2e",
+                              border: "1px solid rgba(255,255,255,0.1)",
+                              borderRadius: "8px",
+                              padding: "0.75rem",
+                              zIndex: 50,
+                              minWidth: "250px",
+                              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "0.5rem",
+                            }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+                                <div style={{ color: "#a1a1aa", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Filter by Tags</div>
+                                {selectedTags.length > 0 && (
+                                    <button 
+                                        onClick={() => setSelectedTags([])}
+                                        style={{ color: "#ef4444", fontSize: "0.7rem", fontWeight: 600, background: "rgba(239, 68, 68, 0.1)", padding: "0.15rem 0.4rem", borderRadius: "4px" }}
+                                    >
+                                        Clear All
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {/* Live Search Input */}
+                            <div style={{ position: "relative" }}>
+                                <MagnifyingGlassIcon width={14} height={14} style={{ position: "absolute", left: "0.5rem", top: "50%", transform: "translateY(-50%)", color: "#6b7280" }} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search tags..." 
+                                    value={tagSearchQuery}
+                                    onChange={(e) => setTagSearchQuery(e.target.value)}
+                                    style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", padding: "0.35rem 0.5rem 0.35rem 1.75rem", color: "#fff", fontSize: "0.75rem", outline: "none" }}
+                                />
+                            </div>
+
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.25rem", maxHeight: "200px", overflowY: "auto" }}>
+                                {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? [])
+                                .filter(opt => opt.name.toLowerCase().includes(tagSearchQuery.toLowerCase()))
+                                .map(opt => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => applyFilterSort(() => setSelectedTags(prev => prev.includes(opt.id) ? prev.filter(id => id !== opt.id) : [...prev, opt.id]))}
+                                    style={{
+                                    padding: "0.25rem 0.75rem",
+                                    borderRadius: "9999px",
+                                    fontSize: "0.75rem",
+                                    fontWeight: 500,
+                                    transition: "all 0.2s",
+                                    border: selectedTags.includes(opt.id) ? "1px solid rgba(139, 92, 246, 0.5)" : "1px solid transparent",
+                                    background: selectedTags.includes(opt.id) ? "rgba(139, 92, 246, 0.2)" : "rgba(255, 255, 255, 0.05)",
+                                    color: selectedTags.includes(opt.id) ? "#c4b5fd" : "#d1d5db",
+                                    }}
+                                >
+                                    {opt.name}
+                                </button>
+                                ))}
+                                {(sectorTagsOverride[displaySectorId] ?? allSectors.find(s => s.id === displaySectorId)?.tags ?? []).filter(opt => opt.name.toLowerCase().includes(tagSearchQuery.toLowerCase())).length === 0 && (
+                                <p style={{ color: "#6b7280", fontSize: "0.875rem", fontStyle: "italic", width: "100%", textAlign: "center", padding: "1rem 0" }}>No matching tags.</p>
+                                )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1908,6 +2052,7 @@ export default function StationClient({
                         onClick={() => setSelectedBeacon(beacon)}
                         onEdit={isCurrentSectorAdminOrOwner ? () => setEditingBeacon(beacon) : undefined}
                         isCollab={(activeSector?.collaborators?.length ?? 0) > 0}
+                        isAllBeacons={displaySectorId === "all"}
                       />
                     </motion.div>
                   ))}
@@ -2036,6 +2181,22 @@ export default function StationClient({
           canEdit={isCurrentSectorAdminOrOwner}
         />
       )}
+
+      {showTagModal && displaySectorId !== "all" && (
+        <TagManagementModal
+          isOpen={showTagModal}
+          onClose={() => setShowTagModal(false)}
+          sector={allSectors.find(s => s.id === displaySectorId)!}
+          sectorTagsOverride={sectorTagsOverride[displaySectorId]}
+          onTagsChanged={(tags) => {
+            setSectorTagsOverride(prev => ({ ...prev, [displaySectorId]: tags }));
+            // Remove any selected tag filters that no longer exist
+            const tagIds = tags.map(t => t.id);
+            setSelectedTags(prev => prev.filter(id => tagIds.includes(id)));
+          }}
+        />
+      )}
+
 
       <AnimatePresence>
         {showAccessDenied && (

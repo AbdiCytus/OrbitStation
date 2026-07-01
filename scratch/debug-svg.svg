@@ -1,0 +1,127 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100' preserveAspectRatio='xMaxYMid slice'>
+  <!-- Orbit Lines (Bottom Left) -->
+  <g stroke='rgba(0, 229, 255, 0.3)' stroke-width='0.5' fill='none'>
+    <ellipse cx='5' cy='95' rx='40' ry='20' transform='rotate(-15 5 95)' />
+    <ellipse cx='5' cy='95' rx='60' ry='30' transform='rotate(-15 5 95)' stroke='rgba(192, 38, 211, 0.3)' />
+    <ellipse cx='5' cy='95' rx='80' ry='40' transform='rotate(-15 5 95)' stroke='rgba(255, 204, 0, 0.2)' />
+  </g>
+  <!-- Constellations (5 total) -->
+  <g stroke='rgba(255,255,255,0.6)' stroke-width='0.4' fill='rgba(255,255,255,0.9)'>
+    <g>
+      <animate attributeName='opacity' values='0;1;1;0;0;0;0;0;0;0;0' dur='15s' repeatCount='indefinite' />
+      <circle cx='30' cy='40' r='1.2' />
+      <circle cx='50' cy='30' r='1.2' />
+      <circle cx='70' cy='50' r='1.8' fill='rgba(0, 229, 255, 1)' />
+      <path d='M30,40 L50,30 L70,50' fill='none' />
+    </g>
+    <g opacity='0'>
+      <animate attributeName='opacity' values='0;0;0;1;1;0;0;0;0;0;0' dur='15s' repeatCount='indefinite' />
+      <circle cx='40' cy='60' r='1.2' />
+      <circle cx='60' cy='50' r='1' />
+      <circle cx='80' cy='65' r='1.8' fill='rgba(192, 38, 211, 1)' />
+      <circle cx='100' cy='40' r='1.2' />
+      <path d='M40,60 L60,50 L80,65 L100,40' fill='none' />
+    </g>
+    <g opacity='0'>
+      <animate attributeName='opacity' values='0;0;0;0;0;1;1;0;0;0;0' dur='15s' repeatCount='indefinite' />
+      <circle cx='50' cy='20' r='1.8' fill='rgba(255, 204, 0, 1)' />
+      <circle cx='65' cy='35' r='1.2' />
+      <circle cx='85' cy='30' r='1.2' />
+      <circle cx='95' cy='15' r='1.2' />
+      <path d='M50,20 L65,35 L85,30 L95,15' fill='none' />
+    </g>
+    <g opacity='0'>
+      <animate attributeName='opacity' values='0;0;0;0;0;0;0;1;1;0;0' dur='15s' repeatCount='indefinite' />
+      <circle cx='80' cy='40' r='1.2' />
+      <circle cx='110' cy='60' r='1.5' fill='rgba(0, 229, 255, 1)' />
+      <circle cx='130' cy='35' r='1.2' />
+      <path d='M80,40 L110,60 L130,35' fill='none' />
+    </g>
+    <g opacity='0'>
+      <animate attributeName='opacity' values='0;0;0;0;0;0;0;0;0;1;1' dur='15s' repeatCount='indefinite' />
+      <circle cx='35' cy='70' r='1.2' />
+      <circle cx='55' cy='85' r='1.8' fill='rgba(192, 38, 211, 1)' />
+      <circle cx='75' cy='80' r='1' />
+      <circle cx='95' cy='90' r='1.2' />
+      <path d='M35,70 L55,85 L75,80 L95,90' fill='none' />
+    </g>
+  </g>
+  
+  <!-- Particles sucking into Blackhole -->
+  <g fill='rgba(255,255,255,0.9)'>
+    <circle cx='0' cy='0' r='1.5' fill='rgba(0, 229, 255, 1)'>
+      <animateMotion path='M50,80 Q120,70 170,25' dur='1.5s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;1;0' dur='1.5s' repeatCount='indefinite' />
+    </circle>
+    <circle cx='0' cy='0' r='2' fill='rgba(192, 38, 211, 1)'>
+      <animateMotion path='M20,50 Q100,40 170,25' dur='2s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;1;0' dur='2s' repeatCount='indefinite' />
+    </circle>
+    <circle cx='0' cy='0' r='1.5' fill='rgba(255, 204, 0, 1)'>
+      <animateMotion path='M80,90 Q140,80 170,25' dur='1.8s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;1;0' dur='1.8s' repeatCount='indefinite' />
+    </circle>
+    <circle cx='0' cy='0' r='1.2' fill='rgba(0, 229, 255, 1)'>
+      <animateMotion path='M10,20 Q80,10 170,25' dur='2.2s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;1;0' dur='2.2s' repeatCount='indefinite' />
+    </circle>
+    <circle cx='0' cy='0' r='2' fill='rgba(192, 38, 211, 1)'>
+      <animateMotion path='M100,60 Q150,50 170,25' dur='1.3s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;1;0' dur='1.3s' repeatCount='indefinite' />
+    </circle>
+  </g>
+  
+  <!-- Floating Space Dust (Not sucked in) -->
+  <g fill='rgba(255, 255, 255, 0.6)'>
+    <circle r='1' fill='white'>
+      <animateMotion path='M10,90 Q40,60 80,80 T150,90' dur='10s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;0' dur='10s' repeatCount='indefinite' />
+    </circle>
+    <circle r='1.2' fill='rgba(0, 229, 255, 0.8)'>
+      <animateMotion path='M30,20 Q60,10 90,30 T160,10' dur='15s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;0' dur='15s' repeatCount='indefinite' />
+    </circle>
+    <circle r='1.5' fill='rgba(255, 204, 0, 0.8)'>
+      <animateMotion path='M150,80 Q100,90 50,70 T0,50' dur='12s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;0' dur='12s' repeatCount='indefinite' />
+    </circle>
+    <circle r='0.8' fill='rgba(192, 38, 211, 0.8)'>
+      <animateMotion path='M80,10 Q100,50 120,20 T180,60' dur='14s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;0' dur='14s' repeatCount='indefinite' />
+    </circle>
+    <circle r='2' fill='rgba(0, 229, 255, 0.5)'>
+      <animateMotion path='M190,90 Q150,60 100,80 T20,70' dur='18s' repeatCount='indefinite' />
+      <animate attributeName='opacity' values='0;1;0' dur='18s' repeatCount='indefinite' />
+    </circle>
+  </g>
+
+  <!-- Blackhole -->
+  <defs>
+    <radialGradient id='bh-glow' cx='50%' cy='50%' r='50%'>
+      <stop offset='0%' stop-color='#000' />
+      <stop offset='20%' stop-color='#000' />
+      <stop offset='50%' stop-color='rgba(192, 38, 211, 0.7)' />
+      <stop offset='75%' stop-color='rgba(0, 229, 255, 0.5)' />
+      <stop offset='100%' stop-color='transparent' />
+    </radialGradient>
+  </defs>
+  <g transform='translate(170, 25)'>
+    <!-- Glow -->
+    <circle cx='0' cy='0' r='40' fill='url(#bh-glow)'>
+      <animateTransform attributeName='transform' type='scale' values='1;1.15;1' dur='3s' repeatCount='indefinite' />
+    </circle>
+    <!-- Accretion Disk Rings -->
+    <ellipse cx='0' cy='0' rx='45' ry='12' fill='none' stroke='rgba(0, 229, 255, 0.7)' stroke-width='1.5' transform='rotate(-20)'>
+      <animateTransform attributeName='transform' type='rotate' values='-20; 340' dur='3s' repeatCount='indefinite' additive='sum'/>
+    </ellipse>
+    <ellipse cx='0' cy='0' rx='50' ry='10' fill='none' stroke='rgba(192, 38, 211, 0.5)' stroke-width='1' transform='rotate(40)'>
+      <animateTransform attributeName='transform' type='rotate' values='40; 400' dur='4s' repeatCount='indefinite' additive='sum'/>
+    </ellipse>
+    <ellipse cx='0' cy='0' rx='40' ry='14' fill='none' stroke='rgba(255, 204, 0, 0.4)' stroke-width='1.2' transform='rotate(10)'>
+      <animateTransform attributeName='transform' type='rotate' values='10; 370' dur='5s' repeatCount='indefinite' additive='sum'/>
+    </ellipse>
+    <!-- Core -->
+    <circle cx='0' cy='0' r='10' fill='#000' />
+    <circle cx='0' cy='0' r='12' fill='none' stroke='rgba(255, 255, 255, 0.3)' stroke-width='0.5' />
+  </g>
+</svg>

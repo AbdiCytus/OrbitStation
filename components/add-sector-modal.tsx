@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createSector, getFriends } from "@/lib/actions";
+import { createSector } from "@/lib/actions/sector.actions";
+import { getFriends } from "@/lib/actions/social.actions";
 import type { SectorWithBeacons, Beacon } from "@/types";
 import { toast } from "sonner";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
@@ -118,6 +119,9 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
         overflowY: isMobile ? "hidden" : "auto",
       }}
     >
+      <style>{`
+        .icon-picker-scroll::-webkit-scrollbar { display: none; }
+      `}</style>
       <div style={{ display: "flex", rowGap: "1rem", flexDirection: "row", alignItems: "stretch", justifyContent: "center", width: "100%", maxWidth: isMobile ? "100%" : "1170px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
       {/* MAIN PANEL */}
       <div
@@ -174,7 +178,7 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
           {/* Icon picker */}
           <div className="form-group">
             <label className="form-label">Icon</label>
-            <div className="icon-picker" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(36px, 1fr))", gap: "0.375rem" }}>
+            <div className="icon-picker icon-picker-scroll" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(36px, 1fr))", gap: "0.375rem", maxHeight: "78px", overflowY: "auto", scrollbarWidth: "none", msOverflowStyle: "none", paddingBottom: "2px" }}>
               {ICON_OPTIONS.map((em) => (
                 <button
                   key={em}
@@ -205,6 +209,20 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
                 />
               ))}
               <CustomColorPicker color={color} setColor={setColor} isSelected={color !== "" && !COLOR_OPTIONS.includes(color)} />
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Preview</label>
+            <div className="sector-preview" style={{ borderColor: color, color }}>
+              <DynamicIcon name={icon} style={{ color }} />
+              <span>{name || "Sector Name"}</span>
+              {!isPublic && (
+                <span style={{ marginLeft: "auto", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}>
+                  <DynamicIcon name="LockClosedIcon" width={12} height={12} /> Private
+                </span>
+              )}
             </div>
           </div>
 
@@ -255,19 +273,6 @@ export default function AddSectorModal({ onClose, onCreated }: Props) {
               )}
             </div>
 
-            {/* Preview */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Preview</label>
-              <div className="sector-preview" style={{ borderColor: color, color }}>
-                <DynamicIcon name={icon} style={{ color }} />
-                <span>{name || "Sector Name"}</span>
-                {!isPublic && (
-                  <span style={{ marginLeft: "auto", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px" }}>
-                    <DynamicIcon name="LockClosedIcon" width={12} height={12} /> Private
-                  </span>
-                )}
-              </div>
-            </div>
           </div>
 
           {/* Mobile Expanded Invite Panel (Rendered inline on mobile) */}

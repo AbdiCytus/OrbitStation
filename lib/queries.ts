@@ -24,16 +24,20 @@ export async function getMyStation() {
         include: {
           beacons: {
             orderBy: { order: "asc" },
-            include: { creator: { select: { name: true, image: true } } }
+            include: { 
+              creator: { select: { name: true, image: true } },
+              tags: { include: { tag: true } }
+            }
           },
           collaborators: {
             include: {
-              user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } }
+              user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
             }
           },
           station: {
-            select: { user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } } }
-          }
+            select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
+          },
+          tags: true,
         },
       },
     },
@@ -56,16 +60,20 @@ export async function getCollabSectors() {
     include: {
       beacons: {
         orderBy: { order: "asc" },
-        include: { creator: { select: { name: true, image: true } } }
+        include: { 
+          creator: { select: { name: true, image: true } },
+          tags: { include: { tag: true } }
+        }
       },
       collaborators: {
         include: {
-          user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } }
+          user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
         }
       },
       station: {
-        select: { user: { select: { id: true, name: true, image: true, username: true, station: { select: { isPublic: true } } } } }
-      }
+        select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
+      },
+      tags: true,
     }
   });
 }
@@ -190,6 +198,7 @@ export async function getMyProfile() {
       staticBackgroundEnabled: true,
       notifSoundEnabled: true,
       notifSoundUrl: true,
+      shortcuts: true,
       createdAt: true,
       station: {
         select: {

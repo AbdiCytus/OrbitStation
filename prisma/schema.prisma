@@ -95,8 +95,10 @@ model User {
   mutedInSectors   MutedMember[]  @relation("MutedUsers")
   notifSoundUrl    String?        // Custom SFX URL
   notifSoundEnabled Boolean       @default(true)
+  shortcuts        String?        @default("{\"publicStation\":\"F1\",\"friends\":\"F2\",\"analytics\":\"F3\",\"settings\":\"F4\"}")
   typingIndicators TypingIndicator[]
   blindedInSectors BlindedMember[] @relation("BlindedUsers")
+  ownedOAuthApps   OAuthApp[]      @relation("OwnedApps")
 }
 
 /// Dasbor utama milik Pilot, disebut "Station"
@@ -135,6 +137,7 @@ model Sector {
   order     Int     @default(0)
   isPublic  Boolean @default(true) // false = sektor privat, tidak ditampilkan di profil publik
   isMuteAll Boolean @default(false)
+  inviteEnabled Boolean @default(false)
   pinnedMessageId String?
 
   createdAt DateTime @default(now())
@@ -148,6 +151,8 @@ model Sector {
   mutedMembers  MutedMember[]
   typingIndicators TypingIndicator[]
   blindedMembers BlindedMember[]
+  invites        SectorInvite[]
+  tags           Tag[]
 }
 
 /// Shortcut web, disebut "Suar" (Beacon)
@@ -168,6 +173,7 @@ model Beacon {
   creatorId   String?
   creator     User?    @relation(fields: [creatorId], references: [id])
   visits      Int      @default(0)
+  tags        BeaconTag[]
 }
 
 // ============================================================
@@ -219,6 +225,19 @@ model SectorCollaborator {
   user      User     @relation("CollabSectors", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([sectorId, userId])
+}
+
+model SectorInvite {
+  id        String   @id @default(cuid())
+  sectorId  String
+  token     String   @unique
+  expiresAt DateTime?
+  maxUses   Int?
+  uses      Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sector    Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
 }
 
 // ============================================================
@@ -287,3 +306,71 @@ model BlindedMember {
 
   @@unique([sectorId, userId])
 }
+
+// ============================================================
+// OAUTH PROVIDER MODELS (SSO Orbit Station)
+// ============================================================
+
+/// Aplikasi pihak ketiga yang terdaftar untuk menggunakan SSO Orbit Station
+model OAuthApp {
+  id           String   @id @default(cuid())
+  name         String
+  clientId     String   @unique
+  clientSecret String
+  redirectUris String[] // Array URL callback yang sah
+  homepageUrl  String?
+  ownerId      String
+  createdAt    DateTime @default(now())
+
+  owner        User     @relation("OwnedApps", fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+/// Tiket sementara (Authorization Code) untuk proses pertukaran token
+model OAuthCode {
+  code        String   @id // Tiket/kode unik
+  clientId    String
+  userId      String
+  redirectUri String
+  expiresAt   DateTime // Hanya berlaku beberapa menit
+  createdAt   DateTime @default(now())
+}
+
+/// Menyimpan data "Remember Consent" agar user tidak perlu klik Allow terus menerus
+model OAuthConsent {
+  id        String   @id @default(cuid())
+  userId    String
+  clientId  String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, clientId])
+}
+
+// ============================================================
+// TAGGING MODELS
+// ============================================================
+
+model Tag {
+  id        String   @id @default(cuid())
+  sectorId  String
+  name      String
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sector    Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  beacons   BeaconTag[]
+
+  @@unique([sectorId, name])
+}
+
+model BeaconTag {
+  beaconId String
+  tagId    String
+  assignedAt DateTime @default(now())
+
+  beacon   Beacon @relation(fields: [beaconId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([beaconId, tagId])
+}
+

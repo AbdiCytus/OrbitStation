@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef, useEffect, useCallback } from "react";
 import type { Beacon, SectorWithBeacons } from "@/types";
-import { deleteBeacon, toggleBeaconPin, updateBeacon, incrementBeaconVisit } from "@/lib/actions";
+import { deleteBeacon, toggleBeaconPin, updateBeacon, incrementBeaconVisit } from "@/lib/actions/beacon.actions";
 import { toast } from "sonner";
 import { DynamicIcon } from "./dynamic-icon";
 import {
@@ -14,12 +14,15 @@ import {
   DocumentTextIcon,
   InformationCircleIcon,
   XMarkIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
+  CameraIcon,
+  TagIcon
 } from "@heroicons/react/24/outline";
+import { toPng } from "html-to-image";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
 type Props = {
-  beacon: Beacon & { _creator?: { name: string | null; image: string | null } | null };
+  beacon: Beacon & { _creator?: { name: string | null; image: string | null } | null, tags?: { tag: { id: string, name: string } }[] };
   sector: SectorWithBeacons | null;
   onClose: () => void;
   onDeleted?: (id: string) => void;
@@ -37,7 +40,87 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   const handleClose = () => { setIsClosing(true); setTimeout(onClose, 200); };
   const [isPending, startTransition] = useTransition();
   const cardRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const getProxyUrl = (url?: string | null) => {
+    if (!url) return undefined;
+    if (url.startsWith('/')) return url;
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  };
+
+  const captureScreenshot = async () => {
+    if (!panelRef.current) return;
+    setIsCapturing(true);
+
+    try {
+      // Create a clone to prevent modifying the actual UI and to handle CORS safely
+      const clone = panelRef.current.cloneNode(true) as HTMLElement;
+      
+      // We must append the clone to the DOM to ensure styles are computed correctly
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'absolute';
+      wrapper.style.left = '-9999px';
+      wrapper.style.top = '-9999px';
+      wrapper.appendChild(clone);
+      panelRef.current.parentElement?.appendChild(wrapper);
+
+      // Force all images in the clone to use the proxy and crossOrigin
+      const images = clone.querySelectorAll('img');
+      const loadPromises: Promise<void>[] = [];
+      
+      images.forEach(img => {
+        const src = img.getAttribute('src');
+        if (src && src.startsWith('http')) {
+          img.crossOrigin = 'anonymous';
+          img.src = getProxyUrl(src) || src;
+          
+          loadPromises.push(new Promise((resolve) => {
+            if (img.complete) resolve();
+            else {
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+            }
+          }));
+        }
+      });
+
+      // Wait for all proxied images to load in the clone
+      await Promise.all(loadPromises);
+      // Extra small delay to ensure DOM is flushed
+      await new Promise(res => setTimeout(res, 100));
+
+      const emptyPixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+      const dataUrl = await toPng(clone, {
+        backgroundColor: "#0f0f16",
+        pixelRatio: 2,
+        imagePlaceholder: emptyPixel,
+        style: {
+          transform: 'scale(1)', // Reset any transforms that might mess up coordinates
+        },
+        filter: (node) => {
+          // Ignore elements with the 'screenshot-ignore' class
+          if (node.classList?.contains('screenshot-ignore')) return false;
+          return true;
+        }
+      });
+
+      // Clean up clone
+      wrapper.remove();
+      
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `beacon-${beacon.title.replace(/[\s/]/g, '-').toLowerCase()}.png`;
+      a.click();
+      toast.success("Screenshot saved to device!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to capture screenshot. The image might have CORS restrictions.");
+    } finally {
+      setIsCapturing(false);
+    }
+  };
 
   // Close on Escape + lock body scroll
   useEffect(() => {
@@ -137,7 +220,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
 
   return (
     <div className={"hsr-overlay" + (isClosing ? " closing" : "")} onClick={handleClose} role="dialog" aria-modal="true" aria-label={beacon.title}>
-      <div className={"hsr-panel" + (isClosing ? " closing" : "")} onClick={(e) => e.stopPropagation()}>
+      <div ref={panelRef} className={"hsr-panel" + (isClosing ? " closing" : "")} onClick={(e) => e.stopPropagation()}>
 
         {/* ── STARFIELD BG ────────────────────────────────── */}
         <div className="hsr-bg" aria-hidden="true">
@@ -180,7 +263,17 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             <span className="hsr-topbar-icon"><InformationCircleIcon width={18} height={18} /></span>
             <span className="hsr-topbar-label">Beacon Details</span>
           </div>
-          <div className="hsr-topbar-actions">
+          <div className="hsr-topbar-actions screenshot-ignore">
+            <button
+              id="btn-screenshot"
+              className="hsr-action-btn"
+              onClick={captureScreenshot}
+              disabled={isCapturing}
+              title="Capture screenshot"
+            >
+              <span>{isCapturing ? <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" /> : <CameraIcon width={16} height={16} />}</span>
+              <span className="hsr-action-label hidden md:inline">{isCapturing ? "Capturing..." : "Screenshot"}</span>
+            </button>
             {!readOnly && (
               <>
                 {subroute && (
@@ -226,7 +319,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                 )}
               </>
             )}
-            <button className="hsr-close-btn" onClick={handleClose} aria-label="Close">
+            <button className="hsr-close-btn screenshot-ignore" onClick={handleClose} aria-label="Close">
               <XMarkIcon width={20} height={20} />
             </button>
           </div>
@@ -315,10 +408,38 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             {/* Title */}
             <h2 className="hsr-title">{beacon.title}</h2>
 
+            {/* Tags (Mobile Only) */}
+            <div className="flex sm:hidden flex-wrap items-center gap-1.5 mb-4 mt-1">
+              {beacon.tags?.map(bt => (
+                <span
+                  key={bt.tag.id}
+                  className="inline-flex items-center gap-1 text-[0.65rem] rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
+                  style={{ padding: "0.05rem 0.6rem" }}
+                >
+                  <TagIcon width={10} height={10} />
+                  {bt.tag.name}
+                </span>
+              ))}
+            </div>
+
             {/* Description */}
             {beacon.description && (
               <p className="hsr-desc">{beacon.description}</p>
             )}
+
+            {/* Tags (Desktop Only) */}
+            <div className="hidden sm:flex flex-wrap items-center gap-1.5 mb-4 mt-2">
+              {beacon.tags?.map(bt => (
+                <span
+                  key={bt.tag.id}
+                  className="inline-flex items-center gap-1.5 text-[0.75rem] rounded-full bg-violet-500/15 text-violet-300 border border-violet-500/30"
+                  style={{ padding: "0.25rem 0.75rem" }}
+                >
+                  <TagIcon width={12} height={12} />
+                  {bt.tag.name}
+                </span>
+              ))}
+            </div>
 
             <div className="hsr-divider" />
 
@@ -361,7 +482,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             {/* CTA */}
             <button
               id={`btn-visit-hsr-${beacon.id}`}
-              className="hsr-visit-btn"
+              className="hsr-visit-btn screenshot-ignore"
               onClick={handleVisit}
               style={{ padding: "0.6rem 1rem", fontSize: "0.9rem" }}
             >
