@@ -40,6 +40,8 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
   const [pilots, setPilots] = useState<any[]>([]);
   const [friends, setFriends] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
+  const [isLoadingFriends, setIsLoadingFriends] = useState(false);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(false);
 
   const [messages, setMessages] = useState<any[]>([]);
   const [messageInput, setMessageInput] = useState("");
@@ -54,9 +56,17 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
     if (!isOpen) return;
 
     if (activeTab === "list") {
-      getFriends().then(setFriends);
+      setIsLoadingFriends(true);
+      getFriends().then((data) => {
+        setFriends(data);
+        setIsLoadingFriends(false);
+      });
     } else if (activeTab === "requests") {
-      getFriendRequests().then(setRequests);
+      setIsLoadingRequests(true);
+      getFriendRequests().then((data) => {
+        setRequests(data);
+        setIsLoadingRequests(false);
+      });
     }
   }, [activeTab, isOpen]);
 
@@ -462,7 +472,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                       </motion.div>
                     ))}
 
-                    {activeTab === "list" && friends.filter(f => !searchQuery || (f.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || (f.username || "").toLowerCase().includes(searchQuery.toLowerCase())).map((f, i) => (
+                    {activeTab === "list" && !isLoadingFriends && friends.filter(f => !searchQuery || (f.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || (f.username || "").toLowerCase().includes(searchQuery.toLowerCase())).map((f, i) => (
                       <motion.div
                         key={`list-${f.id}`}
                         className={`glass flex transition-colors group fm-list-row ${activeChatId === f.id ? "bg-[rgba(139,92,246,0.2)]" : ""} ${mobileOptionsId === f.id ? "fm-show-options" : ""}`}
@@ -561,7 +571,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                       </motion.div>
                     ))}
 
-                    {activeTab === "requests" && requests.map((r, i) => (
+                    {activeTab === "requests" && !isLoadingRequests && requests.map((r, i) => (
                       <motion.div
                         key={`req-${r.id}`}
                         className={`glass flex items-center justify-between transition-colors group fm-list-row ${mobileOptionsId === r.id ? "fm-show-options" : ""}`}
@@ -632,7 +642,20 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         Type at least 2 characters to search for pilots across Orbit Station.
                       </motion.div>
                     )}
-                    {activeTab === "list" && friends.length === 0 && (
+                    {activeTab === "list" && isLoadingFriends && (
+                      <motion.div
+                        key="loading-list"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="flex flex-col items-center justify-center h-full gap-4 opacity-80"
+                      >
+                        <div className="w-10 h-10 border-4 border-white/5 border-t-violet-500 rounded-full animate-spin"></div>
+                        <span className="text-violet-400 text-xs font-bold tracking-[0.2em] uppercase animate-pulse">
+                          Loading Transmissions...
+                        </span>
+                      </motion.div>
+                    )}
+
+                    {activeTab === "list" && !isLoadingFriends && friends.length === 0 && (
                       <motion.div
                         key="empty-list"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -643,7 +666,20 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                         Your friend list is empty. Go to "Find Pilots" to connect!
                       </motion.div>
                     )}
-                    {activeTab === "requests" && requests.length === 0 && (
+                    {activeTab === "requests" && isLoadingRequests && (
+                      <motion.div
+                        key="loading-requests"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="flex flex-col items-center justify-center h-full gap-4 opacity-80"
+                      >
+                        <div className="w-10 h-10 border-4 border-white/5 border-t-violet-500 rounded-full animate-spin"></div>
+                        <span className="text-violet-400 text-xs font-bold tracking-[0.2em] uppercase animate-pulse">
+                          Fetching Requests...
+                        </span>
+                      </motion.div>
+                    )}
+
+                    {activeTab === "requests" && !isLoadingRequests && requests.length === 0 && (
                       <motion.div
                         key="empty-requests"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
