@@ -20,7 +20,7 @@ export async function generateMetadata({
   const data = await getStation(username);
 
   if (!data) {
-    return { title: "User not found — Orbit Station" };
+    return { title: "User not found" };
   }
 
   const totalSectorsCount = data.station.totalSectors ?? data.station.sectors.length;
@@ -37,7 +37,7 @@ export async function generateMetadata({
   const ogImageRoute = `/api/og?${searchParams.toString()}`;
 
   return {
-    title: `${data.user.name ?? username}'s Station — Orbit Station`,
+    title: `${data.user.name ?? username}'s Station`,
     description: data.user.bio ?? `Explore ${data.user.name ?? username}'s web shortcuts on Orbit Station.`,
     openGraph: {
       title: `${data.user.name ?? username}'s Orbit Station`,

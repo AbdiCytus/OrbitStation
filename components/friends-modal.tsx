@@ -378,14 +378,14 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                 <button
                   onClick={() => { setActiveTab("add"); closeChat(); setSearchQuery(""); setMobileOptionsId(null); }}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${activeTab === "add" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
-                  title="Find Pilots"
+                  data-tooltip="Find Pilots"
                 >
                   <UserPlusIcon width={28} height={28} />
                 </button>
                 <button
                   onClick={() => { setActiveTab("list"); setSearchQuery(""); setMobileOptionsId(null); }}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "list" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
-                  title="Friend List"
+                  data-tooltip="Friend List"
                 >
                   <UsersIcon width={28} height={28} />
                   {stats?.totalUnreadMessages > 0 && (
@@ -395,7 +395,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                 <button
                   onClick={() => { setActiveTab("requests"); closeChat(); setSearchQuery(""); setMobileOptionsId(null); }}
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all relative ${activeTab === "requests" ? "bg-violet-500/20 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.6)]" : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"}`}
-                  title="Friend Requests"
+                  data-tooltip="Friend Requests"
                 >
                   <EnvelopeIcon width={28} height={28} />
                   {stats?.totalPendingRequests > 0 && (
@@ -448,12 +448,12 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
 
                         <div className="flex items-center gap-2 transition-opacity fm-action-buttons">
                           {p.station?.isPublic && (
-                            <a href={`/station/${p.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
+                            <a href={`/station/${p.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" data-tooltip="Visit Station" style={{ padding: "10px" }}>
                               <GlobeAltIcon width={22} height={22} />
                             </a>
                           )}
                           {p.friendshipStatus === "ACCEPTED" ? (
-                            <button onClick={() => { setActiveTab("list"); openChat(p.id); setActiveChatName(p.name || p.username); }} className="rounded-full bg-white/5 hover:bg-cyan-500/20 text-gray-300 hover:text-cyan-400 border border-white/10 hover:border-cyan-500/50 transition-all" title="Chat" style={{ padding: "10px" }}>
+                            <button onClick={() => { setActiveTab("list"); openChat(p.id); setActiveChatName(p.name || p.username); }} className="rounded-full bg-white/5 hover:bg-cyan-500/20 text-gray-300 hover:text-cyan-400 border border-white/10 hover:border-cyan-500/50 transition-all" data-tooltip="Chat" style={{ padding: "10px" }}>
                               <ChatBubbleOvalLeftEllipsisIcon width={22} height={22} />
                             </button>
                           ) : p.friendshipStatus === "PENDING" ? (
@@ -461,7 +461,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                               Pending
                             </button>
                           ) : (
-                            <button onClick={() => handleAddFriend(p.id)} className="rounded-full bg-white/5 hover:bg-cyan-500/20 text-gray-300 hover:text-cyan-400 border border-white/10 hover:border-cyan-500/50 transition-all" title="Add Friend" style={{ padding: "10px" }}>
+                            <button onClick={() => handleAddFriend(p.id)} className="rounded-full bg-white/5 hover:bg-cyan-500/20 text-gray-300 hover:text-cyan-400 border border-white/10 hover:border-cyan-500/50 transition-all" data-tooltip="Add Friend" style={{ padding: "10px" }}>
                               <UserPlusIcon width={22} height={22} />
                             </button>
                           )}
@@ -533,7 +533,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
 
                         <div className={`flex items-center gap-2 transition-opacity fm-action-buttons ${activeChatId ? "flex-wrap justify-center" : ""}`}>
                           {f.station?.isPublic && (
-                            <a href={`/station/${f.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" title="Visit Station" style={{ padding: "10px" }}>
+                            <a href={`/station/${f.username}`} target="_blank" rel="noreferrer" className="rounded-full bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border border-white/10 hover:border-violet-500/50 transition-all" data-tooltip="Visit Station" style={{ padding: "10px" }}>
                               <GlobeAltIcon width={22} height={22} />
                             </a>
                           )}
@@ -547,7 +547,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                               }
                             }}
                             className={`rounded-full border transition-all ${activeChatId === f.id ? "bg-violet-500 text-white border-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.5)]" : "bg-white/5 hover:bg-violet-500/20 text-gray-300 hover:text-violet-400 border-white/10 hover:border-violet-500/50"}`}
-                            title="Chat"
+                            data-tooltip="Chat"
                             style={{ padding: "10px" }}
                           >
                             <ChatBubbleOvalLeftEllipsisIcon width={22} height={22} />
@@ -556,7 +556,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                             <button
                               onClick={() => setFriendToRemove({ id: f.id, name: f.name || f.username })}
                               className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all"
-                              title="Remove Friend"
+                              data-tooltip="Remove Friend"
                               style={{ padding: "10px" }}
                             >
                               <UserMinusIcon width={22} height={22} />
@@ -602,7 +602,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           <button
                             onClick={() => handleRejectRequest(r.id, r.friendshipId)}
                             className="rounded-full bg-white/5 hover:bg-pink-500/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/50 transition-all flex items-center justify-center"
-                            title="Refuse"
+                            data-tooltip="Refuse"
                             style={{ width: "48px", height: "48px" }}
                           >
                             <XMarkIcon width={24} height={24} />
@@ -723,7 +723,7 @@ export default function FriendsModal({ isOpen, onClose, user, stats, refetchStat
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button onClick={handleClearChat} className="text-gray-400 hover:text-red-400 transition-colors" style={{ padding: "8px" }} title="Clear Chat">
+                          <button onClick={handleClearChat} className="text-gray-400 hover:text-red-400 transition-colors" style={{ padding: "8px" }} data-tooltip="Clear Chat">
                             <TrashIcon width={20} height={20} />
                           </button>
                           <button onClick={() => closeChat()} className="text-gray-400 hover:text-white transition-colors" style={{ padding: "8px" }}>

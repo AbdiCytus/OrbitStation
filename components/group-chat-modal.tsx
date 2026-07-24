@@ -834,7 +834,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
 
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   {(isOwner || amIAdmin) && sector.inviteEnabled && (
-                    <button onClick={() => setShowQRModal(true)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showQRModal ? "rgba(139,92,246,0.2)" : "transparent", color: showQRModal ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }} title="Share Invite QR">
+                    <button onClick={() => setShowQRModal(true)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showQRModal ? "rgba(139,92,246,0.2)" : "transparent", color: showQRModal ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }} data-tooltip="Share Invite QR">
                       <QrCodeIcon width={22} height={22} />
                     </button>
                   )}
@@ -1011,7 +1011,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     ) : (
                                       msg.content.split(/(\s+)/).map((word: string, i: number) => {
                                         if (word.match(/^https?:\/\//)) {
-                                          return <a key={i} href={word} target="_blank" rel="noreferrer" onClick={e => { if (!e.ctrlKey && !e.metaKey) e.preventDefault(); }} style={{ color: "#93C5FD", textDecoration: "underline" }} title="Ctrl+Click to open">{word}</a>;
+                                          return <a key={i} href={word} target="_blank" rel="noreferrer" onClick={e => { if (!e.ctrlKey && !e.metaKey) e.preventDefault(); }} style={{ color: "#93C5FD", textDecoration: "underline" }} data-tooltip="Ctrl+Click to open">{word}</a>;
                                         }
                                         if (word.startsWith('@')) {
                                           const clean = word.replace('@', '');
@@ -1065,27 +1065,27 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     setSelectedMsgId(null);
                                     setPinnedMessage(msg);
                                     await pinGroupMessageAction(sector.id, msg.id);
-                                  }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Pin Message" style={{ padding: "10px" }}>
+                                  }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Pin Message" style={{ padding: "10px" }}>
                                     <MapPinIcon width={18} height={18} />
                                   </button>
-                                  <button onClick={() => { setReplyToMsg(msg); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Reply" style={{ padding: "10px" }}>
+                                  <button onClick={() => { setReplyToMsg(msg); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Reply" style={{ padding: "10px" }}>
                                     <ArrowUturnLeftIcon width={18} height={18} />
                                   </button>
-                                  <button onClick={() => { navigator.clipboard.writeText(msg.content); toast.success("Copied to clipboard"); setSelectedMsgId(null); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Copy" style={{ padding: "10px" }}>
+                                  <button onClick={() => { navigator.clipboard.writeText(msg.content); toast.success("Copied to clipboard"); setSelectedMsgId(null); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Copy" style={{ padding: "10px" }}>
                                     <ClipboardDocumentIcon width={18} height={18} />
                                   </button>
                                   {msg.content.match(/https?:\/\/[^\s]+/) && (
-                                    <button onClick={() => window.open(msg.content.match(/https?:\/\/[^\s]+/)[0], "_blank")} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Open Link" style={{ padding: "10px" }}>
+                                    <button onClick={() => window.open(msg.content.match(/https?:\/\/[^\s]+/)[0], "_blank")} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Open Link" style={{ padding: "10px" }}>
                                       <LinkIcon width={18} height={18} />
                                     </button>
                                   )}
                                   {isMine && (
-                                    <button onClick={() => { setEditMsgId(msg.id); setInputMessage(msg.content); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Edi t" style={{ padding: "10px" }}>
+                                    <button onClick={() => { setEditMsgId(msg.id); setInputMessage(msg.content); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Edi t" style={{ padding: "10px" }}>
                                       <PencilIcon width={18} height={18} />
                                     </button>
                                   )}
                                   {(isMine || isOwner) && (
-                                    <button onClick={() => handleDeleteMsg(msg.id)} className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors border-none bg-transparent cursor-pointer" title="Delete" style={{ padding: "10px" }}>
+                                    <button onClick={() => handleDeleteMsg(msg.id)} className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Delete" style={{ padding: "10px" }}>
                                       <TrashIcon width={18} height={18} />
                                     </button>
                                   )}
@@ -1126,7 +1126,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                         <button
                           onClick={scrollToBottom}
                           className="bg-violet-600 hover:bg-violet-500 text-white rounded-full p-2 shadow-[0_4px_15px_rgba(0,0,0,0.5)] border border-violet-400/50 cursor-pointer transition-colors"
-                          title="Scroll to bottom"
+                          data-tooltip="Scroll to bottom"
                           style={{ padding: "10px" }}
                         >
                           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1264,7 +1264,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                   position: "absolute", bottom: -2, right: -2, width: "12px", height: "12px", borderRadius: "50%",
                                   background: onlineUserIds.has(sector.station.user.id) ? "#10B981" : "#4B5563", border: "2px solid rgba(15,15,25,0.95)",
                                   transition: "background 0.3s"
-                                }} title={onlineUserIds.has(sector.station.user.id) ? "Online" : "Offline"} />
+                                }} data-tooltip={onlineUserIds.has(sector.station.user.id) ? "Online" : "Offline"} />
                               </div>
                               <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
                                 <span style={{ fontSize: "14px", fontWeight: 500, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "130px" }}>{sector.station.user.name || sector.station.user.username}</span>
@@ -1309,7 +1309,7 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                                     position: "absolute", bottom: -2, right: -2, width: "12px", height: "12px", borderRadius: "50%",
                                     background: isOnline ? "#10B981" : "#4B5563", border: "2px solid rgba(15,15,25,0.95)",
                                     transition: "background 0.3s"
-                                  }} title={isOnline ? "Online" : "Offline"} />
+                                  }} data-tooltip={isOnline ? "Online" : "Offline"} />
                                 </div>
                                 {/* END AVATAR MEMBER */}
 

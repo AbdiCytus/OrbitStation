@@ -35,6 +35,7 @@ export default function TagManagementModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagToDelete, setTagToDelete] = useState<string | null>(null);
   const [modalSearchQuery, setModalSearchQuery] = useState("");
+  const [beaconSearchQuery, setBeaconSearchQuery] = useState("");
 
   // Assign Tab State: beaconId -> array of tagIds
   const [assignments, setAssignments] = useState<Record<string, string[]>>({});
@@ -73,6 +74,10 @@ export default function TagManagementModal({
   const filteredLocalTags = useMemo(() => {
     return localTags.filter(tag => tag.name.toLowerCase().includes(modalSearchQuery.toLowerCase()));
   }, [localTags, modalSearchQuery]);
+
+  const filteredBeacons = useMemo(() => {
+    return sector.beacons.filter(b => b.title.toLowerCase().includes(beaconSearchQuery.toLowerCase()) || b.url.toLowerCase().includes(beaconSearchQuery.toLowerCase()));
+  }, [sector.beacons, beaconSearchQuery]);
 
   useEffect(() => {
     if (isOpen) {
@@ -445,7 +450,7 @@ export default function TagManagementModal({
                               onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }}
                               className="text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
                               style={{ padding: "0.375rem" }}
-                              title="Edit tag"
+                              data-tooltip="Edit tag"
                             >
                               <PencilIcon width={15} height={15} />
                             </button>
@@ -454,7 +459,7 @@ export default function TagManagementModal({
                               disabled={isSubmitting}
                               className="text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
                               style={{ padding: "0.375rem" }}
-                              title="Delete tag"
+                              data-tooltip="Delete tag"
                             >
                               <TrashIcon width={15} height={15} />
                             </button>
@@ -490,13 +495,17 @@ export default function TagManagementModal({
                   <div style={{ position: "relative" }}>
                      <input 
                         type="text" 
-                        placeholder="Search tags..." 
-                        value={modalSearchQuery}
-                        onChange={(e) => setModalSearchQuery(e.target.value)}
+                        placeholder="Search beacons..." 
+                        value={beaconSearchQuery}
+                        onChange={(e) => setBeaconSearchQuery(e.target.value)}
                         style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "#fff", fontSize: "0.875rem", outline: "none", marginBottom: "0.25rem" }}
                      />
                   </div>
-                  {sector.beacons.map((beacon) => {
+                  {filteredBeacons.length === 0 ? (
+                     <p className="text-center" style={{ color: "#6b7280", fontSize: "0.875rem", padding: "1rem" }}>
+                       No matching beacons found.
+                     </p>
+                  ) : filteredBeacons.map((beacon) => {
                   const selectedTagIds = assignments[beacon.id] || [];
                   const domain = (() => { try { return new URL(beacon.url).hostname.replace("www.", ""); } catch { return beacon.url; } })();
                   return (
@@ -558,7 +567,7 @@ export default function TagManagementModal({
                     </div>
                   );
                 })}
-                </>
+                  </>
               )}
             </div>
           )}

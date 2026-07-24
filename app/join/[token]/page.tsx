@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import JoinSectorClient from "./join-client";
 
 export const metadata = {
-  title: "Join Sector — Orbit Station",
+  title: "Join Sector",
 };
 
 export default async function JoinSectorPage({

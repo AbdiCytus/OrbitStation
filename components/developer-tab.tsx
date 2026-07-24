@@ -281,7 +281,7 @@ export default function DeveloperTab() {
                       className="btn btn-secondary"
                       style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(34, 211, 238, 0.1)", color: "#22d3ee", borderColor: "rgba(34, 211, 238, 0.3)" }}
                       onClick={() => window.open(`/oauth-test?client_id=${app.clientId}`, "_blank")}
-                      title="Test App"
+                      data-tooltip="Test App"
                     >
                       <PlayIcon style={{ width: "16px", height: "16px" }} />
                     </button>
@@ -290,7 +290,7 @@ export default function DeveloperTab() {
                       className="btn btn-secondary"
                       style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
                       onClick={() => { setEditTarget(app); setEditName(app.name); setEditRedirectUris(app.redirectUris.join("\n")); setEditHomepageUrl(app.homepageUrl || "https://"); }}
-                      title="Edit"
+                      data-tooltip="Edit"
                     >
                       <PencilIcon style={{ width: "16px", height: "16px" }} />
                     </button>
@@ -299,7 +299,7 @@ export default function DeveloperTab() {
                       className="btn btn-danger-outline"
                       style={{ width: "36px", height: "36px", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
                       onClick={() => setDeleteTarget(app)}
-                      title="Delete"
+                      data-tooltip="Delete"
                     >
                       <TrashIcon style={{ width: "16px", height: "16px" }} />
                     </button>

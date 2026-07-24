@@ -14,9 +14,10 @@ type Props = {
   isCollab?: boolean;
   sectorName?: string;
   isAllBeacons?: boolean;
+  hologramEnabled?: boolean;
 };
 
-export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isCollab = false, sectorName, isAllBeacons }: Props) {
+export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isCollab = false, sectorName, isAllBeacons, hologramEnabled }: Props) {
   const [imgError, setImgError] = useState(false);
   const [favError, setFavError] = useState(false);
 
@@ -80,12 +81,12 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
           </div>
         )}
         {beacon.isPinned && (
-          <span className="beacon-card-pin" title="Pinned"><MapPinSolid width={14} height={14} /></span>
+          <span className="beacon-card-pin" data-tooltip="Pinned"><MapPinSolid width={14} height={14} /></span>
         )}
       </div>
 
       {/* Hologram Effect (Desktop Only, All Beacons Only) */}
-      {isAllBeacons && sectorName && (
+      {hologramEnabled && isAllBeacons && sectorName && (
         <div className="beacon-hologram" aria-hidden="true">
           <span className="beacon-hologram-text">{sectorName.toUpperCase()}</span>
         </div>
@@ -121,34 +122,10 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
                 {(beacon._creator.name || "?")[0].toUpperCase()}
               </span>
             )}
-            <span style={{ fontSize: "0.7rem", color: "var(--color-starlight)" }} title={`Added by ${beacon._creator.name}`}>Added by <span style={{ color: "#fff" }}>{beacon._creator.name?.split(" ")[0]}</span></span>
+            <span style={{ fontSize: "0.7rem", color: "var(--color-starlight)" }} data-tooltip={`Added by ${beacon._creator.name}`}>Added by <span style={{ color: "#fff" }}>{beacon._creator.name?.split(" ")[0]}</span></span>
           </div>
         )}
-        {!isAllBeacons && beacon.tags && beacon.tags.length > 0 && (
-          <div style={{ marginTop: "0.75rem", display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
-            {beacon.tags.slice(0, 3).map((bt) => (
-              <span
-                key={bt.tag.id}
-                style={{
-                  fontSize: "0.65rem",
-                  padding: "0.15rem 0.4rem",
-                  borderRadius: "9999px",
-                  background: "rgba(139, 92, 246, 0.15)",
-                  color: "#c4b5fd",
-                  border: "1px solid rgba(139, 92, 246, 0.3)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {bt.tag.name}
-              </span>
-            ))}
-            {beacon.tags.length > 3 && (
-              <span style={{ fontSize: "0.65rem", color: "var(--color-starlight)", alignSelf: "center", marginLeft: "2px" }}>
-                +{beacon.tags.length - 3}
-              </span>
-            )}
-          </div>
-        )}
+        {/* Tags hidden per user request */}
       </div>
 
       {/* Footer */}
@@ -159,7 +136,7 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
             onClick={handleEdit}
             aria-label={`Edit ${beacon.title}`}
             id={`btn-edit-${beacon.id}`}
-            title="Edit beacon details"
+            data-tooltip="Edit beacon details"
             style={{ width: "2rem", height: "2rem", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.05)", borderRadius: "var(--radius-md)" }}
           >
             <PencilSquareIcon width={14} height={14} />

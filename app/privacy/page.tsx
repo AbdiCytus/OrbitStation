@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeftIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 export const metadata = {
-  title: "Privacy Policy — Orbit Station",
+  title: "Privacy Policy",
   description: "Privacy Policy for Orbit Station",
 };
 

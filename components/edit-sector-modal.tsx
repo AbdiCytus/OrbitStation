@@ -222,7 +222,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         type="button"
                         className={"icon-option" + (icon === ic ? " selected" : "")}
                         onClick={() => setIcon(ic)}
-                        title={ic}
+                        data-tooltip={ic}
                         style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", cursor: "pointer", transition: "all 0.15s" }}
                       >
                         <DynamicIcon name={ic} style={{ color: icon === ic ? "var(--color-violet-glow)" : "var(--color-starlight)" }} />
@@ -242,7 +242,7 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                         className={"color-option" + (color === c ? " selected" : "")}
                         style={{ backgroundColor: c, flexShrink: 0 }}
                         onClick={() => setColor(c)}
-                        title={c}
+                        data-tooltip={c}
                       />
                     ))}
                     <CustomColorPicker color={color} setColor={setColor} isSelected={color !== "" && !COLORS.includes(color)} />
@@ -463,14 +463,14 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                               </div>
                               <div className="flex items-center transition-opacity" style={{ gap: "0.25rem" }}>
                                 {currentUserId === sectorOwner?.id && (
-                                  <button type="button" onClick={() => setRoleAction({ id: c.user.id, type: c.role === "ADMIN" ? "demote" : "promote" })} className="flex items-center justify-center text-gray-400 rounded-full transition-colors" style={{ width: "36px", height: "36px" }} title={c.role === "ADMIN" ? "Demote to Member" : "Promote to Admin"} onMouseEnter={(e) => { e.currentTarget.style.color = c.role === "ADMIN" ? "#fb923c" : "#10b981"; e.currentTarget.style.background = c.role === "ADMIN" ? "rgba(251,146,60,0.2)" : "rgba(16,185,129,0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "transparent"; }}>
+                                  <button type="button" onClick={() => setRoleAction({ id: c.user.id, type: c.role === "ADMIN" ? "demote" : "promote" })} className="flex items-center justify-center text-gray-400 rounded-full transition-colors" style={{ width: "36px", height: "36px" }} data-tooltip={c.role === "ADMIN" ? "Demote to Member" : "Promote to Admin"} onMouseEnter={(e) => { e.currentTarget.style.color = c.role === "ADMIN" ? "#fb923c" : "#10b981"; e.currentTarget.style.background = c.role === "ADMIN" ? "rgba(251,146,60,0.2)" : "rgba(16,185,129,0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "transparent"; }}>
                                     {c.role === "ADMIN" ? <ShieldExclamationIcon width={16} height={16} /> : <ShieldCheckIcon width={16} height={16} />}
                                   </button>
                                 )}
-                                <button type="button" onClick={() => setTransferringTo(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Transfer Ownership">
+                                <button type="button" onClick={() => setTransferringTo(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} data-tooltip="Transfer Ownership">
                                   <DynamicIcon name="ArrowsRightLeftIcon" width={16} height={16} />
                                 </button>
-                                <button type="button" onClick={() => setRemovingMemberId(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-pink-400 rounded-full hover:bg-pink-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Remove Member">
+                                <button type="button" onClick={() => setRemovingMemberId(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-pink-400 rounded-full hover:bg-pink-500/20 transition-colors" style={{ width: "36px", height: "36px" }} data-tooltip="Remove Member">
                                   <DynamicIcon name="UserMinusIcon" width={16} height={16} />
                                 </button>
                               </div>
@@ -660,14 +660,14 @@ export default function EditSectorModal({ sector, sectors, onClose, onUpdated, o
                             </div>
                             <div className="flex items-center transition-opacity" style={{ gap: "0.25rem" }}>
                               {currentUserId === sectorOwner?.id && (
-                                <button type="button" onClick={() => setRoleAction({ id: c.user.id, type: c.role === "ADMIN" ? "demote" : "promote" })} className="flex items-center justify-center text-gray-400 rounded-full transition-colors" style={{ width: "36px", height: "36px" }} title={c.role === "ADMIN" ? "Demote to Member" : "Promote to Admin"} onMouseEnter={(e) => { e.currentTarget.style.color = c.role === "ADMIN" ? "#fb923c" : "#10b981"; e.currentTarget.style.background = c.role === "ADMIN" ? "rgba(251,146,60,0.2)" : "rgba(16,185,129,0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "transparent"; }}>
+                                <button type="button" onClick={() => setRoleAction({ id: c.user.id, type: c.role === "ADMIN" ? "demote" : "promote" })} className="flex items-center justify-center text-gray-400 rounded-full transition-colors" style={{ width: "36px", height: "36px" }} data-tooltip={c.role === "ADMIN" ? "Demote to Member" : "Promote to Admin"} onMouseEnter={(e) => { e.currentTarget.style.color = c.role === "ADMIN" ? "#fb923c" : "#10b981"; e.currentTarget.style.background = c.role === "ADMIN" ? "rgba(251,146,60,0.2)" : "rgba(16,185,129,0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "transparent"; }}>
                                   {c.role === "ADMIN" ? <ShieldExclamationIcon width={16} height={16} /> : <ShieldCheckIcon width={16} height={16} />}
                                 </button>
                               )}
-                              <button type="button" onClick={() => setTransferringTo(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Transfer Ownership">
+                              <button type="button" onClick={() => setTransferringTo(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "36px", height: "36px" }} data-tooltip="Transfer Ownership">
                                 <DynamicIcon name="ArrowsRightLeftIcon" width={16} height={16} />
                               </button>
-                              <button type="button" onClick={() => setRemovingMemberId(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-pink-400 rounded-full hover:bg-pink-500/20 transition-colors" style={{ width: "36px", height: "36px" }} title="Remove Member">
+                              <button type="button" onClick={() => setRemovingMemberId(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-pink-400 rounded-full hover:bg-pink-500/20 transition-colors" style={{ width: "36px", height: "36px" }} data-tooltip="Remove Member">
                                 <DynamicIcon name="UserMinusIcon" width={16} height={16} />
                               </button>
                             </div>

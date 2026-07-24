@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 import { getUnlockedBadges } from "@/lib/badges";
 
 export const metadata: Metadata = {
-  title: "Settings — Orbit Station",
+  title: "Settings",
   robots: {
     index: false,
     follow: false,
@@ -75,6 +75,7 @@ export default async function SettingsPage() {
           notifSoundUrl: (profile as any).notifSoundUrl ?? null,
           shortcuts: (profile as any).shortcuts ?? null,
           station: profile.station,
+          hasPassword: !!(profile as any).password,
         }} 
         unlockedBadges={unlockedBadges}
       />

@@ -11,6 +11,7 @@ import { compressImage } from "@/lib/image-compress";
 import DeveloperTab from "@/components/developer-tab";
 import { BADGE_REGISTRY, BADGE_COLORS } from "@/lib/badges/registry";
 import * as SolidIcons from "@heroicons/react/24/solid";
+import ChangePasswordModal from "@/components/change-password-modal";
 
 const DynamicIcon = ({ name, className }: { name: string, className?: string }) => {
   const Icon = (SolidIcons as any)[name];
@@ -35,6 +36,7 @@ type Profile = {
   notifSoundUrl?: string | null;
   shortcuts?: string | null;
   station: { isPublic: boolean } | null;
+  hasPassword?: boolean;
 };
 
 type Props = {
@@ -108,11 +110,13 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
   const [isPublic, setIsPublic] = useState(profile.station?.isPublic ?? false);
   const [image, setImage] = useState(profile.image ?? "");
 
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
   const defaultShortcuts = { publicStation: "F1", friends: "F2", analytics: "F3", settings: "F4" };
   const [shortcuts, setShortcuts] = useState<typeof defaultShortcuts>(profile.shortcuts ? { ...defaultShortcuts, ...JSON.parse(profile.shortcuts) } : defaultShortcuts);
   const [activeTab, setActiveTab] = useState<"profile" | "public" | "preferences" | "shortcuts" | "developer">("profile");
   const [isScrolled, setIsScrolled] = useState(false);
-  
+
   const [autoHttps, setAutoHttps] = useState(true);
   const [autoFetchMeta, setAutoFetchMeta] = useState(true);
 
@@ -158,7 +162,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
 
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const [formErrors, setFormErrors] = useState<{ name?: string, username?: string }>({});
+  const [formErrors, setFormErrors] = useState<{ name?: string, username?: string, confirmPassword?: string }>({});
   const [, startTransition] = useTransition();
   const router = useRouter();
 
@@ -415,7 +419,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                     className="settings-avatar group relative overflow-hidden"
                     style={{ cursor: "pointer", width: "80px", height: "80px" }}
                     onClick={() => fileInputRef.current?.click()}
-                    title="Change Avatar (Max 2MB)"
+                    data-tooltip="Change Avatar (Max 2MB)"
                   >
                     {image ? (
                       <img src={image} alt={profile.name ?? ""} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -501,6 +505,26 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                       placeholder="Tell the galaxy about yourself…"
                     />
                   </div>
+                  {profile.hasPassword && (
+                    <>
+                      <hr className="border-white/10" style={{ margin: "2rem 0" }} />
+                      <h3 className="text-lg font-semibold text-white" style={{ marginTop: "2rem", marginBottom: "1.5rem" }}>Security</h3>
+
+                      {/* Change Password Button */}
+                      <div className="form-group">
+                        <p className="text-sm text-gray-400 mb-3">Update your password to keep your account secure.</p>
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswordModal(true)}
+                          className="w-full md:w-auto bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-colors flex items-center justify-center"
+                          style={{ padding: "0.75rem 1.5rem", gap: "0.5rem" }}
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                          Change Password
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </section>
 
@@ -1248,6 +1272,10 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
           </motion.div>
         )}
       </AnimatePresence>
+      <ChangePasswordModal 
+        isOpen={showPasswordModal} 
+        onClose={() => setShowPasswordModal(false)} 
+      />
     </>
   );
 }

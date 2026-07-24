@@ -14,6 +14,7 @@ import { sendFriendRequest, recordStationVisit } from "@/lib/actions/social.acti
 import { motion, useAnimation, PanInfo, useDragControls } from "framer-motion";
 import { getBadgeById, BADGE_COLORS } from "@/lib/badges/registry";
 import FriendsModal from "@/components/friends-modal";
+import ShareProfileModal from "@/components/share-profile-modal";
 import { useNotifications } from "@/hooks/use-notifications";
 import "./public-profile.css";
 
@@ -61,6 +62,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
   const [stationSearch, setStationSearch] = useState("");
   const [isAddingFriend, setIsAddingFriend] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const { stats, refetch: refetchNotifications } = useNotifications();
   const router = useRouter();
   const controls = useAnimation();
@@ -354,10 +356,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                   <button
                     className="btn btn-secondary hover:bg-white/10"
                     style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flex: "1", background: "rgba(255,255,255,0.05)" }}
-                    onClick={() => {
-                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => { });
-                      else { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
-                    }}
+                    onClick={() => setShowShareModal(true)}
                   >
                     <ShareIcon width={16} height={16} /> Share
                   </button>
@@ -391,10 +390,7 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                   <button
                     className="btn btn-secondary hover:bg-white/10"
                     style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)" }}
-                    onClick={() => {
-                      if (navigator.share) navigator.share({ title: profileTitle ?? undefined, url: window.location.href }).catch(() => { });
-                      else { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
-                    }}
+                    onClick={() => setShowShareModal(true)}
                   >
                     <ShareIcon width={16} height={16} /> Share
                   </button>
@@ -474,6 +470,14 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
         stats={stats}
         refetchStats={refetchNotifications}
       />
+
+      {showShareModal && (
+        <ShareProfileModal
+          user={user}
+          url={typeof window !== "undefined" ? window.location.href : ""}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </>
   );
 }

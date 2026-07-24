@@ -9,7 +9,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
-  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, notifSoundEnabled, notifSoundUrl, shortcuts, isPublic, image } = body;
+  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, notifSoundEnabled, notifSoundUrl, shortcuts, isPublic, image, currentPassword, newPassword } = body;
 
   // Validate username uniqueness if changed
   if (username) {
@@ -22,6 +22,25 @@ export async function PATCH(req: Request) {
   }
 
   try {
+    let newPasswordHash: string | undefined = undefined;
+    
+    if (newPassword) {
+      const user = await db.user.findUnique({ where: { id: session.user.id } });
+      if (user?.password) {
+        if (!currentPassword) {
+          return NextResponse.json({ error: "Current password is required to change password" }, { status: 400 });
+        }
+        const bcrypt = await import("bcryptjs");
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+          return NextResponse.json({ error: "Incorrect current password" }, { status: 400 });
+        }
+      }
+      
+      const bcrypt = await import("bcryptjs");
+      newPasswordHash = await bcrypt.hash(newPassword, 10);
+    }
+
     const updated = await db.user.update({
       where: { id: session.user.id },
       data: {
@@ -38,6 +57,7 @@ export async function PATCH(req: Request) {
         ...(notifSoundUrl !== undefined && { notifSoundUrl: notifSoundUrl.trim() || null }),
         ...(shortcuts !== undefined && { shortcuts }),
         ...(image !== undefined && { image }),
+        ...(newPasswordHash && { password: newPasswordHash }),
       },
     });
 

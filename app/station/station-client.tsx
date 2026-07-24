@@ -44,6 +44,8 @@ import {
   EllipsisVerticalIcon,
   ChatBubbleOvalLeftEllipsisIcon,
   TagIcon,
+  ViewColumnsIcon,
+  Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import GroupChatModal from "@/components/group-chat-modal";
 import { motion, AnimatePresence } from "framer-motion";
@@ -228,6 +230,26 @@ export default function StationClient({
   const [isFilterExiting, setIsFilterExiting] = useState(false);
   const [isFilterEntering, setIsFilterEntering] = useState(false);
   const [visibleLimit, setVisibleLimit] = useState(12);
+  const [viewMode, setViewMode] = useState<"masonry" | "grid">("masonry");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("stationViewMode");
+      if (saved === "grid" || saved === "masonry") {
+        setViewMode(saved);
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("stationViewMode", viewMode);
+    } catch (e) {
+      // Ignore
+    }
+  }, [viewMode]);
 
   useEffect(() => {
     setVisibleLimit(12);
@@ -1047,7 +1069,7 @@ export default function StationClient({
             <button
               id="btn-add-sector"
               className="btn-icon"
-              title="Add new sector"
+              data-tooltip="Add new sector"
               onClick={() => setShowAddSector(true)}>
               <PlusIcon width={16} height={16} />
             </button>
@@ -1119,7 +1141,7 @@ export default function StationClient({
                       e.stopPropagation();
                       setEditingSector(sector);
                     }}
-                    title="Edit sector"
+                    data-tooltip="Edit sector"
                     aria-label={`Edit ${sector.name}`}>
                     <PencilSquareIcon width={14} height={14} />
                   </div>
@@ -1168,7 +1190,7 @@ export default function StationClient({
                             {/* Crown Icon (visible when NOT hovered) */}
                             <div
                               className="absolute inset-0 flex items-center justify-center text-yellow-500 opacity-100 group-hover:opacity-0 transition-opacity pointer-events-none"
-                              title="Sector Owner">
+                              data-tooltip="Sector Owner">
                               <svg
                                 width="14"
                                 height="14"
@@ -1185,7 +1207,7 @@ export default function StationClient({
                                 e.stopPropagation();
                                 setEditingSector(sector);
                               }}
-                              title="Edit sector"
+                              data-tooltip="Edit sector"
                               aria-label={`Edit ${sector.name}`}>
                               <PencilSquareIcon width={14} height={14} />
                             </div>
@@ -1199,7 +1221,7 @@ export default function StationClient({
                                 e.stopPropagation();
                                 setViewingMembersSector(sector);
                               }}
-                              title="View Members"
+                              data-tooltip="View Members"
                               aria-label={`View Members of ${sector.name}`}>
                               <DynamicIcon
                                 name="UsersIcon"
@@ -1281,7 +1303,7 @@ export default function StationClient({
                                 opacity: 0.5,
                                 flexShrink: 0,
                               }}
-                              title="Private Sector"
+                              data-tooltip="Private Sector"
                             />
                           )}
                         </>
@@ -1314,14 +1336,14 @@ export default function StationClient({
                         }}
                         onClick={handleRefresh}
                         disabled={isRefreshing}
-                        title="Refresh Sector Data">
+                        data-tooltip="Refresh Sector Data">
                         <ArrowPathIcon
                           width={18}
                           height={18}
                           className={isRefreshing ? "animate-spin" : ""}
                         />
                       </button>
-                      {isCurrentSectorAdminOrOwner && displaySectorId !== "all" && (
+                      {displaySectorId !== "all" && (
                         <button
                           className="btn-icon"
                           style={{
@@ -1336,7 +1358,7 @@ export default function StationClient({
                             flexShrink: 0,
                           }}
                           onClick={() => setShowTagModal(true)}
-                          title="Manage Tags">
+                          data-tooltip="Manage Tags">
                           <TagIcon width={18} height={18} />
                         </button>
                       )}
@@ -1346,7 +1368,7 @@ export default function StationClient({
                           className="btn btn-primary"
                           style={{ background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)", border: "1px solid rgba(139, 92, 246, 0.5)", color: "#fff", fontWeight: "600", textShadow: "0 1px 2px rgba(0,0,0,0.3)", whiteSpace: "nowrap" }}
                           onClick={() => isCurrentSectorAdminOrOwner ? setShowAddBeacon(true) : setShowAccessDenied(true)}
-                          title="Add new beacon"
+                          data-tooltip="Add new beacon"
                         >
                           + Add Beacon
                         </button>
@@ -1409,7 +1431,7 @@ export default function StationClient({
                         className={isRefreshing ? "animate-spin" : ""}
                       />
                     </button>
-                    {isCurrentSectorAdminOrOwner && displaySectorId !== "all" && (
+                    {displaySectorId !== "all" && (
                         <button
                           className="flex shrink-0 items-center justify-center"
                           style={{
@@ -1592,7 +1614,7 @@ export default function StationClient({
                           onClick={() =>
                             setOpenMenu(openMenu === "filter" ? null : "filter")
                           }
-                          title="Filter by Visibility">
+                          data-tooltip="Filter by Visibility">
                           <FunnelIcon width={18} height={18} />
                         </button>
                         {openMenu === "filter" && (
@@ -1675,7 +1697,7 @@ export default function StationClient({
                             color: selectedTags.length > 0 ? "#fff" : "#a1a1aa",
                           }}
                           onClick={() => setOpenMenu(openMenu === "tags" ? null : "tags")}
-                          title="Filter by Tags">
+                          data-tooltip="Filter by Tags">
                           <TagIcon width={18} height={18} />
                         </button>
                         {/* Tags dropdown menu: renders inline when openMenu is "tags" */}
@@ -1768,7 +1790,7 @@ export default function StationClient({
                         onClick={() =>
                           setOpenMenu(openMenu === "sort" ? null : "sort")
                         }
-                        title="Sort Beacons">
+                        data-tooltip="Sort Beacons">
                         <ArrowsUpDownIcon width={18} height={18} />
                       </button>
                       {openMenu === "sort" && (
@@ -1877,7 +1899,7 @@ export default function StationClient({
                                       justifyContent: "center",
                                     }}
                                     className="hover:bg-white/10"
-                                    title={`Sort ${sortDir === "asc" ? "Descending" : "Ascending"}`}>
+                                    data-tooltip={`Sort ${sortDir === "asc" ? "Descending" : "Ascending"}`}>
                                     {sortDir === "asc" ? (
                                       <BarsArrowUpIcon width={16} height={16} />
                                     ) : (
@@ -1948,6 +1970,56 @@ export default function StationClient({
                         </div>
                       </div>
                     )}
+                  
+                  <div 
+                    className="staggered-item hidden md:flex items-center" 
+                    style={{ 
+                      background: "rgba(255, 255, 255, 0.05)", 
+                      border: "1px solid rgba(255, 255, 255, 0.1)", 
+                      borderRadius: "8px", 
+                      padding: "4px",
+                      marginLeft: "auto",
+                      height: "38px" 
+                    }}
+                  >
+                    <button
+                      style={{ 
+                        padding: "6px", 
+                        borderRadius: "6px", 
+                        transition: "colors 0.2s",
+                        background: viewMode === "masonry" ? "rgba(168, 85, 247, 0.3)" : "transparent",
+                        color: viewMode === "masonry" ? "#e9d5ff" : "rgba(255, 255, 255, 0.5)",
+                        cursor: "pointer",
+                        border: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}
+                      onClick={() => setViewMode("masonry")}
+                      data-tooltip="Masonry View"
+                    >
+                      <ViewColumnsIcon width={18} height={18} />
+                    </button>
+                    <button
+                      style={{ 
+                        padding: "6px", 
+                        borderRadius: "6px", 
+                        transition: "colors 0.2s",
+                        background: viewMode === "grid" ? "rgba(168, 85, 247, 0.3)" : "transparent",
+                        color: viewMode === "grid" ? "#e9d5ff" : "rgba(255, 255, 255, 0.5)",
+                        cursor: "pointer",
+                        border: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}
+                      onClick={() => setViewMode("grid")}
+                      data-tooltip="Grid View"
+                    >
+                      <Squares2X2Icon width={18} height={18} />
+                    </button>
+                  </div>
+
                 </>
               )}
             </div>
@@ -2012,53 +2084,128 @@ export default function StationClient({
               )}
             </div>
           ) : (
+            <>
+            {viewMode === "grid" && (
+              <style dangerouslySetInnerHTML={{ __html: `
+                .beacon-grid-view { display: grid; gap: 1rem; align-items: stretch; width: 100%; padding-bottom: 2rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                @media (min-width: 640px) { .beacon-grid-view { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+                @media (min-width: 1024px) { .beacon-grid-view { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+                @media (min-width: 1280px) { .beacon-grid-view { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+                .beacon-grid-view .beacon-card-wrapper { display: flex; height: 100%; width: 100%; }
+                .beacon-grid-view .beacon-card { display: flex; flex-direction: column; height: 100%; max-height: 320px; overflow: hidden; width: 100%; margin: 0; }
+                .beacon-grid-view .beacon-card-image { height: 130px !important; min-height: 130px !important; aspect-ratio: unset !important; }
+                .beacon-grid-view .beacon-card-image img { height: 100%; object-fit: cover; }
+                .beacon-grid-view .beacon-card .beacon-card-body { flex: 1; overflow-y: auto; }
+                .beacon-grid-view .beacon-card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+                .beacon-grid-view .beacon-card-desc { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; white-space: normal; }
+              `}} />
+            )}
             <div
-              className={`beacon-masonry ${isExiting && user.animationEnabled ? "exiting" : isEntering && user.animationEnabled ? "entering" : ""}`}
-              key={displaySectorId}>
-              {columnWrapper.map((colItems, colIndex) => (
-                <div className="beacon-masonry-col" key={`col-${colIndex}`}>
-                  {colItems.map(({ beacon, globalIndex }) => (
-                    <motion.div
-                      className={`
-                        beacon-card-wrapper
-                        ${isFilterExiting ? "beacon-filter-exiting" : ""}
-                        ${isFilterEntering ? "beacon-filter-entering" : ""}
-                        ${shrinkingBeacons.has(beacon.id) ? "beacon-shrinking" : ""}
-                        ${growingBeacons.has(beacon.id) ? "beacon-growing" : ""}
-                      `}
-                      style={{
-                        animationDelay: user.animationEnabled
-                          ? `${(globalIndex % 6) * 0.05}s`
-                          : "0s",
-                        transformOrigin: "center center",
-                      }}
-                      initial={
-                        user.animationEnabled ? { opacity: 0, y: 30 } : false
+              className={`${viewMode === "masonry" ? "beacon-masonry" : "beacon-grid-view"} ${isExiting && user.animationEnabled ? "exiting" : isEntering && user.animationEnabled ? "entering" : ""}`}
+              key={`${displaySectorId}-${viewMode}`}>
+              {viewMode === "masonry" ? (
+                columnWrapper.map((colItems, colIndex) => (
+                  <div className="beacon-masonry-col" key={`col-${colIndex}`}>
+                    {colItems.map(({ beacon, globalIndex }) => (
+                      <motion.div
+                        className={`
+                          beacon-card-wrapper
+                          ${isFilterExiting ? "beacon-filter-exiting" : ""}
+                          ${isFilterEntering ? "beacon-filter-entering" : ""}
+                          ${shrinkingBeacons.has(beacon.id) ? "beacon-shrinking" : ""}
+                          ${growingBeacons.has(beacon.id) ? "beacon-growing" : ""}
+                        `}
+                        style={{
+                          animationDelay: user.animationEnabled
+                            ? `${(globalIndex % 6) * 0.05}s`
+                            : "0s",
+                          transformOrigin: "center center",
+                        }}
+                        initial={
+                          user.animationEnabled ? { opacity: 0, y: 30 } : false
+                        }
+                        animate={
+                          user.animationEnabled ? { opacity: 1, y: 0 } : false
+                        }
+                        transition={{
+                          duration: 0.3,
+                          ease: "easeOut",
+                          delay: user.animationEnabled
+                            ? (globalIndex % 6) * 0.05
+                            : 0,
+                        }}
+                        key={beacon.id}>
+                        <BeaconCard
+                          beacon={beacon}
+                          onClick={() => setSelectedBeacon(beacon)}
+                          onEdit={
+                            isCurrentSectorAdminOrOwner
+                              ? () => setEditingBeacon(beacon)
+                              : undefined
+                          }
+                          index={globalIndex}
+                          isCollab={allCollabSectors.some(
+                            (s) => s.id === beacon.sectorId,
+                          )}
+                          sectorName={(beacon as any)._sectorName}
+                          isAllBeacons={displaySectorId === "all"}
+                          hologramEnabled={user.hologramEnabled ?? false}
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                ))
+              ) : (
+                paginatedBeacons.map((beacon, globalIndex) => (
+                  <motion.div
+                    className={`
+                      beacon-card-wrapper
+                      ${isFilterExiting ? "beacon-filter-exiting" : ""}
+                      ${isFilterEntering ? "beacon-filter-entering" : ""}
+                      ${shrinkingBeacons.has(beacon.id) ? "beacon-shrinking" : ""}
+                      ${growingBeacons.has(beacon.id) ? "beacon-growing" : ""}
+                    `}
+                    style={{
+                      animationDelay: user.animationEnabled
+                        ? `${(globalIndex % 6) * 0.05}s`
+                        : "0s",
+                      transformOrigin: "center center",
+                    }}
+                    initial={
+                      user.animationEnabled ? { opacity: 0, y: 30 } : false
+                    }
+                    animate={
+                      user.animationEnabled ? { opacity: 1, y: 0 } : false
+                    }
+                    transition={{
+                      duration: 0.3,
+                      ease: "easeOut",
+                      delay: user.animationEnabled
+                        ? (globalIndex % 6) * 0.05
+                        : 0,
+                    }}
+                    key={beacon.id}>
+                    <BeaconCard
+                      beacon={beacon}
+                      onClick={() => setSelectedBeacon(beacon)}
+                      onEdit={
+                        isCurrentSectorAdminOrOwner
+                          ? () => setEditingBeacon(beacon)
+                          : undefined
                       }
-                      animate={
-                        user.animationEnabled ? { opacity: 1, y: 0 } : false
-                      }
-                      transition={{
-                        duration: 0.3,
-                        ease: "easeOut",
-                        delay: user.animationEnabled
-                          ? (globalIndex % 6) * 0.05
-                          : 0,
-                      }}
-                      key={beacon.id}>
-                      <BeaconCard
-                        beacon={beacon}
-                        index={globalIndex}
-                        onClick={() => setSelectedBeacon(beacon)}
-                        onEdit={isCurrentSectorAdminOrOwner ? () => setEditingBeacon(beacon) : undefined}
-                        isCollab={(activeSector?.collaborators?.length ?? 0) > 0}
-                        isAllBeacons={displaySectorId === "all"}
-                      />
-                    </motion.div>
-                  ))}
-                </div>
-              ))}
+                      index={globalIndex}
+                      isCollab={allCollabSectors.some(
+                        (s) => s.id === beacon.sectorId,
+                      )}
+                      sectorName={(beacon as any)._sectorName}
+                      isAllBeacons={displaySectorId === "all"}
+                      hologramEnabled={user.hologramEnabled ?? false}
+                    />
+                  </motion.div>
+                ))
+              )}
             </div>
+            </>
           )}
 
           {visibleLimit < visibleBeacons.length && (

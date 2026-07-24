@@ -4,7 +4,7 @@ import { getMyStation, getMyProfile, getCollabSectors } from "@/lib/queries";
 import StationClient from "./station-client";
 
 export const metadata = {
-  title: "My Station — Orbit Station",
+  title: "My Station",
   description: "Manage your personal web shortcuts and sectors.",
   robots: {
     index: false,

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeftIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 
 export const metadata = {
-  title: "Terms of Service — Orbit Station",
+  title: "Terms of Service",
   description: "Terms of Service for Orbit Station",
 };
 

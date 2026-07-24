@@ -30,13 +30,28 @@ export default function LoginPage() {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // ... (handle methods below) ...
+  useEffect(() => {
+    // Check for auth_error cookie from server-side intercepts
+    const match = document.cookie.match(new RegExp('(^| )auth_error=([^;]+)'));
+    if (match) {
+      const errorMsg = decodeURIComponent(match[2].replace(/\+/g, ' '));
+      setError(errorMsg);
+      // Delete the cookie
+      document.cookie = "auth_error=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+
+    // Strip ?error= query parameter from URL without reloading
+    if (window.location.search.includes("error=")) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   async function handleOAuth(provider: "github" | "google") {
     setLoadingProvider(provider);
@@ -55,7 +70,13 @@ export default function LoginPage() {
     });
     setLoading(false);
     if (result?.error) {
-      setError("Invalid email or password.");
+      if (result.error.includes("OAUTH_ONLY")) {
+        setError("This account uses a third-party login (Google/GitHub). Please use that instead.");
+      } else if (result.error.includes("CredentialsSignin") || result.error.includes("Configuration")) {
+        setError("Invalid email or password.");
+      } else {
+        setError(result.error.replace("Error: ", ""));
+      }
     } else {
       router.push("/station");
     }
@@ -63,6 +84,10 @@ export default function LoginPage() {
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
@@ -294,6 +319,28 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 relative">
+                <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Confirm Password</label>
+                <div className="relative">
+                  <input
+                    className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "3rem" }}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     minLength={8}
                   />

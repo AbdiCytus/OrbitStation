@@ -1075,11 +1075,13 @@ pre {
   width: 220px;
   flex-shrink: 0;
   padding: 1rem;
+  padding-left: 0;
+  padding-bottom: 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   border-right: 1px solid var(--border-subtle);
-  overflow-y: auto;
+  overflow: hidden !important;
 }
 
 .sidebar-header {
@@ -1087,6 +1089,8 @@ pre {
   align-items: center;
   justify-content: space-between;
   padding: 0 0.25rem 0.25rem;
+  padding-left: 1.25rem;
+  flex-shrink: 0;
 }
 
 .sidebar-label {
@@ -1130,6 +1134,16 @@ pre {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  overflow-y: auto !important;
+  direction: rtl;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+}
+
+.sector-list > * {
+  direction: ltr;
 }
 
 .sector-tab-wrapper {
@@ -1300,6 +1314,9 @@ pre {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+.beacon-card-body > * {
+  flex-shrink: 0;
 }
 
 .beacon-card-meta {
@@ -2798,6 +2815,7 @@ pre {
   margin: 0;
 }
 
+
 /* ============================================================
    RESPONSIVE — MOBILE
    ============================================================ */
@@ -3475,14 +3493,75 @@ pre {
 @keyframes beacon-enter {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: scale(0.9) translateY(20px);
   }
-
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
+
+/* ============================================================
+   GRID BEACON VIEW
+   ============================================================ */
+.beacon-grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.875rem;
+  width: 100%;
+  padding-bottom: 2rem;
+  align-items: stretch;
+}
+
+.beacon-grid-view .beacon-card-wrapper {
+  display: flex;
+  height: 100%;
+}
+
+.beacon-grid-view .beacon-card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  height: 100%;
+  max-height: 320px;
+  overflow: hidden;
+  animation: beacon-float 4s ease-in-out infinite;
+  width: 100%;
+}
+
+.beacon-grid-view .beacon-card-image {
+  height: 130px;
+  min-height: 130px;
+  aspect-ratio: unset !important;
+}
+
+.beacon-grid-view.entering .beacon-card {
+  animation: beacon-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards !important;
+  animation-delay: var(--enter-delay, 0ms) !important;
+}
+
+.beacon-grid-view.exiting .beacon-card {
+  animation: beacon-exit 0.25s ease-in forwards !important;
+  animation-delay: calc(var(--enter-delay, 0ms) * 0.5) !important;
+}
+
+.beacon-grid-view .beacon-card:hover {
+  animation-play-state: paused, paused;
+}
+
+.beacon-grid-view .beacon-card .beacon-card-body {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.beacon-grid-view .beacon-card .beacon-card-body::-webkit-scrollbar {
+  width: 4px;
+}
+.beacon-grid-view .beacon-card .beacon-card-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
 
 @keyframes beacon-exit {
   from {

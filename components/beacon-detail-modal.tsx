@@ -269,7 +269,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
               className="hsr-action-btn"
               onClick={captureScreenshot}
               disabled={isCapturing}
-              title="Capture screenshot"
+              data-tooltip="Capture screenshot"
             >
               <span>{isCapturing ? <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" /> : <CameraIcon width={16} height={16} />}</span>
               <span className="hsr-action-label hidden md:inline">{isCapturing ? "Capturing..." : "Screenshot"}</span>
@@ -299,7 +299,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                       <button
                         className={`hsr-action-btn ${isPinned ? "hsr-action-btn--active" : ""}`}
                         onClick={handleTogglePin}
-                        title={isPinned ? "Unpin" : "Pin beacon"}
+                        data-tooltip={isPinned ? "Unpin" : "Pin beacon"}
                         id={`btn-pin-${beacon.id}`}
                       >
                         <span>{isPinned ? <MapPinSolid width={16} height={16} /> : <MapPinIcon width={16} height={16} />}</span>
@@ -309,7 +309,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                     <button
                       className="hsr-action-btn hsr-action-btn--danger"
                       onClick={handleDelete}
-                      title="Delete beacon"
+                      data-tooltip="Delete beacon"
                       id={`btn-delete-${beacon.id}`}
                     >
                       <span><TrashIcon width={16} height={16} /></span>

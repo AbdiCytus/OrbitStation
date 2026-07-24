@@ -200,6 +200,7 @@ export async function getMyProfile() {
       notifSoundUrl: true,
       shortcuts: true,
       createdAt: true,
+      password: true,
       station: {
         select: {
           isPublic: true,

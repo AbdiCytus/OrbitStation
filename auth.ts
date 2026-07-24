@@ -33,7 +33,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         });
 
-        if (!user?.password) return null; // OAuth-only account
+        if (!user?.password) {
+          throw new Error("OAUTH_ONLY");
+        }
 
         if (!user.emailVerified) {
           throw new Error("Please verify your email address to log in.");
@@ -69,6 +71,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     ...authConfig.callbacks,
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials" && user.email) {
+        const existingUser = await db.user.findUnique({
+          where: { email: user.email },
+          include: { accounts: true },
+        });
+
+        if (existingUser && account) {
+          const isLinked = existingUser.accounts.some(
+            (acc) => acc.provider === account.provider
+          );
+          if (!isLinked) {
+            const cookieStore = await cookies();
+            if (existingUser.password) {
+              cookieStore.set("auth_error", "This email is registered with a password. Please use your email and password to log in.", { path: "/" });
+              return "/login";
+            } else {
+              cookieStore.set("auth_error", "This email is already linked to another login method. Please use that instead.", { path: "/" });
+              return "/login";
+            }
+          }
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;

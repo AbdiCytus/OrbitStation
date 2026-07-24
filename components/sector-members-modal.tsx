@@ -146,12 +146,12 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                 </div>
                 <div className="flex items-center gap-1">
                   {(sectorOwner.isPublic || sectorOwner.station?.isPublic) && sectorOwner.username && (
-                    <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
+                    <Link href={`/station/${sectorOwner.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} data-tooltip="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
                   {sectorOwner.id !== currentUserId && !isFriendsLoading && !isFriend(sectorOwner.id) && !pendingRequests.has(sectorOwner.id) && (
-                    <button type="button" onClick={() => handleAddFriend(sectorOwner.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Add Friend">
+                    <button type="button" onClick={() => handleAddFriend(sectorOwner.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} data-tooltip="Add Friend">
                       <UserPlusIcon width={16} height={16} />
                     </button>
                   )}
@@ -184,17 +184,17 @@ export default function SectorMembersModal({ sector, currentUserId, ownerData, o
                 </div>
                 <div className="flex items-center gap-1">
                   {c.user.id === currentUserId && (!ownerData || ownerData.id !== currentUserId) && (
-                    <button type="button" onClick={handleLeaveSector} className="flex items-center justify-center text-gray-400 hover:text-red-400 rounded-full hover:bg-red-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Leave Sector">
+                    <button type="button" onClick={handleLeaveSector} className="flex items-center justify-center text-gray-400 hover:text-red-400 rounded-full hover:bg-red-500/20 transition-colors" style={{ width: "32px", height: "32px" }} data-tooltip="Leave Sector">
                       <ArrowLeftOnRectangleIcon width={16} height={16} />
                     </button>
                   )}
                   {(c.user as any).station?.isPublic && c.user.username && (
-                    <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Visit Profile">
+                    <Link href={`/station/${c.user.username}`} target="_blank" className="flex items-center justify-center text-gray-400 hover:text-violet-400 rounded-full hover:bg-violet-500/20 transition-colors" style={{ width: "32px", height: "32px" }} data-tooltip="Visit Profile">
                       <GlobeAltIcon width={16} height={16} />
                     </Link>
                   )}
                   {c.userId !== currentUserId && !isFriendsLoading && !isFriend(c.user.id) && !pendingRequests.has(c.user.id) && (
-                    <button type="button" onClick={() => handleAddFriend(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} title="Add Friend">
+                    <button type="button" onClick={() => handleAddFriend(c.user.id)} className="flex items-center justify-center text-gray-400 hover:text-cyan-400 rounded-full hover:bg-cyan-500/20 transition-colors" style={{ width: "32px", height: "32px" }} data-tooltip="Add Friend">
                       <UserPlusIcon width={16} height={16} />
                     </button>
                   )}

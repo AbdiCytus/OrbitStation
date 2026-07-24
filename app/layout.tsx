@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
     default: "Orbit Station",
-    template: "%s — Orbit Station",
+    template: "%s - Orbit Station",
   },
   description:
     "Your personal web portal in the stars. Organize, navigate, and share your favorite web destinations from one command center.",
@@ -44,6 +44,7 @@ export const metadata: Metadata = {
 import MouseTrail from "@/components/mouse-trail";
 import { Toaster } from "sonner";
 import PwaRegister from "@/components/pwa-register";
+import TooltipManager from "@/components/tooltip-manager";
 
 import { cookies } from "next/headers";
 
@@ -68,6 +69,7 @@ export default async function RootLayout({
       </head>
       <body className={!isAnim ? "no-loading-anim" : ""}>
         <PwaRegister />
+        <TooltipManager />
         <MouseTrail />
         <Toaster 
           theme="dark" 
