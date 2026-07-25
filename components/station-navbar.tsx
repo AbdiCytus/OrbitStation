@@ -114,24 +114,26 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
   const defaultShortcuts = { myStation: "Escape", publicStation: "F1", friends: "F2", analytics: "F3", settings: "F4" };
   const parsedShortcuts = user?.shortcuts ? { ...defaultShortcuts, ...JSON.parse(user.shortcuts) } : defaultShortcuts;
 
+  const normalizeKey = (key: string) => key === "Esc" ? "Escape" : key;
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if typing in an input
       if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") return;
 
-      if (e.key === parsedShortcuts.myStation && user) {
+      if (e.key === normalizeKey(parsedShortcuts.myStation) && user) {
         e.preventDefault();
         router.push("/station");
-      } else if (e.key === parsedShortcuts.publicStation && user?.station?.isPublic && user?.username) {
+      } else if (e.key === normalizeKey(parsedShortcuts.publicStation) && user?.station?.isPublic && user?.username) {
         e.preventDefault();
         router.push(`/station/${user.username}`);
-      } else if (e.key === parsedShortcuts.friends && pathname === "/station") {
+      } else if (e.key === normalizeKey(parsedShortcuts.friends) && pathname === "/station") {
         e.preventDefault();
         onOpenFriends?.();
-      } else if (e.key === parsedShortcuts.analytics && user?.station?.isPublic) {
+      } else if (e.key === normalizeKey(parsedShortcuts.analytics) && user?.station?.isPublic) {
         e.preventDefault();
         router.push("/analytics");
-      } else if (e.key === parsedShortcuts.settings) {
+      } else if (e.key === normalizeKey(parsedShortcuts.settings)) {
         e.preventDefault();
         router.push("/settings");
       }
@@ -239,14 +241,12 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
           user ? (
             <>
               <div className="hidden md:flex items-center" style={{ gap: "0.5rem", marginRight: "2.5rem" }}>
-                {pathname !== "/station" && (
-                  <Link href="/station" className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
-                    <UserIcon width={20} height={20} />
-                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#141423] border border-white/10 rounded-lg text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
-                      My Station <span className="text-gray-400 ml-1">({parsedShortcuts.myStation})</span>
-                    </div>
-                  </Link>
-                )}
+                <Link href="/station" className={`navbar-icon-btn group relative ${pathname === "/station" ? "hidden" : ""}`} style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <UserIcon width={20} height={20} />
+                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#141423] border border-white/10 rounded-lg text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
+                    My Station <span className="text-gray-400 ml-1">({parsedShortcuts.myStation})</span>
+                  </div>
+                </Link>
                 {user.station?.isPublic && user.username && (
                   <Link href={`/station/${user.username}`} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
                     <GlobeAltIcon width={20} height={20} />
@@ -333,15 +333,13 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                       <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
                     </div>
                     <hr className="divider" />
-                    {pathname !== "/station" && (
-                      <Link
-                        href="/station"
-                        className="navbar-menu-item"
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        <UserIcon width={18} height={18} /> My Station
-                      </Link>
-                    )}
+                    <Link
+                      href="/station"
+                      className={`navbar-menu-item ${pathname === "/station" ? "hidden" : ""}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <UserIcon width={18} height={18} /> My Station
+                    </Link>
                     {user.username && user.station?.isPublic && (
                       <Link
                         href={`/station/${user.username}`}
