@@ -153,10 +153,9 @@ export default function LandingClient() {
           {/* Deck Container */}
           <div style={{
             position: "relative",
-            width: "50vw", // Setengah layar
-            minWidth: "680px", // Mencegah rusak di layar kecil
-            maxWidth: "1000px",
-            height: "440px", // Ruang cukup untuk kartu naik
+            width: "100%",
+            maxWidth: "920px", // Diperlebar agar memuat semua kartu tanpa keluar
+            height: "440px",
             margin: "0 auto",
             display: "flex",
             justifyContent: "center"
@@ -164,7 +163,7 @@ export default function LandingClient() {
             {/* The Cards in the Deck */}
             <div style={{
               position: "absolute",
-              bottom: "40px",
+              bottom: "20px", // Jarak dasar kartu
               left: "0",
               right: "0",
               display: "flex",
@@ -177,7 +176,7 @@ export default function LandingClient() {
                   <motion.div 
                     key={f.title} 
                     animate={{
-                      y: isActive ? -140 : 0, // Naik sebagian, masih ada sisa 20px di bawah pelat depan
+                      y: isActive ? -105 : 0, // Naik, tapi 75px (1/4 tinggi) tetap di dalam deck
                       zIndex: isActive ? 50 : 10 + index, // Z-index tertinggi saat aktif
                       scale: isActive ? 1.05 : 1,
                     }}
@@ -185,7 +184,7 @@ export default function LandingClient() {
                     className="landing-feature glass group" 
                     style={{ 
                       position: "relative",
-                      marginLeft: index === 0 ? "0" : "-120px", // Bertumpuk rapat agar 6 kartu muat
+                      marginLeft: index === 0 ? "0" : "-120px", // Bertumpuk rapat
                       flexShrink: 0,
                       width: "240px",
                       height: "300px", // Tinggi kartu
@@ -208,14 +207,14 @@ export default function LandingClient() {
               })}
             </div>
 
-            {/* Deck Visual Plate (Slot depan menutupi setengah kartu) */}
+            {/* Deck Visual Plate (Slot depan menutupi kartu) */}
             <div style={{
               position: "absolute",
               bottom: "0",
               left: "50%",
               transform: "translateX(-50%)",
               width: "100%",
-              height: "160px", // Tinggi 160px menutupi setengah bawah kartu (300px) dan sebagian deskripsinya
+              height: "200px", // Tinggi ditambah agar menutupi lebih banyak bagian kartu yang inactive
               background: "linear-gradient(to bottom, rgba(20, 20, 25, 0.85), rgba(10, 10, 15, 1))",
               borderTop: "2px solid rgba(139, 92, 246, 0.4)",
               borderLeft: "1px solid rgba(255,255,255,0.05)",
