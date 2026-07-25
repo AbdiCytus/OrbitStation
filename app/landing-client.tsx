@@ -10,7 +10,7 @@ const FEATURES = [
   {
     icon: "RocketLaunchIcon",
     title: "Sectors",
-    desc: "Organize bookmarks into themed Sectors — Dev Tools, Entertainment, Research, anything.",
+    desc: "Organize bookmarks into themed Sectors Dev Tools, Entertainment, Research, anything.",
   },
   {
     icon: "SparklesIcon",
@@ -125,7 +125,7 @@ export default function LandingClient() {
             Orbit Station is built to be your ultimate command center in the vast ocean of the internet. Unlike traditional, rigid bookmark managers, Orbit Station is designed with a premium, dynamic cosmic aesthetic and powered by <span style={{ color: "#a78bfa" }}>Smart Beacons</span>.
           </motion.p>
           <motion.p variants={itemVariants} style={{ color: "#94a3b8", fontSize: "1.1rem", lineHeight: "1.8", textAlign: "justify" }}>
-            Organize your essential web destinations into thematic <strong>Sectors</strong>, showcase your curated "Station" publicly as a futuristic digital business card, and seamlessly save tabs using our dedicated browser extension. It's not just a list of links—it's your personalized gateway to the digital universe.
+            Organize your essential web destinations into thematic <strong>Sectors</strong>, showcase your curated "Station" publicly as a futuristic digital business card, and seamlessly save tabs using our dedicated browser extension. It's not just a list of links, it's your personalized gateway to the digital universe.
           </motion.p>
         </motion.section>
 
@@ -232,6 +232,100 @@ export default function LandingClient() {
               </div>
             </div>
           </div>
+        </motion.section>
+
+        {/* Launch Sequence (How It Works) */}
+        <motion.section
+          className="landing-how-it-works"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={containerVariants}
+          style={{ padding: "6rem 2rem", maxWidth: "1000px", margin: "0 auto", textAlign: "center", width: "100%" }}
+        >
+          <motion.h2 variants={itemVariants} style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "1rem" }}>
+            Launch Sequence
+          </motion.h2>
+          <motion.p variants={itemVariants} style={{ color: "#94a3b8", fontSize: "1.1rem", marginBottom: "4rem" }}>
+            Three simple steps to establish your base in the digital universe.
+          </motion.p>
+          
+          <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: "2rem", flexWrap: "wrap" }}>
+            {[
+              { step: "01", title: "Build Your Base", desc: "Create your account and define your first themed Sectors.", icon: "FolderPlusIcon" },
+              { step: "02", title: "Deploy Beacons", desc: "Save web links. Smart Beacons automatically fetch metadata.", icon: "LinkIcon" },
+              { step: "03", title: "Orbit Publicly", desc: "Share your curated Station with friends or the community.", icon: "ShareIcon" }
+            ].map((s) => (
+              <motion.div key={s.step} variants={itemVariants} className="glass" style={{
+                flex: "1 1 250px",
+                padding: "2.5rem 2rem",
+                borderRadius: "20px",
+                background: "linear-gradient(180deg, rgba(30,30,40,0.6) 0%, rgba(15,15,20,0.8) 100%)",
+                border: "1px solid rgba(255,255,255,0.05)",
+                position: "relative",
+                overflow: "hidden",
+                textAlign: "left"
+              }}>
+                <div style={{ position: "absolute", top: "-15px", right: "-10px", fontSize: "8rem", fontWeight: "900", color: "rgba(255,255,255,0.02)", lineHeight: "1", pointerEvents: "none" }}>
+                  {s.step}
+                </div>
+                <div style={{ color: "#a78bfa", marginBottom: "1.5rem", display: "inline-block", padding: "0.75rem", background: "rgba(139, 92, 246, 0.1)", borderRadius: "12px", boxShadow: "inset 0 0 10px rgba(139, 92, 246, 0.2)" }}>
+                   <DynamicIcon name={s.icon as any} width={32} height={32} />
+                </div>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: "600", color: "#f8fafc", marginBottom: "0.75rem", position: "relative" }}>{s.title}</h3>
+                <p style={{ color: "#94a3b8", fontSize: "0.95rem", lineHeight: "1.6", position: "relative" }}>{s.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Final CTA */}
+        <motion.section
+          className="landing-cta-bottom"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={containerVariants}
+          style={{ padding: "6rem 2rem 8rem", textAlign: "center", width: "100%" }}
+        >
+          <motion.div variants={itemVariants} className="glass" style={{
+            maxWidth: "800px",
+            margin: "0 auto",
+            padding: "4rem 2rem",
+            borderRadius: "32px",
+            background: "linear-gradient(145deg, rgba(139, 92, 246, 0.1) 0%, rgba(15,15,20,0.8) 100%)",
+            border: "1px solid rgba(139, 92, 246, 0.3)",
+            boxShadow: "0 0 80px -20px rgba(139, 92, 246, 0.3)",
+            position: "relative",
+            overflow: "hidden"
+          }}>
+            {/* Glow effect inside CTA */}
+            <div style={{ position: "absolute", top: "0", left: "50%", transform: "translateX(-50%)", width: "400px", height: "200px", background: "rgba(139, 92, 246, 0.2)", filter: "blur(100px)", zIndex: 0, pointerEvents: "none" }} />
+            
+            <h2 style={{ position: "relative", zIndex: 1, fontSize: "2.5rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "1rem" }}>
+              Ready to command your digital universe?
+            </h2>
+            <p style={{ position: "relative", zIndex: 1, color: "#94a3b8", fontSize: "1.1rem", marginBottom: "2.5rem", maxWidth: "500px", margin: "0 auto 2.5rem", lineHeight: "1.8" }}>
+              Join Orbit Station today and transform the way you explore, organize, and share the web.
+            </p>
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <Link href="/login" className="btn btn-primary btn-lg" style={{ 
+                background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", 
+                border: "1px solid rgba(167, 139, 250, 0.5)", 
+                color: "#fff", 
+                textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                padding: "1rem 3rem",
+                fontSize: "1.1rem",
+                borderRadius: "50px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                boxShadow: "0 10px 25px -5px rgba(139, 92, 246, 0.5)"
+              }}>
+                Initialize Station <ArrowRightIcon width={20} height={20} />
+              </Link>
+            </div>
+          </motion.div>
         </motion.section>
 
         {/* Footer */}
