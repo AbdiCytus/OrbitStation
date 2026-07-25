@@ -1350,7 +1350,7 @@ export default function StationClient({
                           className={isRefreshing ? "animate-spin" : ""}
                         />
                       </button>
-                      {displaySectorId !== "all" && (
+                      {isCurrentSectorAdminOrOwner && displaySectorId !== "all" && (
                         <button
                           className="btn-icon"
                           style={{
