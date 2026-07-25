@@ -492,10 +492,11 @@
   }
   .zzz-banner-container {
     height: auto;
-    margin: 0;
+    margin: 0.5rem 0.5rem 0;
+    width: calc(100% - 1rem);
     border: none;
     box-shadow: none;
-    border-radius: 24px 24px 0 0;
+    border-radius: 20px;
     background: transparent;
     position: relative;
     overflow: hidden;
