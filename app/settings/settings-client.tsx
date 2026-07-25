@@ -112,7 +112,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-  const defaultShortcuts = { publicStation: "F1", friends: "F2", analytics: "F3", settings: "F4" };
+  const defaultShortcuts = { myStation: "Escape", publicStation: "F1", friends: "F2", analytics: "F3", settings: "F4" };
   const [shortcuts, setShortcuts] = useState<typeof defaultShortcuts>(profile.shortcuts ? { ...defaultShortcuts, ...JSON.parse(profile.shortcuts) } : defaultShortcuts);
   const [activeTab, setActiveTab] = useState<"profile" | "public" | "preferences" | "shortcuts" | "developer">("profile");
   const [isScrolled, setIsScrolled] = useState(false);
@@ -507,8 +507,7 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                   </div>
                   {profile.hasPassword && (
                     <>
-                      <hr className="border-white/10" style={{ margin: "2rem 0" }} />
-                      <h3 className="text-lg font-semibold text-white" style={{ marginTop: "2rem", marginBottom: "1.5rem" }}>Security</h3>
+                      <hr className="border-white/10" style={{ margin: "1rem 0" }} />
 
                       {/* Change Password Button */}
                       <div className="form-group">
@@ -936,6 +935,16 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                 <p className="text-gray-400 text-sm mb-6">Configure keyboard shortcuts for quick navigation on desktop.</p>
 
                 <div className="flex flex-col gap-4">
+                  <div className="form-group flex flex-row items-center justify-between rounded-lg border border-white/10">
+                    <label className="form-label text-sm text-gray-300 mb-0">My Station</label>
+                    <input
+                      className="input bg-black/30 border border-white/10 rounded-lg text-center font-mono focus:border-purple-500 uppercase"
+                      value={shortcuts.myStation}
+                      readOnly
+                      onKeyDown={handleShortcutKeyDown("myStation")}
+                      placeholder="Press key..."
+                    />
+                  </div>
                   <div className="form-group flex flex-row items-center justify-between rounded-lg border border-white/10">
                     <label className="form-label text-sm text-gray-300 mb-0">Public Station</label>
                     <input
