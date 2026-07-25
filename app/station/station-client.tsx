@@ -1537,7 +1537,7 @@ export default function StationClient({
                 display: "flex",
                 gap: "0.5rem",
                 alignItems: "center",
-                flexWrap: "wrap",
+                flexWrap: "nowrap",
               }}>
               <style
                 dangerouslySetInnerHTML={{

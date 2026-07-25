@@ -5088,7 +5088,7 @@ pre {
 
 .station-toolbar-search {
   flex: 1;
-  min-width: 200px;
+  min-width: 80px;
   max-width: 250px;
 }
 
@@ -5101,15 +5101,7 @@ pre {
   height: 38px;
   display: flex;
   align-items: center;
-}
-
-@media (max-width: 640px) {
-  .station-toolbar-search {
-    order: 3;
-    min-width: 100%;
-    max-width: 100%;
-    margin-top: 0.25rem;
-  }
+  flex-shrink: 0;
 }
 
 .pilot-suggest-dropdown {
