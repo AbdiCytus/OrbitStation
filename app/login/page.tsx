@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LinkIcon, KeyIcon, RocketLaunchIcon, EyeIcon, EyeSlashIcon, LockClosedIcon } from "@heroicons/react/20/solid";
 import { motion, AnimatePresence } from "framer-motion";
+import { checkRateLimitAction } from "./actions";
 
 type AuthMode = "oauth" | "login" | "register";
 
@@ -97,11 +98,15 @@ export default function LoginPage() {
     
     setLoading(false);
     if (result?.error) {
+      // Check server rate limit status
+      const rlRes = await checkRateLimitAction(email);
+      if (!rlRes.allowed) {
+        setCooldownRemaining(rlRes.remainingMs);
+        return;
+      }
+
       if (result.error.includes("OAUTH_ONLY")) {
         setError("This account uses a third-party login (Google/GitHub). Please use that instead.");
-      } else if (result.error.includes("RATE_LIMIT:")) {
-        const ms = parseInt(result.error.split("RATE_LIMIT:")[1] || "60000", 10);
-        setCooldownRemaining(ms);
       } else if (result.error.includes("CredentialsSignin") || result.error.includes("Configuration")) {
         setError("Invalid email or password.");
       } else {
