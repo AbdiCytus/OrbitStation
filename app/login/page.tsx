@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LinkIcon, KeyIcon, RocketLaunchIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
+import { LinkIcon, KeyIcon, RocketLaunchIcon, EyeIcon, EyeSlashIcon, LockClosedIcon } from "@heroicons/react/20/solid";
 import { motion, AnimatePresence } from "framer-motion";
 
 type AuthMode = "oauth" | "login" | "register";
@@ -36,6 +36,31 @@ export default function LoginPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [cooldownRemaining, setCooldownRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldownRemaining !== null && cooldownRemaining > 0) {
+      timer = setInterval(() => {
+        setCooldownRemaining(prev => {
+          if (prev === null) return null;
+          if (prev <= 1000) {
+            setError(null);
+            return null;
+          }
+          return prev - 1000;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cooldownRemaining]);
+
+  const formatCooldown = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     // Check for auth_error cookie from server-side intercepts
@@ -76,8 +101,7 @@ export default function LoginPage() {
         const msStr = result.error.split("RATE_LIMIT:")[1];
         const ms = parseInt(msStr);
         if (!isNaN(ms)) {
-          const minutes = Math.ceil(ms / 60000);
-          setError(`Too many login attempts. Please try again in ${minutes} minute${minutes > 1 ? 's' : ''}.`);
+          setCooldownRemaining(ms);
         } else {
           setError("Too many login attempts. Please try again later.");
         }
@@ -179,7 +203,18 @@ export default function LoginPage() {
 
         {/* Error */}
         <AnimatePresence mode="wait">
-          {error && (
+          {cooldownRemaining !== null ? (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="text-sm text-center bg-red-500/10 rounded-lg border border-red-500/20 flex flex-col items-center justify-center gap-1"
+              style={{ color: "rgba(255, 100, 100)", padding: "10px 0" }}
+            >
+              <LockClosedIcon className="w-5 h-5 mx-auto" />
+              <span>Input locked. Try again in {formatCooldown(cooldownRemaining)}</span>
+            </motion.div>
+          ) : error ? (
             <motion.p 
               initial={{ opacity: 0, height: 0 }} 
               animate={{ opacity: 1, height: "auto" }} 
@@ -189,7 +224,7 @@ export default function LoginPage() {
             >
               {error}
             </motion.p>
-          )}
+          ) : null}
         </AnimatePresence>
 
         {/* Success */}
@@ -268,13 +303,14 @@ export default function LoginPage() {
                 </div>
                 <div className="relative">
                   <input
-                    className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
+                    className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ paddingLeft: "1.25rem", paddingRight: "3rem" }}
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    disabled={cooldownRemaining !== null || loading}
                   />
                   <button
                     type="button"
@@ -287,9 +323,9 @@ export default function LoginPage() {
               </div>
               <button
                 type="submit"
-                className="w-full mt-3 h-[60px] rounded-2xl font-bold text-white text-[1.1rem] transition-all transform hover:scale-[1.02] active:scale-95"
+                className="w-full mt-3 h-[60px] rounded-2xl font-bold text-white text-[1.1rem] transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 style={{ background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", boxShadow: "0 8px 25px rgba(139, 92, 246, 0.4), inset 0 2px 5px rgba(255,255,255,0.2)" }}
-                disabled={loading}
+                disabled={cooldownRemaining !== null || loading}
               >
                 {loading ? <span className="spinner border-white" /> : "Initiate Launch"}
               </button>
@@ -314,13 +350,14 @@ export default function LoginPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Email Address</label>
                 <input
-                  className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
+                  className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
                   type="email"
                   placeholder="pilot@station.net"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={cooldownRemaining !== null || loading}
                 />
               </div>
               <div className="flex flex-col gap-2 relative">
