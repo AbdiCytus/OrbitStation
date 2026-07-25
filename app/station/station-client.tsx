@@ -2118,7 +2118,6 @@ export default function StationClient({
                             ? `${(globalIndex % 6) * 0.05}s`
                             : "0s",
                           transformOrigin: "center center",
-                          willChange: "transform, opacity",
                         }}
                         key={beacon.id}>
                         <BeaconCard
@@ -2159,7 +2158,6 @@ export default function StationClient({
                         ? `${(globalIndex % 6) * 0.05}s`
                         : "0s",
                       transformOrigin: "center center",
-                      willChange: "transform, opacity",
                     }}
                     key={beacon.id}>
                     <BeaconCard

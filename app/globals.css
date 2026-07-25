@@ -3499,7 +3499,7 @@ pre {
 }
 
 /* When animation is off — keep static canvas, but disable infinite floats */
-.no-animation .beacon-masonry .beacon-card:not(.entering):not(.exiting) {
+.no-animation .beacon-card {
   animation: none !important;
 }
 
