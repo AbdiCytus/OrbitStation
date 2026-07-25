@@ -3026,10 +3026,10 @@ pre {
   /* Mobile Horizontal Beacon Card (1 Column - Masonry) */
   .beacon-masonry .beacon-card {
     display: grid !important;
-    grid-template-columns: 120px 1fr !important;
+    grid-template-columns: 130px 1fr !important;
     grid-template-rows: 1fr auto !important;
-    height: 132px !important;
-    max-height: 132px !important;
+    height: 144px !important;
+    max-height: 144px !important;
     overflow: hidden;
   }
 
@@ -3074,7 +3074,7 @@ pre {
   .beacon-masonry .beacon-card .beacon-card-footer {
     grid-column: 2 / 3 !important;
     grid-row: 2 / 3 !important;
-    padding: 0.5rem 0.75rem !important;
+    padding: 0.5rem 0.75rem 0.75rem !important;
     border-top: none !important;
     background: transparent !important;
   }
