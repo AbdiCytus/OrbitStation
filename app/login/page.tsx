@@ -3,7 +3,6 @@
 import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { preCheckLoginRateLimit, incrementFailedLogin, resetLoginSuccess } from "@/app/actions/auth-actions";
 import Link from "next/link";
 import { LinkIcon, KeyIcon, RocketLaunchIcon, EyeIcon, EyeSlashIcon, LockClosedIcon } from "@heroicons/react/20/solid";
 import { motion, AnimatePresence } from "framer-motion";
@@ -90,9 +89,15 @@ export default function LoginPage() {
     setError(null);
     setSuccessMsg(null);
     
-    const preCheck = await preCheckLoginRateLimit(email);
-    if (preCheck.error === "RATE_LIMIT") {
-      setCooldownRemaining(preCheck.ms!);
+    // Check rate limit via API to ensure shared memory context
+    const preCheckRes = await fetch("/api/rate-limit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, action: "check" }),
+    });
+    const preCheck = await preCheckRes.json();
+    if (!preCheck.allowed) {
+      setCooldownRemaining(preCheck.ms);
       setLoading(false);
       return;
     }
@@ -109,9 +114,14 @@ export default function LoginPage() {
         setError("This account uses a third-party login (Google/GitHub). Please use that instead.");
       } else if (result.error.includes("CredentialsSignin") || result.error.includes("Configuration")) {
         // Increment limit on invalid credentials
-        const postCheck = await incrementFailedLogin(email);
-        if (postCheck.error === "RATE_LIMIT") {
-          setCooldownRemaining(postCheck.ms!);
+        const postCheckRes = await fetch("/api/rate-limit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, action: "increment" }),
+        });
+        const postCheck = await postCheckRes.json();
+        if (!postCheck.allowed) {
+          setCooldownRemaining(postCheck.ms);
         } else {
           setError("Invalid email or password.");
         }
@@ -119,7 +129,11 @@ export default function LoginPage() {
         setError(result.error.replace("Error: ", ""));
       }
     } else {
-      await resetLoginSuccess(email);
+      await fetch("/api/rate-limit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, action: "reset" }),
+      });
       router.push("/station");
     }
   }
