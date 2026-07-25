@@ -3023,14 +3023,39 @@ pre {
     right: 1rem;
   }
 
-  /* Mobile Horizontal Beacon Card */
-  .beacon-masonry .beacon-card,
-  .beacon-card {
+  /* Mobile Horizontal Beacon Card (1 Column - Masonry) */
+  .beacon-masonry .beacon-card {
     display: grid !important;
     grid-template-columns: 110px 1fr !important;
     grid-template-rows: 1fr auto !important;
-    min-height: 110px !important;
+    height: 110px !important;
+    max-height: 110px !important;
+    overflow: hidden;
   }
+
+  /* Mobile Vertical Beacon Card (2 Columns - Grid) */
+  .beacon-grid-view .beacon-card {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 220px !important;
+    max-height: 220px !important;
+    overflow: hidden;
+    margin: 0 !important;
+  }
+  .beacon-grid-view .beacon-card .beacon-card-image {
+    height: 110px !important;
+    min-height: 110px !important;
+    width: 100% !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    border-right: none !important;
+  }
+  .beacon-grid-view .beacon-card .beacon-card-body,
+  .beacon-grid-view .beacon-card .beacon-card-footer {
+    grid-column: unset !important;
+    grid-row: unset !important;
+    display: block !important;
+  }
+
 
   .beacon-masonry .beacon-card .beacon-card-image,
   .beacon-card-image {
@@ -3059,9 +3084,24 @@ pre {
   }
 
   .beacon-masonry .beacon-card .beacon-card-desc,
+  .beacon-grid-view .beacon-card .beacon-card-desc,
   .beacon-card-desc {
     -webkit-line-clamp: 1 !important;
-    /* Limit desc to 1 line to save vertical space */
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .beacon-masonry .beacon-card .beacon-card-title,
+  .beacon-grid-view .beacon-card .beacon-card-title,
+  .beacon-card-title {
+    -webkit-line-clamp: 1 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: normal !important;
   }
 
   .beacon-masonry {

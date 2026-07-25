@@ -8,6 +8,8 @@ import { cookies, headers } from "next/headers";
 import { sendEmail } from "@/lib/email";
 import { randomBytes } from "crypto";
 
+import { checkLoginRateLimit, resetLoginRateLimit } from "@/lib/rate-limit";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(db),
@@ -24,6 +26,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         const input = credentials.email as string;
+
+        const rl = checkLoginRateLimit(input, 5, 5 * 60 * 1000); // 5 attempts per 5 minutes
+        if (!rl.allowed) {
+          throw new Error(`RATE_LIMIT:${rl.remainingMs}`);
+        }
         const user = await db.user.findFirst({
           where: {
             OR: [
@@ -48,6 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!valid) return null;
 
+        resetLoginRateLimit(input);
         return { id: user.id, email: user.email, name: user.name, image: user.image };
       },
     }),

@@ -3,7 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import Link from "next/link";
 import { LinkIcon, KeyIcon, RocketLaunchIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -72,6 +72,15 @@ export default function LoginPage() {
     if (result?.error) {
       if (result.error.includes("OAUTH_ONLY")) {
         setError("This account uses a third-party login (Google/GitHub). Please use that instead.");
+      } else if (result.error.includes("RATE_LIMIT:")) {
+        const msStr = result.error.split("RATE_LIMIT:")[1];
+        const ms = parseInt(msStr);
+        if (!isNaN(ms)) {
+          const minutes = Math.ceil(ms / 60000);
+          setError(`Too many login attempts. Please try again in ${minutes} minute${minutes > 1 ? 's' : ''}.`);
+        } else {
+          setError("Too many login attempts. Please try again later.");
+        }
       } else if (result.error.includes("CredentialsSignin") || result.error.includes("Configuration")) {
         setError("Invalid email or password.");
       } else {
@@ -251,7 +260,12 @@ export default function LoginPage() {
                 />
               </div>
               <div className="flex flex-col gap-2 relative">
-                <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Secure Password</label>
+                <div className="flex justify-between items-center ml-1 pr-2">
+                  <label className="text-[0.95rem] font-semibold text-purple-200 drop-shadow-md">Secure Password</label>
+                  <Link href="/forgot-password" className="text-[0.85rem] text-violet-400 hover:text-violet-300 transition-colors drop-shadow-md">
+                    Forgot password?
+                  </Link>
+                </div>
                 <div className="relative">
                   <input
                     className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"

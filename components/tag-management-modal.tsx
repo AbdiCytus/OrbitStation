@@ -417,24 +417,10 @@ export default function TagManagementModal({
                           <span style={{ color: "#e5e7eb", fontWeight: 500, fontSize: "0.875rem" }}>
                             {tag.name}
                           </span>
-                          <span style={{
-                              fontSize: "0.65rem",
-                              background: tagUsageCount[tag.id] ? "rgba(139, 92, 246, 0.15)" : "rgba(255,255,255,0.05)",
-                              color: tagUsageCount[tag.id] ? "#c4b5fd" : "#9ca3af",
-                              padding: "0.1rem 0.4rem",
-                              borderRadius: "4px",
-                              fontWeight: 600,
-                              border: tagUsageCount[tag.id] ? "1px solid rgba(139, 92, 246, 0.3)" : "1px solid rgba(255,255,255,0.1)"
-                          }}>
-                              {tagUsageCount[tag.id] ? `${tagUsageCount[tag.id]} beacon${tagUsageCount[tag.id] > 1 ? 's' : ''}` : "Unused"}
-                          </span>
                         </div>
                       )}
 
-                      <div
-                        className="flex items-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                        style={{ gap: "0.125rem" }}
-                      >
+                      <div className="flex items-center justify-end" style={{ minWidth: "90px" }}>
                         {editingTagId === tag.id ? (
                           <button
                             onClick={() => handleUpdateTag(tag.id)}
@@ -446,23 +432,61 @@ export default function TagManagementModal({
                           </button>
                         ) : (
                           <>
-                            <button
-                              onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }}
-                              className="text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
-                              style={{ padding: "0.375rem" }}
-                              data-tooltip="Edit tag"
+                            <span className="sm:group-hover:hidden" style={{
+                                fontSize: "0.65rem",
+                                background: tagUsageCount[tag.id] ? "rgba(139, 92, 246, 0.15)" : "rgba(255,255,255,0.05)",
+                                color: tagUsageCount[tag.id] ? "#c4b5fd" : "#9ca3af",
+                                padding: "0.1rem 0.4rem",
+                                borderRadius: "4px",
+                                fontWeight: 600,
+                                border: tagUsageCount[tag.id] ? "1px solid rgba(139, 92, 246, 0.3)" : "1px solid rgba(255,255,255,0.1)"
+                            }}>
+                                {tagUsageCount[tag.id] ? `${tagUsageCount[tag.id]} beacon${tagUsageCount[tag.id] > 1 ? 's' : ''}` : "Unused"}
+                            </span>
+
+                            <div
+                              className="hidden sm:group-hover:flex items-center transition-opacity"
+                              style={{ gap: "0.125rem" }}
                             >
-                              <PencilIcon width={15} height={15} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteTag(tag.id)}
-                              disabled={isSubmitting}
-                              className="text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
-                              style={{ padding: "0.375rem" }}
-                              data-tooltip="Delete tag"
+                              <button
+                                onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }}
+                                className="text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
+                                style={{ padding: "0.375rem" }}
+                                data-tooltip="Edit tag"
+                              >
+                                <PencilIcon width={15} height={15} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteTag(tag.id)}
+                                disabled={isSubmitting}
+                                className="text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
+                                style={{ padding: "0.375rem" }}
+                                data-tooltip="Delete tag"
+                              >
+                                <TrashIcon width={15} height={15} />
+                              </button>
+                            </div>
+
+                            <div
+                              className="flex sm:hidden items-center transition-opacity"
+                              style={{ gap: "0.125rem", marginLeft: "0.5rem" }}
                             >
-                              <TrashIcon width={15} height={15} />
-                            </button>
+                              <button
+                                onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); }}
+                                className="text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors"
+                                style={{ padding: "0.375rem" }}
+                              >
+                                <PencilIcon width={15} height={15} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteTag(tag.id)}
+                                disabled={isSubmitting}
+                                className="text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
+                                style={{ padding: "0.375rem" }}
+                              >
+                                <TrashIcon width={15} height={15} />
+                              </button>
+                            </div>
                           </>
                         )}
                       </div>

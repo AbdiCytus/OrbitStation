@@ -36,3 +36,25 @@ export function checkRateLimit(ip: string, limit: number, windowMs: number): boo
   rateLimitMap.set(ip, record);
   return true;
 }
+
+export function checkLoginRateLimit(identifier: string, limit = 5, windowMs = 5 * 60 * 1000): { allowed: boolean, remainingMs: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(identifier);
+
+  if (!record || now - record.lastReset > windowMs) {
+    rateLimitMap.set(identifier, { count: 1, lastReset: now });
+    return { allowed: true, remainingMs: 0 };
+  }
+
+  if (record.count >= limit) {
+    return { allowed: false, remainingMs: (record.lastReset + windowMs) - now };
+  }
+
+  record.count += 1;
+  rateLimitMap.set(identifier, record);
+  return { allowed: true, remainingMs: 0 };
+}
+
+export function resetLoginRateLimit(identifier: string) {
+  rateLimitMap.delete(identifier);
+}

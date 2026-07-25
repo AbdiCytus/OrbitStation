@@ -196,35 +196,46 @@ export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCr
                   <>
                     <div style={{ position: "fixed", inset: 0, zIndex: 90 }} onClick={() => setIsSectorDropdownOpen(false)} />
                     <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", zIndex: 100, overflow: "hidden", overflowY: "auto", maxHeight: "200px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
-                      {sectors.map((s, index) => {
-                        const isOwned = currentStationId ? (s as any).stationId === currentStationId : true;
-                        const prevIsOwned = index > 0 && currentStationId ? (sectors[index - 1] as any).stationId === currentStationId : true;
-
-                        const showMySectorsHeader = index === 0 && isOwned;
-                        const showCollabSectorsHeader = (!isOwned && prevIsOwned) || (index === 0 && !isOwned);
-
+                      {(() => {
+                        const mySectors = sectors.filter(s => currentStationId ? ((s as any).stationId === currentStationId && (!(s as any).collaborators || (s as any).collaborators.length === 0)) : (!(s as any).collaborators || (s as any).collaborators.length === 0));
+                        const collabSectorsList = sectors.filter(s => currentStationId ? ((s as any).stationId !== currentStationId || ((s as any).collaborators && (s as any).collaborators.length > 0)) : ((s as any).collaborators && (s as any).collaborators.length > 0));
+                        
                         return (
-                          <div key={s.id}>
-                            {showMySectorsHeader && (
+                          <>
+                            {mySectors.length > 0 && (
                               <div style={{ padding: "0.4rem 1rem", fontSize: "0.7rem", color: "#a1a1aa", background: "rgba(0,0,0,0.3)", borderBottom: "1px solid rgba(255,255,255,0.05)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "bold" }}>
                                 My Sectors
                               </div>
                             )}
-                            {showCollabSectorsHeader && (
-                              <div style={{ padding: "0.4rem 1rem", fontSize: "0.7rem", color: "#a1a1aa", background: "rgba(0,0,0,0.3)", borderTop: index > 0 ? "1px solid rgba(255,255,255,0.05)" : "none", borderBottom: "1px solid rgba(255,255,255,0.05)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "bold" }}>
+                            {mySectors.map(s => (
+                              <div
+                                key={s.id}
+                                className="dropdown-option-btn hover:bg-white/5"
+                                style={{ padding: "0.6rem 1rem", paddingLeft: "1.5rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
+                                onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
+                              >
+                                {s.name}
+                              </div>
+                            ))}
+                            
+                            {collabSectorsList.length > 0 && (
+                              <div style={{ padding: "0.4rem 1rem", fontSize: "0.7rem", color: "#a1a1aa", background: "rgba(0,0,0,0.3)", borderTop: mySectors.length > 0 ? "1px solid rgba(255,255,255,0.05)" : "none", borderBottom: "1px solid rgba(255,255,255,0.05)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "bold" }}>
                                 Collab Sectors
                               </div>
                             )}
-                            <div
-                              className="dropdown-option-btn hover:bg-white/5"
-                              style={{ padding: "0.6rem 1rem", paddingLeft: "1.5rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
-                              onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
-                            >
-                              {s.name}
-                            </div>
-                          </div>
+                            {collabSectorsList.map(s => (
+                              <div
+                                key={s.id}
+                                className="dropdown-option-btn hover:bg-white/5"
+                                style={{ padding: "0.6rem 1rem", paddingLeft: "1.5rem", cursor: "pointer", color: s.id === sectorId ? "#a78bfa" : "#fff", background: s.id === sectorId ? "rgba(139, 92, 246, 0.2)" : "transparent", transition: "all 0.2s" }}
+                                onClick={() => { setSectorId(s.id); setIsSectorDropdownOpen(false); }}
+                              >
+                                {s.name}
+                              </div>
+                            ))}
+                          </>
                         );
-                      })}
+                      })()}
                     </div>
                   </>
                 )}

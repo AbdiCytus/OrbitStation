@@ -1972,7 +1972,7 @@ export default function StationClient({
                     )}
                   
                   <div 
-                    className="staggered-item hidden md:flex items-center" 
+                    className="staggered-item flex items-center" 
                     style={{ 
                       background: "rgba(255, 255, 255, 0.05)", 
                       border: "1px solid rgba(255, 255, 255, 0.1)", 
@@ -1996,7 +1996,7 @@ export default function StationClient({
                         justifyContent: "center"
                       }}
                       onClick={() => setViewMode("masonry")}
-                      data-tooltip="Masonry View"
+                      data-tooltip="Masonry / 1-Column"
                     >
                       <ViewColumnsIcon width={18} height={18} />
                     </button>
@@ -2014,7 +2014,7 @@ export default function StationClient({
                         justifyContent: "center"
                       }}
                       onClick={() => setViewMode("grid")}
-                      data-tooltip="Grid View"
+                      data-tooltip="Grid / 2-Columns"
                     >
                       <Squares2X2Icon width={18} height={18} />
                     </button>
