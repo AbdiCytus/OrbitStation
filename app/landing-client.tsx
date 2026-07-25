@@ -53,14 +53,7 @@ const itemVariants = {
 };
 
 export default function LandingClient() {
-  const [activeCard, setActiveCard] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveCard((prev) => (prev + 1) % FEATURES.length);
-    }, 5000); // 5 seconds loop
-    return () => clearInterval(interval);
-  }, []);
+  const [activeCard, setActiveCard] = useState<number | null>(null);
 
   return (
     <main className="landing-root">
@@ -146,7 +139,7 @@ export default function LandingClient() {
           variants={containerVariants}
           style={{ padding: "4rem 2rem", width: "100%", margin: "0 auto", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}
         >
-          <motion.h2 variants={itemVariants} style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "4rem" }}>
+          <motion.h2 variants={itemVariants} style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "1.5rem" }}>
             Features
           </motion.h2>
 
@@ -175,6 +168,8 @@ export default function LandingClient() {
                 return (
                   <motion.div 
                     key={f.title} 
+                    onMouseEnter={() => setActiveCard(index)}
+                    onMouseLeave={() => setActiveCard(null)}
                     animate={{
                       y: isActive ? -105 : 0, // Naik, tapi 75px (1/4 tinggi) tetap di dalam deck
                       zIndex: isActive ? 50 : 10 + index, // Z-index tertinggi saat aktif
@@ -224,11 +219,17 @@ export default function LandingClient() {
               backdropFilter: "blur(24px)",
               boxShadow: "0 -20px 40px -10px rgba(0,0,0,0.8), inset 0 2px 20px rgba(139, 92, 246, 0.2)",
               display: "flex",
-              justifyContent: "center",
-              alignItems: "flex-start",
-              paddingTop: "1.5rem"
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              paddingTop: "2rem"
             }}>
-              <div style={{ width: "80px", height: "4px", background: "rgba(139, 92, 246, 0.3)", borderRadius: "2px", boxShadow: "0 0 10px rgba(139, 92, 246, 0.5)" }} />
+              <div style={{ width: "80px", height: "4px", background: "rgba(139, 92, 246, 0.3)", borderRadius: "2px", boxShadow: "0 0 10px rgba(139, 92, 246, 0.5)", marginBottom: "1.5rem" }} />
+              
+              <div style={{ textAlign: "center", pointerEvents: "none" }}>
+                <h4 style={{ color: "#f8fafc", fontSize: "1.1rem", fontWeight: "600", letterSpacing: "4px", textTransform: "uppercase" }}>Core Modules</h4>
+                <p style={{ color: "#94a3b8", fontSize: "0.9rem", marginTop: "0.5rem" }}>Hover over a card to expand its details</p>
+              </div>
             </div>
           </div>
         </motion.section>
