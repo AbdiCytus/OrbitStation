@@ -110,13 +110,13 @@ export default function ForgotPasswordPage() {
             type="submit"
             disabled={loading || !email}
             className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_25px_rgba(139,92,246,0.5)] border border-violet-500/50"
-            style={{ width: "100%", padding: "0.875rem", marginTop: "0.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}
+            style={{ width: "100%", height: "48px", marginTop: "0.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}
           >
             {loading ? <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : "Send Reset Link"}
           </button>
         </motion.form>
 
-        <motion.div variants={itemVariants} className="text-center" style={{ marginTop: "1rem" }}>
+        <motion.div variants={itemVariants} className="text-center" style={{ marginTop: "-0.5rem" }}>
           <Link href="/login" className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
             <ArrowLeftIcon className="w-4 h-4" />
             Back to login
