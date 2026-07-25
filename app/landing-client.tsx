@@ -126,54 +126,94 @@ export default function LandingClient() {
           </motion.p>
         </motion.section>
 
-        {/* Feature cards */}
+        {/* Feature cards (Visual Deck) */}
         <motion.section 
           className="landing-features"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariants}
-          style={{ padding: "4rem 2rem", maxWidth: "1000px", margin: "0 auto", textAlign: "center" }}
+          style={{ padding: "4rem 2rem", width: "100%", overflowX: "hidden", margin: "0 auto", textAlign: "center" }}
         >
           <motion.h2 variants={itemVariants} style={{ fontSize: "2rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "3rem" }}>
             Features
           </motion.h2>
 
-          <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "stretch", gap: "1.5rem", flexWrap: "wrap" }}>
-            {FEATURES.map((f, index) => {
-              const isActive = activeCard === index;
-              return (
-                <motion.div 
-                  key={f.title} 
-                  variants={itemVariants}
-                  animate={{
-                    y: isActive ? -25 : 0,
-                    scale: isActive ? 1.02 : 1,
-                    zIndex: isActive ? 10 : 1,
-                  }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="landing-feature glass group" 
-                  style={{ 
-                    border: "1px solid rgba(255,255,255,0.08)", 
-                    background: "linear-gradient(145deg, rgba(30,30,40,0.9) 0%, rgba(15,15,20,1) 100%)", 
-                    backdropFilter: "blur(12px)",
-                    padding: "2rem",
-                    borderRadius: "20px",
-                    width: "100%",
-                    maxWidth: "280px",
-                    textAlign: "left",
-                    boxShadow: isActive ? "0 20px 40px -10px rgba(139, 92, 246, 0.4)" : "0 10px 20px -5px rgba(0,0,0,0.5)",
-                    position: "relative",
-                  }}
-                >
-                  <span className="landing-feature-icon" style={{ color: "#a78bfa", background: "rgba(139, 92, 246, 0.1)", padding: "0.75rem", borderRadius: "12px", display: "inline-flex", marginBottom: "1rem", boxShadow: "inset 0 0 10px rgba(139, 92, 246, 0.2)" }}>
-                    <DynamicIcon name={f.icon} width={28} height={28} />
-                  </span>
-                  <h3 className="landing-feature-title" style={{ fontSize: "1.2rem", color: "#f8fafc", fontWeight: "600", marginBottom: "0.5rem" }}>{f.title}</h3>
-                  <p className="landing-feature-desc" style={{ color: "#94a3b8", fontSize: "0.95rem", lineHeight: "1.6" }}>{f.desc}</p>
-                </motion.div>
-              );
-            })}
+          {/* Deck Container */}
+          <div style={{
+            position: "relative",
+            width: "50vw", // Setengah layar
+            minWidth: "680px", // Mencegah rusak di layar kecil
+            maxWidth: "1000px",
+            height: "400px",
+            margin: "0 auto",
+          }}>
+            {/* The Cards in the Deck */}
+            <div style={{
+              position: "absolute",
+              bottom: "40px",
+              left: "0",
+              right: "0",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "flex-end",
+            }}>
+              {FEATURES.map((f, index) => {
+                const isActive = activeCard === index;
+                return (
+                  <motion.div 
+                    key={f.title} 
+                    animate={{
+                      y: isActive ? -120 : 0, // Naik sebagian (dari total height 280px)
+                      zIndex: isActive ? 50 : 10 + index, // Z-index tertinggi saat aktif
+                      scale: isActive ? 1.05 : 1,
+                    }}
+                    transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                    className="landing-feature glass group" 
+                    style={{ 
+                      position: "relative",
+                      marginLeft: index === 0 ? "0" : "-80px", // Bertumpuk rapi dari kiri ke kanan
+                      flexShrink: 0,
+                      width: "240px",
+                      height: "280px",
+                      border: "1px solid rgba(255,255,255,0.08)", 
+                      background: "linear-gradient(145deg, rgba(30,30,40,0.95) 0%, rgba(15,15,20,1) 100%)", 
+                      backdropFilter: "blur(12px)",
+                      padding: "1.5rem",
+                      borderRadius: "20px",
+                      textAlign: "left",
+                      boxShadow: isActive ? "0 30px 60px -15px rgba(139, 92, 246, 0.6)" : "-10px 0 20px -5px rgba(0,0,0,0.5)",
+                    }}
+                  >
+                    <span className="landing-feature-icon" style={{ color: "#a78bfa", background: "rgba(139, 92, 246, 0.1)", padding: "0.6rem", borderRadius: "12px", display: "inline-flex", marginBottom: "1rem", boxShadow: "inset 0 0 10px rgba(139, 92, 246, 0.2)" }}>
+                      <DynamicIcon name={f.icon} width={24} height={24} />
+                    </span>
+                    <h3 className="landing-feature-title" style={{ fontSize: "1.1rem", color: "#f8fafc", fontWeight: "600", marginBottom: "0.5rem" }}>{f.title}</h3>
+                    <p className="landing-feature-desc" style={{ color: "#94a3b8", fontSize: "0.85rem", lineHeight: "1.6" }}>{f.desc}</p>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Deck Visual Plate (Slot depan) */}
+            <div style={{
+              position: "absolute",
+              bottom: "0",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "100%",
+              height: "60px",
+              background: "linear-gradient(to bottom, rgba(30, 30, 40, 0.7), rgba(15, 15, 20, 1))",
+              borderTop: "2px solid rgba(139, 92, 246, 0.3)",
+              borderLeft: "1px solid rgba(255,255,255,0.05)",
+              borderRight: "1px solid rgba(255,255,255,0.05)",
+              borderRadius: "24px 24px 12px 12px",
+              zIndex: 100, // Menutupi bagian bawah kartu agar terlihat masuk ke dalam deck
+              backdropFilter: "blur(20px)",
+              boxShadow: "0 -15px 40px -5px rgba(0,0,0,0.6), inset 0 2px 20px rgba(139, 92, 246, 0.15)"
+            }}>
+              <div style={{ width: "60px", height: "4px", background: "rgba(255,255,255,0.1)", borderRadius: "2px", margin: "12px auto 0" }} />
+            </div>
           </div>
         </motion.section>
 
