@@ -44,7 +44,7 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
 
   return (
     <article
-      className="beacon-card glass"
+      className={`beacon-card glass ${isCollab ? "is-collab" : ""}`}
       style={{ "--enter-delay": `${Math.min(index * 60, 600)}ms` } as React.CSSProperties}
       onClick={handleVisit}
       role="button"
