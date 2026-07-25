@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
@@ -42,6 +43,15 @@ const itemVariants = {
 };
 
 export default function LandingClient() {
+  const [activeCard, setActiveCard] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveCard((prev) => (prev + 1) % FEATURES.length);
+    }, 5000); // 5 seconds loop
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <main className="landing-root">
       {/* Animated background */}
@@ -75,11 +85,6 @@ export default function LandingClient() {
           initial="hidden"
           animate="visible"
         >
-          <motion.div variants={itemVariants} className="landing-badge" style={{ background: "rgba(139, 92, 246, 0.15)", border: "1px solid rgba(139, 92, 246, 0.4)", boxShadow: "0 0 20px rgba(139, 92, 246, 0.2)" }}>
-            <span className="landing-badge-dot" />
-            <span style={{ color: "#eaddff", letterSpacing: "0.5px" }}>Your Personal Bookmark Universe</span>
-          </motion.div>
-
           <motion.h1 variants={itemVariants} className="landing-title">
             <span className="text-gradient" style={{ background: "linear-gradient(to right, #fff, #a78bfa)", WebkitBackgroundClip: "text", color: "transparent", filter: "drop-shadow(0 0 30px rgba(167, 139, 250, 0.4))" }}>Organize the Web.</span>
             <br />
@@ -87,15 +92,14 @@ export default function LandingClient() {
           </motion.h1>
 
           <motion.p variants={itemVariants} className="landing-subtitle" style={{ color: "#94a3b8", fontSize: "1.1rem", maxWidth: "600px", lineHeight: "1.8" }}>
-            Orbit Station is your personal portal — save web shortcuts into Sectors,
+            Orbit Station is your personal portal save web shortcuts into Sectors,
             share your collection publicly, and revisit what matters with one click.
           </motion.p>
 
           <motion.div variants={itemVariants} className="landing-cta" style={{ marginTop: "1rem" }}>
             <Link href="/login" className="btn btn-primary btn-lg landing-cta-main" style={{ background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", border: "1px solid rgba(167, 139, 250, 0.5)", color: "#fff", textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>
-              Launch Your Station <ArrowRightIcon width={20} height={20} style={{ marginLeft: "0.5rem" }} />
+              Launch Your Station
             </Link>
-            <p className="landing-cta-hint" style={{ marginTop: "0.75rem", color: "#64748b" }}>Free. No credit card required.</p>
           </motion.div>
         </motion.section>
 
@@ -114,10 +118,10 @@ export default function LandingClient() {
           <motion.h2 variants={itemVariants} style={{ fontSize: "2rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "1rem" }}>
             What is Orbit Station?
           </motion.h2>
-          <motion.p variants={itemVariants} style={{ color: "#94a3b8", fontSize: "1.1rem", lineHeight: "1.8", marginBottom: "1.5rem" }}>
+          <motion.p variants={itemVariants} style={{ color: "#94a3b8", fontSize: "1.1rem", lineHeight: "1.8", marginBottom: "1.5rem", textAlign: "justify" }}>
             Orbit Station is built to be your ultimate command center in the vast ocean of the internet. Unlike traditional, rigid bookmark managers, Orbit Station is designed with a premium, dynamic cosmic aesthetic and powered by <span style={{ color: "#a78bfa" }}>Smart Beacons</span>.
           </motion.p>
-          <motion.p variants={itemVariants} style={{ color: "#94a3b8", fontSize: "1.1rem", lineHeight: "1.8" }}>
+          <motion.p variants={itemVariants} style={{ color: "#94a3b8", fontSize: "1.1rem", lineHeight: "1.8", textAlign: "justify" }}>
             Organize your essential web destinations into thematic <strong>Sectors</strong>, showcase your curated "Station" publicly as a futuristic digital business card, and seamlessly save tabs using our dedicated browser extension. It's not just a list of links—it's your personalized gateway to the digital universe.
           </motion.p>
         </motion.section>
@@ -129,16 +133,48 @@ export default function LandingClient() {
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariants}
+          style={{ padding: "4rem 2rem", maxWidth: "1000px", margin: "0 auto", textAlign: "center" }}
         >
-          {FEATURES.map((f) => (
-            <motion.div key={f.title} variants={itemVariants} className="landing-feature glass group hover:bg-white/5 transition-all duration-300" style={{ border: "1px solid rgba(255,255,255,0.08)", background: "linear-gradient(145deg, rgba(30,30,40,0.6) 0%, rgba(15,15,20,0.8) 100%)", backdropFilter: "blur(12px)" }}>
-              <span className="landing-feature-icon" style={{ color: "#a78bfa", background: "rgba(139, 92, 246, 0.1)", padding: "0.75rem", borderRadius: "12px", display: "inline-flex", marginBottom: "0.5rem", boxShadow: "inset 0 0 10px rgba(139, 92, 246, 0.2)" }}>
-                <DynamicIcon name={f.icon} width={28} height={28} />
-              </span>
-              <h3 className="landing-feature-title" style={{ fontSize: "1.1rem", color: "#f8fafc", fontWeight: "600", marginBottom: "0.25rem" }}>{f.title}</h3>
-              <p className="landing-feature-desc" style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: "1.6" }}>{f.desc}</p>
-            </motion.div>
-          ))}
+          <motion.h2 variants={itemVariants} style={{ fontSize: "2rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "3rem" }}>
+            Features
+          </motion.h2>
+
+          <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "stretch", gap: "1.5rem", flexWrap: "wrap" }}>
+            {FEATURES.map((f, index) => {
+              const isActive = activeCard === index;
+              return (
+                <motion.div 
+                  key={f.title} 
+                  variants={itemVariants}
+                  animate={{
+                    y: isActive ? -25 : 0,
+                    scale: isActive ? 1.02 : 1,
+                    zIndex: isActive ? 10 : 1,
+                  }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  className="landing-feature glass group" 
+                  style={{ 
+                    border: "1px solid rgba(255,255,255,0.08)", 
+                    background: "linear-gradient(145deg, rgba(30,30,40,0.9) 0%, rgba(15,15,20,1) 100%)", 
+                    backdropFilter: "blur(12px)",
+                    padding: "2rem",
+                    borderRadius: "20px",
+                    width: "100%",
+                    maxWidth: "280px",
+                    textAlign: "left",
+                    boxShadow: isActive ? "0 20px 40px -10px rgba(139, 92, 246, 0.4)" : "0 10px 20px -5px rgba(0,0,0,0.5)",
+                    position: "relative",
+                  }}
+                >
+                  <span className="landing-feature-icon" style={{ color: "#a78bfa", background: "rgba(139, 92, 246, 0.1)", padding: "0.75rem", borderRadius: "12px", display: "inline-flex", marginBottom: "1rem", boxShadow: "inset 0 0 10px rgba(139, 92, 246, 0.2)" }}>
+                    <DynamicIcon name={f.icon} width={28} height={28} />
+                  </span>
+                  <h3 className="landing-feature-title" style={{ fontSize: "1.2rem", color: "#f8fafc", fontWeight: "600", marginBottom: "0.5rem" }}>{f.title}</h3>
+                  <p className="landing-feature-desc" style={{ color: "#94a3b8", fontSize: "0.95rem", lineHeight: "1.6" }}>{f.desc}</p>
+                </motion.div>
+              );
+            })}
+          </div>
         </motion.section>
 
         {/* Footer */}
@@ -146,7 +182,7 @@ export default function LandingClient() {
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             <img src="/logo.png" alt="Orbit Station" style={{ height: "36px", width: "auto", objectFit: "contain", filter: "drop-shadow(0 0 8px rgba(139, 92, 246, 0.4))" }} />
             <span style={{ color: "#64748b", fontSize: "0.85rem" }}>
-              Built for curious minds.
+              &copy; {new Date().getFullYear()} Orbit Station. All rights reserved.
             </span>
           </div>
           <div style={{ display: "flex", gap: "1rem", fontSize: "0.8rem", color: "#64748b" }}>
