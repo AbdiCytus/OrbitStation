@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { preCheckLoginRateLimit } from "@/app/actions/auth-actions";
 import Link from "next/link";
 import { LinkIcon, KeyIcon, RocketLaunchIcon, EyeIcon, EyeSlashIcon, LockClosedIcon } from "@heroicons/react/20/solid";
 import { motion, AnimatePresence } from "framer-motion";
@@ -88,23 +89,32 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
+    
+    const preCheck = await preCheckLoginRateLimit(email);
+    if (preCheck.error === "RATE_LIMIT") {
+      setCooldownRemaining(preCheck.ms!);
+      setLoading(false);
+      return;
+    }
+
     const result = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
+    console.log("LOGIN RESULT ERROR:", result?.error);
+    
+    const postCheck = await preCheckLoginRateLimit(email);
+    if (postCheck.error === "RATE_LIMIT") {
+      setCooldownRemaining(postCheck.ms!);
+      setLoading(false);
+      return;
+    }
+
     setLoading(false);
     if (result?.error) {
       if (result.error.includes("OAUTH_ONLY")) {
         setError("This account uses a third-party login (Google/GitHub). Please use that instead.");
-      } else if (result.error.includes("RATE_LIMIT:")) {
-        const msStr = result.error.split("RATE_LIMIT:")[1];
-        const ms = parseInt(msStr);
-        if (!isNaN(ms)) {
-          setCooldownRemaining(ms);
-        } else {
-          setError("Too many login attempts. Please try again later.");
-        }
       } else if (result.error.includes("CredentialsSignin") || result.error.includes("Configuration")) {
         setError("Invalid email or password.");
       } else {
