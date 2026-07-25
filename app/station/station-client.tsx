@@ -231,6 +231,7 @@ export default function StationClient({
   const [isFilterEntering, setIsFilterEntering] = useState(false);
   const [visibleLimit, setVisibleLimit] = useState(12);
   const [viewMode, setViewMode] = useState<"masonry" | "grid">("masonry");
+  const [isViewModeMounted, setIsViewModeMounted] = useState(false);
 
   useEffect(() => {
     try {
@@ -241,15 +242,17 @@ export default function StationClient({
     } catch (e) {
       // Ignore
     }
+    setIsViewModeMounted(true);
   }, []);
 
   useEffect(() => {
+    if (!isViewModeMounted) return;
     try {
       localStorage.setItem("stationViewMode", viewMode);
     } catch (e) {
       // Ignore
     }
-  }, [viewMode]);
+  }, [viewMode, isViewModeMounted]);
 
   useEffect(() => {
     setVisibleLimit(12);
