@@ -6,13 +6,13 @@ export async function POST(req: Request) {
     const { email, action } = await req.json();
     
     if (action === "increment") {
-      incrementLoginRateLimit(email, 5 * 60 * 1000);
-      const rl = checkLoginRateLimit(email, 5, 5 * 60 * 1000);
+      incrementLoginRateLimit(email, 1 * 60 * 1000);
+      const rl = checkLoginRateLimit(email, 5, 1 * 60 * 1000);
       return NextResponse.json({ allowed: rl.allowed, ms: rl.remainingMs });
     }
     
     if (action === "check") {
-      const rl = checkLoginRateLimit(email, 5, 5 * 60 * 1000);
+      const rl = checkLoginRateLimit(email, 5, 1 * 60 * 1000);
       return NextResponse.json({ allowed: rl.allowed, ms: rl.remainingMs });
     }
 

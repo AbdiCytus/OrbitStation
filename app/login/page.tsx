@@ -231,11 +231,11 @@ export default function LoginPage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="text-sm text-center bg-red-500/10 rounded-lg border border-red-500/20 flex flex-col items-center justify-center gap-1"
+              className="text-sm text-center bg-red-500/10 rounded-lg border border-red-500/20 flex flex-row items-center justify-center gap-2"
               style={{ color: "rgba(255, 100, 100)", padding: "10px 0" }}
             >
-              <LockClosedIcon className="w-5 h-5 mx-auto" />
-              <span>Input locked. Try again in {formatCooldown(cooldownRemaining)}</span>
+              <LockClosedIcon className="w-5 h-5 flex-shrink-0" />
+              <span>Too many login attempts. Please try again in {formatCooldown(cooldownRemaining)}</span>
             </motion.div>
           ) : error ? (
             <motion.p 
@@ -308,13 +308,14 @@ export default function LoginPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-[0.95rem] font-semibold text-purple-200 ml-1 drop-shadow-md">Email / Username</label>
                 <input
-                  className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner"
+                  className="w-full h-[60px] bg-white/5 border border-white/10 rounded-2xl text-white text-[1.05rem] placeholder-slate-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/50 focus:bg-white/10 transition-all shadow-inner disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
                   type="text"
                   placeholder="pilot@station.net or Pilot1234"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={cooldownRemaining !== null || loading}
                 />
               </div>
               <div className="flex flex-col gap-2 relative">
