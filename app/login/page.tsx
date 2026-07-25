@@ -231,11 +231,11 @@ export default function LoginPage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="text-sm text-center bg-red-500/10 rounded-lg border border-red-500/20 flex flex-row items-center justify-center gap-2"
-              style={{ color: "rgba(255, 100, 100)", padding: "10px 0" }}
+              className="text-sm text-left bg-red-500/10 rounded-lg border border-red-500/20 flex flex-row items-center justify-start gap-3"
+              style={{ color: "rgba(255, 100, 100)", padding: "12px 16px" }}
             >
               <LockClosedIcon className="w-5 h-5 flex-shrink-0" />
-              <span>Too many login attempts. Please try again in {formatCooldown(cooldownRemaining)}</span>
+              <span>Too many attempts. Please try again in {formatCooldown(cooldownRemaining)}.</span>
             </motion.div>
           ) : error ? (
             <motion.p 
