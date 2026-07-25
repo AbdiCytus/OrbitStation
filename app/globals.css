@@ -3028,8 +3028,8 @@ pre {
     display: grid !important;
     grid-template-columns: 130px 1fr !important;
     grid-template-rows: 1fr auto !important;
-    height: 144px !important;
-    max-height: 144px !important;
+    height: 170px !important;
+    max-height: 170px !important;
     overflow: hidden;
   }
 
@@ -3037,8 +3037,8 @@ pre {
   .beacon-grid-view .beacon-card {
     display: flex !important;
     flex-direction: column !important;
-    height: 250px !important;
-    max-height: 250px !important;
+    height: 280px !important;
+    max-height: 280px !important;
     overflow: hidden;
     margin: 0 !important;
   }
