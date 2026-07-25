@@ -3037,8 +3037,8 @@ pre {
   .beacon-grid-view .beacon-card {
     display: flex !important;
     flex-direction: column !important;
-    height: 260px !important;
-    max-height: 260px !important;
+    height: 250px !important;
+    max-height: 250px !important;
     overflow: hidden;
     margin: 0 !important;
   }
