@@ -32,8 +32,10 @@ export default async function AnalyticsPage() {
         username: profile?.username ?? null,
         image: profile?.image ?? session.user.image ?? null,
         callsign: profile?.callsign ?? null,
+        shortcuts: profile?.shortcuts ?? null,
         animationEnabled: profile?.animationEnabled ?? true,
         staticBackgroundEnabled: (profile as any)?.staticBackgroundEnabled ?? false,
+        station: { isPublic: station.isPublic },
       }}
       isPublicProfile={station.isPublic}
     />

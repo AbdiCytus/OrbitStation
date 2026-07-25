@@ -67,9 +67,9 @@ export default async function PublicProfilePage({
   let isFriendOrPending = false;
   let sessionUser = session?.user || null;
   if (sessionUser?.id && data) {
-    const dbUser = await db.user.findUnique({ where: { id: sessionUser.id }, select: { animationEnabled: true, staticBackgroundEnabled: true, image: true, name: true, callsign: true } });
+    const dbUser = await db.user.findUnique({ where: { id: sessionUser.id }, select: { animationEnabled: true, staticBackgroundEnabled: true, image: true, name: true, callsign: true, username: true, shortcuts: true, station: { select: { isPublic: true } } } });
     if (dbUser) {
-      sessionUser = { ...sessionUser, animationEnabled: dbUser.animationEnabled, staticBackgroundEnabled: (dbUser as any).staticBackgroundEnabled ?? false, image: dbUser.image || sessionUser.image, name: dbUser.name || sessionUser.name, callsign: dbUser.callsign } as any;
+      sessionUser = { ...sessionUser, animationEnabled: dbUser.animationEnabled, staticBackgroundEnabled: (dbUser as any).staticBackgroundEnabled ?? false, image: dbUser.image || sessionUser.image, name: dbUser.name || sessionUser.name, callsign: dbUser.callsign, username: dbUser.username, shortcuts: dbUser.shortcuts, station: dbUser.station } as any;
     }
     const friendship = await db.friendship.findFirst({
       where: {
