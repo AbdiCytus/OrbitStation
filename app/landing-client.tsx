@@ -27,6 +27,16 @@ const FEATURES = [
     title: "Visit Tracking",
     desc: "Track how often you visit each beacon. Your most-used shortcuts earn more stars.",
   },
+  {
+    icon: "MoonIcon",
+    title: "Cosmic Aesthetic",
+    desc: "A beautifully crafted dark mode interface that feels like navigating through space.",
+  },
+  {
+    icon: "ShieldCheckIcon",
+    title: "Private & Secure",
+    desc: "Your data remains yours. We prioritize security and privacy in every feature we build.",
+  },
 ];
 
 const containerVariants = {
@@ -128,14 +138,15 @@ export default function LandingClient() {
 
         {/* Feature cards (Visual Deck) */}
         <motion.section 
+          id="features"
           className="landing-features"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={containerVariants}
-          style={{ padding: "4rem 2rem", width: "100%", overflowX: "hidden", margin: "0 auto", textAlign: "center" }}
+          style={{ padding: "4rem 2rem", width: "100%", margin: "0 auto", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}
         >
-          <motion.h2 variants={itemVariants} style={{ fontSize: "2rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "3rem" }}>
+          <motion.h2 variants={itemVariants} style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "4rem" }}>
             Features
           </motion.h2>
 
@@ -145,8 +156,10 @@ export default function LandingClient() {
             width: "50vw", // Setengah layar
             minWidth: "680px", // Mencegah rusak di layar kecil
             maxWidth: "1000px",
-            height: "400px",
+            height: "440px", // Ruang cukup untuk kartu naik
             margin: "0 auto",
+            display: "flex",
+            justifyContent: "center"
           }}>
             {/* The Cards in the Deck */}
             <div style={{
@@ -164,7 +177,7 @@ export default function LandingClient() {
                   <motion.div 
                     key={f.title} 
                     animate={{
-                      y: isActive ? -120 : 0, // Naik sebagian (dari total height 280px)
+                      y: isActive ? -140 : 0, // Naik sebagian, masih ada sisa 20px di bawah pelat depan
                       zIndex: isActive ? 50 : 10 + index, // Z-index tertinggi saat aktif
                       scale: isActive ? 1.05 : 1,
                     }}
@@ -172,10 +185,10 @@ export default function LandingClient() {
                     className="landing-feature glass group" 
                     style={{ 
                       position: "relative",
-                      marginLeft: index === 0 ? "0" : "-80px", // Bertumpuk rapi dari kiri ke kanan
+                      marginLeft: index === 0 ? "0" : "-120px", // Bertumpuk rapat agar 6 kartu muat
                       flexShrink: 0,
                       width: "240px",
-                      height: "280px",
+                      height: "300px", // Tinggi kartu
                       border: "1px solid rgba(255,255,255,0.08)", 
                       background: "linear-gradient(145deg, rgba(30,30,40,0.95) 0%, rgba(15,15,20,1) 100%)", 
                       backdropFilter: "blur(12px)",
@@ -195,24 +208,28 @@ export default function LandingClient() {
               })}
             </div>
 
-            {/* Deck Visual Plate (Slot depan) */}
+            {/* Deck Visual Plate (Slot depan menutupi setengah kartu) */}
             <div style={{
               position: "absolute",
               bottom: "0",
               left: "50%",
               transform: "translateX(-50%)",
               width: "100%",
-              height: "60px",
-              background: "linear-gradient(to bottom, rgba(30, 30, 40, 0.7), rgba(15, 15, 20, 1))",
-              borderTop: "2px solid rgba(139, 92, 246, 0.3)",
+              height: "160px", // Tinggi 160px menutupi setengah bawah kartu (300px) dan sebagian deskripsinya
+              background: "linear-gradient(to bottom, rgba(20, 20, 25, 0.85), rgba(10, 10, 15, 1))",
+              borderTop: "2px solid rgba(139, 92, 246, 0.4)",
               borderLeft: "1px solid rgba(255,255,255,0.05)",
               borderRight: "1px solid rgba(255,255,255,0.05)",
               borderRadius: "24px 24px 12px 12px",
-              zIndex: 100, // Menutupi bagian bawah kartu agar terlihat masuk ke dalam deck
-              backdropFilter: "blur(20px)",
-              boxShadow: "0 -15px 40px -5px rgba(0,0,0,0.6), inset 0 2px 20px rgba(139, 92, 246, 0.15)"
+              zIndex: 100, // Menutupi kartu!
+              backdropFilter: "blur(24px)",
+              boxShadow: "0 -20px 40px -10px rgba(0,0,0,0.8), inset 0 2px 20px rgba(139, 92, 246, 0.2)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "flex-start",
+              paddingTop: "1.5rem"
             }}>
-              <div style={{ width: "60px", height: "4px", background: "rgba(255,255,255,0.1)", borderRadius: "2px", margin: "12px auto 0" }} />
+              <div style={{ width: "80px", height: "4px", background: "rgba(139, 92, 246, 0.3)", borderRadius: "2px", boxShadow: "0 0 10px rgba(139, 92, 246, 0.5)" }} />
             </div>
           </div>
         </motion.section>
