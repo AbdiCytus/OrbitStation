@@ -2102,7 +2102,7 @@ export default function StationClient({
                 columnWrapper.map((colItems, colIndex) => (
                   <div className="beacon-masonry-col" key={`col-${colIndex}`}>
                     {colItems.map(({ beacon, globalIndex }) => (
-                      <motion.div
+                      <div
                         className={`
                           beacon-card-wrapper
                           ${isFilterExiting ? "beacon-filter-exiting" : ""}
@@ -2111,23 +2111,14 @@ export default function StationClient({
                           ${growingBeacons.has(beacon.id) ? "beacon-growing" : ""}
                         `}
                         style={{
+                          animation: user.animationEnabled
+                            ? `beacon-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards`
+                            : "none",
                           animationDelay: user.animationEnabled
                             ? `${(globalIndex % 6) * 0.05}s`
                             : "0s",
                           transformOrigin: "center center",
-                        }}
-                        initial={
-                          user.animationEnabled ? { opacity: 0, y: 30 } : false
-                        }
-                        animate={
-                          user.animationEnabled ? { opacity: 1, y: 0 } : false
-                        }
-                        transition={{
-                          duration: 0.3,
-                          ease: "easeOut",
-                          delay: user.animationEnabled
-                            ? (globalIndex % 6) * 0.05
-                            : 0,
+                          willChange: "transform, opacity",
                         }}
                         key={beacon.id}>
                         <BeaconCard
@@ -2146,13 +2137,13 @@ export default function StationClient({
                           isAllBeacons={displaySectorId === "all"}
                           hologramEnabled={user.hologramEnabled ?? false}
                         />
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 ))
               ) : (
                 paginatedBeacons.map((beacon, globalIndex) => (
-                  <motion.div
+                  <div
                     className={`
                       beacon-card-wrapper
                       ${isFilterExiting ? "beacon-filter-exiting" : ""}
@@ -2161,23 +2152,14 @@ export default function StationClient({
                       ${growingBeacons.has(beacon.id) ? "beacon-growing" : ""}
                     `}
                     style={{
+                      animation: user.animationEnabled
+                        ? `beacon-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards`
+                        : "none",
                       animationDelay: user.animationEnabled
                         ? `${(globalIndex % 6) * 0.05}s`
                         : "0s",
                       transformOrigin: "center center",
-                    }}
-                    initial={
-                      user.animationEnabled ? { opacity: 0, y: 30 } : false
-                    }
-                    animate={
-                      user.animationEnabled ? { opacity: 1, y: 0 } : false
-                    }
-                    transition={{
-                      duration: 0.3,
-                      ease: "easeOut",
-                      delay: user.animationEnabled
-                        ? (globalIndex % 6) * 0.05
-                        : 0,
+                      willChange: "transform, opacity",
                     }}
                     key={beacon.id}>
                     <BeaconCard
@@ -2196,7 +2178,7 @@ export default function StationClient({
                       isAllBeacons={displaySectorId === "all"}
                       hologramEnabled={user.hologramEnabled ?? false}
                     />
-                  </motion.div>
+                  </div>
                 ))
               )}
             </div>
