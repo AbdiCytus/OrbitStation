@@ -216,6 +216,7 @@ export default function StationClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollThrottleRef = useRef<number>(0);
   const [filterVisibility, setFilterVisibility] = useState<
     "all" | "public" | "private"
   >("all");
@@ -1247,12 +1248,15 @@ export default function StationClient({
           className="station-main"
           onScroll={(e) => {
             const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-            // Toleransi scroll yang pas (100px dari bawah)
-            if (scrollHeight - scrollTop - clientHeight < 100) {
-              // Gunakan functional state agar tidak tereksekusi ganda
-              setVisibleLimit((prev) =>
-                prev < visibleBeacons.length ? prev + 6 : prev,
-              );
+            // Toleransi scroll yang pas (150px dari bawah)
+            if (scrollHeight - scrollTop - clientHeight < 150) {
+              const now = Date.now();
+              if (now - scrollThrottleRef.current > 400) {
+                scrollThrottleRef.current = now;
+                setVisibleLimit((prev) =>
+                  prev < visibleBeacons.length ? prev + 12 : prev,
+                );
+              }
             }
           }}>
           <div
