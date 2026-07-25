@@ -8,7 +8,16 @@ import { cookies, headers } from "next/headers";
 import { sendEmail } from "@/lib/email";
 import { randomBytes } from "crypto";
 
-import { checkLoginRateLimit, resetLoginRateLimit } from "@/lib/rate-limit";
+import { checkLoginRateLimit, incrementLoginRateLimit, resetLoginRateLimit } from "@/lib/rate-limit";
+import { CredentialsSignin } from "next-auth";
+
+class CustomAuthError extends CredentialsSignin {
+  code: string;
+  constructor(message: string) {
+    super();
+    this.code = message;
+  }
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -29,8 +38,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const rl = checkLoginRateLimit(input, 5, 5 * 60 * 1000); // 5 attempts per 5 minutes
         if (!rl.allowed) {
-          throw new Error(`RATE_LIMIT:${rl.remainingMs}`);
+          throw new CustomAuthError(`RATE_LIMIT:${rl.remainingMs}`);
         }
+
         const user = await db.user.findFirst({
           where: {
             OR: [
@@ -41,11 +51,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         if (!user?.password) {
-          throw new Error("OAUTH_ONLY");
+          throw new CustomAuthError("OAUTH_ONLY");
         }
 
         if (!user.emailVerified) {
-          throw new Error("Please verify your email address to log in.");
+          throw new CustomAuthError("Please verify your email address to log in.");
         }
 
         const valid = await bcrypt.compare(
@@ -53,7 +63,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.password
         );
 
-        if (!valid) return null;
+        if (!valid) {
+          incrementLoginRateLimit(input, 5 * 60 * 1000);
+          return null;
+        }
 
         resetLoginRateLimit(input);
         return { id: user.id, email: user.email, name: user.name, image: user.image };

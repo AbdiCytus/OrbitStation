@@ -1996,7 +1996,7 @@ export default function StationClient({
                         justifyContent: "center"
                       }}
                       onClick={() => setViewMode("masonry")}
-                      data-tooltip="Masonry / 1-Column"
+                      data-tooltip={cols <= 2 ? "1 Column View" : "Masonry View"}
                     >
                       <ViewColumnsIcon width={18} height={18} />
                     </button>
@@ -2014,7 +2014,7 @@ export default function StationClient({
                         justifyContent: "center"
                       }}
                       onClick={() => setViewMode("grid")}
-                      data-tooltip="Grid / 2-Columns"
+                      data-tooltip={cols <= 2 ? "2 Columns View" : "Grid View"}
                     >
                       <Squares2X2Icon width={18} height={18} />
                     </button>

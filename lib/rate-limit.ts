@@ -42,7 +42,6 @@ export function checkLoginRateLimit(identifier: string, limit = 5, windowMs = 5 
   const record = rateLimitMap.get(identifier);
 
   if (!record || now - record.lastReset > windowMs) {
-    rateLimitMap.set(identifier, { count: 1, lastReset: now });
     return { allowed: true, remainingMs: 0 };
   }
 
@@ -50,9 +49,19 @@ export function checkLoginRateLimit(identifier: string, limit = 5, windowMs = 5 
     return { allowed: false, remainingMs: (record.lastReset + windowMs) - now };
   }
 
-  record.count += 1;
-  rateLimitMap.set(identifier, record);
   return { allowed: true, remainingMs: 0 };
+}
+
+export function incrementLoginRateLimit(identifier: string, windowMs = 5 * 60 * 1000) {
+  const now = Date.now();
+  const record = rateLimitMap.get(identifier);
+
+  if (!record || now - record.lastReset > windowMs) {
+    rateLimitMap.set(identifier, { count: 1, lastReset: now });
+  } else {
+    record.count += 1;
+    rateLimitMap.set(identifier, record);
+  }
 }
 
 export function resetLoginRateLimit(identifier: string) {
