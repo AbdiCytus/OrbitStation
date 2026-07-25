@@ -5,7 +5,7 @@ import { getStationAnalytics } from "@/lib/actions/social.actions";
 import AnalyticsClient from "./analytics-client";
 
 export const metadata = {
-  title: "Analytics — Orbit Station",
+  title: "Analytics",
   description: "View analytics for your public profile.",
 };
 
