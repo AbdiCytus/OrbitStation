@@ -122,7 +122,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
       if (e.key === parsedShortcuts.publicStation && user?.station?.isPublic && user?.username) {
         e.preventDefault();
         router.push(`/station/${user.username}`);
-      } else if (e.key === parsedShortcuts.friends) {
+      } else if (e.key === parsedShortcuts.friends && pathname === "/station") {
         e.preventDefault();
         onOpenFriends?.();
       } else if (e.key === parsedShortcuts.analytics && user?.station?.isPublic) {
@@ -236,12 +236,14 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
           user ? (
             <>
               <div className="hidden md:flex items-center" style={{ gap: "0.5rem", marginRight: "2.5rem" }}>
-                <Link href="/station" className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
-                  <UserIcon width={20} height={20} />
-                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#141423] border border-white/10 rounded-lg text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
-                    My Station
-                  </div>
-                </Link>
+                {pathname !== "/station" && (
+                  <Link href="/station" className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                    <UserIcon width={20} height={20} />
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#141423] border border-white/10 rounded-lg text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
+                      My Station
+                    </div>
+                  </Link>
+                )}
                 {user.station?.isPublic && user.username && (
                   <Link href={`/station/${user.username}`} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
                     <GlobeAltIcon width={20} height={20} />
@@ -250,13 +252,20 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                     </div>
                   </Link>
                 )}
-                <button onClick={onOpenFriends} className="navbar-icon-btn group relative" style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                <button 
+                  onClick={onOpenFriends} 
+                  disabled={pathname !== "/station"}
+                  className="navbar-icon-btn group relative" 
+                  style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s", opacity: pathname !== "/station" ? 0.5 : 1, cursor: pathname !== "/station" ? "not-allowed" : "pointer" }} 
+                  onMouseEnter={(e) => { if (pathname === "/station") e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)" }} 
+                  onMouseLeave={(e) => { if (pathname === "/station") e.currentTarget.style.backgroundColor = "transparent" }}
+                >
                   <UsersIcon width={20} height={20} />
                   {stats?.hasNotifications && (
                     <span style={{ position: "absolute", top: "2px", right: "2px", width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%", border: "2px solid #141423" }}></span>
                   )}
                   <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-[#141423] border border-white/10 rounded-lg text-xs font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg" style={{ padding: "0.5rem 0.75rem" }}>
-                    Friends <span className="text-gray-400 ml-1">({parsedShortcuts.friends})</span>
+                    {pathname !== "/station" ? "Available only in Station" : <>Friends <span className="text-gray-400 ml-1">({parsedShortcuts.friends})</span></>}
                   </div>
                 </button>
                 {user.station?.isPublic && (
@@ -321,13 +330,15 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                       <span className="navbar-menu-name">{displayName ?? user.name ?? "Pilot"}</span>
                     </div>
                     <hr className="divider" />
-                    <Link
-                      href="/station"
-                      className="navbar-menu-item"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <UserIcon width={18} height={18} /> My Station
-                    </Link>
+                    {pathname !== "/station" && (
+                      <Link
+                        href="/station"
+                        className="navbar-menu-item"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <UserIcon width={18} height={18} /> My Station
+                      </Link>
+                    )}
                     {user.username && user.station?.isPublic && (
                       <Link
                         href={`/station/${user.username}`}
@@ -339,6 +350,8 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                     )}
                     <button
                       className="navbar-menu-item md:hidden"
+                      disabled={pathname !== "/station"}
+                      style={{ opacity: pathname !== "/station" ? 0.5 : 1, cursor: pathname !== "/station" ? "not-allowed" : "pointer" }}
                       onClick={() => {
                         setMenuOpen(false);
                         onOpenFriends?.();
