@@ -3503,6 +3503,10 @@ pre {
   animation: none !important;
 }
 
+.station-root:not(.no-animation) .beacon-card {
+  animation: beacon-float 4s ease-in-out infinite;
+}
+
 .static-cosmic-bg {
   filter: brightness(0.35);
 }
@@ -3534,7 +3538,6 @@ pre {
   display: flex;
   flex-direction: column;
   margin-bottom: 0;
-  animation: beacon-float 4s ease-in-out infinite;
 }
 
 .beacon-masonry.entering .beacon-card {
@@ -3599,7 +3602,6 @@ pre {
   height: 100%;
   max-height: 320px;
   overflow: hidden;
-  animation: beacon-float 4s ease-in-out infinite;
   width: 100%;
 }
 
