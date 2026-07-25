@@ -139,7 +139,7 @@ export default function LandingClient() {
           variants={containerVariants}
           style={{ padding: "4rem 2rem", width: "100%", margin: "0 auto", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}
         >
-          <motion.h2 variants={itemVariants} style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "1.5rem" }}>
+          <motion.h2 variants={itemVariants} style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "5rem" }}>
             Features
           </motion.h2>
 
@@ -148,7 +148,7 @@ export default function LandingClient() {
             position: "relative",
             width: "100%",
             maxWidth: "920px", // Diperlebar agar memuat semua kartu tanpa keluar
-            height: "440px",
+            height: "320px", // Dikurangi dari 440px agar jarak dengan judul tidak jauh
             margin: "0 auto",
             display: "flex",
             justifyContent: "center"
@@ -175,7 +175,7 @@ export default function LandingClient() {
                       zIndex: isActive ? 50 : 10 + index, // Z-index tertinggi saat aktif
                       scale: isActive ? 1.05 : 1,
                     }}
-                    transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                    transition={{ duration: 0.15, ease: "easeOut" }} // Animasi cepat tanpa delay
                     className="landing-feature glass group" 
                     style={{ 
                       position: "relative",
