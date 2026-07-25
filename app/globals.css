@@ -5086,6 +5086,32 @@ pre {
   }
 }
 
+.station-toolbar-search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 250px;
+}
+
+.station-toolbar-view {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+  margin-left: auto;
+  height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .station-toolbar-search {
+    order: 3;
+    min-width: 100%;
+    max-width: 100%;
+    margin-top: 0.25rem;
+  }
+}
+
 .pilot-suggest-dropdown {
   position: absolute;
   top: 100%;

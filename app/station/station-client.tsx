@@ -1922,9 +1922,7 @@ export default function StationClient({
                       allCollabSectors.some(
                         (s) => s.id === displaySectorId,
                       ))) && (
-                      <div
-                        className="staggered-item"
-                        style={{ flex: 1, minWidth: "200px", maxWidth: "250px" }}>
+                      <div className="staggered-item station-toolbar-search">
                         <div
                           className={`${user.animationEnabled ? "floating-controls" : ""}`}
                           style={{
@@ -1971,17 +1969,7 @@ export default function StationClient({
                       </div>
                     )}
                   
-                  <div 
-                    className="staggered-item flex items-center" 
-                    style={{ 
-                      background: "rgba(255, 255, 255, 0.05)", 
-                      border: "1px solid rgba(255, 255, 255, 0.1)", 
-                      borderRadius: "8px", 
-                      padding: "4px",
-                      marginLeft: "auto",
-                      height: "38px" 
-                    }}
-                  >
+                  <div className="staggered-item station-toolbar-view">
                     <button
                       style={{ 
                         padding: "6px", 
