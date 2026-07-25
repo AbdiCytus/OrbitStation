@@ -3037,23 +3037,36 @@ pre {
   .beacon-grid-view .beacon-card {
     display: flex !important;
     flex-direction: column !important;
-    height: 220px !important;
-    max-height: 220px !important;
+    height: 240px !important;
+    max-height: 240px !important;
     overflow: hidden;
     margin: 0 !important;
   }
   .beacon-grid-view .beacon-card .beacon-card-image {
-    height: 110px !important;
-    min-height: 110px !important;
+    height: 120px !important;
+    min-height: 120px !important;
     width: 100% !important;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
     border-right: none !important;
   }
-  .beacon-grid-view .beacon-card .beacon-card-body,
+  .beacon-grid-view .beacon-card .beacon-card-body {
+    grid-column: unset !important;
+    grid-row: unset !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0.5rem 0.75rem 0 !important;
+    gap: 0.25rem !important;
+  }
+  
   .beacon-grid-view .beacon-card .beacon-card-footer {
     grid-column: unset !important;
     grid-row: unset !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.5rem 0.75rem !important;
+    margin-top: auto !important;
   }
 
   .beacon-masonry .beacon-card .beacon-card-image {
