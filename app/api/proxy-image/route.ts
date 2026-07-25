@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isSafeUrl } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
 
@@ -6,8 +7,8 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const url = searchParams.get('url');
 
-  if (!url) {
-    return new NextResponse('Missing url', { status: 400 });
+  if (!url || !isSafeUrl(url)) {
+    return new NextResponse('Missing or invalid url', { status: 400 });
   }
 
   try {

@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { isSafeUrl } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +15,14 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: "URL parameter is required" }, { status: 400 });
   }
 
-  // Validasi URL
+  // Validasi URL secara ketat untuk mencegah SSRF
+  if (!isSafeUrl(url)) {
+    return Response.json({ error: "Invalid or blocked URL" }, { status: 400 });
+  }
+
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(url);
-    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-      throw new Error("Invalid protocol");
-    }
   } catch {
     return Response.json({ error: "Invalid URL" }, { status: 400 });
   }

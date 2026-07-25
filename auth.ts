@@ -36,6 +36,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const input = credentials.email as string;
 
+        // Check Rate Limit FIRST
+        const rl = checkLoginRateLimit(input, 5, 1 * 60 * 1000);
+        if (!rl.allowed) {
+          throw new CustomAuthError(`RATE_LIMIT:${rl.remainingMs}`);
+        }
+
         const user = await db.user.findFirst({
           where: {
             OR: [
@@ -59,9 +65,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
 
         if (!valid) {
+          incrementLoginRateLimit(input, 1 * 60 * 1000);
           return null;
         }
 
+        resetLoginRateLimit(input);
         return { id: user.id, email: user.email, name: user.name, image: user.image };
       },
     }),

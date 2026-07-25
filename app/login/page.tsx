@@ -88,19 +88,6 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
-    
-    // Check rate limit via API to ensure shared memory context
-    const preCheckRes = await fetch("/api/rate-limit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, action: "check" }),
-    });
-    const preCheck = await preCheckRes.json();
-    if (!preCheck.allowed) {
-      setCooldownRemaining(preCheck.ms);
-      setLoading(false);
-      return;
-    }
 
     const result = await signIn("credentials", {
       email,
@@ -112,28 +99,15 @@ export default function LoginPage() {
     if (result?.error) {
       if (result.error.includes("OAUTH_ONLY")) {
         setError("This account uses a third-party login (Google/GitHub). Please use that instead.");
+      } else if (result.error.includes("RATE_LIMIT:")) {
+        const ms = parseInt(result.error.split("RATE_LIMIT:")[1] || "60000", 10);
+        setCooldownRemaining(ms);
       } else if (result.error.includes("CredentialsSignin") || result.error.includes("Configuration")) {
-        // Increment limit on invalid credentials
-        const postCheckRes = await fetch("/api/rate-limit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, action: "increment" }),
-        });
-        const postCheck = await postCheckRes.json();
-        if (!postCheck.allowed) {
-          setCooldownRemaining(postCheck.ms);
-        } else {
-          setError("Invalid email or password.");
-        }
+        setError("Invalid email or password.");
       } else {
         setError(result.error.replace("Error: ", ""));
       }
     } else {
-      await fetch("/api/rate-limit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, action: "reset" }),
-      });
       router.push("/station");
     }
   }
