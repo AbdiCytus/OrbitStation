@@ -51,11 +51,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         });
 
-        if (!user?.password) {
-          throw new CustomAuthError("OAUTH_ONLY");
+        if (!user || !user.password) {
+          incrementLoginRateLimit(input, 1 * 60 * 1000);
+          if (user && !user.password) {
+            throw new CustomAuthError("OAUTH_ONLY");
+          }
+          return null; // Invalid credentials
         }
 
         if (!user.emailVerified) {
+          incrementLoginRateLimit(input, 1 * 60 * 1000);
           throw new CustomAuthError("Please verify your email address to log in.");
         }
 
