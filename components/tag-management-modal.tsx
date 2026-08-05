@@ -34,7 +34,6 @@ export default function TagManagementModal({
   const [editTagName, setEditTagName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagToDelete, setTagToDelete] = useState<string | null>(null);
-  const [modalSearchQuery, setModalSearchQuery] = useState("");
   const [beaconSearchQuery, setBeaconSearchQuery] = useState("");
 
   // Assign Tab State: beaconId -> array of tagIds
@@ -71,10 +70,6 @@ export default function TagManagementModal({
     return counts;
   }, [assignments]);
 
-  const filteredLocalTags = useMemo(() => {
-    return localTags.filter(tag => tag.name.toLowerCase().includes(modalSearchQuery.toLowerCase()));
-  }, [localTags, modalSearchQuery]);
-
   const filteredBeacons = useMemo(() => {
     return sector.beacons.filter(b => b.title.toLowerCase().includes(beaconSearchQuery.toLowerCase()) || b.url.toLowerCase().includes(beaconSearchQuery.toLowerCase()));
   }, [sector.beacons, beaconSearchQuery]);
@@ -105,7 +100,7 @@ export default function TagManagementModal({
     const trimmed = newTagName.trim();
     if (!trimmed) return;
     if (trimmed.length > 20) return toast.error("Tag name max 20 characters");
-    if (localTags.length >= 10) return toast.error("Max 10 tags allowed per sector");
+    if (localTags.length >= 20) return toast.error("Max 20 tags allowed per sector");
     if (localTags.some((t) => t.name.toLowerCase() === trimmed.toLowerCase()))
       return toast.error("Tag already exists");
 
@@ -313,7 +308,7 @@ export default function TagManagementModal({
                 background: activeTab === tab ? "rgba(139,92,246,0.07)" : "transparent",
               }}
             >
-              {tab === "manage" ? "Manage Tags" : "Assign Tags"}
+              {tab === "manage" ? `Manage Tags (${localTags.length})` : "Assign Tags"}
             </button>
           ))}
         </div>
@@ -350,15 +345,6 @@ export default function TagManagementModal({
               </div>
 
               {/* Tag List */}
-              <div style={{ position: "relative" }}>
-                 <input 
-                    type="text" 
-                    placeholder="Search tags..." 
-                    value={modalSearchQuery}
-                    onChange={(e) => setModalSearchQuery(e.target.value)}
-                    style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "6px", padding: "0.5rem 0.75rem", color: "#fff", fontSize: "0.875rem", outline: "none", marginBottom: "1rem" }}
-                 />
-              </div>
               
               {localTags.length === 0 ? (
                 <div
@@ -373,13 +359,9 @@ export default function TagManagementModal({
                     Add your first tag above.
                   </p>
                 </div>
-              ) : filteredLocalTags.length === 0 ? (
-                <p style={{ color: "#6b7280", fontSize: "0.875rem", textAlign: "center", padding: "2.5rem 1rem" }}>
-                  No matching tags found.
-                </p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-                  {filteredLocalTags.map((tag) => (
+                  {localTags.map((tag) => (
                     <div
                       key={tag.id}
                       className="flex items-center justify-between border border-white/5 group hover:border-white/10 transition-colors"
@@ -598,6 +580,20 @@ export default function TagManagementModal({
         </div>
 
         {/* Footer */}
+        {activeTab === "manage" && (
+          <div
+            className="border-t border-white/10 flex justify-end"
+            style={{ padding: "0.875rem 1.5rem", background: "rgba(0,0,0,0.2)" }}
+          >
+            <button
+              onClick={handleClose}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-lg transition-colors"
+              style={{ padding: "0.625rem 1.5rem", fontSize: "0.875rem" }}
+            >
+              Done
+            </button>
+          </div>
+        )}
         {activeTab === "assign" && localTags.length > 0 && sector.beacons.length > 0 && (
           <div
             className="border-t border-white/10 flex justify-end"

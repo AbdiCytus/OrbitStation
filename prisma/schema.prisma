@@ -73,6 +73,7 @@ model User {
   hologramEnabled  Boolean @default(true)
   allowFriendRequests Boolean @default(true)
   staticBackgroundEnabled Boolean @default(false)
+  saveFilterSortEnabled Boolean @default(false)
 
   // Email/password login (opsional, untuk akun Orbit Station)
   password      String?   // hashed, null = OAuth-only user
@@ -106,6 +107,7 @@ model Station {
   id          String  @id @default(cuid())
   userId      String  @unique
   isPublic    Boolean @default(false)
+  allowPublicWorkspace Boolean @default(false)
   description String?
 
   createdAt DateTime @default(now())
@@ -174,6 +176,7 @@ model Beacon {
   creator     User?    @relation(fields: [creatorId], references: [id])
   visits      Int      @default(0)
   tags        BeaconTag[]
+  branches    BeaconBranch[]
 }
 
 // ============================================================
@@ -372,5 +375,15 @@ model BeaconTag {
   tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([beaconId, tagId])
+}
+
+model BeaconBranch {
+  id        String @id @default(cuid())
+  beaconId  String
+  name      String
+  url       String
+  order     Int    @default(0)
+
+  beacon    Beacon @relation(fields: [beaconId], references: [id], onDelete: Cascade)
 }
 

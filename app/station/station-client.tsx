@@ -56,6 +56,7 @@ import { pusherClient } from "@/lib/pusher-client";
 type Props = {
   initialStation: StationWithSectors | null;
   initialCollabSectors?: (SectorWithBeacons & { collaborators?: any[] })[];
+  visitingProfile?: any;
   user: {
     id: string;
     name: string | null;
@@ -65,6 +66,7 @@ type Props = {
     animationEnabled: boolean;
     hologramEnabled?: boolean;
     staticBackgroundEnabled?: boolean;
+    saveFilterSortEnabled?: boolean;
     shortcuts?: string | null;
     station?: { isPublic: boolean };
   };
@@ -74,11 +76,15 @@ export default function StationClient({
   initialStation,
   initialCollabSectors = [],
   user,
+  visitingProfile,
 }: Props) {
   const [station, setStation] = useState(initialStation);
   const [collabSectors, setCollabSectors] = useState(initialCollabSectors);
   const [activeSectorId, setActiveSectorId] = useState<string | "all">("all");
   const [displaySectorId, setDisplaySectorId] = useState<string | "all">("all");
+  const [loadedSectorId, setLoadedSectorId] = useState<string | null>(null);
+  const [tagFilterMode, setTagFilterMode] = useState<"union" | "intersect">("union");
+  const [beaconColors, setBeaconColors] = useState<Record<string, number>>({});
   const [isExiting, setIsExiting] = useState(false);
   const [isEntering, setIsEntering] = useState(true);
   const [funFact, setFunFact] = useState("");
@@ -256,8 +262,40 @@ export default function StationClient({
   }, [viewMode, isViewModeMounted]);
 
   useEffect(() => {
+    if (!user.saveFilterSortEnabled) return;
+    try {
+      const saved = localStorage.getItem(`os_prefs_${displaySectorId}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.sortBy) setSortBy(parsed.sortBy);
+        if (parsed.sortDir) setSortDir(parsed.sortDir);
+        if (parsed.filterVisibility) setFilterVisibility(parsed.filterVisibility);
+        if (parsed.selectedTags) setSelectedTags(parsed.selectedTags);
+        if (parsed.tagFilterMode) setTagFilterMode(parsed.tagFilterMode);
+      } else {
+        setSortBy("date");
+        setSortDir("desc");
+        setFilterVisibility("all");
+        setSelectedTags([]);
+        setTagFilterMode("union");
+      }
+    } catch (e) {}
+    setLoadedSectorId(displaySectorId);
+  }, [displaySectorId, user.saveFilterSortEnabled]);
+
+  useEffect(() => {
+    if (!user.saveFilterSortEnabled || loadedSectorId !== displaySectorId) return;
+    try {
+      localStorage.setItem(
+        `os_prefs_${displaySectorId}`,
+        JSON.stringify({ sortBy, sortDir, filterVisibility, selectedTags, tagFilterMode })
+      );
+    } catch (e) {}
+  }, [displaySectorId, sortBy, sortDir, filterVisibility, selectedTags, tagFilterMode, user.saveFilterSortEnabled, loadedSectorId]);
+
+  useEffect(() => {
     setVisibleLimit(12);
-  }, [displaySectorId, searchQuery, filterVisibility, sortBy, sortDir, selectedTags]);
+  }, [displaySectorId, searchQuery, filterVisibility, sortBy, sortDir, selectedTags, tagFilterMode]);
 
   const applyFilterSort = (updateFn: () => void) => {
     if (!user.animationEnabled) {
@@ -432,6 +470,153 @@ export default function StationClient({
   const allCollabSectors = [...myCollabSectors, ...collabSectors];
   const allSectors = [...allOwnedSectors, ...collabSectors];
 
+    const processedColorsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const beaconsToProcess = allSectors
+      .flatMap(s => s.beacons)
+      .filter(b => beaconColors[b.id] === undefined && !processedColorsRef.current.has(b.id) && (b.imageUrl || b.faviconUrl));
+      
+    if (beaconsToProcess.length === 0) return;
+    
+    let isMounted = true;
+    
+    const computeColors = async () => {
+      const getProxyUrl = (url?: string | null) => {
+        if (!url) return undefined;
+        if (url.startsWith('/')) return url;
+        return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+      };
+      
+      beaconsToProcess.forEach(b => processedColorsRef.current.add(b.id));
+      
+      const promises = beaconsToProcess.map(async (b) => {
+        const url = getProxyUrl(b.imageUrl || b.faviconUrl);
+        if (!url) return { id: b.id, hue: -1 };
+        
+        try {
+          const hue = await new Promise<number>((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            
+            const timeout = setTimeout(() => {
+              img.src = ""; // cancel
+              resolve(-1);
+            }, 5000);
+            
+            img.onload = () => {
+              clearTimeout(timeout);
+              try {
+                const canvas = document.createElement("canvas");
+                const MAX_SIZE = 64;
+                let w = img.width, h = img.height;
+                if (w > MAX_SIZE || h > MAX_SIZE) {
+                  const ratio = Math.min(MAX_SIZE / w, MAX_SIZE / h);
+                  w = Math.floor(w * ratio);
+                  h = Math.floor(h * ratio);
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) { resolve(-1); return; }
+                ctx.drawImage(img, 0, 0, w, h);
+                const data = ctx.getImageData(0, 0, w, h).data;
+                
+                const bins: Record<string, {r: number, g: number, b: number, count: number}> = {};
+                let maxCount = 0;
+                let dominantRGB = { r: 0, g: 0, b: 0 };
+                
+                for (let i = 0; i < data.length; i += 4) {
+                  const r = data[i], g = data[i+1], b_val = data[i+2], a = data[i+3];
+                  if (a < 128) continue;
+                  
+                  const key = `${Math.floor(r/32)},${Math.floor(g/32)},${Math.floor(b_val/32)}`;
+                  if (!bins[key]) bins[key] = { r: 0, g: 0, b: 0, count: 0 };
+                  bins[key].r += r;
+                  bins[key].g += g;
+                  bins[key].b += b_val;
+                  bins[key].count++;
+                  
+                  if (bins[key].count > maxCount) {
+                    maxCount = bins[key].count;
+                    dominantRGB = {
+                      r: Math.round(bins[key].r / maxCount),
+                      g: Math.round(bins[key].g / maxCount),
+                      b: Math.round(bins[key].b / maxCount)
+                    };
+                  }
+                }
+                
+                if (maxCount === 0) { resolve(-1); return; }
+                
+                const r = dominantRGB.r / 255;
+                const g = dominantRGB.g / 255;
+                const b_val = dominantRGB.b / 255;
+                
+                let max = Math.max(r, g, b_val), min = Math.min(r, g, b_val);
+                let h_val = 0, s_val = 0, l_val = (max + min) / 2;
+                
+                if (max !== min) {
+                  let d = max - min;
+                  s_val = l_val > 0.5 ? d / (2 - max - min) : d / (max + min);
+                  switch (max) {
+                    case r: h_val = (g - b_val) / d + (g < b_val ? 6 : 0); break;
+                    case g: h_val = (b_val - r) / d + 2; break;
+                    case b_val: h_val = (r - g) / d + 4; break;
+                  }
+                  h_val /= 6;
+                }
+                
+                h_val = Math.round(h_val * 360);
+                s_val = Math.round(s_val * 100);
+                l_val = Math.round(l_val * 100);
+                
+                let category = 0;
+                if (l_val < 20 || (s_val < 15 && l_val < 50)) category = 7;
+                else if (l_val > 80 || (s_val < 15 && l_val >= 50)) category = 8;
+                else {
+                  if (h_val < 15 || h_val >= 345) category = 1;
+                  else if (h_val < 45) category = 2;
+                  else if (h_val < 75) category = 3;
+                  else if (h_val < 165) category = 4;
+                  else if (h_val < 265) category = 5;
+                  else category = 6;
+                }
+                
+                let hueForSort = h_val;
+                if (category === 1 && hueForSort >= 345) hueForSort -= 360;
+                
+                resolve(category * 1000 + hueForSort + 360);
+              } catch (err) {
+                resolve(-1);
+              }
+            };
+            img.onerror = () => {
+              clearTimeout(timeout);
+              resolve(-1);
+            };
+            img.src = url;
+          });
+          return { id: b.id, hue };
+        } catch {
+          return { id: b.id, hue: -1 };
+        }
+      });
+      
+      const results = await Promise.all(promises);
+      
+      if (isMounted) {
+        setBeaconColors(prev => {
+          const updated = { ...prev };
+          results.forEach(r => { updated[r.id] = r.hue; });
+          return updated;
+        });
+      }
+    };
+    computeColors();
+    return () => { isMounted = false; };
+  }, [allSectors]);
+
   const baseBeacons = useMemo(() => {
     if (displaySectorId === "all") {
       return personalSectors.flatMap((s) =>
@@ -518,7 +703,7 @@ export default function StationClient({
     }
 
     return beacons;
-  }, [baseBeacons, searchQuery, filterVisibility, sortBy, sortDir, selectedTags]);
+  }, [baseBeacons, searchQuery, filterVisibility, sortBy, sortDir, selectedTags, tagFilterMode, beaconColors]);
 
   const [cols, setCols] = useState(6);
   useEffect(() => {
@@ -2089,7 +2274,7 @@ export default function StationClient({
                 .beacon-grid-view .beacon-card-wrapper { display: flex; height: 100%; width: 100%; }
                 .beacon-grid-view .beacon-card { display: flex; flex-direction: column; height: 100%; max-height: 320px; overflow: hidden; width: 100%; margin: 0; }
                 .beacon-grid-view .beacon-card-image { height: 130px !important; min-height: 130px !important; aspect-ratio: unset !important; }
-                .beacon-grid-view .beacon-card-image img { height: 100%; object-fit: cover; }
+                .beacon-grid-view .beacon-card-image > img { height: 100%; object-fit: cover; }
                 .beacon-grid-view .beacon-card .beacon-card-body { flex: 1; overflow-y: auto; }
                 .beacon-grid-view .beacon-card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
                 .beacon-grid-view .beacon-card-desc { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; white-space: normal; }

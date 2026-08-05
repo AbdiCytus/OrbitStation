@@ -71,6 +71,7 @@ export default async function SettingsPage() {
           hologramEnabled: (profile as any).hologramEnabled ?? true,
           allowFriendRequests: (profile as any).allowFriendRequests ?? true,
           staticBackgroundEnabled: (profile as any).staticBackgroundEnabled ?? false,
+          saveFilterSortEnabled: (profile as any).saveFilterSortEnabled ?? false,
           notifSoundEnabled: (profile as any).notifSoundEnabled ?? true,
           notifSoundUrl: (profile as any).notifSoundUrl ?? null,
           shortcuts: (profile as any).shortcuts ?? null,

@@ -11,8 +11,16 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createClient() {
-  const pool = globalForPrisma.pool ?? new Pool({ connectionString: process.env.DATABASE_URL! });
-  if (process.env.NODE_ENV !== "production") globalForPrisma.pool = pool;
+  let pool = globalForPrisma.pool;
+  if (!pool) {
+    pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+    pool.on('error', (err) => {
+      console.error('Unexpected error on idle pg client', err);
+      // Don't crash the Node.js process, just log it. pg will automatically remove it.
+    });
+    if (process.env.NODE_ENV !== "production") globalForPrisma.pool = pool;
+  }
+  
   
   const adapter = new PrismaPg(pool);
   return new PrismaClient({

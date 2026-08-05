@@ -360,6 +360,15 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                   >
                     <ShareIcon width={16} height={16} /> Share
                   </button>
+                  {station.allowPublicWorkspace && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flex: "1", background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", border: "none" }}
+                      onClick={() => router.push(`/station?visit=${user.username}`)}
+                    >
+                      Visit Workspace
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -393,6 +402,15 @@ export default function PublicProfileClient({ data, sessionUser, isFriendOrPendi
                     onClick={() => setShowShareModal(true)}
                   >
                     <ShareIcon width={16} height={16} /> Share
+                  </button>
+                )}
+                {!isMobile && station.allowPublicWorkspace && (
+                  <button
+                    className="btn btn-primary"
+                    style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", borderRadius: "20px", display: "flex", alignItems: "center", gap: "0.5rem", background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", border: "none" }}
+                    onClick={() => router.push(`/station?visit=${user.username}`)}
+                  >
+                    Visit Workspace
                   </button>
                 )}
               </div>

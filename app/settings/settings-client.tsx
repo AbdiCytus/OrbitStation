@@ -34,6 +34,7 @@ type Profile = {
   staticBackgroundEnabled?: boolean;
   notifSoundEnabled?: boolean;
   notifSoundUrl?: string | null;
+  saveFilterSortEnabled?: boolean;
   shortcuts?: string | null;
   station: { isPublic: boolean } | null;
   hasPassword?: boolean;
@@ -102,12 +103,14 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
   const [hologramEnabled, setHologramEnabled] = useState(profile.hologramEnabled);
   const [allowFriendRequests, setAllowFriendRequests] = useState(profile.allowFriendRequests ?? true);
   const [staticBackgroundEnabled, setStaticBackgroundEnabled] = useState(profile.staticBackgroundEnabled ?? false);
+  const [saveFilterSortEnabled, setSaveFilterSortEnabled] = useState(profile.saveFilterSortEnabled ?? false);
   const [notifSoundEnabled, setNotifSoundEnabled] = useState(profile.notifSoundEnabled ?? true);
   const [notifSoundUrl, setNotifSoundUrl] = useState(profile.notifSoundUrl ?? "/sounds/notif-default.mp3");
   const [notifSoundType, setNotifSoundType] = useState<"default" | "custom">(
     !profile.notifSoundUrl || profile.notifSoundUrl === "/sounds/notif-default.mp3" ? "default" : "custom"
   );
   const [isPublic, setIsPublic] = useState(profile.station?.isPublic ?? false);
+  const [allowPublicWorkspace, setAllowPublicWorkspace] = useState((profile.station as any)?.allowPublicWorkspace ?? false);
   const [image, setImage] = useState(profile.image ?? "");
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -284,10 +287,10 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
         body: JSON.stringify({
           name, username, callsign, bio, bannerUrl, titleBadge,
           animationEnabled, hologramEnabled, allowFriendRequests,
-          staticBackgroundEnabled, notifSoundEnabled,
+          staticBackgroundEnabled, saveFilterSortEnabled, notifSoundEnabled,
           notifSoundUrl: finalSoundUrl,
           shortcuts: JSON.stringify(shortcuts),
-          isPublic, image
+          isPublic, allowPublicWorkspace, image
         }),
       });
       const data = await res.json();
@@ -556,6 +559,25 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                     </label>
                   </div>
 
+                  {/* Allow Public Workspace Toggle */}
+                  <div className="settings-toggle-row rounded-lg border border-white/10 mt-4" style={{ padding: "1rem" }}>
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-label text-white font-medium">Allow another pilot to visit my station workspace</span>
+                      <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
+                        Allows other users to view your public sectors and beacons.
+                      </span>
+                    </div>
+                    <label className="toggle-switch" htmlFor="toggle-allow-public-workspace">
+                      <input
+                        id="toggle-allow-public-workspace"
+                        type="checkbox"
+                        checked={allowPublicWorkspace}
+                        onChange={(e) => setAllowPublicWorkspace(e.target.checked)}
+                      />
+                      <span className="toggle-thumb" />
+                    </label>
+                  </div>
+
                   {/* Banner URL (Moved above Title Badge) */}
                   <div className="form-group">
                     <label className="form-label text-sm text-gray-300" htmlFor="s-banner">Banner Image URL</label>
@@ -779,6 +801,25 @@ export default function SettingsClient({ profile, unlockedBadges = [] }: Props) 
                       </label>
                     </div>
                   )}
+
+                  {/* Save Filter & Sort toggle */}
+                  <div className="settings-toggle-row p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-label text-white font-medium">Save My Filter & Sort</span>
+                      <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
+                        Automatically remember your active filter and sort preferences per sector across sessions.
+                      </span>
+                    </div>
+                    <label className="toggle-switch" htmlFor="toggle-save-filter">
+                      <input
+                        id="toggle-save-filter"
+                        type="checkbox"
+                        checked={saveFilterSortEnabled}
+                        onChange={(e) => setSaveFilterSortEnabled(e.target.checked)}
+                      />
+                      <span className="toggle-thumb" />
+                    </label>
+                  </div>
 
                   {/* Friend Requests toggle */}
                   <div className="settings-toggle-row p-4 rounded-lg border border-white/10" style={{ padding: "1rem" }}>

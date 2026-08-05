@@ -15,16 +15,27 @@ type Props = {
   sectorName?: string;
   isAllBeacons?: boolean;
   hologramEnabled?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (e: React.MouseEvent) => void;
+  isSelectMode?: boolean;
 };
 
-export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isCollab = false, sectorName, isAllBeacons, hologramEnabled }: Props) {
+export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isCollab = false, sectorName, isAllBeacons, hologramEnabled, isSelected, onToggleSelect, isSelectMode }: Props) {
   const [imgError, setImgError] = useState(false);
   const [favError, setFavError] = useState(false);
 
   function handleVisit(e: React.MouseEvent) {
     e.stopPropagation();
-    incrementBeaconVisit(beacon.id);
-    window.open(beacon.url, "_blank", "noopener,noreferrer");
+    if (isSelectMode && onToggleSelect) {
+      onToggleSelect(e);
+      return;
+    }
+    if ((beacon as any).branches && (beacon as any).branches.length > 0) {
+      onClick();
+    } else {
+      incrementBeaconVisit(beacon.id);
+      window.open(beacon.url, "_blank", "noopener,noreferrer");
+    }
   }
 
   function handleDetail(e: React.MouseEvent) {
@@ -53,6 +64,17 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
       onKeyDown={(e) => e.key === "Enter" && onClick()}
       id={`beacon-${beacon.id}`}
     >
+      {/* Checkbox for Select Mode */}
+      {isSelectMode && (
+        <div 
+          className="beacon-card-checkbox screenshot-ignore" 
+          onClick={(e) => { e.stopPropagation(); onToggleSelect?.(e); }}
+          style={{ position: "absolute", top: "8px", left: "8px", zIndex: 10, background: isSelected ? "#8b5cf6" : "rgba(0,0,0,0.5)", border: "2px solid #fff", borderRadius: "4px", width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+        >
+          {isSelected && <span style={{ color: "#fff", fontSize: "14px", fontWeight: "bold" }}>✓</span>}
+        </div>
+      )}
+
       {/* OG Image */}
       <div className="beacon-card-image">
         {beacon.imageUrl && !imgError ? (

@@ -26,7 +26,8 @@ export async function getMyStation() {
             orderBy: { order: "asc" },
             include: { 
               creator: { select: { name: true, image: true } },
-              tags: { include: { tag: true } }
+              tags: { include: { tag: true } },
+              branches: { orderBy: { order: "asc" } }
             }
           },
           collaborators: {
@@ -46,6 +47,38 @@ export async function getMyStation() {
   return station;
 }
 
+export async function getVisitedStation(username: string) {
+  const station = await db.station.findFirst({
+    where: { user: { username }, isPublic: true, allowPublicWorkspace: true },
+    include: {
+      sectors: {
+        where: { isPublic: true },
+        orderBy: { order: "asc" },
+        include: {
+          beacons: {
+            orderBy: { order: "asc" },
+            include: { 
+              creator: { select: { name: true, image: true } },
+              tags: { include: { tag: true } },
+              branches: { orderBy: { order: "asc" } }
+            }
+          },
+          collaborators: {
+            include: {
+              user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
+            }
+          },
+          station: {
+            select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
+          },
+          tags: true,
+        },
+      },
+    },
+  });
+  return station;
+}
+
 /** Ambil sektor-sektor di mana user menjadi kolaborator */
 export async function getCollabSectors() {
   const session = await auth();
@@ -62,7 +95,8 @@ export async function getCollabSectors() {
         orderBy: { order: "asc" },
         include: { 
           creator: { select: { name: true, image: true } },
-          tags: { include: { tag: true } }
+          tags: { include: { tag: true } },
+          branches: { orderBy: { order: "asc" } }
         }
       },
       collaborators: {
@@ -93,6 +127,7 @@ export async function getPublicStation(username: string) {
               beacons: {
                 where: { isPinned: true },
                 orderBy: { order: "asc" },
+                include: { branches: { orderBy: { order: "asc" } } },
               },
             },
           },
@@ -196,6 +231,7 @@ export async function getMyProfile() {
       hologramEnabled: true,
       allowFriendRequests: true,
       staticBackgroundEnabled: true,
+      saveFilterSortEnabled: true,
       notifSoundEnabled: true,
       notifSoundUrl: true,
       shortcuts: true,

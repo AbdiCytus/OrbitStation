@@ -21,7 +21,7 @@ export async function GET(req: Request) {
     });
     if (!response.ok) {
       console.error('Proxy fetch failed for URL:', url, 'Status:', response.status);
-      throw new Error('Failed to fetch image');
+      return NextResponse.redirect(`https://corsproxy.io/?${encodeURIComponent(url)}`, 302);
     }
     
     const buffer = await response.arrayBuffer();
@@ -32,6 +32,7 @@ export async function GET(req: Request) {
 
     return new NextResponse(buffer, { headers });
   } catch (error) {
-    return new NextResponse('Error fetching image', { status: 500 });
+    console.error('Proxy fetch threw error, redirecting to fallback:', error);
+    return NextResponse.redirect(`https://corsproxy.io/?${encodeURIComponent(url)}`, 302);
   }
 }

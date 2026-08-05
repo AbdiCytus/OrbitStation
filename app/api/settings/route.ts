@@ -9,7 +9,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
-  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, notifSoundEnabled, notifSoundUrl, shortcuts, isPublic, image, currentPassword, newPassword } = body;
+  const { name, username, callsign, bio, bannerUrl, titleBadge, animationEnabled, hologramEnabled, allowFriendRequests, staticBackgroundEnabled, saveFilterSortEnabled, notifSoundEnabled, notifSoundUrl, shortcuts, isPublic, allowPublicWorkspace, image, currentPassword, newPassword } = body;
 
   // Validate username uniqueness if changed
   if (username) {
@@ -53,6 +53,7 @@ export async function PATCH(req: Request) {
         ...(hologramEnabled !== undefined && { hologramEnabled: Boolean(hologramEnabled) }),
         ...(allowFriendRequests !== undefined && { allowFriendRequests: Boolean(allowFriendRequests) }),
         ...(staticBackgroundEnabled !== undefined && { staticBackgroundEnabled: Boolean(staticBackgroundEnabled) }),
+        ...(saveFilterSortEnabled !== undefined && { saveFilterSortEnabled: Boolean(saveFilterSortEnabled) }),
         ...(notifSoundEnabled !== undefined && { notifSoundEnabled: Boolean(notifSoundEnabled) }),
         ...(notifSoundUrl !== undefined && { notifSoundUrl: notifSoundUrl.trim() || null }),
         ...(shortcuts !== undefined && { shortcuts }),
@@ -81,11 +82,15 @@ export async function PATCH(req: Request) {
         });
       }
     }
-    if (isPublic !== undefined) {
+    if (isPublic !== undefined || allowPublicWorkspace !== undefined) {
+      const updateData: any = {};
+      if (isPublic !== undefined) updateData.isPublic = Boolean(isPublic);
+      if (allowPublicWorkspace !== undefined) updateData.allowPublicWorkspace = Boolean(allowPublicWorkspace);
+      
       await db.station.upsert({
         where: { userId: session.user.id },
-        update: { isPublic: Boolean(isPublic) },
-        create: { userId: session.user.id, isPublic: Boolean(isPublic) },
+        update: updateData,
+        create: { userId: session.user.id, ...updateData },
       });
     }
 

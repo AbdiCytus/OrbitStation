@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { getMyStation, getMyProfile, getCollabSectors } from "@/lib/queries";
+import { getMyStation, getMyProfile, getCollabSectors, getVisitedStation } from "@/lib/queries";
 import StationClient from "./station-client";
 
 export const metadata = {
@@ -12,18 +12,42 @@ export const metadata = {
   },
 };
 
-export default async function StationPage() {
+export default async function StationPage(
+  props: { searchParams?: Promise<{ visit?: string }> }
+) {
+  const searchParams = await props.searchParams;
+  const visitUsername = searchParams?.visit;
+
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const [station, profile, collabSectors] = await Promise.all([
-    getMyStation(),
-    getMyProfile(),
-    getCollabSectors(),
-  ]);
+  let station: any = null;
+  let collabSectors: any[] = [];
+  let visitingProfile: any = null;
+  const profile = await getMyProfile();
+
+  if (visitUsername && profile?.username !== visitUsername) {
+    station = await getVisitedStation(visitUsername);
+    if (!station) {
+      redirect("/station");
+    }
+    visitingProfile = {
+      id: station.userId,
+      username: visitUsername,
+      name: station.sectors[0]?.station?.user?.name || visitUsername,
+      image: station.sectors[0]?.station?.user?.image || null
+    };
+    collabSectors = [];
+  } else {
+    [station, collabSectors] = await Promise.all([
+      getMyStation(),
+      getCollabSectors(),
+    ]);
+  }
 
   return (
     <StationClient
+      visitingProfile={visitingProfile}
       initialStation={station}
       initialCollabSectors={collabSectors}
       user={{
@@ -35,6 +59,7 @@ export default async function StationPage() {
         animationEnabled: profile?.animationEnabled ?? true,
         staticBackgroundEnabled: (profile as any)?.staticBackgroundEnabled ?? false,
         hologramEnabled: (profile as any)?.hologramEnabled ?? true,
+        saveFilterSortEnabled: (profile as any)?.saveFilterSortEnabled ?? false,
         shortcuts: profile?.shortcuts ?? null,
         station: { isPublic: profile?.station?.isPublic ?? false },
       }}

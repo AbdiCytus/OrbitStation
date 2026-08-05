@@ -16,7 +16,8 @@ import {
   XMarkIcon,
   RocketLaunchIcon,
   CameraIcon,
-  TagIcon
+  TagIcon,
+  ArrowTopRightOnSquareIcon
 } from "@heroicons/react/24/outline";
 import { toPng } from "html-to-image";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
@@ -204,12 +205,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     catch { return beacon.url; }
   })();
 
-  const subroute = (() => {
-    try {
-      const url = new URL(beacon.url);
-      return url.pathname && url.pathname !== "/" ? url.pathname : null;
-    } catch { return null; }
-  })();
+
 
   const addedDate = new Date(beacon.createdAt).toLocaleDateString("en", {
     month: "short", day: "numeric", year: "numeric",
@@ -276,23 +272,6 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             </button>
             {!readOnly && (
               <>
-                {subroute && (
-                  <>
-                    <style>{`@media (max-width: 639px) { .hsr-subroute-label { display: none !important; } }`}</style>
-                    <div className="hsr-subroute-label" style={{
-                      background: "rgba(255, 255, 255, 0.1)",
-                      padding: "0.2rem 0.5rem",
-                      borderRadius: "6px",
-                      fontSize: "0.75rem",
-                      color: "#c4b5fd",
-                      marginRight: "0.5rem",
-                      display: "flex",
-                      alignItems: "center"
-                    }}>
-                      {subroute}
-                    </div>
-                  </>
-                )}
                 {canEdit && (
                   <>
                     {(!sector || sector.isPublic) && (
@@ -480,15 +459,32 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             </div>
 
             {/* CTA */}
-            <button
-              id={`btn-visit-hsr-${beacon.id}`}
-              className="hsr-visit-btn screenshot-ignore"
-              onClick={handleVisit}
-              style={{ padding: "0.6rem 1rem", fontSize: "0.9rem" }}
-            >
-              <span>Launch Beacon</span>
-              <span className="hsr-visit-arrow"><RocketLaunchIcon width={16} height={16} /></span>
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }} className="screenshot-ignore">
+              <button
+                id={`btn-visit-hsr-${beacon.id}`}
+                className="hsr-visit-btn"
+                onClick={handleVisit}
+                style={{ padding: "0.6rem 1rem", fontSize: "0.9rem", width: "100%" }}
+              >
+                <span>{((beacon as any).branches && (beacon as any).branches.length > 0) ? "Launch Main URL" : "Launch Beacon"}</span>
+                <span className="hsr-visit-arrow"><RocketLaunchIcon width={16} height={16} /></span>
+              </button>
+              {((beacon as any).branches || []).map((branch: any) => (
+                <button
+                  key={branch.id || branch.name}
+                  className="hsr-visit-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    incrementBeaconVisit(beacon.id);
+                    window.open(branch.url, "_blank", "noopener,noreferrer");
+                  }}
+                  style={{ padding: "0.6rem 1rem", fontSize: "0.9rem", width: "100%", background: "rgba(139, 92, 246, 0.1)", border: "1px solid rgba(139, 92, 246, 0.3)", color: "#c4b5fd", boxShadow: "none" }}
+                >
+                  <span>Launch {branch.name}</span>
+                  <span className="hsr-visit-arrow"><ArrowTopRightOnSquareIcon width={16} height={16} /></span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

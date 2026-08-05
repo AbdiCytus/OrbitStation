@@ -35,6 +35,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
   // Kondisikan inisialisasi URL awal berdasarkan autoHttps
   const [url, setUrl] = useState(autoHttps ? beacon.url.replace(/^https?:\/\//, "") : beacon.url);
   const [title, setTitle] = useState(beacon.title);
+  const [branches, setBranches] = useState<{id?: string, name: string, url: string}[]>((beacon as any).branches || []);
   const [description, setDescription] = useState(beacon.description ?? "");
   const [imageUrl, setImageUrl] = useState(beacon.imageUrl ?? "");
   const [faviconUrl, setFaviconUrl] = useState(beacon.faviconUrl || "");
@@ -145,6 +146,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
       imageUrl,
       faviconUrl,
       notes,
+      branches: branches.filter(b => b.name.trim() && b.url.trim()),
     });
     setLoading(false);
     if (result.error) {
@@ -247,6 +249,48 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
                 />
               </div>
               {formErrors.url && <span className="text-red-500 text-xs mt-1 block">{formErrors.url}</span>}
+              
+              <div style={{ marginTop: "0.5rem" }}>
+                {branches.map((branch, idx) => (
+                  <div key={idx} style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                    <input
+                      className="input input-sm"
+                      style={{ flex: 1 }}
+                      placeholder="Name (e.g. Github)"
+                      value={branch.name}
+                      onChange={e => {
+                        const newBranches = [...branches];
+                        newBranches[idx].name = e.target.value;
+                        setBranches(newBranches);
+                      }}
+                    />
+                    <input
+                      className="input input-sm"
+                      style={{ flex: 2 }}
+                      placeholder="URL"
+                      value={branch.url}
+                      onChange={e => {
+                        const newBranches = [...branches];
+                        newBranches[idx].url = e.target.value;
+                        setBranches(newBranches);
+                      }}
+                    />
+                    <button type="button" className="btn-icon" onClick={() => {
+                      const newBranches = [...branches];
+                      newBranches.splice(idx, 1);
+                      setBranches(newBranches);
+                    }} style={{ color: "#ef4444" }}>✕</button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="btn-text"
+                  style={{ fontSize: "0.75rem", marginTop: "0.5rem" }}
+                  onClick={() => setBranches([...branches, { name: "", url: "" }])}
+                >
+                  + Add Alternate URL (Branch)
+                </button>
+              </div>
             </div>
 
             {/* Title */}

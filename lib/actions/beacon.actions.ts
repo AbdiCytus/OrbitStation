@@ -23,6 +23,7 @@ export type BeaconFormData = {
   notes?: string;
   isPinned?: boolean;
   sectorId?: string;
+  branches?: { id?: string, name: string, url: string }[];
 };
 
 /** Tambah Suar (Beacon) baru ke dalam sebuah Sektor */
@@ -74,9 +75,18 @@ export async function createBeacon(sectorId: string, data: BeaconFormData) {
       notes: data.notes?.trim() || null,
       isPinned: data.isPinned ?? false,
       order: newOrder,
-      creatorId: user.id
+      creatorId: user.id,
+      ...(data.branches && data.branches.length > 0 && {
+        branches: {
+          create: data.branches.map((b, i) => ({
+            name: b.name.trim(),
+            url: b.url.trim(),
+            order: i
+          }))
+        }
+      })
     },
-    include: { creator: { select: { name: true, image: true } } }
+    include: { creator: { select: { name: true, image: true } }, branches: { orderBy: { order: "asc" } } }
   });
 
   const userIdsToNotify = new Set([sector.station.userId, ...sector.collaborators.map((c: any) => c.userId)]);
@@ -158,8 +168,18 @@ export async function updateBeacon(
       ...(data.notes !== undefined && { notes: data.notes.trim() || null }),
       ...(data.isPinned !== undefined && { isPinned: data.isPinned }),
       ...(data.sectorId !== undefined && { sectorId: data.sectorId }),
+      ...(data.branches !== undefined && {
+        branches: {
+          deleteMany: {},
+          create: data.branches.map((b, i) => ({
+            name: b.name.trim(),
+            url: b.url.trim(),
+            order: i
+          }))
+        }
+      })
     },
-    include: { creator: { select: { name: true, image: true } } }
+    include: { creator: { select: { name: true, image: true } }, branches: { orderBy: { order: "asc" } } }
   });
 
   const userIdsToNotify = new Set([beacon.sector.station.userId, ...beacon.sector.collaborators.map((c: any) => c.userId)]);
@@ -307,4 +327,18 @@ export async function reorderBeacons(
   return { success: true };
 }
 
-// ============================================================
+// ============================================================
+
+export async function bulkDeleteBeacons(beaconIds: string[]) {
+  for (const id of beaconIds) {
+    await deleteBeacon(id);
+  }
+  return { success: true };
+}
+
+export async function bulkMoveBeacons(beaconIds: string[], targetSectorId: string) {
+  for (const id of beaconIds) {
+    await updateBeacon(id, { sectorId: targetSectorId });
+  }
+  return { success: true };
+}

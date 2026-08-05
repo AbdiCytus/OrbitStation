@@ -575,13 +575,14 @@ export async function createOAuthApp(name: string, redirectUris: string[], homep
   }
 
   // 2. Validasi Redirect URIs (Harus match dengan origin Homepage)
-  for (const uri of redirectUris) {
+  for (let i = 0; i < redirectUris.length; i++) {
+    const uri = redirectUris[i];
     try {
       const parsed = new URL(uri.trim());
       if (!["http:", "https:"].includes(parsed.protocol)) {
         return { error: `Redirect URI must use http or https: ${uri}` };
       }
-      if (parsed.origin !== homeOrigin) {
+      if (i === 0 && parsed.origin !== homeOrigin) {
         return { error: `Redirect URI origin (${parsed.origin}) must match Homepage URL origin (${homeOrigin})` };
       }
     } catch {
@@ -650,13 +651,14 @@ export async function updateOAuthApp(appId: string, name: string, redirectUris: 
   }
 
   // 2. Validasi Redirect URIs (Harus match dengan origin Homepage)
-  for (const uri of redirectUris) {
+  for (let i = 0; i < redirectUris.length; i++) {
+    const uri = redirectUris[i];
     try {
       const parsed = new URL(uri.trim());
       if (!["http:", "https:"].includes(parsed.protocol)) {
         return { error: `Redirect URI must use http or https: ${uri}` };
       }
-      if (parsed.origin !== homeOrigin) {
+      if (i === 0 && parsed.origin !== homeOrigin) {
         return { error: `Redirect URI origin (${parsed.origin}) must match Homepage URL origin (${homeOrigin})` };
       }
     } catch {
@@ -714,6 +716,10 @@ export async function createTag(sectorId: string, name: string) {
   }
 
   try {
+    const count = await db.tag.count({ where: { sectorId } });
+    if (count >= 20) {
+      return { error: "Max 20 tags allowed per sector" };
+    }
     const tag = await db.tag.create({
       data: {
         sectorId,
