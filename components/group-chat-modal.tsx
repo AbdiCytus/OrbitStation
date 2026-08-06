@@ -20,6 +20,14 @@ import { BADGE_REGISTRY } from "@/lib/badges/registry";
 import SectorQRModal from "./sector-qr-modal";
 import { QrCodeIcon } from "@heroicons/react/24/outline";
 
+import ChatHeader from "./chat/chat-header";
+import MessageInput from "./chat/message-input";
+import MembersPanel from "./chat/members-panel";
+import TypingIndicator from "./chat/typing-indicator";
+import ConfirmActionModal from "./chat/confirm-action-modal";
+import MentionDetailPopup from "./chat/mention-detail-popup";
+import MessageList from "./chat/message-list";
+
 export const getAvatarBadgeClass = (titleBadge?: string | null) => {
   if (!titleBadge) return '';
   const badge = BADGE_REGISTRY.find(b => b.id === titleBadge);
@@ -816,304 +824,54 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
               }}
             >
               {/* Header */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(0,0,0,0.4)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "20px", flexShrink: 0, boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div style={{ width: "48px", height: "48px", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", boxShadow: "inset 0 2px 4px rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", backgroundColor: sector.color || "#8b5cf6", flexShrink: 0 }}>
-                    {sector.icon && typeof sector.icon === "string" && sector.icon.endsWith("Icon") ? (
-                      <DynamicIcon name={sector.icon as any} className="w-6 h-6 text-white" />
-                    ) : (sector.icon || "🌌")}
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                    <h3 style={{ fontWeight: 700, color: "white", fontSize: "1.125rem", lineHeight: 1.2, margin: 0 }}>{sector.name} Chat</h3>
-                    <div style={{ fontSize: "0.75rem", color: "#C4B5FD", display: "flex", alignItems: "center", gap: "4px" }}>
-                      <UserGroupIcon width={12} height={12} />
-                      {1 + (localCollaborators?.length || 0)} Members
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  {(isOwner || amIAdmin) && sector.inviteEnabled && (
-                    <button onClick={() => setShowQRModal(true)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showQRModal ? "rgba(139,92,246,0.2)" : "transparent", color: showQRModal ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }} data-tooltip="Share Invite QR">
-                      <QrCodeIcon width={22} height={22} />
-                    </button>
-                  )}
-                  <button onClick={() => setShowMembers(!showMembers)} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: showMembers ? "rgba(139,92,246,0.2)" : "transparent", color: showMembers ? "#A78BFA" : "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
-                    <UserGroupIcon width={22} height={22} />
-                  </button>
-                  <button onClick={handleCloseModal} style={{ padding: "8px", borderRadius: "10px", border: "none", cursor: "pointer", background: "transparent", color: "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
-                    <XMarkIcon width={22} height={22} />
-                  </button>
-                </div>
-              </div>
+              <ChatHeader
+                sector={sector}
+                collaboratorsCount={localCollaborators?.length || 0}
+                isOwner={isOwner}
+                amIAdmin={amIAdmin}
+                showMembers={showMembers}
+                setShowMembers={setShowMembers}
+                showQRModal={showQRModal}
+                setShowQRModal={setShowQRModal}
+                onClose={handleCloseModal}
+              />
 
               {/* Area Body & Chat */}
               <div className="flex flex-1 overflow-hidden relative">
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
-
-                  <AnimatePresence>
-                    {pinnedMessage && (
-                      <motion.div
-                        initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }}
-                        className="absolute top-0 left-0 right-0 z-20 bg-[rgba(20,20,30,0.95)] backdrop-blur-md border-b border-violet-500/30 py-2 px-4 flex items-center justify-between shadow-lg"
-                      >
-                        <div className="flex items-center gap-3 overflow-hidden flex-1 cursor-pointer" style={{ padding: "10px" }} onClick={() => {
-                          const el = document.getElementById(`msg-${pinnedMessage.id}`);
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }}>
-                          <MapPinIcon width={24} height={24} className="text-violet-400 shrink-0" />
-                          <div className="flex flex-col overflow-hidden">
-                            <span className="text-violet-400 text-[10px] font-bold uppercase tracking-wide">
-                              {pinnedMessage.sender?.name || pinnedMessage.sender?.username}
-                            </span>
-                            <span className="text-gray-200 text-sm truncate line-clamp-1">{pinnedMessage.content}</span>
-                          </div>
-                        </div>
-                        {(isOwner || amIAdmin) && (
-                          <button onClick={async () => {
-                            setPinnedMessage(null);
-                            await unpinGroupMessageAction(sector.id);
-                          }} className="text-gray-500 hover:text-white bg-transparent border-none cursor-pointer" style={{ padding: "10px 0", marginRight: "20px" }}>
-                            <XMarkIcon width={18} height={18} />
-                          </button>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  {/* Messages List */}
-                  <div
-                    ref={messagesContainerRef}
-                    onScroll={handleScroll}
-                    style={{ flex: 1, overflowY: "auto", padding: "16px", paddingTop: pinnedMessage ? "64px" : "16px", display: "flex", flexDirection: "column", gap: "12px", opacity: chatReady ? 1 : 0, transition: chatReady ? "opacity 0.2s ease-out" : "none", visibility: chatReady ? "visible" : "hidden" }}>
-
-                    {isLoading ? (
-                      <div className="flex flex-col items-center justify-center h-full gap-4 opacity-80 mt-10">
-                        {/* Spinner bergaya radar kosmos */}
-                        <div className="w-10 h-10 border-4 border-white/5 border-t-violet-500 rounded-full animate-spin"></div>
-                        <span className="text-violet-400 text-xs font-bold tracking-[0.2em] uppercase animate-pulse">
-                          Establishing Connection...
-                        </span>
-                      </div>
-                    ) : messages.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full gap-2 opacity-50 mt-10">
-                        <span className="text-4xl">🌌</span>
-                        <span className="text-gray-400 text-sm">No signals detected yet. Be the first to transmit.</span>
-                      </div>
-                    ) : (
-                      messages.map(msg => {
-                        const isMine = msg.senderId === user.id;
-                        const isMsgOwner = msg.senderId === sector.station?.userId || msg.senderId === sector.station?.user?.id || (isOwner && isMine);
-                        const showOptions = selectedMsgId === msg.id;
-                        const isSending = !!msg._isSending;
-
-                        if (msg.type === "SYSTEM") {
-                          return (
-                            <div key={msg.id} id={`msg-${msg.id}`} style={{ textAlign: "center", margin: "4px 0" }}>
-                              <span style={{ fontSize: "12px", fontWeight: 500, color: "rgba(156,163,175,1)", background: "rgba(255,255,255,0.05)", padding: "4px 12px", borderRadius: "999px", border: "1px solid rgba(255,255,255,0.1)" }}>
-                                {msg.sender?.name || msg.sender?.username} {msg.content}
-                              </span>
-                            </div>
-                          );
-                        }
-
-                        return (
-                          <div
-                            key={msg.id}
-                            id={`msg-${msg.id}`}
-                            style={{ display: "flex", flexDirection: "column", alignItems: isMine ? "flex-end" : "flex-start", position: "relative", opacity: isSending ? 0.5 : 1, transition: "opacity 0.2s" }}
-                          >
-                            <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", maxWidth: "85%" }}>
-                              {!isMine && (
-                                <div
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const targetUser = localCollaborators?.find((c: any) => c.user.id === msg.senderId)?.user || (sector.station?.userId === msg.senderId ? sector.station.user : msg.sender);
-                                    if (targetUser) setMentionDetail({ type: 'user', data: targetUser });
-                                  }}
-                                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                                  style={{
-                                    width: "32px", height: "32px", borderRadius: "50%", background: "#374151", overflow: "hidden", flexShrink: 0,
-                                    ...(isMsgOwner ? { border: "2px solid #FFD700", boxShadow: "0 0 12px 2px rgba(255,215,0,0.8)" } :
-                                      localCollaborators.find((c: any) => c.userId === msg.senderId)?.role === "ADMIN" ? { border: "2px solid #10B981" } :
-                                        { border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" })
-                                  } as any}
-                                >
-                                  <div className="w-full h-full rounded-full overflow-hidden relative">
-                                  {msg.sender?.image ? (
-                                    <img src={msg.sender.image} alt={msg.sender.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                  ) : (
-                                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", color: "#D1D5DB" }}>
-                                      {msg.sender?.username?.[0]?.toUpperCase()}
-                                    </div>
-                                  )}
-                                </div>
-                                </div>
-                              )}
-
-                              <div style={{ display: "flex", flexDirection: "column", alignItems: isMine ? "flex-end" : "flex-start" }}>
-                                {!isMine && (
-                                  <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginLeft: "4px", marginBottom: "4px" }}>
-                                    <span style={{ fontSize: "13px", fontWeight: 500, color: "#D1D5DB" }}>{msg.sender?.name || msg.sender?.username}</span>
-                                    <span style={{ fontSize: "10px", color: "#6B7280" }}>{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                                  </div>
-                                )}
-                                {isMine && (
-                                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "4px", marginRight: "4px" }}>
-                                    <span style={{ fontSize: "10px", color: "#6B7280" }}>
-                                      {isSending ? "Sending..." : new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                    </span>
-                                  </div>
-                                )}
-
-                                <motion.div
-                                  animate={{ x: (swipeOffset && swipeOffset.id === msg.id) ? swipeOffset.x : 0 }}
-                                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                                  onMouseDown={() => handlePressStart(msg.id)}
-                                  onMouseUp={handlePressEnd}
-                                  onMouseLeave={handlePressEnd}
-                                  onTouchStart={(e) => handleTouchStartSwipe(e, msg.id)}
-                                  onTouchEnd={handleTouchEndSwipe}
-                                  onTouchMove={(e) => handleTouchMoveSwipe(e, msg)}
-                                  onClick={(e) => { e.stopPropagation() }}
-                                  style={{
-                                    userSelect: "none",
-                                    WebkitUserSelect: "none",
-                                    padding: "10px 14px", borderRadius: "18px", width: "fit-content", cursor: "pointer", transition: "background 0.15s, border 0.15s, color 0.15s, border-radius 0.15s, box-shadow 0.15s", wordBreak: "break-word", fontSize: "15px", lineHeight: "1.5",
-                                    ...(msg.isDeleted ? {
-                                      background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.05)", color: "#6B7280", fontStyle: "italic"
-                                    } : isMine ? {
-                                      background: isSending ? "rgba(109,40,217,0.4)" : "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                                      border: "1px solid rgba(139,92,246,0.4)", color: "white", borderBottomRightRadius: "4px", boxShadow: isSending ? "none" : "0 4px 15px rgba(109,40,217,0.3)"
-                                    } : {
-                                      background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.06)", color: "#F3F4F6", borderBottomLeftRadius: "4px",
-                                    })
-                                  }}
-                                >
-                                  {msg.replyTo && !msg.isDeleted && (
-                                    <div
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        const el = document.getElementById(`msg-${msg.replyTo.id}`);
-                                        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                                      }}
-                                      style={{ cursor: "pointer", marginBottom: "8px", padding: "6px 10px", background: "rgba(0,0,0,0.25)", borderRadius: "10px", borderLeft: "3px solid rgba(139,92,246,0.8)", fontSize: "12px" }}
-                                    >
-                                      <div style={{ color: "#A78BFA", fontWeight: 600, marginBottom: "2px" }}>{msg.replyTo.sender?.name || msg.replyTo.sender?.username}</div>
-                                      <div style={{ color: "#D1D5DB", opacity: 0.85, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" as any }}>{msg.replyTo.isDeleted ? "Message deleted" : msg.replyTo.content}</div>
-                                    </div>
-                                  )}
-
-                                  <div>
-                                    {msg.isDeleted ? (
-                                      "This message was deleted"
-                                    ) : (amIBlinded && !isMine && msg.type !== "SYSTEM") ? (
-                                      <div style={{ padding: "0 10px", opacity: 0.3 }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-                                    ) : (
-                                      msg.content.split(/(\s+)/).map((word: string, i: number) => {
-                                        if (word.match(/^https?:\/\//)) {
-                                          return <a key={i} href={word} target="_blank" rel="noreferrer" onClick={e => { if (!e.ctrlKey && !e.metaKey) e.preventDefault(); }} style={{ color: "#93C5FD", textDecoration: "underline" }} data-tooltip="Ctrl+Click to open">{word}</a>;
-                                        }
-                                        if (word.startsWith('@')) {
-                                          const clean = word.replace('@', '');
-                                          const isMe = clean.toLowerCase() === user.username.toLowerCase();
-                                          if (isMe) {
-                                            return <span key={i}>{word}</span>;
-                                          }
-
-                                          return (
-                                            <span
-                                              key={i}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedMsgId(null);
-                                                const targetUser = localCollaborators?.find((c: any) => c.user.username.toLowerCase() === clean.toLowerCase())?.user || (sector.station?.user?.username.toLowerCase() === clean.toLowerCase() ? sector.station.user : null);
-                                                if (targetUser) { setMentionDetail({ type: 'user', data: targetUser }); return; }
-                                                const targetBeacon = sector.beacons?.find((b: any) => b.title.replace(/\s+/g, '').toLowerCase() === clean.toLowerCase());
-                                                if (targetBeacon) setMentionDetail({ type: 'beacon', data: targetBeacon });
-                                              }}
-                                              style={{ fontWeight: 600, padding: "1px 5px", borderRadius: "5px", background: "rgba(139,92,246,0.25)", color: "#C4B5FD", cursor: "pointer" }}
-                                            >
-                                              {word}
-                                            </span>
-                                          );
-                                        }
-                                        return <span key={i}>{word}</span>;
-                                      })
-                                    )}
-                                  </div>
-                                  {msg.editedAt && !msg.isDeleted && <span style={{ fontSize: "10px", opacity: 0.5, marginLeft: "6px", fontStyle: "italic" }}>(edited)</span>}
-                                </motion.div>
-                              </div>
-                            </div>
-
-                            {/* Action Menu popover */}
-                            <AnimatePresence>
-                              {showOptions && !msg.isDeleted && !isSending && (
-                                <motion.div
-                                  onClick={(e) => e.stopPropagation()}
-                                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                                  exit={{ opacity: 0, scale: 0.9 }}
-                                  style={{
-                                    position: "absolute", zIndex: 10, display: "flex", gap: "4px", padding: "6px", background: "rgba(17,17,30,0.97)",
-                                    backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                                    bottom: "100%", marginBottom: "4px",
-                                    ...(isMine ? { right: 0 } : { left: "40px" })
-                                  }}
-                                >
-                                  <button onClick={async () => {
-                                    setSelectedMsgId(null);
-                                    setPinnedMessage(msg);
-                                    await pinGroupMessageAction(sector.id, msg.id);
-                                  }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Pin Message" style={{ padding: "10px" }}>
-                                    <MapPinIcon width={18} height={18} />
-                                  </button>
-                                  <button onClick={() => { setReplyToMsg(msg); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Reply" style={{ padding: "10px" }}>
-                                    <ArrowUturnLeftIcon width={18} height={18} />
-                                  </button>
-                                  <button onClick={() => { navigator.clipboard.writeText(msg.content); toast.success("Copied to clipboard"); setSelectedMsgId(null); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Copy" style={{ padding: "10px" }}>
-                                    <ClipboardDocumentIcon width={18} height={18} />
-                                  </button>
-                                  {msg.content.match(/https?:\/\/[^\s]+/) && (
-                                    <button onClick={() => window.open(msg.content.match(/https?:\/\/[^\s]+/)[0], "_blank")} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Open Link" style={{ padding: "10px" }}>
-                                      <LinkIcon width={18} height={18} />
-                                    </button>
-                                  )}
-                                  {isMine && (
-                                    <button onClick={() => { setEditMsgId(msg.id); setInputMessage(msg.content); setSelectedMsgId(null); inputRef.current?.focus(); }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Edi t" style={{ padding: "10px" }}>
-                                      <PencilIcon width={18} height={18} />
-                                    </button>
-                                  )}
-                                  {(isMine || isOwner) && (
-                                    <button onClick={() => handleDeleteMsg(msg.id)} className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors border-none bg-transparent cursor-pointer" data-tooltip="Delete" style={{ padding: "10px" }}>
-                                      <TrashIcon width={18} height={18} />
-                                    </button>
-                                  )}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        );
-                      })
-                    )}
-                    <div ref={messagesEndRef} />
-                  </div>
+                  <MessageList
+                    messages={messages}
+                    user={user}
+                    sector={sector}
+                    isOwner={isOwner}
+                    amIAdmin={amIAdmin}
+                    localCollaborators={localCollaborators}
+                    pinnedMessage={pinnedMessage}
+                    setPinnedMessage={setPinnedMessage}
+                    messagesContainerRef={messagesContainerRef}
+                    messagesEndRef={messagesEndRef}
+                    chatReady={chatReady}
+                    isLoading={isLoading}
+                    swipeOffset={swipeOffset}
+                    selectedMsgId={selectedMsgId}
+                    setSelectedMsgId={setSelectedMsgId}
+                    amIBlinded={amIBlinded}
+                    handleScroll={handleScroll}
+                    handlePressStart={handlePressStart}
+                    handlePressEnd={handlePressEnd}
+                    handleTouchStartSwipe={handleTouchStartSwipe}
+                    handleTouchMoveSwipe={handleTouchMoveSwipe}
+                    handleTouchEndSwipe={handleTouchEndSwipe}
+                    setMentionDetail={setMentionDetail}
+                    setReplyToMsg={setReplyToMsg}
+                    inputRef={inputRef}
+                    setEditMsgId={setEditMsgId}
+                    setInputMessage={setInputMessage}
+                    handleDeleteMsg={handleDeleteMsg}
+                  />
 
                   {/* Typing Indicator */}
-                  {typingUsers.length > 0 && (
-                    <div style={{ padding: "4px 16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <div style={{ display: "flex", gap: "4px", alignItems: "center", background: "rgba(0,0,0,0.6)", padding: "6px 12px", borderRadius: "999px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(4px)" }}>
-                        <span style={{ fontSize: "12px", color: "#A78BFA", fontWeight: 500 }}>
-                          {typingUsers.map((u: any) => u.name || u.username).join(', ')} {typingUsers.length > 1 ? 'are' : 'is'} typing
-                        </span>
-                        <div style={{ display: "flex", gap: "3px", marginLeft: "4px" }}>
-                          <motion.span animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} style={{ width: "4px", height: "4px", background: "#A78BFA", borderRadius: "50%", display: "block" }} />
-                          <motion.span animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} style={{ width: "4px", height: "4px", background: "#A78BFA", borderRadius: "50%", display: "block" }} />
-                          <motion.span animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} style={{ width: "4px", height: "4px", background: "#A78BFA", borderRadius: "50%", display: "block" }} />
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <TypingIndicator typingUsers={typingUsers} />
 
                   <AnimatePresence>
                     {isScrolledUp && (
@@ -1137,394 +895,78 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
                     )}
                   </AnimatePresence>
 
-                  {/* Input Area */}
-                  <div style={{ padding: "12px 16px", background: "rgba(0,0,0,0.5)", borderTop: "1px solid rgba(255,255,255,0.07)", position: "relative", backdropFilter: "blur(10px)" }}>
-
-                    {/* Reply / Edit Context... */}
-                    {replyToMsg && (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", padding: "8px 12px", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: "10px" }}>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
-                          <span style={{ fontSize: "12px", color: "#A78BFA", fontWeight: 600 }}>Replying to {replyToMsg.sender?.name || replyToMsg.sender?.username}</span>
-                          <span style={{ fontSize: "13px", color: "#D1D5DB", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "300px" }}>{replyToMsg.content}</span>
-                        </div>
-                        <button onClick={() => setReplyToMsg(null)} style={{ padding: "4px", color: "#9CA3AF", background: "transparent", border: "none", cursor: "pointer" }}>
-                          <XMarkIcon width={16} height={16} />
-                        </button>
-                      </div>
-                    )}
-                    {editMsgId && (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", padding: "8px 12px", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: "10px" }}>
-                        <span style={{ fontSize: "12px", color: "#60A5FA", fontWeight: 600 }}>Editing Message</span>
-                        <button onClick={() => { setEditMsgId(null); setInputMessage(""); }} style={{ padding: "4px", color: "#9CA3AF", background: "transparent", border: "none", cursor: "pointer" }}>
-                          <XMarkIcon width={16} height={16} />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Mention Suggestions */}
-                    <AnimatePresence>
-                      {mentionQuery && mentionSuggestions.length > 0 && (
-                        <motion.div
-                          ref={suggestionContainerRef}
-                          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                          style={{ position: "absolute", bottom: "100%", left: "16px", marginBottom: "8px", background: "rgba(17,17,30,0.97)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: "14px", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", overflow: "hidden", zIndex: 20, maxHeight: "156px", overflowY: "auto", minWidth: "220px" }}
-                        >
-                          {mentionSuggestions.map((sg: any, idx: number) => (
-                            <div
-                              key={idx}
-                              onClick={() => insertMention(sg.text)}
-                              style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", transition: "background 0.15s", background: idx === mentionSelectedIndex ? "rgba(139,92,246,0.3)" : "transparent" }}
-                            >
-                              {sg.image ? <img src={sg.image} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} /> : <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#374151", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", flexShrink: 0 }}>{sg.label[0]?.toUpperCase()}</div>}
-                              <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                                <span style={{ fontSize: "14px", fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px", display: "block" }}>{sg.label}</span>
-                                {sg.subtitle && <span style={{ fontSize: "12px", color: "#9CA3AF", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sg.subtitle}</span>}
-                              </div>
-                            </div>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    <form onSubmit={handleSendMessage} style={{ display: "flex", gap: "8px" }}>
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        disabled={isUserMuted}
-                        placeholder={isUserMuted ? "You are muted in this group." : "Type a message..."}
-                        value={inputMessage}
-                        onChange={handleInputChange}
-                        onKeyDown={(e) => {
-                          if (mentionQuery && mentionSuggestions.length > 0) {
-                            if (e.key === "ArrowDown") {
-                              e.preventDefault();
-                              setMentionSelectedIndex(p => Math.min(p + 1, mentionSuggestions.length - 1));
-                            } else if (e.key === "ArrowUp") {
-                              e.preventDefault();
-                              setMentionSelectedIndex(p => Math.max(p - 1, 0));
-                            } else if (e.key === "Enter" || e.key === "Tab") {
-                              e.preventDefault();
-                              insertMention(mentionSuggestions[mentionSelectedIndex].text);
-                            } else if (e.key === "Escape") {
-                              setMentionQuery(null);
-                            }
-                          }
-                        }}
-                        style={{ flex: 1, background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", color: "white", padding: "10px 16px", borderRadius: "12px", outline: "none", fontSize: "14px", transition: "border-color 0.2s" }}
-                        onFocus={e => e.target.style.borderColor = "rgba(139,92,246,0.6)"}
-                        onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
-                      />
-                      <button
-                        type="submit"
-                        disabled={isUserMuted || !inputMessage.trim()}
-                        style={{ background: isUserMuted || !inputMessage.trim() ? "#374151" : "linear-gradient(135deg, #7c3aed, #4f46e5)", color: isUserMuted || !inputMessage.trim() ? "#6B7280" : "white", padding: "10px 14px", borderRadius: "12px", border: "none", cursor: isUserMuted || !inputMessage.trim() ? "not-allowed" : "pointer", boxShadow: inputMessage.trim() ? "0 0 15px rgba(109,40,217,0.4)" : "none", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-                      >
-                        <PaperAirplaneIcon width={22} height={22} />
-                      </button>
-                    </form>
-                  </div>
+                  <MessageInput
+                    replyToMsg={replyToMsg}
+                    setReplyToMsg={setReplyToMsg}
+                    editMsgId={editMsgId}
+                    setEditMsgId={setEditMsgId}
+                    inputMessage={inputMessage}
+                    setInputMessage={setInputMessage}
+                    handleInputChange={handleInputChange}
+                    handleSendMessage={handleSendMessage}
+                    isUserMuted={isUserMuted}
+                    mentionQuery={mentionQuery}
+                    mentionSuggestions={mentionSuggestions}
+                    mentionSelectedIndex={mentionSelectedIndex}
+                    insertMention={insertMention}
+                    suggestionContainerRef={suggestionContainerRef}
+                    inputRef={inputRef}
+                    onKeyDown={(e) => {
+                      if (mentionQuery && mentionSuggestions.length > 0) {
+                        if (e.key === "ArrowDown") {
+                          e.preventDefault();
+                          setMentionSelectedIndex(p => Math.min(p + 1, mentionSuggestions.length - 1));
+                        } else if (e.key === "ArrowUp") {
+                          e.preventDefault();
+                          setMentionSelectedIndex(p => Math.max(p - 1, 0));
+                        } else if (e.key === "Enter" || e.key === "Tab") {
+                          e.preventDefault();
+                          insertMention(mentionSuggestions[mentionSelectedIndex].text);
+                        } else if (e.key === "Escape") {
+                          setMentionQuery(null);
+                        }
+                      }
+                    }}
+                  />
                 </div>
 
-                <AnimatePresence>
-                  {showMembers && (
-                    <motion.div
-                      initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 240, opacity: 1 }}
-                      exit={{ width: 0, opacity: 0 }}
-                      className="absolute right-0 top-0 bottom-0 sm:relative sm:top-auto sm:bottom-auto z-50 flex flex-col flex-shrink-0 h-full border-l border-white/10"
-                      style={{ background: "rgba(15,15,25,0.95)", backdropFilter: "blur(12px)", overflow: "hidden" }}
-                    >
-                      {/* Members Header */}
-                      <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", gap: "8px" }}>
-                        <UserGroupIcon width={16} height={16} style={{ color: "#A78BFA", flexShrink: 0 }} />
-                        <h4 style={{ color: "white", fontWeight: 700, fontSize: "14px", margin: 0 }}>Members</h4>
-                        <span style={{ fontSize: "12px", color: "#6B7280", marginLeft: "auto" }}>{1 + (localCollaborators?.length || 0)}</span>
-                      </div>
-
-                      {/* Members List */}
-                      <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
-                        {sector.station?.user && (
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", borderRadius: "10px", background: "rgba(255,255,255,0.05)", marginBottom: "4px" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                              <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
-                                <div
-                                  onClick={(e) => { e.stopPropagation(), setMentionDetail({ type: 'user', data: sector.station.user }) }}
-                                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                                  style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#374151", border: "2px solid #FFD700", boxShadow: "0 0 8px rgba(255,215,0,0.5)", overflow: "hidden" }}
-                                >
-                                  <div className="w-full h-full rounded-full overflow-hidden relative">
-                                    {sector.station.user.image
-                                      ? <img src={sector.station.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                      : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{sector.station.user.username?.[0]?.toUpperCase()}</div>
-                                    }
-                                  </div>
-                                </div>
-                                {/* Titik Online */}
-                                <div style={{
-                                  position: "absolute", bottom: -2, right: -2, width: "12px", height: "12px", borderRadius: "50%",
-                                  background: onlineUserIds.has(sector.station.user.id) ? "#10B981" : "#4B5563", border: "2px solid rgba(15,15,25,0.95)",
-                                  transition: "background 0.3s"
-                                }} data-tooltip={onlineUserIds.has(sector.station.user.id) ? "Online" : "Offline"} />
-                              </div>
-                              <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                                <span style={{ fontSize: "14px", fontWeight: 500, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "130px" }}>{sector.station.user.name || sector.station.user.username}</span>
-                                <span style={{ fontSize: "10px", color: "#A78BFA", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Owner</span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {localCollaborators?.map((c: any) => {
-                          const isMuted = isMuteAll
-                            ? (!mutedMembers.includes(c.user.id))
-                            : (mutedMembers.includes(c.user.id));
-                          const isOnline = onlineUserIds.has(c.user.id);
-                          return (
-                            <div key={c.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", borderRadius: "10px", marginBottom: "2px", transition: "background 0.15s", cursor: "default" }}
-                              onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
-                              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                            >
-                              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-
-                                {/* STRUKTUR AVATAR MEMBER YANG BARU */}
-                                <div style={{ position: "relative", width: "34px", height: "34px", flexShrink: 0 }}>
-                                  <div
-                                    onClick={(e) => { e.stopPropagation(); setMentionDetail({ type: 'user', data: c.user }) }}
-                                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                                    style={{
-                                      width: "100%", height: "100%", borderRadius: "50%", background: "#374151", overflow: "hidden",
-                                      ...(c.role === "ADMIN" ? { border: "2px solid #10B981" } : { border: "1px solid rgba(255,255,255,0.1)" })
-                                    } as any}
-                                  >
-                                    <div className="w-full h-full rounded-full overflow-hidden relative">
-                                      {c.user.image
-                                        ? <img src={c.user.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                        : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", color: "#D1D5DB" }}>{c.user.username?.[0]?.toUpperCase()}</div>
-                                      }
-                                    </div>
-                                  </div>
-
-                                  {/* Titik Online Indicator */}
-                                  <div style={{
-                                    position: "absolute", bottom: -2, right: -2, width: "12px", height: "12px", borderRadius: "50%",
-                                    background: isOnline ? "#10B981" : "#4B5563", border: "2px solid rgba(15,15,25,0.95)",
-                                    transition: "background 0.3s"
-                                  }} data-tooltip={isOnline ? "Online" : "Offline"} />
-                                </div>
-                                {/* END AVATAR MEMBER */}
-
-                                <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                                  <span style={{ fontSize: "14px", fontWeight: 500, color: "#E5E7EB", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100px" }}>{c.user.name || c.user.username}</span>
-                                  <span style={{ fontSize: "10px", color: c.role === "ADMIN" ? "#10B981" : "#9CA3AF", fontWeight: 700, textTransform: "uppercase" }}>{c.role} {isMuted && <span style={{ color: "#F87171" }}>• MUTED</span>}</span>
-                                </div>
-                              </div>
-                              {isOwner && (
-                                <button
-                                  onClick={async () => {
-                                    if (isMuted) {
-                                      await unmuteMember(sector.id, c.user.id);
-                                      setMutedMembers(prev => prev.filter(id => id !== c.user.id));
-                                    } else {
-                                      await muteMember(sector.id, c.user.id);
-                                      setMutedMembers(prev => [...prev, c.user.id]);
-                                    }
-                                  }}
-                                  style={{ fontSize: "12px", padding: "4px 8px", background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "6px", color: "white", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, transition: "background 0.15s" }}
-                                >
-                                  {isMuted ? "Unmute" : "Mute"}
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <MembersPanel
+                  showMembers={showMembers}
+                  sector={sector}
+                  localCollaborators={localCollaborators}
+                  isOwner={isOwner}
+                  isMuteAll={isMuteAll}
+                  mutedMembers={mutedMembers}
+                  setMutedMembers={setMutedMembers}
+                  onlineUserIds={onlineUserIds}
+                  setMentionDetail={setMentionDetail}
+                />
               </div>
 
               {/* Popover Detail Mention */}
-              <AnimatePresence>
-                {mentionDetail && (() => {
-                  const isUserType = mentionDetail.type === 'user';
-                  const allowAddFriend = isUserType && mentionDetail.data.allowFriendRequests !== false;
-                  const allowVisitProfile = isUserType && mentionDetail.data.station?.isPublic !== false;
-                  const isAlreadyFriend = isUserType && myFriends.some(f => f.id === mentionDetail.data.id);
-                  const isPending = isUserType && pendingRequests.has(mentionDetail.data.id);
-
-                  const dataAsUser = mentionDetail.data as any;
-                  const badge = isUserType && dataAsUser.titleBadge ? BADGE_REGISTRY.find(b => b.id === dataAsUser.titleBadge) : null;
-                  const isSpecial = badge?.rarity === "ekslusif";
-                  const isExclusive = badge?.rarity === "super-ekslusif" || badge?.rarity === "developer";
-
-                  const avatarBadgeClass = badge 
-                    ? isExclusive 
-                      ? `avatar-badge avatar-exclusive-${badge.id}`
-                      : isSpecial 
-                        ? `avatar-badge avatar-badge-special-${badge.color}`
-                        : `avatar-badge avatar-badge-common-${badge.color}`
-                    : '';
-                  
-                  const avatarSweepClass = isExclusive || isSpecial ? 'public-badge-sweep' : '';
-
-                  return (
-                    <motion.div
-                      onClick={(e) => e.stopPropagation()}
-                      initial={{ opacity: 0, scale: 0.9, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                      className={`!absolute z-[120] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border flex flex-col gap-4 min-w-[300px] chat-mention-modal ${isExclusive && badge ? badge.effectClass : ''} ${badge?.id === 'shattered' ? 'modal-shattered' : ''}`}
-                      style={{ 
-                        padding: "1.5rem", 
-                        backgroundColor: "rgba(15,15,25,0.95)",
-                        backgroundImage: badge && isSpecial ? `radial-gradient(circle at top right, ${getModalTint(badge.color)}, transparent)` : undefined,
-                        borderColor: getModalBorder(badge?.color),
-                        backdropFilter: "blur(20px)"
-                      }}
-                    >
-                      {(isExclusive) && <div className="modal-exclusive-sparkles" />}
-                      <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: "inherit", pointerEvents: "none", zIndex: 0 }}>
-                        {badge?.id === 'the-completionist' && <div className="modal-completionist-wave" />}
-                        {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-wave-layer" />}
-                        {badge?.id === 'zodiac-horizon' && <div className="modal-zodiac-blackhole" />}
-                      </div>
-                      <button onClick={() => setMentionDetail(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-transparent border-none cursor-pointer z-50">
-                        <XMarkIcon width={20} height={20} />
-                      </button>
-
-                      <div className="flex items-center gap-5 relative z-10">
-                        <div style={{ position: 'relative', flexShrink: 0 }}>
-                          {badge?.id === 'zodiac-horizon' && (
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-back" />
-                          )}
-                          {badge?.id === 'zodiac-horizon' && (
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-back" />
-                          )}
-                          <div 
-                            className={`shrink-0 flex items-center justify-center rounded-full bg-[#1a1a2e] ${avatarBadgeClass}`} 
-                            style={{ 
-                              width: '74px', height: '74px', '--avatar-radius': '37px', overflow: 'visible', position: 'relative', zIndex: 1,
-                              ...( !badge ? { border: '3px solid #a78bfa', boxShadow: '0 0 20px rgba(167, 139, 250, 0.4)' } : {} )
-                            } as React.CSSProperties}
-                          >
-                            <div className={`w-full h-full rounded-full overflow-hidden relative ${avatarSweepClass}`}>
-                              <img src={mentionDetail.data.image || mentionDetail.data.faviconUrl || '/default.png'} className="w-full h-full object-cover relative z-10" />
-                            </div>
-                          </div>
-                          {badge?.id === 'zodiac-horizon' && (
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-1 avatar-exclusive-zodiac-horizon-orbit-front" />
-                          )}
-                          {badge?.id === 'zodiac-horizon' && (
-                            <div className="avatar-exclusive-zodiac-horizon-orbit-2 avatar-exclusive-zodiac-horizon-orbit-front" />
-                          )}
-                        </div>
-                        <div className="flex flex-col pr-6">
-                          <h4 className="text-white font-bold text-lg m-0">{mentionDetail.data.name || mentionDetail.data.title}</h4>
-                          {isUserType ? (
-                            <>
-                              <p className="text-gray-400 text-sm m-0">@{mentionDetail.data.username} {mentionDetail.data.callsign ? `• ${mentionDetail.data.callsign}` : ''}</p>
-                              {badge && (
-                                <div className="zodiac-orbit-wrapper" style={{ position: 'relative', width: 'fit-content' }}>
-                                  {badge.id === 'zodiac-horizon' && (
-                                    <>
-                                      <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-back" />
-                                      <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-back" />
-                                    </>
-                                  )}
-                                  <div className={`badge-card ${isExclusive || isSpecial ? 'public-badge-sweep' : ''} ${badge.effectClass} pr-5 py-1 pl-1 rounded-full flex items-center gap-2.5 border backdrop-blur-sm shadow-lg mt-1.5`} style={{ width: 'fit-content', position: 'relative', zIndex: 1, marginTop: "0.25rem" }}>
-                                    {badge.id === 'the-completionist' && <div className="badge-wave-layer" />}
-                                    {badge.id === 'zodiac-horizon' && <div className="badge-zodiac-wave-layer" />}
-                                    <div className="badge-icon w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
-                                      <DynamicIcon name={badge.icon as any} className="w-3.5 h-3.5 relative z-10" />
-                                    </div>
-                                    <span className="badge-content relative z-10 text-white font-bold tracking-wide text-[12px] drop-shadow-md" style={{marginRight: "0.5rem"}}>
-                                      {badge.name}
-                                    </span>
-                                  </div>
-                                  {badge.id === 'zodiac-horizon' && (
-                                    <>
-                                      <div className="badge-zodiac-orbit-1 badge-zodiac-orbit-front" />
-                                      <div className="badge-zodiac-orbit-2 badge-zodiac-orbit-front" />
-                                    </>
-                                  )}
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <p className="text-violet-400 text-sm m-0">Sector Beacon Reference</p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 w-full">
-                        {isUserType ? (
-                          <>
-                            {allowAddFriend && (
-                              <button
-                                disabled={isAlreadyFriend || isPending}
-                                onClick={async () => {
-                                  if (isAlreadyFriend || isPending) return;
-                                  
-                                  setPendingRequests(prev => new Set(prev).add(mentionDetail.data.id));
-                                  toast.success("Friend request sent!");
-                                  const res = await sendFriendRequest(mentionDetail.data.id);
-                                  if ((res as any).error) {
-                                    toast.error((res as any).error);
-                                    setPendingRequests(prev => {
-                                      const next = new Set(prev);
-                                      next.delete(mentionDetail.data.id);
-                                      return next;
-                                    });
-                                  }
-                                }}
-                                style={{ padding: "5px 0" }}
-                                className={`flex-1 flex justify-center items-center gap-2 rounded-xl text-sm font-semibold transition-colors border-none ${
-                                  isAlreadyFriend || isPending ? 'bg-white/5 text-gray-400 cursor-default' : 'bg-violet-600 hover:bg-violet-500 text-white cursor-pointer'
-                                }`}
-                              >
-                                {isAlreadyFriend ? <UsersIcon width={18} height={18} /> : <UserPlusIcon width={18} height={18} />}
-                                {isAlreadyFriend ? "Friends" : isPending ? "Pending" : "Add Friend"}
-                              </button>
-                            )}
-                            {allowVisitProfile && (
-                              <a
-                                href={`/station/${mentionDetail.data.username}`}
-                                target="_blank"
-                                style={{ padding: "5px 0", color: "white" }}
-                                className="flex-1 flex justify-center items-center gap-2 text-center bg-white/10 hover:bg-white/20 rounded-xl text-sm font-semibold transition-colors no-underline"
-                              >
-                                <GlobeAltIcon width={18} height={18} /> Visit Profile
-                              </a>
-                            )}
-                            {!allowAddFriend && !allowVisitProfile && (
-                              <p className="text-gray-500 text-sm italic w-full text-center m-0">This pilot's station is completely private.</p>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => {
-                                setSelectedBeaconIdForDetail(mentionDetail.data.id);
-                                setMentionDetail(null);
-                              }}
-                              style={{ padding: "5px 0" }}
-                              className="flex-1 flex justify-center items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-sm font-semibold transition-colors border-none cursor-pointer"
-                            >
-                              <EyeIcon width={18} height={18} /> See Detail
-                            </button>
-                            <a
-                              href={mentionDetail.data.url}
-                              target="_blank"
-                              style={{ padding: "5px 0", color: "white" }}
-                              className="flex-1 flex justify-center items-center gap-2 text-center bg-white/10 hover:bg-white/20 rounded-xl text-sm font-semibold transition-colors no-underline"
-                            >
-                              <RocketLaunchIcon width={18} height={18} /> Launch
-                            </a>
-                          </>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })()}
-              </AnimatePresence>
+              <MentionDetailPopup
+                mentionDetail={mentionDetail}
+                onClose={() => setMentionDetail(null)}
+                myFriends={myFriends}
+                pendingRequests={pendingRequests}
+                onSendFriendRequest={async (userId) => {
+                  setPendingRequests(prev => new Set(prev).add(userId));
+                  toast.success("Friend request sent!");
+                  const res = await sendFriendRequest(userId);
+                  if ((res as any).error) {
+                    toast.error((res as any).error);
+                    setPendingRequests(prev => {
+                      const next = new Set(prev);
+                      next.delete(userId);
+                      return next;
+                    });
+                  }
+                }}
+                onViewBeaconDetail={(beaconId) => {
+                  setSelectedBeaconIdForDetail(beaconId);
+                  setMentionDetail(null);
+                }}
+              />
 
             </div>
           </motion.div>
@@ -1544,46 +986,12 @@ export default function GroupChatModal({ isOpen, onClose, sector: incomingSector
           />
         );
       })()}
-      <AnimatePresence>
-        {confirmAction && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="flex flex-col gap-4 w-full max-w-[400px] rounded-2xl p-6 shadow-2xl"
-              style={{ background: "rgba(20,20,30,0.95)", border: "1px solid rgba(239,68,68,0.3)", backdropFilter: "blur(12px)", padding: "20px" }}
-            >
-              <h3 className="text-[#ef4444] text-xl font-bold m-0">
-                {confirmAction.type === 'clear' ? 'Clear Chat History?' : 'Kick Member?'}
-              </h3>
-              <p className="text-gray-300 text-sm leading-relaxed m-0">
-                {confirmAction.type === 'clear'
-                  ? "Are you absolutely sure you want to clear all messages in this group chat? This action cannot be undone and will affect all members."
-                  : `Are you sure you want to kick ${confirmAction.targetUser?.name || confirmAction.targetUser?.username} (@${confirmAction.targetUser?.username}) from this sector? They will lose access immediately.`}
-              </p>
-
-              <div className="flex justify-end gap-3 mt-4">
-                <button
-                  onClick={() => setConfirmAction(null)}
-                  className="px-4 py-2 rounded-xl bg-transparent text-gray-400 hover:text-white border border-white/20 transition-colors cursor-pointer"
-                  style={{ padding: "8px 24px" }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmAction.type === 'clear' ? executeClearChat : executeKickMember}
-                  className="px-4 py-2 rounded-xl bg-[#ef4444] hover:bg-red-600 text-white font-semibold border-none transition-colors cursor-pointer"
-                  style={{ padding: "8px 24px" }}
-                >
-                  {confirmAction.type === 'clear' ? 'Clear Messages' : 'Kick Member'}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ConfirmActionModal
+        confirmAction={confirmAction}
+        onCancel={() => setConfirmAction(null)}
+        onConfirmClear={executeClearChat}
+        onConfirmKick={executeKickMember}
+      />
       <SectorQRModal
         isOpen={showQRModal}
         onClose={() => setShowQRModal(false)}
