@@ -22,8 +22,6 @@ import FriendsModal from "@/components/friends-modal";
 import StationNavbar from "@/components/station-navbar";
 import SpaceBackground from "@/components/space-background";
 import StaticStarfield from "@/components/static-starfield";
-import { deleteSector, reorderSectors } from "@/lib/actions/sector.actions";
-import { deleteBeacon, updateBeacon, reorderBeacons } from "@/lib/actions/beacon.actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import {
   PlusIcon,
@@ -51,8 +49,12 @@ import {
 import GroupChatModal from "@/components/group-chat-modal";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useBeaconColors } from "@/hooks/use-beacon-colors";
+import { useRealtimeSync } from "@/hooks/use-realtime-sync";
+import { useSectorDrag } from "@/hooks/use-sector-drag";
+import { useBeaconFilters } from "@/hooks/use-beacon-filters";
+import { useStationCrud } from "@/hooks/use-station-crud";
 import { toast } from "sonner";
-import { pusherClient } from "@/lib/pusher-client";
 
 type Props = {
   initialStation: StationWithSectors | null;
@@ -83,9 +85,6 @@ export default function StationClient({
   const [collabSectors, setCollabSectors] = useState(initialCollabSectors);
   const [activeSectorId, setActiveSectorId] = useState<string | "all">("all");
   const [displaySectorId, setDisplaySectorId] = useState<string | "all">("all");
-  const [loadedSectorId, setLoadedSectorId] = useState<string | null>(null);
-  const [tagFilterMode, setTagFilterMode] = useState<"union" | "intersect">("union");
-  const [beaconColors, setBeaconColors] = useState<Record<string, number>>({});
   const [isExiting, setIsExiting] = useState(false);
   const [isEntering, setIsEntering] = useState(true);
   const [funFact, setFunFact] = useState("");
@@ -95,11 +94,38 @@ export default function StationClient({
   );
   const [isIdle, setIsIdle] = useState(false);
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
-  const [shrinkingBeacons, setShrinkingBeacons] = useState<Set<string>>(
-    new Set(),
-  );
-  const [growingBeacons, setGrowingBeacons] = useState<Set<string>>(new Set());
   const [showAccessDenied, setShowAccessDenied] = useState(false);
+  const [, startTransition] = useTransition();
+
+  const {
+    growingBeacons,
+    shrinkingBeacons,
+    selectedBeacon,
+    setSelectedBeacon,
+    editingBeacon,
+    setEditingBeacon,
+    showAddBeacon,
+    setShowAddBeacon,
+    showAddSector,
+    setShowAddSector,
+    editingSector,
+    setEditingSector,
+    viewingMembersSector,
+    setViewingMembersSector,
+    handleSectorCreated,
+    handleSectorUpdated,
+    handleBeaconCreated,
+    handleBeaconUpdated,
+    handleBeaconDeleted,
+    handleSectorDelete,
+  } = useStationCrud({
+    user,
+    setStation,
+    setCollabSectors,
+    setActiveSectorId,
+    setDisplaySectorId,
+    startTransition,
+  });
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileMenuCaption, setMobileMenuCaption] = useState<
@@ -219,137 +245,34 @@ export default function StationClient({
       setIsEntering(true);
     }, delay);
   };
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [localSearchQuery, setLocalSearchQuery] = useState("");
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const scrollThrottleRef = useRef<number>(0);
-  const [filterVisibility, setFilterVisibility] = useState<
-    "all" | "public" | "private"
-  >("all");
-  const [sortBy, setSortBy] = useState<"date" | "name" | "sector" | "creator" | "visits" | "color">("date");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [tagSearchQuery, setTagSearchQuery] = useState("");
-  // Local override for sector tags — updated optimistically from TagManagementModal
-  const [sectorTagsOverride, setSectorTagsOverride] = useState<Record<string, import("@/types").Tag[]>>({});
-  const [isFilterExiting, setIsFilterExiting] = useState(false);
-  const [isFilterEntering, setIsFilterEntering] = useState(false);
-  const [visibleLimit, setVisibleLimit] = useState(12);
-  const [viewMode, setViewMode] = useState<"masonry" | "grid">("masonry");
-  const [isViewModeMounted, setIsViewModeMounted] = useState(false);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("stationViewMode");
-      if (saved === "grid" || saved === "masonry") {
-        setViewMode(saved);
-      }
-    } catch (e) {
-      // Ignore
-    }
-    setIsViewModeMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isViewModeMounted) return;
-    try {
-      localStorage.setItem("stationViewMode", viewMode);
-    } catch (e) {
-      // Ignore
-    }
-  }, [viewMode, isViewModeMounted]);
-
-  useEffect(() => {
-    // Reset to defaults if disabled OR if not in "all" sector
-    if (!user.saveFilterSortEnabled || displaySectorId !== "all") {
-      setSortBy("date");
-      setSortDir("desc");
-      setFilterVisibility("all");
-      setSelectedTags([]);
-      setTagFilterMode("union");
-      setLoadedSectorId(displaySectorId);
-      return;
-    }
-    
-    try {
-      const saved = localStorage.getItem("os_prefs_all");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.sortBy) setSortBy(parsed.sortBy);
-        if (parsed.sortDir) setSortDir(parsed.sortDir);
-        if (parsed.filterVisibility) setFilterVisibility(parsed.filterVisibility);
-        if (parsed.selectedTags) setSelectedTags(parsed.selectedTags);
-        if (parsed.tagFilterMode) setTagFilterMode(parsed.tagFilterMode);
-      } else {
-        setSortBy("date");
-        setSortDir("desc");
-        setFilterVisibility("all");
-        setSelectedTags([]);
-        setTagFilterMode("union");
-      }
-    } catch (e) {}
-    setLoadedSectorId(displaySectorId);
-  }, [displaySectorId, user.saveFilterSortEnabled]);
-
-  useEffect(() => {
-    if (!user.saveFilterSortEnabled || loadedSectorId !== displaySectorId || displaySectorId !== "all") return;
-    try {
-      localStorage.setItem(
-        "os_prefs_all",
-        JSON.stringify({ sortBy, sortDir, filterVisibility, selectedTags, tagFilterMode })
-      );
-    } catch (e) {}
-  }, [displaySectorId, sortBy, sortDir, filterVisibility, selectedTags, tagFilterMode, user.saveFilterSortEnabled, loadedSectorId]);
-
-  useEffect(() => {
-    setVisibleLimit(12);
-  }, [displaySectorId, searchQuery, filterVisibility, sortBy, sortDir, selectedTags, tagFilterMode]);
-
-  const applyFilterSort = (updateFn: () => void) => {
-    if (!user.animationEnabled) {
-      updateFn();
-      return;
-    }
-    setIsFilterExiting(true);
-    setTimeout(() => {
-      updateFn();
-      setIsFilterExiting(false);
-      setIsFilterEntering(true);
-      setTimeout(() => setIsFilterEntering(false), 500);
-    }, 300);
-  };
-
-  const handleSearchChange = (val: string) => {
-    setLocalSearchQuery(val);
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    searchTimeoutRef.current = setTimeout(() => {
-      applyFilterSort(() => setSearchQuery(val));
-    }, 300);
-  };
-
-  const [openMenu, setOpenMenu] = useState<"filter" | "sort" | "tags" | null>(null);
-  const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
-  
-  const [editingBeacon, setEditingBeacon] = useState<Beacon | null>(null);
-  const [showAddBeacon, setShowAddBeacon] = useState(false);
-  const [showAddSector, setShowAddSector] = useState(false);
+  const [openMenu, setOpenMenu] = useState<"filter" | "sort" | "tags" | null>(
+    null,
+  );
   const [showTagModal, setShowTagModal] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showGroupChat, setShowGroupChat] = useState(false);
-  // Track which private chat is open so useNotifications can suppress its toast
-  const [activeFriendChatId, setActiveFriendChatId] = useState<string | null>(null);
-  const [targetFriendChatId, setTargetFriendChatId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const handleChatNotificationClick = useCallback((type: 'private' | 'group', id: string) => {
-    if (type === 'private') {
-      setTargetFriendChatId(id);
-      setShowFriendsModal(true);
-    } else if (type === 'group') {
-      setDisplaySectorId(id);
-      setShowGroupChat(true);
-    }
-  }, []);
+  // Track which private chat is open so useNotifications can suppress its toast
+  const [activeFriendChatId, setActiveFriendChatId] = useState<string | null>(
+    null,
+  );
+  const [targetFriendChatId, setTargetFriendChatId] = useState<string | null>(
+    null,
+  );
+
+  const handleChatNotificationClick = useCallback(
+    (type: "private" | "group", id: string) => {
+      if (type === "private") {
+        setTargetFriendChatId(id);
+        setShowFriendsModal(true);
+      } else if (type === "group") {
+        setDisplaySectorId(id);
+        setShowGroupChat(true);
+      }
+    },
+    [],
+  );
 
   const {
     stats,
@@ -377,96 +300,13 @@ export default function StationClient({
     }
   }, [showGroupChat, displaySectorId, clearGroupUnread]);
 
-  useEffect(() => {
-    const handleGlobalRoleUpdate = (e: any) => {
-      const { sectorId, userId, role } = e.detail;
-      setStation((prev: any) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          sectors: prev.sectors.map((s: any) => {
-            if (s.id === sectorId) {
-              return {
-                ...s,
-                collaborators: s.collaborators?.map((c: any) =>
-                  c.userId === userId || c.user?.id === userId ? { ...c, role } : c
-                )
-              };
-            }
-            return s;
-          })
-        };
-      });
-    };
-
-    window.addEventListener('role-updated-global', handleGlobalRoleUpdate);
-    return () => window.removeEventListener('role-updated-global', handleGlobalRoleUpdate);
-  }, [router]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    const channel = pusherClient.subscribe(`private-user-${user.id}`);
-    const handleRoleUpdate = (data: any) => {
-      setStation((prev: any) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          sectors: prev.sectors.map((s: any) => {
-            if (s.id === data.sectorId) {
-              return {
-                ...s,
-                collaborators: s.collaborators?.map((c: any) =>
-                  c.userId === user.id ? { ...c, role: data.role } : c
-                )
-              };
-            }
-            return s;
-          })
-        };
-      });
-
-      // 2. Tampilkan notifikasi DARI ATAS LAYAR dengan nama sektor
-      if (data.role === "ADMIN") {
-        toast.success(`You have been promoted to Admin in sector ${data.sectorName}!`, { position: 'top-center' });
-      } else {
-        toast.error(`Your Admin rights have been revoked in sector ${data.sectorName}.`, { position: 'top-center' });
-      }
-    };
-
-    channel.bind("role-updated", handleRoleUpdate);
-
-    return () => {
-      channel.unbind("role-updated", handleRoleUpdate);
-      pusherClient.unsubscribe(`private-user-${user.id}`);
-    };
-  }, [user?.id]);
-
-  // Tentukan apakah sektor yang sedang dibuka punya pesan yang belum dibaca
+  // Sektor yang sedang dibuka punya pesan yang belum dibaca
   const currentUnread =
     typeof displaySectorId === "string"
       ? unreadGroupSectors[displaySectorId]
       : null;
   const hasUnreadInCurrentSector = currentUnread?.unread || false;
   const hasMentionInCurrentSector = currentUnread?.mention || false;
-
-  // Hilangkan lencana saat modal chat dibuka
-  useEffect(() => {
-    if (
-      showGroupChat &&
-      typeof displaySectorId === "string" &&
-      displaySectorId !== "all"
-    ) {
-      clearGroupUnread(displaySectorId);
-    }
-  }, [showGroupChat, displaySectorId, clearGroupUnread]);
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [editingSector, setEditingSector] = useState<SectorWithBeacons | null>(
-    null,
-  );
-  const [viewingMembersSector, setViewingMembersSector] =
-    useState<SectorWithBeacons | null>(null);
-  const [, startTransition] = useTransition();
 
   const allOwnedSectors = [...(station?.sectors ?? [])].sort(
     (a, b) => a.order - b.order,
@@ -480,283 +320,52 @@ export default function StationClient({
   const allCollabSectors = [...myCollabSectors, ...collabSectors];
   const allSectors = [...allOwnedSectors, ...collabSectors];
 
-    const processedColorsRef = useRef<Set<string>>(new Set());
+  // Beacon color computation (extracted to hook)
+  const beaconColors = useBeaconColors(allSectors);
 
-  useEffect(() => {
-    const beaconsToProcess = allSectors
-      .flatMap(s => s.beacons)
-      .filter(b => beaconColors[b.id] === undefined && (b.imageUrl || b.faviconUrl));
-      
-    if (beaconsToProcess.length === 0) return;
-    
-    let isMounted = true;
-    
-    const computeColors = async () => {
-      const getProxyUrl = (url?: string | null) => {
-        if (!url) return undefined;
-        if (url.startsWith('/')) return url;
-        return `/api/proxy-image?url=${encodeURIComponent(url)}`;
-      };
-      
-      beaconsToProcess.forEach(b => processedColorsRef.current.add(b.id));
-      
-      const promises = beaconsToProcess.map(async (b) => {
-        const url = getProxyUrl(b.imageUrl || b.faviconUrl);
-        if (!url) return { id: b.id, hue: -1 };
-        
-        try {
-          const hue = await new Promise<number>((resolve) => {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            
-            const timeout = setTimeout(() => {
-              img.src = ""; // cancel
-              resolve(-1);
-            }, 5000);
-            
-            img.onload = () => {
-              clearTimeout(timeout);
-              try {
-                const canvas = document.createElement("canvas");
-                const MAX_SIZE = 64;
-                let w = img.width, h = img.height;
-                if (w > MAX_SIZE || h > MAX_SIZE) {
-                  const ratio = Math.min(MAX_SIZE / w, MAX_SIZE / h);
-                  w = Math.floor(w * ratio);
-                  h = Math.floor(h * ratio);
-                }
-                canvas.width = w;
-                canvas.height = h;
-                const ctx = canvas.getContext("2d");
-                if (!ctx) { resolve(-1); return; }
-                ctx.drawImage(img, 0, 0, w, h);
-                const data = ctx.getImageData(0, 0, w, h).data;
-                
-                const bins: Record<string, {r: number, g: number, b: number, count: number}> = {};
-                let maxCount = 0;
-                let dominantRGB = { r: 0, g: 0, b: 0 };
-                
-                for (let i = 0; i < data.length; i += 4) {
-                  const r = data[i], g = data[i+1], b_val = data[i+2], a = data[i+3];
-                  if (a < 128) continue;
-                  
-                  const key = `${Math.floor(r/32)},${Math.floor(g/32)},${Math.floor(b_val/32)}`;
-                  if (!bins[key]) bins[key] = { r: 0, g: 0, b: 0, count: 0 };
-                  bins[key].r += r;
-                  bins[key].g += g;
-                  bins[key].b += b_val;
-                  bins[key].count++;
-                  
-                  if (bins[key].count > maxCount) {
-                    maxCount = bins[key].count;
-                    dominantRGB = {
-                      r: Math.round(bins[key].r / maxCount),
-                      g: Math.round(bins[key].g / maxCount),
-                      b: Math.round(bins[key].b / maxCount)
-                    };
-                  }
-                }
-                
-                if (maxCount === 0) { resolve(-1); return; }
-                
-                const r = dominantRGB.r / 255;
-                const g = dominantRGB.g / 255;
-                const b_val = dominantRGB.b / 255;
-                
-                let max = Math.max(r, g, b_val), min = Math.min(r, g, b_val);
-                let h_val = 0, s_val = 0, l_val = (max + min) / 2;
-                
-                if (max !== min) {
-                  let d = max - min;
-                  s_val = l_val > 0.5 ? d / (2 - max - min) : d / (max + min);
-                  switch (max) {
-                    case r: h_val = (g - b_val) / d + (g < b_val ? 6 : 0); break;
-                    case g: h_val = (b_val - r) / d + 2; break;
-                    case b_val: h_val = (r - g) / d + 4; break;
-                  }
-                  h_val /= 6;
-                }
-                
-                h_val = Math.round(h_val * 360);
-                s_val = Math.round(s_val * 100);
-                l_val = Math.round(l_val * 100);
-                
-                let category = 0;
-                if (l_val < 20 || (s_val < 15 && l_val < 50)) category = 7;
-                else if (l_val > 80 || (s_val < 15 && l_val >= 50)) category = 8;
-                else {
-                  if (h_val < 15 || h_val >= 345) category = 1;
-                  else if (h_val < 45) category = 2;
-                  else if (h_val < 75) category = 3;
-                  else if (h_val < 165) category = 4;
-                  else if (h_val < 265) category = 5;
-                  else category = 6;
-                }
-                
-                let hueForSort = h_val;
-                if (category === 1 && hueForSort >= 345) hueForSort -= 360;
-                
-                resolve(category * 1000 + hueForSort + 360);
-              } catch (err) {
-                resolve(-1);
-              }
-            };
-            img.onerror = () => {
-              clearTimeout(timeout);
-              resolve(-1);
-            };
-            img.src = url;
-          });
-          return { id: b.id, hue };
-        } catch {
-          return { id: b.id, hue: -1 };
-        }
-      });
-      
-      const results = await Promise.all(promises);
-      
-      if (isMounted) {
-        setBeaconColors(prev => {
-          const updated = { ...prev };
-          results.forEach(r => { updated[r.id] = r.hue; });
-          return updated;
-        });
-      }
-    };
-    computeColors();
-    return () => { isMounted = false; };
-  }, [allSectors]);
+  const scrollThrottleRef = useRef<number>(0);
 
-  const baseBeacons = useMemo(() => {
-    if (displaySectorId === "all") {
-      return personalSectors.flatMap((s) =>
-        s.beacons.map((b: any) => ({
-          ...b,
-          _isPublic: s.isPublic,
-          _sectorOrder: s.order,
-          _sectorName: s.name,
-          _creator: b.creator,
-        })),
-      );
-    } else {
-      const s = allSectors.find((s) => s.id === displaySectorId);
-      return (
-        s?.beacons.map((b: any) => ({
-          ...b,
-          _isPublic: s.isPublic,
-          _sectorOrder: s.order,
-          _sectorName: s.name,
-          _creator: b.creator,
-        })) ?? []
-      );
-    }
-  }, [allSectors, displaySectorId, personalSectors]);
-
-  const visibleBeacons = useMemo(() => {
-    let beacons = [...baseBeacons];
-
-    if (filterVisibility === "public") {
-      beacons = beacons.filter((b) => b._isPublic);
-    } else if (filterVisibility === "private") {
-      beacons = beacons.filter((b) => !b._isPublic);
-    }
-
-    if (selectedTags.length > 0) {
-      beacons = beacons.filter((b) =>
-        b.tags?.some((bt: any) => selectedTags.includes(bt.tagId))
-      );
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      beacons = beacons.filter(
-        (b) =>
-          b.title.toLowerCase().includes(q) ||
-          b.url.toLowerCase().includes(q) ||
-          b.description?.toLowerCase().includes(q),
-      );
-    }
-
-    if (sortBy === "name") {
-      beacons.sort((a, b) =>
-        sortDir === "asc"
-          ? a.title.localeCompare(b.title)
-          : b.title.localeCompare(a.title),
-      );
-    } else if (sortBy === "sector") {
-      beacons.sort((a, b) => {
-        const orderDiff = (a._sectorOrder ?? 0) - (b._sectorOrder ?? 0);
-        if (orderDiff !== 0) return sortDir === "asc" ? orderDiff : -orderDiff;
-        return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-      });
-    } else if (sortBy === "creator") {
-      beacons.sort((a, b) =>
-        sortDir === "asc"
-          ? (a._creator?.name || "").localeCompare(b._creator?.name || "")
-          : (b._creator?.name || "").localeCompare(a._creator?.name || ""),
-      );
-    } else if (sortBy === "visits") {
-      beacons.sort((a, b) =>
-        sortDir === "asc"
-          ? (a.visits || 0) - (b.visits || 0)
-          : (b.visits || 0) - (a.visits || 0),
-      );
-    } else if (sortBy === "color") {
-      beacons.sort((a, b) => {
-        const hA = beaconColors[a.id];
-        const hB = beaconColors[b.id];
-        const hasA = hA !== undefined && hA !== -1;
-        const hasB = hB !== undefined && hB !== -1;
-        
-        if (hasA && hasB) {
-          return sortDir === "asc" ? hA - hB : hB - hA;
-        }
-        if (hasA) return -1;
-        if (hasB) return 1;
-        return 0;
-      });
-    } else {
-      // date
-      beacons.sort((a, b) =>
-        sortDir === "asc"
-          ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    }
-
-    return beacons;
-  }, [baseBeacons, searchQuery, filterVisibility, sortBy, sortDir, selectedTags, tagFilterMode, beaconColors]);
-
-  const [cols, setCols] = useState(6);
-  useEffect(() => {
-    const updateCols = () => {
-      if (window.innerWidth <= 640) setCols(1);
-      else if (window.innerWidth <= 840) setCols(2);
-      else if (window.innerWidth <= 1024) setCols(3);
-      else if (window.innerWidth <= 1200) setCols(4);
-      else setCols(6);
-    };
-    updateCols();
-    window.addEventListener("resize", updateCols);
-    return () => window.removeEventListener("resize", updateCols);
-  }, []);
-
-  const paginatedBeacons = useMemo(() => {
-    return visibleBeacons.slice(0, visibleLimit);
-  }, [visibleBeacons, visibleLimit]);
-
-  const columnWrapper = useMemo(() => {
-    const wrapper = Array.from(
-      { length: cols },
-      () => [] as { beacon: Beacon; globalIndex: number }[],
-    );
-    paginatedBeacons.forEach((beacon, index) => {
-      wrapper[index % cols].push({ beacon, globalIndex: index });
-    });
-    return wrapper;
-  }, [paginatedBeacons, cols]);
+  // Beacon filtering, sorting, view mode, and responsive pagination (extracted to hook)
+  const {
+    searchQuery,
+    setSearchQuery,
+    localSearchQuery,
+    setLocalSearchQuery,
+    filterVisibility,
+    setFilterVisibility,
+    sortBy,
+    setSortBy,
+    sortDir,
+    setSortDir,
+    selectedTags,
+    setSelectedTags,
+    tagSearchQuery,
+    setTagSearchQuery,
+    tagFilterMode,
+    setTagFilterMode,
+    sectorTagsOverride,
+    setSectorTagsOverride,
+    isFilterExiting,
+    isFilterEntering,
+    visibleLimit,
+    setVisibleLimit,
+    viewMode,
+    setViewMode,
+    isViewModeMounted,
+    applyFilterSort,
+    handleSearchChange,
+    baseBeacons,
+    visibleBeacons,
+    paginatedBeacons,
+    columnWrapper,
+    cols,
+  } = useBeaconFilters({
+    allSectors,
+    personalSectors,
+    displaySectorId,
+    beaconColors,
+    user,
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -779,359 +388,41 @@ export default function StationClient({
     };
   }, []);
 
-  const activeSector = allSectors.find((s) => s.id === displaySectorId) ?? null;
+  const activeSector =
+    allSectors.find((s) => s.id === displaySectorId) ?? null;
 
-  const isCurrentSectorAdminOrOwner = !visitingProfile && (
-    displaySectorId === "all" ||
-    station?.userId === user.id ||
-    (activeSector as any)?.collaborators?.some((c: any) => c.userId === user.id && c.role === "ADMIN")
-  );
+  const isCurrentSectorAdminOrOwner =
+    !visitingProfile &&
+    (displaySectorId === "all" ||
+      station?.userId === user.id ||
+      (activeSector as any)?.collaborators?.some(
+        (c: any) => c.userId === user.id && c.role === "ADMIN",
+      ));
 
-  // ── Handlers ────────────────────────────────────────────────
-  const handleSectorCreated = useCallback((newSector: SectorWithBeacons) => {
-    setStation((prev) => {
-      if (!prev) return prev;
-      return { ...prev, sectors: [...prev.sectors, newSector] };
-    });
-    setActiveSectorId(newSector.id);
-    setDisplaySectorId(newSector.id);
-    setShowAddSector(false);
-  }, []);
+  // Real-time beacon & role sync (extracted to hook)
+  useRealtimeSync({
+    userId: user.id,
+    userName: user.name,
+    userImage: user.image,
+    allSectors,
+    onBeaconCreated: handleBeaconCreated,
+    onBeaconUpdated: handleBeaconUpdated,
+    onBeaconDeleted: handleBeaconDeleted,
+    setStation,
+  });
 
-  const handleSectorUpdated = useCallback((updated: SectorWithBeacons) => {
-    setStation((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        sectors: prev.sectors.map((s) =>
-          s.id === updated.id ? { ...s, ...updated } : s,
-        ),
-      };
-    });
-    setEditingSector(null);
-  }, []);
-
-  const handleBeaconCreated = useCallback(
-    (newBeacon: Beacon) => {
-      if (user.animationEnabled) {
-        setGrowingBeacons(new Set([newBeacon.id]));
-        setTimeout(() => {
-          setGrowingBeacons(new Set());
-        }, 500);
-      }
-      setStation((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          sectors: prev.sectors.map((s) =>
-            s.id === newBeacon.sectorId
-              ? { ...s, beacons: [...s.beacons, newBeacon] }
-              : s,
-          ),
-        };
-      });
-      setCollabSectors((prev) =>
-        prev.map((s) =>
-          s.id === newBeacon.sectorId
-            ? { ...s, beacons: [...s.beacons, newBeacon] }
-            : s,
-        ),
-      );
-      setShowAddBeacon(false);
-    },
-    [user.animationEnabled],
-  );
-
-  const handleBeaconUpdated = useCallback(
-    (updated: Beacon) => {
-      setStation((prev) => {
-        if (!prev) return prev;
-        const oldBeacon = prev.sectors
-          .flatMap((s) => s.beacons)
-          .find((b) => b.id === updated.id);
-        const sectorChanged =
-          oldBeacon && oldBeacon.sectorId !== updated.sectorId;
-
-        if (sectorChanged && user.animationEnabled) {
-          setShrinkingBeacons(new Set([updated.id]));
-          setTimeout(() => {
-            setShrinkingBeacons(new Set());
-            setStation((p) => {
-              if (!p) return p;
-              let ns = p.sectors.map((s) => ({
-                ...s,
-                beacons: s.beacons.filter((b) => b.id !== updated.id),
-              }));
-              ns = ns.map((s) =>
-                s.id === updated.sectorId
-                  ? {
-                    ...s,
-                    beacons: [...s.beacons, updated].sort(
-                      (a, b) => a.order - b.order,
-                    ),
-                  }
-                  : s,
-              );
-              return { ...p, sectors: ns };
-            });
-          }, 300);
-          return prev; // don't update state yet
-        }
-
-        let newSectors = prev.sectors.map((s) => ({
-          ...s,
-          beacons: s.beacons.filter((b) => b.id !== updated.id),
-        }));
-        newSectors = newSectors.map((s) =>
-          s.id === updated.sectorId
-            ? {
-              ...s,
-              beacons: [...s.beacons, updated].sort(
-                (a, b) => a.order - b.order,
-              ),
-            }
-            : s,
-        );
-        return { ...prev, sectors: newSectors };
-      });
-      setCollabSectors((prev) => {
-        let ns = prev.map((s) => ({
-          ...s,
-          beacons: s.beacons.filter((b) => b.id !== updated.id),
-        }));
-        ns = ns.map((s) =>
-          s.id === updated.sectorId
-            ? {
-              ...s,
-              beacons: [...s.beacons, updated].sort(
-                (a, b) => a.order - b.order,
-              ),
-            }
-            : s,
-        );
-        return ns;
-      });
-      setEditingBeacon(null);
-      setSelectedBeacon((prev) => (prev?.id === updated.id ? updated : prev));
-    },
-    [user.animationEnabled],
-  );
-
-  const handleBeaconDeleted = useCallback(
-    (beaconId: string) => {
-      const doDelete = () => {
-        setStation((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            sectors: prev.sectors.map((s) => ({
-              ...s,
-              beacons: s.beacons.filter((b) => b.id !== beaconId),
-            })),
-          };
-        });
-        setCollabSectors((prev) =>
-          prev.map((s) => ({
-            ...s,
-            beacons: s.beacons.filter((b) => b.id !== beaconId),
-          })),
-        );
-        setSelectedBeacon(null);
-        setEditingBeacon(null);
-      };
-
-      if (user.animationEnabled) {
-        setShrinkingBeacons(new Set([beaconId]));
-        setSelectedBeacon(null);
-        setEditingBeacon(null);
-        setTimeout(() => {
-          setShrinkingBeacons(new Set());
-          doDelete();
-        }, 300);
-      } else {
-        doDelete();
-      }
-    },
-    [user.animationEnabled],
-  );
-
-  const handleSectorDelete = useCallback(
-    (sectorId: string, moveToSectorId?: string) => {
-      startTransition(async () => {
-        const result = await deleteSector(sectorId, moveToSectorId);
-        if (!result.error) {
-          setStation((prev) => {
-            if (!prev) return prev;
-            let remaining = prev.sectors;
-            if (moveToSectorId) {
-              const deletedSector = remaining.find((s) => s.id === sectorId);
-              if (deletedSector && deletedSector.beacons.length > 0) {
-                remaining = remaining.map((s) => {
-                  if (s.id === moveToSectorId) {
-                    return {
-                      ...s,
-                      beacons: [...s.beacons, ...deletedSector.beacons],
-                    };
-                  }
-                  return s;
-                });
-              }
-            }
-            remaining = remaining.filter((s) => s.id !== sectorId);
-            return { ...prev, sectors: remaining };
-          });
-          setActiveSectorId("all");
-          setDisplaySectorId("all");
-          setEditingSector(null);
-          toast.success("Sector deleted successfully");
-        } else {
-          toast.error(result.error || "Failed to delete sector");
-        }
-      });
-    },
-    [startTransition],
-  );
-
-  // ---> TAMBAHKAN LISTENER BEACON REAL-TIME DI SINI <---
-  // 1. Simpan referensi sektor tanpa memicu render ulang Pusher
-  const allSectorsRef = useRef(allSectors);
-  useEffect(() => {
-    allSectorsRef.current = allSectors;
-  }, [allSectors]);
-
-  // 2. Listener Pusher Utama
-  useEffect(() => {
-    if (!user?.id) return;
-    const channel = pusherClient.subscribe(`private-user-${user.id}`);
-
-    const handleBeaconUpdate = (payload: any) => {
-      const beaconData = payload.data;
-
-      // RECOVERY FOTO PROFIL LENGKAP: 
-      if (beaconData && beaconData.creatorId && (!beaconData.creator || !beaconData.creator.image)) {
-        let foundImage = null;
-        let foundName = beaconData.creator?.name || null;
-
-        if (beaconData.creatorId === user.id) {
-          foundImage = user.image;
-          if (!foundName) foundName = user.name;
-        } else {
-          for (const s of allSectorsRef.current) {
-            if ((s as any).station?.userId === beaconData.creatorId && (s as any).station?.user) {
-              foundImage = (s as any).station.user.image;
-              if (!foundName) foundName = (s as any).station.user.name;
-            }
-            if (!foundImage) {
-              const collab = (s as any).collaborators?.find((c: any) => c.userId === beaconData.creatorId || c.user?.id === beaconData.creatorId);
-              if (collab && collab.user) {
-                foundImage = collab.user.image;
-                if (!foundName) foundName = collab.user.name;
-              }
-            }
-            // Trik Agresif Baru: Curi foto dari beacon lain yang pernah dia buat sebelumnya!
-            if (!foundImage && s.beacons) {
-              const existingBeacon: any = s.beacons.find((b: any) => b.creatorId === beaconData.creatorId && b.creator?.image);
-
-              if (existingBeacon && existingBeacon.creator) {
-                foundImage = existingBeacon.creator.image;
-                if (!foundName) foundName = existingBeacon.creator.name;
-              }
-            }
-            if (foundImage) break;
-          }
-        }
-
-        beaconData.creator = {
-          ...(beaconData.creator || {}),
-          name: foundName,
-          image: foundImage
-        };
-      }
-
-      // 1. Jalankan animasi instan di layar (Optimistic UI)
-      if (payload.type === 'BEACON_CREATED') {
-        handleBeaconCreated(beaconData);
-      } else if (payload.type === 'BEACON_UPDATED') {
-        handleBeaconUpdated(beaconData);
-      } else if (payload.type === 'BEACON_DELETED') {
-        handleBeaconDeleted(beaconData.id);
-      }
-
-      // 2. Silent Refresh: Tarik data lengkap dari server di belakang layar
-      // Kita beri delay 1 detik agar tidak mengganggu/menginterupsi animasi pop-up yang sedang berjalan.
-      setTimeout(() => {
-        router.refresh();
-      }, 1000);
-    };
-
-    channel.bind('beacon-update', handleBeaconUpdate);
-
-    return () => {
-      channel.unbind('beacon-update', handleBeaconUpdate);
-    };
-  }, [user?.id, handleBeaconCreated, handleBeaconUpdated, handleBeaconDeleted, user.image, user.name, router]); // <-- (Penting: pastikan 'router' ada di dalam kurung siku ini)
-  // -------------------------------------------------------------
   const displayName = user.callsign ?? user.name ?? "Pilot";
   const animEnabled = user.animationEnabled;
 
-  const [draggedSectorIndex, setDraggedSectorIndex] = useState<number | null>(
-    null,
-  );
-  const [dragOverSectorIndex, setDragOverSectorIndex] = useState<number | null>(
-    null,
-  );
-
-  const handleSectorDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedSectorIndex(index);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", index.toString());
-  };
-
-  const handleSectorDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (draggedSectorIndex !== null && draggedSectorIndex !== index) {
-      setDragOverSectorIndex(index);
-    } else {
-      setDragOverSectorIndex(null);
-    }
-  };
-
-  const handleSectorDrop = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (draggedSectorIndex === null || draggedSectorIndex === index) {
-      setDraggedSectorIndex(null);
-      setDragOverSectorIndex(null);
-      return;
-    }
-
-    const reorderedSectors = Array.from(personalSectors);
-    const [movedSector] = reorderedSectors.splice(draggedSectorIndex, 1);
-    reorderedSectors.splice(index, 0, movedSector);
-
-    setStation((prev) => {
-      if (!prev) return prev;
-      const updatedSectors = prev.sectors.map((s) => {
-        const pIndex = reorderedSectors.findIndex((rs) => rs.id === s.id);
-        if (pIndex !== -1) {
-          return { ...s, order: pIndex };
-        }
-        return s;
-      });
-      return { ...prev, sectors: updatedSectors };
-    });
-
-    startTransition(async () => {
-      await reorderSectors(reorderedSectors.map((s) => s.id));
-    });
-
-    setDraggedSectorIndex(null);
-    setDragOverSectorIndex(null);
-  };
-
-  const handleSectorDragEnd = () => {
-    setDraggedSectorIndex(null);
-    setDragOverSectorIndex(null);
-  };
+  // Sector drag & drop reorder (extracted to hook)
+  const {
+    draggedSectorIndex,
+    dragOverSectorIndex,
+    handleSectorDragStart,
+    handleSectorDragOver,
+    handleSectorDrop,
+    handleSectorDragEnd,
+  } = useSectorDrag(personalSectors, setStation);
 
 
   return (
