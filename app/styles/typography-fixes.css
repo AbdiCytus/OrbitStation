@@ -1,0 +1,82 @@
+﻿/* =================================================================
+   Text contrast fixes
+   ================================================================= */
+/* ============================================================
+   TEXT CONTRAST FIXES  (Poin 13)
+   ============================================================ */
+/* Sidebar labels */
+.sidebar-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b7db3;
+  /* was too dark, bumped up */
+}
+
+/* Sector tab text */
+.sector-tab-name {
+  font-size: 0.875rem;
+  color: #c4cde8;
+  /* brighter than before */
+}
+
+.sector-tab-count {
+  font-size: 0.7rem;
+  color: #6b7db3;
+  margin-left: auto;
+}
+
+.sector-tab.active .sector-tab-name {
+  color: #f0f4ff;
+  font-weight: 600;
+}
+
+.sector-tab.active .sector-tab-count {
+  color: rgba(167, 139, 250, 0.8);
+}
+
+/* Station section sub (beacon count) */
+.station-section-sub {
+  color: #6b7db3;
+  font-size: 0.8125rem;
+}
+
+/* Form labels */
+.form-label {
+  color: #9aafcf;
+  /* was var(--color-comet) which was a bit dark */
+}
+
+/* Beacon domain text */
+.beacon-card-domain {
+  font-size: 0.7rem;
+  color: #6b7db3;
+}
+
+/* Empty state text */
+.station-empty-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #c4cde8;
+}
+
+.station-empty-sub {
+  font-size: 0.875rem;
+  color: #6b7db3;
+  max-width: 320px;
+}
+
+/* Beacon description */
+.beacon-card-desc {
+  font-size: 0.8rem;
+  color: #8a99bb;
+  /* bumped from comet */
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.5;
+}
+

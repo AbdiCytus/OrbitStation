@@ -1,0 +1,272 @@
+﻿/* =================================================================
+   Glass panels, buttons, inputs, cards, badges, modal overlay
+   ================================================================= */
+/* ============================================================
+   REUSABLE COMPONENT CLASSES
+   ============================================================ */
+
+/* --- Glass Panel --- */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.glass-sm {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+}
+
+.glass:hover,
+.glass-sm:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--color-border-hover);
+  transition: all var(--transition-base);
+}
+
+/* --- Glow Effects --- */
+.glow-violet {
+  box-shadow: var(--glow-violet);
+}
+
+.glow-cyan {
+  box-shadow: var(--glow-cyan);
+}
+
+.glow-pink {
+  box-shadow: var(--glow-pink);
+}
+
+/* --- Gradient Text --- */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-violet-light), var(--color-cyan-glow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--color-amber-glow), var(--color-amber-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all var(--transition-base);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.5);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-violet-mid), var(--color-violet-glow));
+  color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 12px rgba(91, 63, 222, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--color-violet-glow), #9d7aff);
+  box-shadow: var(--glow-violet);
+  transform: translateY(-1px);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--glass-bg);
+  color: var(--color-starlight);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur-sm);
+}
+
+.btn-secondary:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--color-border-hover);
+  color: var(--color-starlight);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-comet);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+  background: rgba(124, 92, 252, 0.08);
+  color: var(--color-violet-light);
+  border-color: var(--glass-border);
+}
+
+.btn-danger {
+  background: rgba(244, 114, 182, 0.1);
+  color: var(--color-pink-glow);
+  border: 1px solid rgba(244, 114, 182, 0.2);
+}
+
+.btn-danger:hover {
+  background: rgba(244, 114, 182, 0.2);
+  border-color: var(--color-pink-glow);
+  box-shadow: var(--glow-pink);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+.btn-lg {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border-radius: var(--radius-lg);
+}
+
+/* --- Input Fields --- */
+.input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-starlight);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-dust);
+}
+
+.input:focus {
+  border-color: var(--color-violet-glow);
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.15);
+  background: rgba(17, 24, 39, 1);
+}
+
+.input option {
+  background: #111827;
+  /* Fallback */
+  background: var(--color-nebula);
+  color: var(--color-starlight);
+  padding: 8px;
+}
+
+/* --- Cards --- */
+.card {
+  background: var(--color-cosmos);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-base);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-card), var(--glow-violet);
+  transform: translate3d(0, -2px, 0);
+}
+
+/* --- Badge / Chip --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-violet {
+  background: rgba(124, 92, 252, 0.15);
+  color: var(--color-violet-light);
+  border: 1px solid rgba(124, 92, 252, 0.25);
+}
+
+.badge-cyan {
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--color-cyan-light);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+}
+
+.badge-amber {
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--color-amber-glow);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+/* --- Divider --- */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  border: none;
+}
+
+/* --- Loading Skeleton --- */
+.skeleton {
+  background: linear-gradient(90deg,
+      var(--color-nebula) 25%,
+      var(--color-aurora) 50%,
+      var(--color-nebula) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* --- Modal Overlay --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-panel {
+  background: var(--color-cosmos);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: 640px;
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+
