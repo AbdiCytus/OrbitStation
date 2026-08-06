@@ -239,7 +239,9 @@ export async function getMyProfile() {
       password: true,
       station: {
         select: {
+          id: true,
           isPublic: true,
+          allowPublicWorkspace: true,
         },
       },
     },

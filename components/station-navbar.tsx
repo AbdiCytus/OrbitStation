@@ -28,9 +28,10 @@ type Props = {
   onOpenFriends?: () => void;
   stats?: { hasNotifications: boolean };
   isPublicProfile?: boolean;
+  visitingProfile?: any;
 };
 
-export default function StationNavbar({ user, searchQuery, onSearchChange, onSearchSubmit, searchPlaceholder, displayName, hideSearch, hideProfile, onOpenFriends, stats, isPublicProfile }: Props) {
+export default function StationNavbar({ user, searchQuery, onSearchChange, onSearchSubmit, searchPlaceholder, displayName, hideSearch, hideProfile, onOpenFriends, stats, isPublicProfile, visitingProfile }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -234,10 +235,23 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
           </div>
         )}
 
+        {visitingProfile && (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)", padding: "0.25rem 1rem", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#374151", overflow: "hidden" }}>
+              {visitingProfile.image ? <img src={visitingProfile.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", width: "100%", height: "100%" }}>{(visitingProfile.name || visitingProfile.username)[0].toUpperCase()}</span>}
+            </div>
+            <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--color-starlight)" }}>{visitingProfile.name || visitingProfile.username}</span>
+          </div>
+        )}
+
       </div>
 
-      <div className="navbar-user" style={{ display: "flex", alignItems: "center" }} ref={menuRef}>
-        {!hideProfile ? (
+      <div className="navbar-user" style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }} ref={menuRef}>
+        {visitingProfile ? (
+          <Link href={`/station/${visitingProfile.username}`} className="btn btn-primary btn-sm" style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", background: "rgba(139, 92, 246, 0.2)", border: "1px solid rgba(139, 92, 246, 0.5)", color: "#c4b5fd" }}>
+            Return to Public Station
+          </Link>
+        ) : !hideProfile ? (
           user ? (
             <>
               <div className="hidden md:flex items-center" style={{ gap: "0.5rem", marginRight: "2.5rem" }}>

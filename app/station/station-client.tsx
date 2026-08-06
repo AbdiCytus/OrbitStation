@@ -23,6 +23,7 @@ import StationNavbar from "@/components/station-navbar";
 import SpaceBackground from "@/components/space-background";
 import StaticStarfield from "@/components/static-starfield";
 import { deleteSector, reorderSectors } from "@/lib/actions/sector.actions";
+import { deleteBeacon, updateBeacon, reorderBeacons } from "@/lib/actions/beacon.actions";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import {
   PlusIcon,
@@ -226,9 +227,7 @@ export default function StationClient({
   const [filterVisibility, setFilterVisibility] = useState<
     "all" | "public" | "private"
   >("all");
-  const [sortBy, setSortBy] = useState<
-    "date" | "name" | "sector" | "creator" | "visits"
-  >("date");
+  const [sortBy, setSortBy] = useState<"date" | "name" | "sector" | "creator" | "visits" | "color">("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagSearchQuery, setTagSearchQuery] = useState("");
@@ -262,9 +261,19 @@ export default function StationClient({
   }, [viewMode, isViewModeMounted]);
 
   useEffect(() => {
-    if (!user.saveFilterSortEnabled) return;
+    // Reset to defaults if disabled OR if not in "all" sector
+    if (!user.saveFilterSortEnabled || displaySectorId !== "all") {
+      setSortBy("date");
+      setSortDir("desc");
+      setFilterVisibility("all");
+      setSelectedTags([]);
+      setTagFilterMode("union");
+      setLoadedSectorId(displaySectorId);
+      return;
+    }
+    
     try {
-      const saved = localStorage.getItem(`os_prefs_${displaySectorId}`);
+      const saved = localStorage.getItem("os_prefs_all");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.sortBy) setSortBy(parsed.sortBy);
@@ -284,10 +293,10 @@ export default function StationClient({
   }, [displaySectorId, user.saveFilterSortEnabled]);
 
   useEffect(() => {
-    if (!user.saveFilterSortEnabled || loadedSectorId !== displaySectorId) return;
+    if (!user.saveFilterSortEnabled || loadedSectorId !== displaySectorId || displaySectorId !== "all") return;
     try {
       localStorage.setItem(
-        `os_prefs_${displaySectorId}`,
+        "os_prefs_all",
         JSON.stringify({ sortBy, sortDir, filterVisibility, selectedTags, tagFilterMode })
       );
     } catch (e) {}
@@ -321,6 +330,7 @@ export default function StationClient({
 
   const [openMenu, setOpenMenu] = useState<"filter" | "sort" | "tags" | null>(null);
   const [selectedBeacon, setSelectedBeacon] = useState<Beacon | null>(null);
+  
   const [editingBeacon, setEditingBeacon] = useState<Beacon | null>(null);
   const [showAddBeacon, setShowAddBeacon] = useState(false);
   const [showAddSector, setShowAddSector] = useState(false);
@@ -475,7 +485,7 @@ export default function StationClient({
   useEffect(() => {
     const beaconsToProcess = allSectors
       .flatMap(s => s.beacons)
-      .filter(b => beaconColors[b.id] === undefined && !processedColorsRef.current.has(b.id) && (b.imageUrl || b.faviconUrl));
+      .filter(b => beaconColors[b.id] === undefined && (b.imageUrl || b.faviconUrl));
       
     if (beaconsToProcess.length === 0) return;
     
@@ -693,6 +703,20 @@ export default function StationClient({
           ? (a.visits || 0) - (b.visits || 0)
           : (b.visits || 0) - (a.visits || 0),
       );
+    } else if (sortBy === "color") {
+      beacons.sort((a, b) => {
+        const hA = beaconColors[a.id];
+        const hB = beaconColors[b.id];
+        const hasA = hA !== undefined && hA !== -1;
+        const hasB = hB !== undefined && hB !== -1;
+        
+        if (hasA && hasB) {
+          return sortDir === "asc" ? hA - hB : hB - hA;
+        }
+        if (hasA) return -1;
+        if (hasB) return 1;
+        return 0;
+      });
     } else {
       // date
       beacons.sort((a, b) =>
@@ -757,10 +781,11 @@ export default function StationClient({
 
   const activeSector = allSectors.find((s) => s.id === displaySectorId) ?? null;
 
-  const isCurrentSectorAdminOrOwner =
+  const isCurrentSectorAdminOrOwner = !visitingProfile && (
     displaySectorId === "all" ||
-    activeSector?.stationId === station?.id ||
-    (activeSector as any)?.collaborators?.find((c: any) => c.userId === user.id)?.role === "ADMIN";
+    station?.userId === user.id ||
+    (activeSector as any)?.collaborators?.some((c: any) => c.userId === user.id && c.role === "ADMIN")
+  );
 
   // ── Handlers ────────────────────────────────────────────────
   const handleSectorCreated = useCallback((newSector: SectorWithBeacons) => {
@@ -1108,6 +1133,7 @@ export default function StationClient({
     setDragOverSectorIndex(null);
   };
 
+
   return (
     <div
       className={`station-root${animEnabled ? "" : " no-animation"} ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}
@@ -1199,6 +1225,7 @@ export default function StationClient({
         onOpenFriends={() => setShowFriendsModal(true)}
         stats={stats}
         isPublicProfile={station?.isPublic}
+        visitingProfile={visitingProfile}
       />
 
       {/* Mobile Sidebar Toggle Button */}
@@ -1255,13 +1282,15 @@ export default function StationClient({
           className={`station-sidebar glass ${isSidebarOpen ? "open" : ""}`}>
           <div className="sidebar-header">
             <span className="sidebar-label">Sectors</span>
-            <button
-              id="btn-add-sector"
-              className="btn-icon"
-              data-tooltip="Add new sector"
-              onClick={() => setShowAddSector(true)}>
-              <PlusIcon width={16} height={16} />
-            </button>
+            {!visitingProfile && (
+              <button
+                id="btn-add-sector"
+                className="btn-icon"
+                data-tooltip="Add new sector"
+                onClick={() => setShowAddSector(true)}>
+                <PlusIcon width={16} height={16} />
+              </button>
+            )}
           </div>
 
           <nav className="sector-list">
@@ -1535,25 +1564,6 @@ export default function StationClient({
                           className={isRefreshing ? "animate-spin" : ""}
                         />
                       </button>
-                      {isCurrentSectorAdminOrOwner && displaySectorId !== "all" && (
-                        <button
-                          className="btn-icon"
-                          style={{
-                            background: "rgba(255, 255, 255, 0.05)",
-                            border: "1px solid rgba(255, 255, 255, 0.1)",
-                            borderRadius: "8px",
-                            width: "38px",
-                            height: "38px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
-                          }}
-                          onClick={() => setShowTagModal(true)}
-                          data-tooltip="Manage Tags">
-                          <TagIcon width={18} height={18} />
-                        </button>
-                      )}
                       {isCurrentSectorAdminOrOwner && (
                         <button
                           id="btn-add-beacon"
@@ -1877,14 +1887,9 @@ export default function StationClient({
                     <div className="staggered-item">
                       <div className={`custom-dropdown ${user.animationEnabled ? "floating-controls" : ""}`} style={{ position: "relative" }}>
                         <button
-                          className="flex shrink-0 items-center justify-center overflow-hidden whitespace-nowrap"
+                          className="custom-dropdown-btn"
                           style={{
-                            background: selectedTags.length > 0 ? "rgba(139, 92, 246, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                            borderRadius: "8px",
-                            height: "38px",
-                            padding: "0 0.8rem",
-                            width: "auto",
-                            transition: "all 0.15s",
+                            background: selectedTags.length > 0 ? "rgba(139, 92, 246, 0.2)" : "rgba(15, 15, 25, 0.6)",
                             border: `1px solid ${selectedTags.length > 0 ? "#a78bfa" : "rgba(255, 255, 255, 0.1)"}`,
                             color: selectedTags.length > 0 ? "#fff" : "#a1a1aa",
                           }}
@@ -2011,6 +2016,7 @@ export default function StationClient({
                               label: "Sector Order",
                               hide: displaySectorId !== "all",
                             },
+                            { id: "color", label: "Color" },
                             {
                               id: "creator",
                               label: "Added By",
@@ -2215,16 +2221,21 @@ export default function StationClient({
                   <div className="station-empty-icon">
                     <RocketLaunchIcon width={48} height={48} />
                   </div>
-                  <p className="station-empty-title">Your Station is empty</p>
-                  <p className="station-empty-sub">
-                    Create your first Sector to start organizing your web
-                    shortcuts.
+                  <p className="station-empty-title">
+                    {visitingProfile ? "This Station is empty" : "Your Station is empty"}
                   </p>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setShowAddSector(true)}>
-                    + Create First Sector
-                  </button>
+                  <p className="station-empty-sub">
+                    {visitingProfile 
+                      ? "This pilot hasn't created any sectors yet."
+                      : "Create your first Sector to start organizing your web shortcuts."}
+                  </p>
+                  {isCurrentSectorAdminOrOwner && (
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setShowAddSector(true)}>
+                      + Create First Sector
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
@@ -2253,7 +2264,7 @@ export default function StationClient({
                           ? "There's no public sector or beacon in public sector."
                           : "Add your first web shortcut to this sector."}
                   </p>
-                  {!searchQuery && filterVisibility === "all" && (
+                  {!searchQuery && filterVisibility === "all" && isCurrentSectorAdminOrOwner && (
                     <button
                       className="btn btn-primary"
                       onClick={() => setShowAddBeacon(true)}>
@@ -2407,7 +2418,9 @@ export default function StationClient({
                 </AnimatePresence>
               </motion.button>
             )}
-        </main>
+    
+
+      </main>
       </div>
 
       <FriendsModal

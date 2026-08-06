@@ -17,10 +17,11 @@ import {
   RocketLaunchIcon,
   CameraIcon,
   TagIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  SparklesIcon
 } from "@heroicons/react/24/outline";
 import { toPng } from "html-to-image";
-import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
+import { MapPinIcon as MapPinSolid, StarIcon as StarSolid } from "@heroicons/react/24/solid";
 
 type Props = {
   beacon: Beacon & { _creator?: { name: string | null; image: string | null } | null, tags?: { tag: { id: string, name: string } }[] };
@@ -44,6 +45,8 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
   const panelRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [showBranchModal, setShowBranchModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const getProxyUrl = (url?: string | null) => {
     if (!url) return undefined;
@@ -56,10 +59,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     setIsCapturing(true);
 
     try {
-      // Create a clone to prevent modifying the actual UI and to handle CORS safely
       const clone = panelRef.current.cloneNode(true) as HTMLElement;
-      
-      // We must append the clone to the DOM to ensure styles are computed correctly
       const wrapper = document.createElement('div');
       wrapper.style.position = 'absolute';
       wrapper.style.left = '-9999px';
@@ -67,7 +67,6 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
       wrapper.appendChild(clone);
       panelRef.current.parentElement?.appendChild(wrapper);
 
-      // Force all images in the clone to use the proxy and crossOrigin
       const images = clone.querySelectorAll('img');
       const loadPromises: Promise<void>[] = [];
       
@@ -87,9 +86,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
         }
       });
 
-      // Wait for all proxied images to load in the clone
       await Promise.all(loadPromises);
-      // Extra small delay to ensure DOM is flushed
       await new Promise(res => setTimeout(res, 100));
 
       const emptyPixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
@@ -98,16 +95,14 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
         pixelRatio: 2,
         imagePlaceholder: emptyPixel,
         style: {
-          transform: 'scale(1)', // Reset any transforms that might mess up coordinates
+          transform: 'scale(1)',
         },
         filter: (node) => {
-          // Ignore elements with the 'screenshot-ignore' class
           if (node.classList?.contains('screenshot-ignore')) return false;
           return true;
         }
       });
 
-      // Clean up clone
       wrapper.remove();
       
       const a = document.createElement("a");
@@ -123,7 +118,6 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     }
   };
 
-  // Close on Escape + lock body scroll
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
     document.addEventListener("keydown", handleKey);
@@ -135,17 +129,16 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     };
   }, [onClose]);
 
-  // ── 3D tilt effect (ala HSR card) ──────────────────────────
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = cardRef.current;
     if (!el) return;
     cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;   // 0-1
-      const y = (e.clientY - rect.top) / rect.height;  // 0-1
-      const rotY = (x - 0.5) * 28;   // -14 to +14 deg
-      const rotX = -(y - 0.5) * 20;   // -10 to +10 deg
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      const rotY = (x - 0.5) * 28;
+      const rotX = -(y - 0.5) * 20;
       const shine = `radial-gradient(circle at ${x * 100}% ${y * 100}%,
         rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 50%, transparent 80%)`;
       el.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.04)`;
@@ -160,11 +153,16 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
     (el.querySelector(".card-shine") as HTMLElement | null)!.style.background = "none";
   }, []);
 
-  // ── Actions ──────────────────────────────────────────────
   function handleVisit() {
+    const branches = (beacon as any).branches || [];
+    if (branches.length > 0) {
+      setShowBranchModal(true);
+      return;
+    }
     incrementBeaconVisit(beacon.id);
     window.open(beacon.url, "_blank", "noopener,noreferrer");
   }
+
   function handleTogglePin() {
     if (!isPinned && sector) {
       const pinnedCount = sector.beacons.filter((b: Beacon) => b.isPinned).length;
@@ -182,10 +180,11 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
       toast.success(newVal ? "Beacon pinned" : "Beacon unpinned");
     });
   }
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   function handleDelete() {
     setShowDeleteConfirm(true);
   }
+
   function executeDelete() {
     startTransition(async () => {
       const result = await deleteBeacon(beacon.id);
@@ -195,6 +194,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
       }
     });
   }
+
   function handleSaveNotes() {
     startTransition(async () => { await updateBeacon(beacon.id, { notes }); });
     setEditingNotes(false);
@@ -466,28 +466,130 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                 onClick={handleVisit}
                 style={{ padding: "0.6rem 1rem", fontSize: "0.9rem", width: "100%" }}
               >
-                <span>{((beacon as any).branches && (beacon as any).branches.length > 0) ? "Launch Main URL" : "Launch Beacon"}</span>
+                <span>Launch Beacon</span>
                 <span className="hsr-visit-arrow"><RocketLaunchIcon width={16} height={16} /></span>
               </button>
-              {((beacon as any).branches || []).map((branch: any) => (
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showBranchModal && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }} onClick={() => setShowBranchModal(false)}>
+          <div className="modal-panel glass" style={{ width: "90%", maxWidth: "420px", background: "rgba(15, 15, 23, 0.95)", border: "1px solid rgba(139, 92, 246, 0.3)", borderRadius: "var(--radius-lg)", boxShadow: "0 20px 50px rgba(0, 0, 0, 0.6)", padding: 0, overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header" style={{ padding: "1.25rem 1.5rem 1rem", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", background: "rgba(139, 92, 246, 0.05)" }}>
+              <div>
+                <h2 className="modal-title" style={{ fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <RocketLaunchIcon width={18} height={18} style={{ color: "var(--color-nebula-cyan)" }} />
+                  Select Destination
+                </h2>
+                <p style={{ fontSize: "0.75rem", color: "var(--color-comet)", margin: "0.2rem 0 0" }}>Choose which link you want to launch</p>
+              </div>
+              <button className="btn-icon modal-close" onClick={() => setShowBranchModal(false)}>✕</button>
+            </div>
+            
+            <div className="modal-body" style={{ padding: "1.25rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.75rem", maxHeight: "60vh", overflowY: "auto" }}>
+              {/* Main URL Button */}
+              <button
+                className="btn"
+                onClick={() => {
+                  incrementBeaconVisit(beacon.id);
+                  window.open(beacon.url, "_blank", "noopener,noreferrer");
+                  setShowBranchModal(false);
+                }}
+                style={{
+                  padding: "0.85rem 1rem",
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%)",
+                  border: "1px solid rgba(139, 92, 246, 0.5)",
+                  borderRadius: "var(--radius-md)",
+                  transition: "all var(--transition-fast)",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(139, 92, 246, 0.9)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(139, 92, 246, 0.5)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", minWidth: 0, flex: 1 }}>
+                  <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(139, 92, 246, 0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#c4b5fd" }}>
+                    <StarSolid width={18} height={18} />
+                  </div>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span style={{ fontWeight: 600, color: "var(--color-starlight)", fontSize: "0.9rem" }}>Main URL</span>
+                      <span style={{ fontSize: "0.65rem", padding: "0.1rem 0.4rem", borderRadius: "9999px", background: "rgba(139, 92, 246, 0.4)", color: "#e9d5ff", fontWeight: 700, letterSpacing: "0.05em" }}>PRIMARY</span>
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--color-comet)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {beacon.url.replace(/^https?:\/\//, "")}
+                    </div>
+                  </div>
+                </div>
+                <ArrowTopRightOnSquareIcon width={16} height={16} style={{ color: "#c4b5fd", flexShrink: 0, marginLeft: "0.5rem" }} />
+              </button>
+
+              {/* Branch URL Buttons */}
+              {((beacon as any).branches || []).map((branch: any, idx: number) => (
                 <button
-                  key={branch.id || branch.name}
-                  className="hsr-visit-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  key={branch.id || `${branch.name}-${idx}`}
+                  className="btn"
+                  onClick={() => {
                     incrementBeaconVisit(beacon.id);
                     window.open(branch.url, "_blank", "noopener,noreferrer");
+                    setShowBranchModal(false);
                   }}
-                  style={{ padding: "0.6rem 1rem", fontSize: "0.9rem", width: "100%", background: "rgba(139, 92, 246, 0.1)", border: "1px solid rgba(139, 92, 246, 0.3)", color: "#c4b5fd", boxShadow: "none" }}
+                  style={{
+                    padding: "0.85rem 1rem",
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    background: "rgba(255, 255, 255, 0.04)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "var(--radius-md)",
+                    transition: "all var(--transition-fast)",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.3)";
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.1)";
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
                 >
-                  <span>Launch {branch.name}</span>
-                  <span className="hsr-visit-arrow"><ArrowTopRightOnSquareIcon width={16} height={16} /></span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", minWidth: 0, flex: 1 }}>
+                    <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(255, 255, 255, 0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "var(--color-comet)" }}>
+                      <LinkIcon width={16} height={16} />
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <span style={{ fontWeight: 600, color: "var(--color-starlight)", fontSize: "0.88rem", display: "block" }}>
+                        {branch.name}
+                      </span>
+                      <div style={{ fontSize: "0.75rem", color: "var(--color-comet)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {branch.url.replace(/^https?:\/\//, "")}
+                      </div>
+                    </div>
+                  </div>
+                  <ArrowTopRightOnSquareIcon width={16} height={16} style={{ color: "var(--color-comet)", flexShrink: 0, marginLeft: "0.5rem" }} />
                 </button>
               ))}
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Beacon } from "@/types";
 import { incrementBeaconVisit } from "@/lib/actions/beacon.actions";
-import { PencilSquareIcon, ArrowTopRightOnSquareIcon, InformationCircleIcon } from "@heroicons/react/20/solid";
+import { PencilSquareIcon, InformationCircleIcon } from "@heroicons/react/20/solid";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
 type Props = {
@@ -15,21 +15,23 @@ type Props = {
   sectorName?: string;
   isAllBeacons?: boolean;
   hologramEnabled?: boolean;
-  isSelected?: boolean;
-  onToggleSelect?: (e: React.MouseEvent) => void;
-  isSelectMode?: boolean;
 };
 
-export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isCollab = false, sectorName, isAllBeacons, hologramEnabled, isSelected, onToggleSelect, isSelectMode }: Props) {
+export default function BeaconCard({
+  beacon,
+  onClick,
+  onEdit,
+  index = 0,
+  isCollab = false,
+  sectorName,
+  isAllBeacons,
+  hologramEnabled,
+}: Props) {
   const [imgError, setImgError] = useState(false);
   const [favError, setFavError] = useState(false);
 
   function handleVisit(e: React.MouseEvent) {
     e.stopPropagation();
-    if (isSelectMode && onToggleSelect) {
-      onToggleSelect(e);
-      return;
-    }
     if ((beacon as any).branches && (beacon as any).branches.length > 0) {
       onClick();
     } else {
@@ -49,13 +51,18 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
   }
 
   const domain = (() => {
-    try { return new URL(beacon.url).hostname.replace("www.", ""); }
-    catch { return beacon.url; }
+    try {
+      return new URL(beacon.url).hostname.replace("www.", "");
+    } catch {
+      return beacon.url;
+    }
   })();
+
+  const hasBranches = Boolean((beacon as any).branches && (beacon as any).branches.length > 0);
 
   return (
     <article
-      className={`beacon-card glass ${isCollab ? "is-collab" : ""}`}
+      className={`beacon-card glass ${isCollab ? "is-collab" : ""} ${hasBranches ? "has-branches" : ""}`}
       style={{ "--enter-delay": `${Math.min(index * 60, 600)}ms` } as React.CSSProperties}
       onClick={handleVisit}
       role="button"
@@ -64,17 +71,6 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
       onKeyDown={(e) => e.key === "Enter" && onClick()}
       id={`beacon-${beacon.id}`}
     >
-      {/* Checkbox for Select Mode */}
-      {isSelectMode && (
-        <div 
-          className="beacon-card-checkbox screenshot-ignore" 
-          onClick={(e) => { e.stopPropagation(); onToggleSelect?.(e); }}
-          style={{ position: "absolute", top: "8px", left: "8px", zIndex: 10, background: isSelected ? "#8b5cf6" : "rgba(0,0,0,0.5)", border: "2px solid #fff", borderRadius: "4px", width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-        >
-          {isSelected && <span style={{ color: "#fff", fontSize: "14px", fontWeight: "bold" }}>✓</span>}
-        </div>
-      )}
-
       {/* OG Image */}
       <div className="beacon-card-image">
         {beacon.imageUrl && !imgError ? (
@@ -103,7 +99,9 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
           </div>
         )}
         {beacon.isPinned && (
-          <span className="beacon-card-pin" data-tooltip="Pinned"><MapPinSolid width={14} height={14} /></span>
+          <span className="beacon-card-pin" data-tooltip="Pinned">
+            <MapPinSolid width={14} height={14} />
+          </span>
         )}
       </div>
 
@@ -125,7 +123,9 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
                 width={14}
                 height={14}
                 className="beacon-card-favicon"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
               />
             )}
             <span className="beacon-card-domain">{domain}</span>
@@ -138,16 +138,24 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
         {beacon._creator && isCollab && (
           <div style={{ marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
             {beacon._creator.image ? (
-              <img src={beacon._creator.image} alt={beacon._creator.name || "?"} style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }} />
+              <img
+                src={beacon._creator.image}
+                alt={beacon._creator.name || "?"}
+                style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }}
+              />
             ) : (
               <span style={{ fontSize: "0.65rem", background: "rgba(255,255,255,0.1)", width: 16, height: 16, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
                 {(beacon._creator.name || "?")[0].toUpperCase()}
               </span>
             )}
-            <span style={{ fontSize: "0.7rem", color: "var(--color-starlight)" }} data-tooltip={`Added by ${beacon._creator.name}`}>Added by <span style={{ color: "#fff" }}>{beacon._creator.name?.split(" ")[0]}</span></span>
+            <span
+              style={{ fontSize: "0.7rem", color: "var(--color-starlight)" }}
+              data-tooltip={`Added by ${beacon._creator.name}`}
+            >
+              Added by <span style={{ color: "#fff" }}>{beacon._creator.name?.split(" ")[0]}</span>
+            </span>
           </div>
         )}
-        {/* Tags hidden per user request */}
       </div>
 
       {/* Footer */}
@@ -159,7 +167,16 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
             aria-label={`Edit ${beacon.title}`}
             id={`btn-edit-${beacon.id}`}
             data-tooltip="Edit beacon details"
-            style={{ width: "2rem", height: "2rem", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.05)", borderRadius: "var(--radius-md)" }}
+            style={{
+              width: "2rem",
+              height: "2rem",
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(255,255,255,0.05)",
+              borderRadius: "var(--radius-md)",
+            }}
           >
             <PencilSquareIcon width={14} height={14} />
           </button>
@@ -169,7 +186,13 @@ export default function BeaconCard({ beacon, onClick, onEdit, index = 0, isColla
           onClick={handleDetail}
           aria-label={`Details for ${beacon.title}`}
           id={`btn-detail-${beacon.id}`}
-          style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "0.375rem" }}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            gap: "0.375rem",
+          }}
         >
           <InformationCircleIcon width={16} height={16} /> Details
         </button>

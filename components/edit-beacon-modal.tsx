@@ -6,6 +6,8 @@ import { useMetaFetcher } from "@/hooks/use-meta-fetcher";
 import { compressImage } from "@/lib/image-compress";
 import type { Beacon, SectorWithBeacons } from "@/types";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { LinkIcon } from "@heroicons/react/24/outline";
+import MultiUrlModal from "@/components/multi-url-modal";
 import { toast } from "sonner";
 import { DynamicIcon } from "@/components/dynamic-icon";
 
@@ -36,6 +38,8 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
   const [url, setUrl] = useState(autoHttps ? beacon.url.replace(/^https?:\/\//, "") : beacon.url);
   const [title, setTitle] = useState(beacon.title);
   const [branches, setBranches] = useState<{id?: string, name: string, url: string}[]>((beacon as any).branches || []);
+  const [isMultiUrlEnabled, setIsMultiUrlEnabled] = useState(((beacon as any).branches || []).length > 0);
+  const [showMultiUrlModal, setShowMultiUrlModal] = useState(false);
   const [description, setDescription] = useState(beacon.description ?? "");
   const [imageUrl, setImageUrl] = useState(beacon.imageUrl ?? "");
   const [faviconUrl, setFaviconUrl] = useState(beacon.faviconUrl || "");
@@ -146,7 +150,7 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
       imageUrl,
       faviconUrl,
       notes,
-      branches: branches.filter(b => b.name.trim() && b.url.trim()),
+      branches: isMultiUrlEnabled ? branches.filter(b => b.name.trim() && b.url.trim()) : [],
     });
     setLoading(false);
     if (result.error) {
@@ -229,11 +233,31 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="edit-beacon-url">
-                URL
-                {metaLoading && <span className="form-label-hint">⟳ Fetching metadata…</span>}
-                {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
-              </label>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.35rem" }}>
+                <label className="form-label" htmlFor="edit-beacon-url" style={{ margin: 0 }}>
+                  URL
+                  {metaLoading && <span className="form-label-hint">⟳ Fetching metadata…</span>}
+                  {meta && !metaLoading && <span className="form-label-hint form-label-ok">✓ Metadata loaded</span>}
+                </label>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <span style={{ fontSize: "0.75rem", color: isMultiUrlEnabled ? "#c4b5fd" : "var(--color-comet)", fontWeight: 500 }}>Multi URL</span>
+                  <label className="toggle-switch toggle-switch-sm" htmlFor="toggle-multi-url-edit" title="Enable multiple URLs for this beacon">
+                    <input
+                      id="toggle-multi-url-edit"
+                      type="checkbox"
+                      checked={isMultiUrlEnabled}
+                      onChange={(e) => {
+                        const enabled = e.target.checked;
+                        setIsMultiUrlEnabled(enabled);
+                        if (enabled && branches.length === 0) {
+                          setBranches([{ name: "", url: "" }]);
+                        }
+                      }}
+                    />
+                    <span className="toggle-thumb" />
+                  </label>
+                </div>
+              </div>
               <div className="url-input-wrap" style={{ display: "flex", alignItems: "center", background: "rgba(17, 24, 39, 0.8)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", transition: "all var(--transition-fast)" }}>
                 {/* Conditional Rendering pada prefix Https:// */}
                 {autoHttps && <span style={{ padding: "0 0.5rem 0 1rem", color: "var(--color-comet)", fontSize: "0.9rem", userSelect: "none" }}>https://</span>}
@@ -250,47 +274,45 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
               </div>
               {formErrors.url && <span className="text-red-500 text-xs mt-1 block">{formErrors.url}</span>}
               
-              <div style={{ marginTop: "0.5rem" }}>
-                {branches.map((branch, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-                    <input
-                      className="input input-sm"
-                      style={{ flex: 1 }}
-                      placeholder="Name (e.g. Github)"
-                      value={branch.name}
-                      onChange={e => {
-                        const newBranches = [...branches];
-                        newBranches[idx].name = e.target.value;
-                        setBranches(newBranches);
+              {/* View Multi URLs Button when toggle is active */}
+              {isMultiUrlEnabled && (
+                <div style={{ marginTop: "0.5rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowMultiUrlModal(true)}
+                    className="btn btn-secondary"
+                    style={{
+                      width: "100%",
+                      padding: "0.45rem 0.75rem",
+                      fontSize: "0.8rem",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      background: "rgba(139, 92, 246, 0.1)",
+                      border: "1px dashed rgba(139, 92, 246, 0.4)",
+                      color: "#c4b5fd",
+                      borderRadius: "var(--radius-md)",
+                    }}
+                  >
+                    <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <LinkIcon width={14} height={14} />
+                      View Multi URLs
+                    </span>
+                    <span
+                      style={{
+                        background: "rgba(139, 92, 246, 0.3)",
+                        color: "#fff",
+                        fontSize: "0.7rem",
+                        padding: "0.15rem 0.5rem",
+                        borderRadius: "9999px",
+                        fontWeight: 600,
                       }}
-                    />
-                    <input
-                      className="input input-sm"
-                      style={{ flex: 2 }}
-                      placeholder="URL"
-                      value={branch.url}
-                      onChange={e => {
-                        const newBranches = [...branches];
-                        newBranches[idx].url = e.target.value;
-                        setBranches(newBranches);
-                      }}
-                    />
-                    <button type="button" className="btn-icon" onClick={() => {
-                      const newBranches = [...branches];
-                      newBranches.splice(idx, 1);
-                      setBranches(newBranches);
-                    }} style={{ color: "#ef4444" }}>✕</button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  className="btn-text"
-                  style={{ fontSize: "0.75rem", marginTop: "0.5rem" }}
-                  onClick={() => setBranches([...branches, { name: "", url: "" }])}
-                >
-                  + Add Alternate URL (Branch)
-                </button>
-              </div>
+                    >
+                      {branches.filter(b => b.name.trim() || b.url.trim()).length} extra URL{branches.filter(b => b.name.trim() || b.url.trim()).length === 1 ? "" : "s"}
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Title */}
@@ -428,6 +450,14 @@ export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, o
           )}
         </div>
       </div>
+
+      <MultiUrlModal
+        isOpen={showMultiUrlModal}
+        onClose={() => setShowMultiUrlModal(false)}
+        branches={branches}
+        onChange={setBranches}
+        autoHttps={autoHttps}
+      />
     </div>
   );
 }

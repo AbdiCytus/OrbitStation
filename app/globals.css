@@ -1283,6 +1283,19 @@ pre {
   }
 }
 
+/* Multi-URL (Branching) Beacon: Subtle glowing purple border */
+.beacon-card.has-branches {
+  border: 1px solid rgba(168, 85, 247, 0.45) !important;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.22), inset 0 0 12px rgba(168, 85, 247, 0.05);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .beacon-card.has-branches:hover {
+    border-color: rgba(192, 132, 252, 0.85) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), 0 0 24px rgba(168, 85, 247, 0.45), inset 0 0 16px rgba(168, 85, 247, 0.1) !important;
+  }
+}
+
 .beacon-card-image {
   position: relative;
   width: 100%;
@@ -4270,6 +4283,23 @@ pre {
   transform: translateX(20px);
 }
 
+/* Compact / Small Toggle Switch Variant */
+.toggle-switch-sm {
+  width: 34px;
+  height: 18px;
+}
+
+.toggle-switch-sm .toggle-thumb::before {
+  width: 12px;
+  height: 12px;
+  top: 2px;
+  left: 2px;
+}
+
+.toggle-switch-sm input:checked+.toggle-thumb::before {
+  transform: translateX(16px);
+}
+
 .settings-save-row {
   display: flex;
   justify-content: flex-end;
@@ -4511,6 +4541,22 @@ pre {
 
 .toggle-switch input:checked+.toggle-thumb::before {
   transform: translateX(20px);
+}
+
+.toggle-switch-sm {
+  width: 34px;
+  height: 18px;
+}
+
+.toggle-switch-sm .toggle-thumb::before {
+  width: 12px;
+  height: 12px;
+  top: 2px;
+  left: 2px;
+}
+
+.toggle-switch-sm input:checked+.toggle-thumb::before {
+  transform: translateX(16px);
 }
 
 .settings-save-row {
