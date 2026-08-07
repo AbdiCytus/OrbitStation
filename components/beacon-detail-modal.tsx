@@ -388,7 +388,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             <h2 className="hsr-title">{beacon.title}</h2>
 
             {/* Tags (Mobile Only) */}
-            <div className="flex sm:hidden flex-wrap items-center gap-1.5 mb-4 mt-1">
+            <div className="hsr-tags-mobile flex sm:hidden flex-wrap items-center gap-1.5 mb-4 mt-1">
               {beacon.tags?.map(bt => (
                 <span
                   key={bt.tag.id}
@@ -459,7 +459,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
             </div>
 
             {/* CTA */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }} className="screenshot-ignore">
+            <div className="hsr-cta screenshot-ignore" style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               <button
                 id={`btn-visit-hsr-${beacon.id}`}
                 className="hsr-visit-btn"

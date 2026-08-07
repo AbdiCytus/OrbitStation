@@ -2,12 +2,13 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import type { Beacon, SectorWithBeacons, Tag } from "@/types";
+import { useBeaconColors } from "@/hooks/use-beacon-colors";
 
 type UseBeaconFiltersOptions = {
   allSectors: SectorWithBeacons[];
   personalSectors: SectorWithBeacons[];
   displaySectorId: string | "all";
-  beaconColors: Record<string, number>;
+  beaconColors?: Record<string, number>;
   user: {
     saveFilterSortEnabled?: boolean;
     animationEnabled: boolean;
@@ -23,7 +24,7 @@ export function useBeaconFilters({
   allSectors,
   personalSectors,
   displaySectorId,
-  beaconColors,
+  beaconColors: externalBeaconColors,
   user,
 }: UseBeaconFiltersOptions) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,6 +41,9 @@ export function useBeaconFilters({
     useState<TagFilterModeOption>("union");
   const [loadedSectorId, setLoadedSectorId] = useState<string | null>(null);
 
+  const internalBeaconColors = useBeaconColors(allSectors, sortBy === "color");
+  const beaconColors = externalBeaconColors || internalBeaconColors;
+
   // Local override for sector tags — updated optimistically from TagManagementModal
   const [sectorTagsOverride, setSectorTagsOverride] = useState<
     Record<string, Tag[]>
@@ -50,6 +54,7 @@ export function useBeaconFilters({
   const [visibleLimit, setVisibleLimit] = useState(12);
   const [viewMode, setViewMode] = useState<"masonry" | "grid">("masonry");
   const [isViewModeMounted, setIsViewModeMounted] = useState(false);
+  const [isPrefLoading, setIsPrefLoading] = useState(true);
 
   // Load view mode preference
   useEffect(() => {
@@ -83,6 +88,7 @@ export function useBeaconFilters({
       setSelectedTags([]);
       setTagFilterMode("union");
       setLoadedSectorId(displaySectorId);
+      setIsPrefLoading(false);
       return;
     }
 
@@ -107,6 +113,13 @@ export function useBeaconFilters({
       // Ignore
     }
     setLoadedSectorId(displaySectorId);
+
+    // Brief delay to ensure state and DOM settle smoothly
+    const timer = setTimeout(() => {
+      setIsPrefLoading(false);
+    }, 120);
+
+    return () => clearTimeout(timer);
   }, [displaySectorId, user.saveFilterSortEnabled]);
 
   // Persist filter & sort preferences for "all" sector
@@ -212,9 +225,17 @@ export function useBeaconFilters({
     }
 
     if (selectedTags.length > 0) {
-      beacons = beacons.filter((b) =>
-        b.tags?.some((bt: any) => selectedTags.includes(bt.tagId)),
-      );
+      if (tagFilterMode === "intersect") {
+        beacons = beacons.filter((b) =>
+          selectedTags.every((tagId) =>
+            b.tags?.some((bt: any) => bt.tagId === tagId),
+          ),
+        );
+      } else {
+        beacons = beacons.filter((b) =>
+          b.tags?.some((bt: any) => selectedTags.includes(bt.tagId)),
+        );
+      }
     }
 
     if (searchQuery.trim()) {
@@ -255,17 +276,28 @@ export function useBeaconFilters({
       );
     } else if (sortBy === "color") {
       beacons.sort((a, b) => {
-        const hA = beaconColors[a.id];
-        const hB = beaconColors[b.id];
-        const hasA = hA !== undefined && hA !== -1;
-        const hasB = hB !== undefined && hB !== -1;
+        const groupA = a.imageUrl ? 1 : a.faviconUrl ? 2 : 3;
+        const groupB = b.imageUrl ? 1 : b.faviconUrl ? 2 : 3;
 
-        if (hasA && hasB) {
-          return sortDir === "asc" ? hA - hB : hB - hA;
+        if (groupA !== groupB) {
+          return groupA - groupB;
         }
-        if (hasA) return -1;
-        if (hasB) return 1;
-        return 0;
+
+        if (groupA === 1 || groupA === 2) {
+          const hA = beaconColors[a.id];
+          const hB = beaconColors[b.id];
+          const hasA = hA !== undefined && hA !== -1;
+          const hasB = hB !== undefined && hB !== -1;
+
+          if (hasA && hasB) {
+            return sortDir === "asc" ? hA - hB : hB - hA;
+          }
+          if (hasA) return -1;
+          if (hasB) return 1;
+          return a.title.localeCompare(b.title);
+        }
+
+        return a.title.localeCompare(b.title);
       });
     } else {
       // date
@@ -344,6 +376,7 @@ export function useBeaconFilters({
     viewMode,
     setViewMode,
     isViewModeMounted,
+    isPrefLoading,
     applyFilterSort,
     handleSearchChange,
     baseBeacons,

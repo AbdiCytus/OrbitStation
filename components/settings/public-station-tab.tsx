@@ -94,11 +94,11 @@ export default function PublicStationTab({
 
         {/* Allow Public Workspace Toggle */}
         <div
-          className="settings-toggle-row rounded-lg border border-white/10 mt-4"
-          style={{ padding: "1rem" }}>
+          className="settings-toggle-row rounded-lg border border-white/10"
+          style={{ padding: "1rem", marginTop: "1rem" }}>
           <div className="settings-toggle-info">
             <span className="settings-toggle-label text-white font-medium">
-              Allow another pilot to visit my station workspace
+              Public Workspace
             </span>
             <span className="settings-toggle-desc text-sm text-gray-400 mt-1">
               Allows other users to view your public sectors and beacons.
@@ -268,13 +268,12 @@ export default function PublicStationTab({
                                   if (isUnlocked) setTitleBadge(badge.id);
                                   else setPreviewBadge(badge);
                                 }}
-                                className={`badge-card relative group p-4 rounded-xl border flex gap-3 items-center cursor-pointer ${
-                                  isSelected
+                                className={`badge-card relative group p-4 rounded-xl border flex gap-3 items-center cursor-pointer ${isSelected
                                     ? `ring-2 ring-purple-500 ring-offset-2 ring-offset-[#0f0f16]`
                                     : isUnlocked
                                       ? "hover:scale-[1.02] hover:shadow-lg"
                                       : "bg-black/40 border-white/5 opacity-60 grayscale"
-                                } ${isUnlocked ? badge.effectClass : ""}`}
+                                  } ${isUnlocked ? badge.effectClass : ""}`}
                                 style={{ position: "relative", zIndex: 1 }}>
                                 {isUnlocked &&
                                   badge.id === "the-completionist" && (
@@ -287,11 +286,10 @@ export default function PublicStationTab({
                                 <div
                                   className={`flex-1 min-w-0 flex items-center gap-2 pr-10`}>
                                   <div
-                                    className={`badge-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                                      isUnlocked
+                                    className={`badge-icon w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${isUnlocked
                                         ? ""
                                         : "bg-gray-800 text-gray-500 border border-gray-700 group-hover:bg-purple-500/20 group-hover:text-purple-400 group-hover:border-purple-500/50"
-                                    }`}
+                                      }`}
                                     style={{ marginLeft: "0.5rem" }}>
                                     {isUnlocked ? (
                                       <DynamicIcon

@@ -24,7 +24,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "@/hooks/use-notifications";
-import { useBeaconColors } from "@/hooks/use-beacon-colors";
 import { useRealtimeSync } from "@/hooks/use-realtime-sync";
 import { useSectorDrag } from "@/hooks/use-sector-drag";
 import { useBeaconFilters } from "@/hooks/use-beacon-filters";
@@ -203,19 +202,12 @@ export default function StationClient({
     }
     setIsExiting(true);
     setFunFact(FUN_FACTS[Math.floor(Math.random() * FUN_FACTS.length)]);
-    let delay = 800;
-    if (typeof navigator !== "undefined" && "connection" in navigator) {
-      const conn = (navigator as any).connection;
-      if (conn.effectiveType === "slow-2g") delay = 3500;
-      else if (conn.effectiveType === "2g") delay = 2500;
-      else if (conn.effectiveType === "3g") delay = 1500;
-    }
 
     setTimeout(() => {
       setDisplaySectorId(sectorId);
       setIsExiting(false);
       setIsEntering(true);
-    }, delay);
+    }, 800);
   };
   const [openMenu, setOpenMenu] = useState<"filter" | "sort" | "tags" | null>(
     null,
@@ -292,9 +284,6 @@ export default function StationClient({
   const allCollabSectors = [...myCollabSectors, ...collabSectors];
   const allSectors = [...allOwnedSectors, ...collabSectors];
 
-  // Beacon color computation (extracted to hook)
-  const beaconColors = useBeaconColors(allSectors);
-
   const scrollThrottleRef = useRef<number>(0);
 
   // Beacon filtering, sorting, view mode, and responsive pagination (extracted to hook)
@@ -324,6 +313,7 @@ export default function StationClient({
     viewMode,
     setViewMode,
     isViewModeMounted,
+    isPrefLoading,
     applyFilterSort,
     handleSearchChange,
     baseBeacons,
@@ -335,7 +325,6 @@ export default function StationClient({
     allSectors,
     personalSectors,
     displaySectorId,
-    beaconColors,
     user,
   });
 
@@ -420,15 +409,7 @@ export default function StationClient({
           sector={activeSectorId}
           sectorColor={activeSector?.color}
           animEnabled={true}
-          transitionDuration={(() => {
-            if (typeof navigator !== "undefined" && "connection" in navigator) {
-              const conn = (navigator as any).connection;
-              if (conn.effectiveType === "slow-2g") return 3500;
-              if (conn.effectiveType === "2g") return 2500;
-              if (conn.effectiveType === "3g") return 1500;
-            }
-            return 800;
-          })()}
+          transitionDuration={800}
         />
       ) : (
         <StaticStarfield
@@ -447,20 +428,7 @@ export default function StationClient({
       {isExiting && user.animationEnabled && (
         <div
           className="fun-fact-overlay"
-          style={{
-            animationDuration: (() => {
-              if (
-                typeof navigator !== "undefined" &&
-                "connection" in navigator
-              ) {
-                const conn = (navigator as any).connection;
-                if (conn.effectiveType === "slow-2g") return "3.5s";
-                if (conn.effectiveType === "2g") return "2.5s";
-                if (conn.effectiveType === "3g") return "1.5s";
-              }
-              return "0.8s";
-            })(),
-          }}>
+          style={{ animationDuration: "0.8s" }}>
           <p className="fun-fact-text">
             <SparklesIcon
               width={20}
@@ -579,6 +547,8 @@ export default function StationClient({
             setSelectedTags={setSelectedTags}
             tagSearchQuery={tagSearchQuery}
             setTagSearchQuery={setTagSearchQuery}
+            tagFilterMode={tagFilterMode}
+            setTagFilterMode={setTagFilterMode}
             sortBy={sortBy}
             setSortBy={setSortBy}
             sortDir={sortDir}
@@ -610,6 +580,7 @@ export default function StationClient({
             isFilterEntering={isFilterEntering}
             shrinkingBeacons={shrinkingBeacons}
             growingBeacons={growingBeacons}
+            isPrefLoading={isPrefLoading}
             onSelectBeacon={(beacon) => setSelectedBeacon(beacon)}
             onEditBeacon={(beacon) => setEditingBeacon(beacon)}
             onAddSector={() => setShowAddSector(true)}

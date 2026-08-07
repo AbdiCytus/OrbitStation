@@ -236,11 +236,11 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
         )}
 
         {visitingProfile && (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)", padding: "0.25rem 1rem", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "start", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)", padding: "0.25rem", paddingLeft: "0.25rem", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.1)" }}>
             <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#374151", overflow: "hidden" }}>
-              {visitingProfile.image ? <img src={visitingProfile.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", width: "100%", height: "100%" }}>{(visitingProfile.name || visitingProfile.username)[0].toUpperCase()}</span>}
+              {visitingProfile.image ? <img src={visitingProfile.image} style={{ width: "100%", height: "100%", objectFit: "cover", justifyContent: "start" }} /> : <span style={{ display: "flex", alignItems: "center", justifyContent: "start", fontSize: "10px", width: "100%", height: "100%" }}>{(visitingProfile.name || visitingProfile.username)[0].toUpperCase()}</span>}
             </div>
-            <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--color-starlight)" }}>{visitingProfile.name || visitingProfile.username}</span>
+            <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--color-starlight)", marginRight: "0.5rem" }}>{visitingProfile.name || visitingProfile.username}</span>
           </div>
         )}
 
@@ -249,7 +249,7 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
       <div className="navbar-user" style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }} ref={menuRef}>
         {visitingProfile ? (
           <Link href={`/station/${visitingProfile.username}`} className="btn btn-primary btn-sm" style={{ padding: "0.4rem 1rem", fontSize: "0.85rem", background: "rgba(139, 92, 246, 0.2)", border: "1px solid rgba(139, 92, 246, 0.5)", color: "#c4b5fd" }}>
-            Return to Public Station
+            Return
           </Link>
         ) : !hideProfile ? (
           user ? (
@@ -269,12 +269,12 @@ export default function StationNavbar({ user, searchQuery, onSearchChange, onSea
                     </div>
                   </Link>
                 )}
-                <button 
-                  onClick={onOpenFriends} 
+                <button
+                  onClick={onOpenFriends}
                   disabled={pathname !== "/station"}
-                  className="navbar-icon-btn group relative" 
-                  style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s", opacity: pathname !== "/station" ? 0.5 : 1, cursor: pathname !== "/station" ? "not-allowed" : "pointer" }} 
-                  onMouseEnter={(e) => { if (pathname === "/station") e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)" }} 
+                  className="navbar-icon-btn group relative"
+                  style={{ padding: "8px", borderRadius: "8px", color: "#a78bfa", transition: "all 0.2s", opacity: pathname !== "/station" ? 0.5 : 1, cursor: pathname !== "/station" ? "not-allowed" : "pointer" }}
+                  onMouseEnter={(e) => { if (pathname === "/station") e.currentTarget.style.backgroundColor = "rgba(139,92,246,0.2)" }}
                   onMouseLeave={(e) => { if (pathname === "/station") e.currentTarget.style.backgroundColor = "transparent" }}
                 >
                   <UsersIcon width={20} height={20} />

@@ -138,6 +138,25 @@ export default function StationHeader({
                     className={isRefreshing ? "animate-spin" : ""}
                   />
                 </button>
+                {isCurrentSectorAdminOrOwner && displaySectorId !== "all" && (
+                  <button
+                    className="btn-icon"
+                    style={{
+                      background: "rgba(255, 255, 255, 0.05)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: "8px",
+                      width: "38px",
+                      height: "38px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                    onClick={onManageTags}
+                    data-tooltip="Manage Tags">
+                    <TagIcon width={18} height={18} />
+                  </button>
+                )}
                 {isCurrentSectorAdminOrOwner && (
                   <button
                     id="btn-add-beacon"
@@ -215,7 +234,7 @@ export default function StationHeader({
                   className={isRefreshing ? "animate-spin" : ""}
                 />
               </button>
-              {displaySectorId !== "all" && (
+              {displaySectorId !== "all" && isCurrentSectorAdminOrOwner && (
                 <button
                   className="flex shrink-0 items-center justify-center"
                   style={{
@@ -229,7 +248,8 @@ export default function StationHeader({
                   onClick={() => {
                     onManageTags();
                     setMobileMenuOpen(false);
-                  }}>
+                  }}
+                  data-tooltip="Manage Tags">
                   <TagIcon width={18} height={18} />
                 </button>
               )}

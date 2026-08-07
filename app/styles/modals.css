@@ -1,4 +1,4 @@
-﻿/* =================================================================
+/* =================================================================
    Shared modal styles, Beacon detail modal (HSR Light Cone), form elements
    ================================================================= */
 /* ============================================================
@@ -931,6 +931,11 @@
     font-size: 1.25rem !important;
   }
 
+  .hsr-tags-mobile {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
   .hsr-desc {
     grid-column: 1 / -1 !important;
     grid-row: 6 !important;
@@ -944,9 +949,15 @@
     grid-column: 1 / -1 !important;
   }
 
+  .hsr-cta {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    margin-top: 1rem !important;
+  }
+
   .hsr-visit-btn {
     grid-column: 1 / -1 !important;
-    margin-top: 1rem !important;
+    width: 100% !important;
   }
 
   .hsr-stat-val {

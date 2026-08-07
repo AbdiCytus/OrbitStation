@@ -28,6 +28,7 @@ type BeaconGridViewProps = {
   isFilterEntering: boolean;
   shrinkingBeacons: Set<string>;
   growingBeacons: Set<string>;
+  isPrefLoading?: boolean;
   onSelectBeacon: (beacon: Beacon) => void;
   onEditBeacon: (beacon: Beacon) => void;
   onAddSector: () => void;
@@ -53,11 +54,63 @@ export default function BeaconGridView({
   isFilterEntering,
   shrinkingBeacons,
   growingBeacons,
+  isPrefLoading,
   onSelectBeacon,
   onEditBeacon,
   onAddSector,
   onAddBeacon,
 }: BeaconGridViewProps) {
+  if (isPrefLoading) {
+    return (
+      <div
+        className="station-empty"
+        style={{
+          minHeight: "320px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "1rem",
+          animation: user.animationEnabled ? "fade-in 0.3s ease both" : "none",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: "40px",
+            height: "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <span
+            className="spinner"
+            style={{
+              width: "28px",
+              height: "28px",
+              borderWidth: "2.5px",
+              borderColor: "rgba(124, 92, 252, 0.2)",
+              borderTopColor: "var(--color-nebula-400)",
+              filter: "drop-shadow(0 0 10px rgba(124, 92, 252, 0.5))",
+            }}
+          />
+        </div>
+        <p
+          style={{
+            fontSize: "0.8rem",
+            fontWeight: 500,
+            color: "var(--color-nebula)",
+            letterSpacing: "0.05em",
+            margin: 0,
+          }}
+        >
+          Calibrating station view...
+        </p>
+      </div>
+    );
+  }
+
   if (visibleBeacons.length === 0) {
     return (
       <div

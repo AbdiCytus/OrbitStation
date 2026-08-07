@@ -271,11 +271,21 @@ export function useNotifications({
       });
     }
 
-    const onFocus = () => fetchStats();
+    let lastFetchTime = 0;
+    const onFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      const now = Date.now();
+      if (now - lastFetchTime > 15000) {
+        lastFetchTime = now;
+        fetchStats();
+      }
+    };
     window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
 
     return () => {
       window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
       pusherClient.unsubscribe('presence-global');
       if (channelName) {
         pusherClient.unsubscribe(channelName);

@@ -31,6 +31,8 @@ type StationToolbarProps = {
   setSelectedTags: React.Dispatch<React.SetStateAction<string[]>>;
   tagSearchQuery: string;
   setTagSearchQuery: (q: string) => void;
+  tagFilterMode: "union" | "intersect";
+  setTagFilterMode: (mode: "union" | "intersect") => void;
   sortBy: "date" | "name" | "sector" | "creator" | "visits" | "color";
   setSortBy: (
     s: "date" | "name" | "sector" | "creator" | "visits" | "color",
@@ -62,6 +64,8 @@ export default function StationToolbar({
   setSelectedTags,
   tagSearchQuery,
   setTagSearchQuery,
+  tagFilterMode,
+  setTagFilterMode,
   sortBy,
   setSortBy,
   sortDir,
@@ -304,6 +308,69 @@ export default function StationToolbar({
                           Clear All
                         </button>
                       )}
+                    </div>
+
+                    {/* Tag Filter Mode Toggle: Union vs Intersect */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        background: "rgba(255, 255, 255, 0.05)",
+                        border: "1px solid rgba(255, 255, 255, 0.08)",
+                        borderRadius: "6px",
+                        padding: "2px",
+                        gap: "2px",
+                      }}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          applyFilterSort(() => setTagFilterMode("union"))
+                        }
+                        style={{
+                          flex: 1,
+                          padding: "0.25rem 0.5rem",
+                          fontSize: "0.72rem",
+                          fontWeight: tagFilterMode === "union" ? 600 : 400,
+                          borderRadius: "4px",
+                          border: "none",
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                          background:
+                            tagFilterMode === "union"
+                              ? "rgba(139, 92, 246, 0.3)"
+                              : "transparent",
+                          color:
+                            tagFilterMode === "union"
+                              ? "#c4b5fd"
+                              : "rgba(255, 255, 255, 0.5)",
+                        }}>
+                        Union (OR)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          applyFilterSort(() => setTagFilterMode("intersect"))
+                        }
+                        style={{
+                          flex: 1,
+                          padding: "0.25rem 0.5rem",
+                          fontSize: "0.72rem",
+                          fontWeight: tagFilterMode === "intersect" ? 600 : 400,
+                          borderRadius: "4px",
+                          border: "none",
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                          background:
+                            tagFilterMode === "intersect"
+                              ? "rgba(139, 92, 246, 0.3)"
+                              : "transparent",
+                          color:
+                            tagFilterMode === "intersect"
+                              ? "#c4b5fd"
+                              : "rgba(255, 255, 255, 0.5)",
+                        }}>
+                        Intersect (AND)
+                      </button>
                     </div>
 
                     {/* Live Search Input */}

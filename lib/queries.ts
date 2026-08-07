@@ -13,103 +13,163 @@ import { auth } from "@/auth";
 
 /** Ambil Station + semua Sector + Beacon milik user yang sedang login */
 export async function getMyStation() {
-  const session = await auth();
-  if (!session?.user?.id) return null;
+  try {
+    const session = await auth();
+    if (!session?.user?.id) return null;
 
-  const station = await db.station.findUnique({
-    where: { userId: session.user.id },
-    include: {
-      sectors: {
-        orderBy: { order: "asc" },
-        include: {
-          beacons: {
-            orderBy: { order: "asc" },
-            include: { 
-              creator: { select: { name: true, image: true } },
-              tags: { include: { tag: true } },
-              branches: { orderBy: { order: "asc" } }
-            }
+    let station = await db.station.findUnique({
+      where: { userId: session.user.id },
+      include: {
+        sectors: {
+          orderBy: { order: "asc" },
+          include: {
+            beacons: {
+              orderBy: { order: "asc" },
+              include: { 
+                creator: { select: { name: true, image: true } },
+                tags: { include: { tag: true } },
+                branches: { orderBy: { order: "asc" } }
+              }
+            },
+            collaborators: {
+              include: {
+                user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
+              }
+            },
+            station: {
+              select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
+            },
+            tags: true,
           },
-          collaborators: {
-            include: {
-              user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
-            }
-          },
-          station: {
-            select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
-          },
-          tags: true,
         },
       },
-    },
-  });
+    });
 
-  return station;
+    if (!station) {
+      // Auto-create default station if missing
+      try {
+        station = await db.station.create({
+          data: {
+            userId: session.user.id,
+            sectors: {
+              create: {
+                name: "General",
+                icon: "GlobeAltIcon",
+                color: "#7c5cfc",
+                order: 0,
+              },
+            },
+          },
+          include: {
+            sectors: {
+              orderBy: { order: "asc" },
+              include: {
+                beacons: {
+                  orderBy: { order: "asc" },
+                  include: { 
+                    creator: { select: { name: true, image: true } },
+                    tags: { include: { tag: true } },
+                    branches: { orderBy: { order: "asc" } }
+                  }
+                },
+                collaborators: {
+                  include: {
+                    user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
+                  }
+                },
+                station: {
+                  select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
+                },
+                tags: true,
+              },
+            },
+          },
+        });
+      } catch (createErr) {
+        console.error("Failed to auto-create station for user:", createErr);
+      }
+    }
+
+    return station;
+  } catch (err) {
+    console.error("Error in getMyStation:", err);
+    return null;
+  }
 }
 
 export async function getVisitedStation(username: string) {
-  const station = await db.station.findFirst({
-    where: { user: { username }, isPublic: true, allowPublicWorkspace: true },
-    include: {
-      sectors: {
-        where: { isPublic: true },
-        orderBy: { order: "asc" },
-        include: {
-          beacons: {
-            orderBy: { order: "asc" },
-            include: { 
-              creator: { select: { name: true, image: true } },
-              tags: { include: { tag: true } },
-              branches: { orderBy: { order: "asc" } }
-            }
+  try {
+    const station = await db.station.findFirst({
+      where: { user: { username }, isPublic: true, allowPublicWorkspace: true },
+      include: {
+        sectors: {
+          where: { isPublic: true },
+          orderBy: { order: "asc" },
+          include: {
+            beacons: {
+              orderBy: { order: "asc" },
+              include: { 
+                creator: { select: { name: true, image: true } },
+                tags: { include: { tag: true } },
+                branches: { orderBy: { order: "asc" } }
+              }
+            },
+            collaborators: {
+              include: {
+                user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
+              }
+            },
+            station: {
+              select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
+            },
+            tags: true,
           },
-          collaborators: {
-            include: {
-              user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
-            }
-          },
-          station: {
-            select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
-          },
-          tags: true,
         },
       },
-    },
-  });
-  return station;
+    });
+    return station;
+  } catch (err) {
+    console.error("Error in getVisitedStation:", err);
+    return null;
+  }
 }
 
 /** Ambil sektor-sektor di mana user menjadi kolaborator */
 export async function getCollabSectors() {
-  const session = await auth();
-  if (!session?.user?.id) return [];
+  try {
+    const session = await auth();
+    if (!session?.user?.id) return [];
 
-  return db.sector.findMany({
-    where: {
-      collaborators: {
-        some: { userId: session.user.id }
+    return await db.sector.findMany({
+      where: {
+        collaborators: {
+          some: { userId: session.user.id }
+        }
+      },
+      include: {
+        beacons: {
+          orderBy: { order: "asc" },
+          include: { 
+            creator: { select: { name: true, image: true } },
+            tags: { include: { tag: true } },
+            branches: { orderBy: { order: "asc" } }
+          }
+        },
+        collaborators: {
+          include: {
+            user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
+          }
+        },
+        station: {
+          select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
+        },
+        tags: true,
       }
-    },
-    include: {
-      beacons: {
-        orderBy: { order: "asc" },
-        include: { 
-          creator: { select: { name: true, image: true } },
-          tags: { include: { tag: true } },
-          branches: { orderBy: { order: "asc" } }
-        }
-      },
-      collaborators: {
-        include: {
-          user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } }
-        }
-      },
-      station: {
-        select: { user: { select: { id: true, name: true, image: true, username: true, titleBadge: true, station: { select: { isPublic: true } } } } }
-      },
-      tags: true,
-    }
-  });
+    });
+  } catch (err) {
+    console.error("Error in getCollabSectors:", err);
+    return [];
+  }
 }
 
 /** Ambil Station publik milik user lain berdasarkan username */
@@ -212,38 +272,43 @@ export async function getPinnedBeacons(userId: string) {
 
 /** Ambil profil user yang sedang login (lengkap) */
 export async function getMyProfile() {
-  const session = await auth();
-  if (!session?.user?.id) return null;
+  try {
+    const session = await auth();
+    if (!session?.user?.id) return null;
 
-  return db.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      id: true,
-      name: true,
-      username: true,
-      email: true,
-      image: true,
-      bio: true,
-      bannerUrl: true,
-      titleBadge: true,
-      callsign: true,
-      animationEnabled: true,
-      hologramEnabled: true,
-      allowFriendRequests: true,
-      staticBackgroundEnabled: true,
-      saveFilterSortEnabled: true,
-      notifSoundEnabled: true,
-      notifSoundUrl: true,
-      shortcuts: true,
-      createdAt: true,
-      password: true,
-      station: {
-        select: {
-          id: true,
-          isPublic: true,
-          allowPublicWorkspace: true,
+    return await db.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        email: true,
+        image: true,
+        bio: true,
+        bannerUrl: true,
+        titleBadge: true,
+        callsign: true,
+        animationEnabled: true,
+        hologramEnabled: true,
+        allowFriendRequests: true,
+        staticBackgroundEnabled: true,
+        saveFilterSortEnabled: true,
+        notifSoundEnabled: true,
+        notifSoundUrl: true,
+        shortcuts: true,
+        createdAt: true,
+        password: true,
+        station: {
+          select: {
+            id: true,
+            isPublic: true,
+            allowPublicWorkspace: true,
+          },
         },
       },
-    },
-  });
+    });
+  } catch (err) {
+    console.error("Error in getMyProfile:", err);
+    return null;
+  }
 }
