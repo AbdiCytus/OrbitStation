@@ -6,10 +6,13 @@ import { incrementBeaconVisit } from "@/lib/actions/beacon.actions";
 import { PencilSquareIcon, InformationCircleIcon } from "@heroicons/react/20/solid";
 import { MapPinIcon as MapPinSolid } from "@heroicons/react/24/solid";
 
+import { normalizeUrl } from "@/lib/url-utils";
+
 type Props = {
   beacon: Beacon & { _creator?: { name: string | null; image: string | null } | null, tags?: { tag: { id: string, name: string } }[] };
   onClick: () => void;
   onEdit?: () => void;
+  onLaunchDestination?: (beacon: Beacon) => void;
   index?: number; // For stagger animation
   isCollab?: boolean;
   sectorName?: string;
@@ -21,6 +24,7 @@ export default function BeaconCard({
   beacon,
   onClick,
   onEdit,
+  onLaunchDestination,
   index = 0,
   isCollab = false,
   sectorName,
@@ -32,11 +36,16 @@ export default function BeaconCard({
 
   function handleVisit(e: React.MouseEvent) {
     e.stopPropagation();
-    if ((beacon as any).branches && (beacon as any).branches.length > 0) {
-      onClick();
+    const branches = (beacon as any).branches || [];
+    if (branches.length > 0) {
+      if (onLaunchDestination) {
+        onLaunchDestination(beacon);
+      } else {
+        onClick();
+      }
     } else {
       incrementBeaconVisit(beacon.id);
-      window.open(beacon.url, "_blank", "noopener,noreferrer");
+      window.open(normalizeUrl(beacon.url), "_blank", "noopener,noreferrer");
     }
   }
 
@@ -68,7 +77,11 @@ export default function BeaconCard({
       role="button"
       tabIndex={0}
       aria-label={`Beacon: ${beacon.title}`}
-      onKeyDown={(e) => e.key === "Enter" && onClick()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          handleVisit(e as any);
+        }
+      }}
       id={`beacon-${beacon.id}`}
     >
       {/* OG Image */}

@@ -19,14 +19,7 @@ type Props = {
   onDeleted: (id: string) => void;
 };
 
-// Pindahkan ke luar komponen agar mudah diakses
-function normalizeUrl(raw: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) return trimmed;
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  if (trimmed.startsWith("//")) return `https:${trimmed}`;
-  return `https://${trimmed}`;
-}
+import { normalizeUrl } from "@/lib/url-utils";
 
 export default function EditBeaconModal({ beacon, sectors, onClose, onUpdated, onDeleted }: Props) {
   // Ambil pengaturan dari localStorage

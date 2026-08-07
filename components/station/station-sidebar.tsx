@@ -8,6 +8,7 @@ import {
   PencilSquareIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  LockClosedIcon,
 } from "@heroicons/react/24/outline";
 
 type StationSidebarProps = {
@@ -162,7 +163,7 @@ export default function StationSidebar({
               }}>
               <button
                 id={`tab-sector-${sector.id}`}
-                className={`sector-tab ${activeSectorId === sector.id ? "active" : ""}`}
+                className={`sector-tab group ${activeSectorId === sector.id ? "active" : ""}`}
                 onClick={() => handleTabClick(sector.id)}
                 style={
                   activeSectorId === sector.id && sector.color
@@ -174,14 +175,31 @@ export default function StationSidebar({
                 </span>
                 <span className="sector-tab-name">{sector.name}</span>
                 <div
-                  className="sector-tab-edit-btn hidden md:flex"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEditSector(sector);
-                  }}
-                  data-tooltip="Edit sector"
-                  aria-label={`Edit ${sector.name}`}>
-                  <PencilSquareIcon width={14} height={14} />
+                  className={`relative shrink-0 items-center justify-center ${
+                    !sector.isPublic ? "flex" : "hidden md:flex"
+                  }`}
+                  style={{ width: "28px", height: "28px", marginLeft: "4px" }}>
+                  {/* Private Lock Icon (visible when NOT hovered) */}
+                  {!sector.isPublic && (
+                    <div
+                      className="absolute inset-0 flex items-center justify-center opacity-75 md:group-hover:opacity-0 transition-opacity pointer-events-none"
+                      style={{ color: "rgba(167, 139, 250, 0.8)" }}
+                      data-tooltip="Private Sector">
+                      <LockClosedIcon width={14} height={14} />
+                    </div>
+                  )}
+                  {/* Edit Button (visible on hover on desktop, hidden on mobile) */}
+                  <div
+                    className="sector-tab-edit-btn hidden md:flex"
+                    style={{ position: "absolute", inset: 0, margin: 0 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditSector(sector);
+                    }}
+                    data-tooltip="Edit sector"
+                    aria-label={`Edit ${sector.name}`}>
+                    <PencilSquareIcon width={14} height={14} />
+                  </div>
                 </div>
               </button>
             </div>

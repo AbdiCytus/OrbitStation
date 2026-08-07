@@ -10,6 +10,7 @@ import { SignJWT } from "jose";
 import bcrypt from "bcryptjs";
 import { requireAuth, requireStation } from "./utils";
 import { BeaconSchema, UpdateBeaconSchema } from "@/lib/validations";
+import { normalizeUrl } from "@/lib/url-utils";
 
 // BEACON ACTIONS
 // ============================================================
@@ -80,7 +81,7 @@ export async function createBeacon(sectorId: string, data: BeaconFormData) {
         branches: {
           create: data.branches.map((b, i) => ({
             name: b.name.trim(),
-            url: b.url.trim(),
+            url: normalizeUrl(b.url),
             order: i
           }))
         }
@@ -173,7 +174,7 @@ export async function updateBeacon(
           deleteMany: {},
           create: data.branches.map((b, i) => ({
             name: b.name.trim(),
-            url: b.url.trim(),
+            url: normalizeUrl(b.url),
             order: i
           }))
         }

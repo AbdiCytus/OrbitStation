@@ -18,15 +18,7 @@ type Props = {
   currentStationId?: string;
 };
 
-function normalizeUrl(raw: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) return trimmed;
-  // Already has a protocol
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  // Has // but no protocol
-  if (trimmed.startsWith("//")) return `https:${trimmed}`;
-  return `https://${trimmed}`;
-}
+import { normalizeUrl } from "@/lib/url-utils";
 
 export default function AddBeaconModal({ sectors, initialSectorId, onClose, onCreated, currentStationId }: Props) {
   const [sectorId, setSectorId] = useState(initialSectorId ?? sectors[0]?.id ?? "");

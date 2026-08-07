@@ -17,7 +17,7 @@ type UseBeaconFiltersOptions = {
 
 export type SortByOption = "date" | "name" | "sector" | "creator" | "visits" | "color";
 export type SortDirOption = "asc" | "desc";
-export type FilterVisibilityOption = "all" | "public" | "private";
+export type FilterVisibilityOption = "all" | "public" | "private" | "multi_url";
 export type TagFilterModeOption = "union" | "intersect";
 
 export function useBeaconFilters({
@@ -222,6 +222,8 @@ export function useBeaconFilters({
       beacons = beacons.filter((b) => b._isPublic);
     } else if (filterVisibility === "private") {
       beacons = beacons.filter((b) => !b._isPublic);
+    } else if (filterVisibility === "multi_url") {
+      beacons = beacons.filter((b) => b.branches && b.branches.length > 0);
     }
 
     if (selectedTags.length > 0) {

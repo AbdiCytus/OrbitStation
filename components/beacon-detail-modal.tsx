@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef, useEffect, useCallback } from "react";
 import type { Beacon, SectorWithBeacons } from "@/types";
 import { deleteBeacon, toggleBeaconPin, updateBeacon, incrementBeaconVisit } from "@/lib/actions/beacon.actions";
+import { normalizeUrl } from "@/lib/url-utils";
 import { toast } from "sonner";
 import { DynamicIcon } from "./dynamic-icon";
 import {
@@ -160,7 +161,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
       return;
     }
     incrementBeaconVisit(beacon.id);
-    window.open(beacon.url, "_blank", "noopener,noreferrer");
+    window.open(normalizeUrl(beacon.url), "_blank", "noopener,noreferrer");
   }
 
   function handleTogglePin() {
@@ -494,7 +495,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                 className="btn"
                 onClick={() => {
                   incrementBeaconVisit(beacon.id);
-                  window.open(beacon.url, "_blank", "noopener,noreferrer");
+                  window.open(normalizeUrl(beacon.url), "_blank", "noopener,noreferrer");
                   setShowBranchModal(false);
                 }}
                 style={{
@@ -543,7 +544,7 @@ export default function BeaconDetailModal({ beacon, sector, onClose, onDeleted, 
                   className="btn"
                   onClick={() => {
                     incrementBeaconVisit(beacon.id);
-                    window.open(branch.url, "_blank", "noopener,noreferrer");
+                    window.open(normalizeUrl(branch.url), "_blank", "noopener,noreferrer");
                     setShowBranchModal(false);
                   }}
                   style={{

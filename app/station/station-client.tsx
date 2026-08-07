@@ -21,7 +21,10 @@ import StationModals from "@/components/station/station-modals";
 import {
   SparklesIcon,
   ChatBubbleOvalLeftEllipsisIcon,
+  ClockIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
+import BeaconCard from "@/components/beacon-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useRealtimeSync } from "@/hooks/use-realtime-sync";
@@ -102,6 +105,7 @@ export default function StationClient({
   });
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showRecentVisits, setShowRecentVisits] = useState(true);
 
   const FUN_FACTS = [
     "Did you know? A day on Venus is longer than a year on Venus.",
@@ -215,6 +219,9 @@ export default function StationClient({
   const [showTagModal, setShowTagModal] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showGroupChat, setShowGroupChat] = useState(false);
+  const [destinationBeacon, setDestinationBeacon] = useState<Beacon | null>(
+    null,
+  );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Track which private chat is open so useNotifications can suppress its toast
@@ -349,8 +356,7 @@ export default function StationClient({
     };
   }, []);
 
-  const activeSector =
-    allSectors.find((s) => s.id === displaySectorId) ?? null;
+  const activeSector = allSectors.find((s) => s.id === displaySectorId) ?? null;
 
   const isCurrentSectorAdminOrOwner =
     !visitingProfile &&
@@ -385,22 +391,24 @@ export default function StationClient({
     handleSectorDragEnd,
   } = useSectorDrag(personalSectors, setStation);
 
-
   return (
     <div
       className={`station-root${animEnabled ? "" : " no-animation"} ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      onMouseMove={resetIdleTimer}>
+      onMouseMove={resetIdleTimer}
+    >
       {/* Animated space canvas background or static fallback */}
       {(user as any).staticBackgroundEnabled ? (
         <div
           className="cosmic-bg fixed inset-0 z-[-1] pointer-events-none static-cosmic-bg"
-          aria-hidden="true">
+          aria-hidden="true"
+        >
           <div className="cosmic-stars"></div>
           <div
             className="cosmic-aurora"
-            style={{ opacity: 0.5, transform: "scale(1.2)" }}></div>
+            style={{ opacity: 0.5, transform: "scale(1.2)" }}
+          ></div>
           <div className="cosmic-dust"></div>
         </div>
       ) : animEnabled ? (
@@ -416,8 +424,8 @@ export default function StationClient({
           seed={
             activeSectorId
               ? activeSectorId
-                .split("")
-                .reduce((a, c) => a + c.charCodeAt(0), 0)
+                  .split("")
+                  .reduce((a, c) => a + c.charCodeAt(0), 0)
               : 42
           }
           sectorColor={activeSector?.color}
@@ -426,9 +434,7 @@ export default function StationClient({
 
       {/* Fun fact overlay */}
       {isExiting && user.animationEnabled && (
-        <div
-          className="fun-fact-overlay"
-          style={{ animationDuration: "0.8s" }}>
+        <div className="fun-fact-overlay" style={{ animationDuration: "0.8s" }}>
           <p className="fun-fact-text">
             <SparklesIcon
               width={20}
@@ -460,7 +466,8 @@ export default function StationClient({
       />
 
       <div
-        className={`station-layout ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}>
+        className={`station-layout ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}
+      >
         <StationSidebar
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
@@ -496,7 +503,6 @@ export default function StationClient({
           className="station-main"
           onScroll={(e) => {
             const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-            // Toleransi scroll yang pas (150px dari bawah)
             if (scrollHeight - scrollTop - clientHeight < 150) {
               const now = Date.now();
               if (now - scrollThrottleRef.current > 400) {
@@ -506,7 +512,8 @@ export default function StationClient({
                 );
               }
             }
-          }}>
+          }}
+        >
           <StationHeader
             displaySectorId={displaySectorId}
             activeSector={activeSector}
@@ -561,6 +568,142 @@ export default function StationClient({
             applyFilterSort={applyFilterSort}
           />
 
+          {displaySectorId === "all" &&
+            baseBeacons.length > 0 &&
+            !searchQuery && (
+              <div
+                className={`mb-2 ${user.animationEnabled && isExiting ? "exiting" : ""} ${user.animationEnabled && isEntering ? "entering" : ""}`}
+                style={{ animationDelay: "0.1s" }}
+              >
+                <button
+                  onClick={() => setShowRecentVisits(!showRecentVisits)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "1.25rem",
+                    fontWeight: 600,
+                    color: "var(--color-starlight)",
+                    marginBottom: "0.5rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    cursor: "pointer",
+                    padding: 0,
+                    fontFamily: "var(--font-sans)",
+                  }}
+                >
+                  <ClockIcon
+                    width={18}
+                    height={18}
+                    style={{ color: "var(--color-violet-glow)" }}
+                  />
+                  Recent Visits
+                  <ChevronDownIcon
+                    width={16}
+                    height={16}
+                    style={{
+                      color: "var(--color-comet)",
+                      transform: showRecentVisits
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                      transition: "transform 0.2s ease",
+                    }}
+                  />
+                </button>
+
+                {/* COLLAPSIBLE CONTENT */}
+                <AnimatePresence initial={false}>
+                  {showRecentVisits && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <div
+                        className={`
+                        ${viewMode === "grid" ? "beacon-grid-view" : "beacon-masonry"} 
+                        ${user.animationEnabled && (isEntering || isFilterEntering) ? "entering" : ""} 
+                        ${user.animationEnabled && (isExiting || isFilterExiting) ? "exiting" : ""}
+                      `}
+                        style={{
+                          paddingBottom: "0.5rem",
+                          paddingTop: "0.5rem",
+                        }}
+                      >
+                        {baseBeacons
+                          .slice()
+                          .sort(
+                            (a, b) =>
+                              new Date(b.updatedAt || b.createdAt).getTime() -
+                              new Date(a.updatedAt || a.createdAt).getTime(),
+                          )
+                          .slice(0, cols <= 2 ? 2 : cols)
+                          .map((beacon, idx) => {
+                            const isCollab = allCollabSectors.some(
+                              (s) => s.id === beacon.sectorId,
+                            );
+                            const card = (
+                              <BeaconCard
+                                key={`recent-${beacon.id}`}
+                                beacon={beacon}
+                                index={idx}
+                                onClick={() => setSelectedBeacon(beacon)}
+                                onEdit={
+                                  !visitingProfile
+                                    ? () => setEditingBeacon(beacon)
+                                    : undefined
+                                }
+                                onLaunchDestination={(b) =>
+                                  setDestinationBeacon(b)
+                                }
+                                isCollab={isCollab}
+                                sectorName={beacon._sectorName}
+                                isAllBeacons={true}
+                                hologramEnabled={user.hologramEnabled}
+                              />
+                            );
+
+                            return viewMode === "masonry" ? (
+                              <div
+                                key={`recent-wrap-${beacon.id}`}
+                                className="beacon-masonry-col"
+                              >
+                                {card}
+                              </div>
+                            ) : (
+                              card
+                            );
+                          })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <h3
+                  style={{
+                    fontSize: "1.25rem",
+                    fontWeight: 600,
+                    color: "var(--color-starlight)",
+                    marginTop: showRecentVisits ? "1rem" : "1.5rem",
+                    marginBottom: "1rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    transition: "margin-top 0.3s ease",
+                  }}
+                >
+                  <SparklesIcon
+                    width={18}
+                    height={18}
+                    style={{ color: "var(--color-violet-glow)" }}
+                  />
+                  Beacons
+                </h3>
+              </div>
+            )}
+
           <BeaconGridView
             visibleBeacons={visibleBeacons}
             paginatedBeacons={paginatedBeacons}
@@ -583,6 +726,7 @@ export default function StationClient({
             isPrefLoading={isPrefLoading}
             onSelectBeacon={(beacon) => setSelectedBeacon(beacon)}
             onEditBeacon={(beacon) => setEditingBeacon(beacon)}
+            onLaunchDestination={(beacon) => setDestinationBeacon(beacon)}
             onAddSector={() => setShowAddSector(true)}
             onAddBeacon={() => setShowAddBeacon(true)}
           />
@@ -593,7 +737,6 @@ export default function StationClient({
             </div>
           )}
 
-          {/* Group Chat FAB (only if collab sector) */}
           {displaySectorId !== "all" &&
             allCollabSectors.some((s) => s.id === displaySectorId) && (
               <motion.button
@@ -610,7 +753,8 @@ export default function StationClient({
                   }
                 }}
                 style={{ padding: "10px" }}
-                className="fixed bottom-6 right-6 z-[9999] bg-violet-600 hover:bg-violet-500 text-white rounded-full shadow-[0_0_20px_rgba(139,92,246,0.6)] transition-transform hover:scale-110 flex items-center justify-center group">
+                className="fixed bottom-6 right-6 z-[9999] bg-violet-600 hover:bg-violet-500 text-white rounded-full shadow-[0_0_20px_rgba(139,92,246,0.6)] transition-transform hover:scale-110 flex items-center justify-center group"
+              >
                 <ChatBubbleOvalLeftEllipsisIcon width={32} height={32} />
 
                 <AnimatePresence>
@@ -619,7 +763,8 @@ export default function StationClient({
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
-                      className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[rgba(20,20,30,1)] shadow-lg">
+                      className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[rgba(20,20,30,1)] shadow-lg"
+                    >
                       {hasMentionInCurrentSector ? "@" : "!"}
                     </motion.div>
                   )}
@@ -658,6 +803,8 @@ export default function StationClient({
         handleBeaconDeleted={handleBeaconDeleted}
         selectedBeacon={selectedBeacon}
         setSelectedBeacon={setSelectedBeacon}
+        destinationBeacon={destinationBeacon}
+        setDestinationBeacon={setDestinationBeacon}
         showTagModal={showTagModal}
         setShowTagModal={setShowTagModal}
         sectorTagsOverride={sectorTagsOverride}

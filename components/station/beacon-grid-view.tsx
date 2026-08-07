@@ -17,7 +17,7 @@ type BeaconGridViewProps = {
   displaySectorId: string | "all";
   allSectorsCount: number;
   allCollabSectors: SectorWithBeacons[];
-  filterVisibility: "all" | "public" | "private";
+  filterVisibility: "all" | "public" | "private" | "multi_url";
   searchQuery: string;
   visitingProfile?: any;
   isCurrentSectorAdminOrOwner: boolean;
@@ -31,6 +31,7 @@ type BeaconGridViewProps = {
   isPrefLoading?: boolean;
   onSelectBeacon: (beacon: Beacon) => void;
   onEditBeacon: (beacon: Beacon) => void;
+  onLaunchDestination?: (beacon: Beacon) => void;
   onAddSector: () => void;
   onAddBeacon: () => void;
 };
@@ -57,6 +58,7 @@ export default function BeaconGridView({
   isPrefLoading,
   onSelectBeacon,
   onEditBeacon,
+  onLaunchDestination,
   onAddSector,
   onAddBeacon,
 }: BeaconGridViewProps) {
@@ -231,6 +233,7 @@ export default function BeaconGridView({
                           ? () => onEditBeacon(beacon)
                           : undefined
                       }
+                      onLaunchDestination={onLaunchDestination}
                       index={globalIndex}
                       isCollab={allCollabSectors.some(
                         (s) => s.id === beacon.sectorId,
@@ -270,6 +273,7 @@ export default function BeaconGridView({
                       ? () => onEditBeacon(beacon)
                       : undefined
                   }
+                  onLaunchDestination={onLaunchDestination}
                   index={globalIndex}
                   isCollab={allCollabSectors.some(
                     (s) => s.id === beacon.sectorId,

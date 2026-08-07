@@ -25,8 +25,8 @@ type StationToolbarProps = {
   isEntering: boolean;
   openMenu: "filter" | "sort" | "tags" | null;
   setOpenMenu: (menu: "filter" | "sort" | "tags" | null) => void;
-  filterVisibility: "all" | "public" | "private";
-  setFilterVisibility: (v: "all" | "public" | "private") => void;
+  filterVisibility: "all" | "public" | "private" | "multi_url";
+  setFilterVisibility: (v: "all" | "public" | "private" | "multi_url") => void;
   selectedTags: string[];
   setSelectedTags: React.Dispatch<React.SetStateAction<string[]>>;
   tagSearchQuery: string;
@@ -167,7 +167,7 @@ export default function StationToolbar({
                 onClick={() =>
                   setOpenMenu(openMenu === "filter" ? null : "filter")
                 }
-                data-tooltip="Filter by Visibility">
+                data-tooltip="Filter">
                 <FunnelIcon width={18} height={18} />
               </button>
               {openMenu === "filter" && (
@@ -191,6 +191,7 @@ export default function StationToolbar({
                     { id: "all", label: "All Visibility" },
                     { id: "public", label: "Public" },
                     { id: "private", label: "Private" },
+                    { id: "multi_url", label: "Multi URL" },
                   ].map((opt) => (
                     <button
                       key={opt.id}
@@ -499,7 +500,7 @@ export default function StationToolbar({
                 color: sortBy !== "date" ? "#fff" : "#a1a1aa",
               }}
               onClick={() => setOpenMenu(openMenu === "sort" ? null : "sort")}
-              data-tooltip="Sort Beacons">
+              data-tooltip="Sort">
               <ArrowsUpDownIcon width={18} height={18} />
             </button>
             {openMenu === "sort" && (

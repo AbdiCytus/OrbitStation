@@ -11,6 +11,7 @@ import TagManagementModal from "@/components/tag-management-modal";
 import SectorMembersModal from "@/components/sector-members-modal";
 import FriendsModal from "@/components/friends-modal";
 import GroupChatModal from "@/components/group-chat-modal";
+import DestinationListModal from "@/components/destination-list-modal";
 import { motion, AnimatePresence } from "framer-motion";
 
 type StationModalsProps = {
@@ -48,6 +49,9 @@ type StationModalsProps = {
 
   selectedBeacon: Beacon | null;
   setSelectedBeacon: (beacon: Beacon | null) => void;
+
+  destinationBeacon?: Beacon | null;
+  setDestinationBeacon?: (beacon: Beacon | null) => void;
 
   showTagModal: boolean;
   setShowTagModal: (show: boolean) => void;
@@ -96,6 +100,8 @@ export default function StationModals({
   handleBeaconDeleted,
   selectedBeacon,
   setSelectedBeacon,
+  destinationBeacon,
+  setDestinationBeacon,
   showTagModal,
   setShowTagModal,
   sectorTagsOverride,
@@ -193,6 +199,14 @@ export default function StationModals({
           onUpdated={handleBeaconUpdated}
           onDeleted={handleBeaconDeleted}
           canEdit={isCurrentSectorAdminOrOwner}
+        />
+      )}
+
+      {destinationBeacon && (
+        <DestinationListModal
+          beacon={destinationBeacon as any}
+          isOpen={Boolean(destinationBeacon)}
+          onClose={() => setDestinationBeacon?.(null)}
         />
       )}
 
